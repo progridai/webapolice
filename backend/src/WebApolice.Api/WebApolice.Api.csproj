@@ -9,6 +9,11 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.9" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.9" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.9">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks.EntityFrameworkCore" Version="10.0.9" />
     <!--
       Referência direta necessária para substituir a versão transitiva vulnerável
       trazida por Microsoft.AspNetCore.OpenApi.
@@ -21,6 +26,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\WebApolice.SharedKernel\WebApolice.SharedKernel.csproj" />
+    <ProjectReference Include="..\WebApolice.Shared.Infrastructure\WebApolice.Shared.Infrastructure.csproj" />
   </ItemGroup>
 
 

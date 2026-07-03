@@ -135,8 +135,9 @@ cd backend
 ## Status da Fundação Técnica
 A fundação técnica inicial foi inicializada com sucesso:
 * Frontend e backend utilizam as versões estáveis mais recentes das tecnologias de base (React 19, Vite 8, .NET 10).
-* Endpoints técnicos `/api/health` e `/api/version` encontram-se disponíveis no backend.
-* **Testes de Arquitetura**: Os testes arquiteturais de reflexão em `WebApolice.Architecture.Tests` estão ativos. Eles detectam dependências proibidas (como o `SharedKernel` referenciando a `Api`) quando a suíte de testes é executada. O bloqueio efetivo de alterações incompatíveis é garantido no pipeline de CI (que impede integrações se os testes falharem), já que a compilação local isolada do assembly do `SharedKernel` não é impedida fisicamente por asserções em código.
+* Endpoints técnicos `/api/health`, `/api/health/live` e `/api/health/ready` encontram-se disponíveis no backend, avaliando disponibilidade da API e integrações com segurança.
+* A fundação de Persistência com PostgreSQL 18.4 (Testcontainers para integração) e Entity Framework Core está completa. Utilizou-se o projeto técnico `WebApolice.Shared.Infrastructure` restrito unicamente a configurações transversais, impedindo que classes de domínio futuras sejam persistidas centralmente.
+* **Testes de Arquitetura**: Os testes arquiteturais de reflexão em `WebApolice.Architecture.Tests` estão ativos. Eles detectam dependências proibidas (como chamadas automáticas de migrações na API e invasão do Shared.Infrastructure nos módulos). O bloqueio efetivo de alterações incompatíveis é garantido no pipeline de CI.
 
 > [!IMPORTANT]
 > **Identidade Visual Pendente**:

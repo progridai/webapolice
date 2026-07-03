@@ -30,8 +30,12 @@ public sealed class ApiTestFactory : WebApplicationFactory<Program>
     public const string AudienciaDeTeste = "webapolice-api";
 
     // Chave RSA gerada uma única vez para toda a vida do factory.
-    // É exclusiva de testes — não representa nenhuma chave de produção.
     private static readonly RsaSecurityKey ChaveRsaDeTeste = CriarChaveRsaDeTeste();
+
+    static ApiTestFactory()
+    {
+        Environment.SetEnvironmentVariable("ConnectionStrings__PostgreSql", "Host=localhost;Port=5432;Database=test;Username=test;Password=test");
+    }
 
     private static RsaSecurityKey CriarChaveRsaDeTeste()
     {
@@ -113,6 +117,7 @@ public sealed class ApiTestFactory : WebApplicationFactory<Program>
                 new("Authentication:Authority", IsserDeTeste),
                 new("Authentication:Audience", AudienciaDeTeste),
                 new("Authentication:RequireHttpsMetadata", "false"),
+                new("ConnectionStrings:PostgreSql", "Host=localhost;Port=5432;Database=test;Username=test;Password=test")
             });
         });
 

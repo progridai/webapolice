@@ -20,20 +20,46 @@ public sealed class EndpointsPublicosTests : IClassFixture<ApiTestFactory>
     [Fact]
     public async Task GetHealth_SemToken_Retorna200()
     {
-        var resposta = await _client.GetAsync("/api/health");
+        // Act
+        var response = await _client.GetAsync("/api/health");
 
-        Assert.Equal(HttpStatusCode.OK, resposta.StatusCode);
+        // Assert
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        var content = await response.Content.ReadAsStringAsync();
+        Assert.Equal("Healthy", content);
     }
 
     [Fact]
-    public async Task GetHealth_SemToken_RetornaStatusHealthy()
+    public async Task GetHealthLive_SemToken_Retorna200_IndependenteDeBanco()
     {
-        var resposta = await _client.GetAsync("/api/health");
-        var conteudo = await resposta.Content.ReadFromJsonAsync<HealthResponse>();
+        // Act
+        var response = await _client.GetAsync("/api/health/live");
+        
+        // Assert
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        var content = await response.Content.ReadAsStringAsync();
+        Assert.Equal("Healthy", content);
+    }
 
-        Assert.NotNull(conteudo);
-        Assert.Equal("healthy", conteudo.status);
-        Assert.Equal("WebApolice.Api", conteudo.application);
+    [Fact]
+    public async Task GetHealthReady_SemBanco_Retorna503ESemDadosSensiveis()
+    {
+        // Act (banco de testes é dummy, logo não conecta)
+        var response = await _client.GetAsync("/api/health/ready");
+        
+        // Assert
+        Assert.Equal(HttpStatusCode.ServiceUnavailable, response.StatusCode);
+        
+        var content = await response.Content.ReadAsStringAsync();
+        
+        // Valida que não vaza dados sensíveis (connection string, servidor, usuário)
+        Assert.DoesNotContain("localhost", content);
+        Assert.DoesNotContain("Port=5432", content);
+        Assert.DoesNotContain("Username=test", content);
+        Assert.DoesNotContain("Npgsql", content);
+        
+        // Valida que retorna o JSON esperado
+        Assert.Contains("\"status\":\"Unhealthy\"", content);
     }
 
     [Fact]

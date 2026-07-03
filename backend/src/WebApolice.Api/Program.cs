@@ -3,10 +3,12 @@ using System.Text.Json;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using WebApolice.Api.Autenticacao;
 using WebApolice.Api.Autorizacao;
 using WebApolice.Api.Infrastructure.Errors;
+using WebApolice.Shared.Infrastructure.Persistence;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -141,6 +143,34 @@ builder.Services.AddProblemDetails();
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 
 // =============================================================================
+// PERSISTÊNCIA DE DADOS (POSTGRESQL + EF CORE)
+// =============================================================================
+var connectionString = builder.Configuration.GetConnectionString("PostgreSql");
+if (string.IsNullOrWhiteSpace(connectionString))
+{
+    throw new InvalidOperationException("A configuração 'ConnectionStrings:PostgreSql' é obrigatória.");
+}
+
+builder.Services.AddDbContext<InfraestruturaDbContext>(options =>
+{
+    options.UseNpgsql(connectionString, o => 
+           {
+               o.MigrationsHistoryTable("__EFMigrationsHistory", "infraestrutura");
+               o.EnableRetryOnFailure(
+                   maxRetryCount: 3,
+                   maxRetryDelay: TimeSpan.FromSeconds(5),
+                   errorCodesToAdd: null);
+           })
+           .UseSnakeCaseNamingConvention();
+});
+
+// =============================================================================
+// HEALTH CHECKS
+// =============================================================================
+builder.Services.AddHealthChecks()
+    .AddDbContextCheck<InfraestruturaDbContext>("postgresql");
+
+// =============================================================================
 // OPENAPI & CONTROLLERS
 // =============================================================================
 builder.Services.AddOpenApi();
@@ -222,13 +252,41 @@ app.UseAuthorization();
 // ENDPOINTS PÚBLICOS
 // =============================================================================
 
-app.MapGet("/api/health", () => Results.Ok(new
+app.MapHealthChecks("/api/health", new Microsoft.AspNetCore.Diagnostics.HealthChecks.HealthCheckOptions
 {
-    status = "healthy",
-    application = "WebApolice.Api"
-}))
-.WithName("GetHealth")
-.AllowAnonymous();
+    Predicate = _ => false, // liveness
+    ResponseWriter = async (context, report) =>
+    {
+        context.Response.ContentType = "text/plain";
+        await context.Response.WriteAsync(report.Status.ToString());
+    }
+}).AllowAnonymous();
+
+app.MapHealthChecks("/api/health/live", new Microsoft.AspNetCore.Diagnostics.HealthChecks.HealthCheckOptions
+{
+    Predicate = _ => false, // liveness
+    ResponseWriter = async (context, report) =>
+    {
+        context.Response.ContentType = "text/plain";
+        await context.Response.WriteAsync(report.Status.ToString());
+    }
+}).AllowAnonymous();
+
+app.MapHealthChecks("/api/health/ready", new Microsoft.AspNetCore.Diagnostics.HealthChecks.HealthCheckOptions
+{
+    // readiness verifica dependências, sem expor mensagens de erro internas
+    ResponseWriter = async (context, report) =>
+    {
+        context.Response.ContentType = "application/json";
+        var result = JsonSerializer.Serialize(new
+        {
+            status = report.Status.ToString(),
+            checks = report.Entries.Select(e => new { name = e.Key, status = e.Value.Status.ToString() })
+        });
+        await context.Response.WriteAsync(result);
+    }
+}).AllowAnonymous();
+
 
 app.MapGet("/api/version", (IWebHostEnvironment env) => Results.Ok(new
 {

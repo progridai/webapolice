@@ -1,0 +1,10 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/WebApolice.Api/WebApolice.Api.csproj" />
+    <Project Path="src/WebApolice.SharedKernel/WebApolice.SharedKernel.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/WebApolice.Api.Tests/WebApolice.Api.Tests.csproj" />
+    <Project Path="tests/WebApolice.Architecture.Tests/WebApolice.Architecture.Tests.csproj" />
+  </Folder>
+</Solution>

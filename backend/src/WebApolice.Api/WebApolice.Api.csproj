@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.9" />
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.9" />
+    <!--
+      Referência direta necessária para substituir a versão transitiva vulnerável
+      trazida por Microsoft.AspNetCore.OpenApi.
+      Não remover sem executar nova auditoria de segurança.
+      Revisar quando o pacote de nível superior atualizar sua dependência transitiva
+      para uma versão corrigida e compatível.
+    -->
+    <PackageReference Include="Microsoft.OpenApi" Version="2.7.5" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\WebApolice.SharedKernel\WebApolice.SharedKernel.csproj" />
+  </ItemGroup>
+
+
+</Project>

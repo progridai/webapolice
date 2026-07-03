@@ -1,0 +1,46 @@
+# .gitignore
+
+# Node / Vite / Frontend
+node_modules/
+dist/
+dist-ssr/
+.env
+.env.local
+.env.*.local
+*.local
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+eslintdocgen.config.js
+.eslintcache
+.prettiercache
+coverage/
+.vitest/
+
+# .NET / C# / Backend
+bin/
+obj/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+.vs/
+.idea/
+.rider/
+*.userprefs
+TestResults/
+*.dyn
+*.clog
+appsettings.Local.json
+
+# OS and IDEs
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+!.vscode/extensions.json
+!.vscode/launch.json
+!.vscode/tasks.json
+!.vscode/settings.json
+.history/
+*.log

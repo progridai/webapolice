@@ -1,0 +1,64 @@
+{
+  "id": "webapolice",
+  "realm": "webapolice",
+  "enabled": true,
+  "roles": {
+    "realm": [
+      {
+        "name": "admin",
+        "description": "Administracao global do ambiente e dos usuarios da aplicacao"
+      },
+      {
+        "name": "gestor",
+        "description": "Acesso gerencial, ainda sem permissoes detalhadas de modulos"
+      },
+      {
+        "name": "operador",
+        "description": "Acesso operacional basico, ainda sem permissoes detalhadas"
+      }
+    ]
+  },
+  "clients": [
+    {
+      "clientId": "webapolice-web",
+      "name": "WebApolice Frontend",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": true,
+      "bearerOnly": false,
+      "standardFlowEnabled": true,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "serviceAccountsEnabled": false,
+      "rootUrl": "http://127.0.0.1:5173",
+      "baseUrl": "http://127.0.0.1:5173",
+      "redirectUris": [
+        "http://127.0.0.1:5173/*"
+      ],
+      "webOrigins": [
+        "http://127.0.0.1:5173"
+      ],
+      "consentRequired": false,
+      "attributes": {
+        "pkce.code.challenge.method": "S256",
+        "pkce.proof.key.required": "true",
+        "post.logout.redirect.uris": "http://127.0.0.1:5173/*"
+      }
+    },
+    {
+      "clientId": "webapolice-api",
+      "name": "WebApolice API",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": false,
+      "bearerOnly": false,
+      "standardFlowEnabled": false,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "serviceAccountsEnabled": false,
+      "attributes": {
+        "client.credentials.use.refresh.token": "false"
+      }
+    }
+  ]
+}

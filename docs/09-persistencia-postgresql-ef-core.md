@@ -1,4 +1,7 @@
-# Persistência com PostgreSQL e Entity Framework Core
+# 09. Persistência de Dados (PostgreSQL + EF Core)
+
+> [!NOTE]
+> Este documento cobre a infraestrutura de dados geral. Para persistência de auditoria e uso de JSONB, consulte também `10-auditoria-rastreabilidade.md`.
 
 Este documento descreve as diretrizes, padrões e comandos adotados para a infraestrutura de persistência de dados do sistema WebApólice.
 

@@ -153,4 +153,102 @@ public class ArchitectureTests
 
         Assert.True(result.IsSuccessful, "A API não deve definir contextos de banco de dados diretamente.");
     }
+
+    [Fact]
+    public void Domain_ShouldNot_DependOnAuditoriaInfrastructure()
+    {
+        var result = Types.InCurrentDomain()
+            .That()
+            .ResideInNamespace(DomainNamespace)
+            .Should().NotHaveDependencyOn("WebApolice.Auditoria.Infrastructure")
+            .GetResult();
+
+        Assert.True(result.IsSuccessful, "Domain não referencia auditoria técnica.");
+    }
+
+    [Fact]
+    public void AuditoriaContracts_ShouldNot_DependOnAspNetCore()
+    {
+        var result = Types.InCurrentDomain()
+            .That()
+            .ResideInNamespace("WebApolice.Auditoria.Contracts")
+            .Should().NotHaveDependencyOn("Microsoft.AspNetCore")
+            .GetResult();
+
+        Assert.True(result.IsSuccessful, "Contratos de auditoria não dependem de ASP.NET Core.");
+    }
+
+    [Fact]
+    public void Auditoria_ShouldNot_DependOnKeycloak()
+    {
+        var result = Types.InCurrentDomain()
+            .That()
+            .ResideInNamespace("WebApolice.Auditoria")
+            .Should().NotHaveDependencyOn("Keycloak") // O projeto não usa biblioteca Keycloak específica, mas validamos a string
+            .GetResult();
+
+        Assert.True(result.IsSuccessful, "Auditoria não depende de Keycloak.");
+    }
+
+    [Fact]
+    public void AuditoriaDbContext_ShouldResideInInfrastructure()
+    {
+        var result = Types.InCurrentDomain()
+            .That()
+            .HaveName("AuditoriaDbContext")
+            .Should().ResideInNamespace("WebApolice.Auditoria.Infrastructure")
+            .GetResult();
+
+        Assert.True(result.IsSuccessful, "DbContext da auditoria permanece em Infrastructure.");
+    }
+
+    [Fact]
+    public void ApiAndModules_ShouldNot_AccessAuditoriaDbContextDirectly()
+    {
+        var result = Types.InCurrentDomain()
+            .That()
+            .ResideInNamespace(ApiNamespace)
+            .Or().ResideInNamespace(ApplicationNamespace)
+            .Or().ResideInNamespace(DomainNamespace)
+            .Should().NotHaveDependencyOn("WebApolice.Auditoria.Infrastructure.AuditoriaDbContext")
+            .GetResult();
+
+        Assert.True(result.IsSuccessful, "API e módulos não acessam diretamente o DbContext da auditoria.");
+    }
+
+    [Fact]
+    public void InfraestruturaDbContext_ShouldNot_ContainAuditoria()
+    {
+        var result = Types.InCurrentDomain()
+            .That()
+            .HaveName("InfraestruturaDbContext")
+            .Should().NotHaveDependencyOn("WebApolice.Auditoria")
+            .GetResult();
+
+        Assert.True(result.IsSuccessful, "InfraestruturaDbContext não contém entidade de auditoria.");
+    }
+
+    [Fact]
+    public void AuditoriaDbContext_ShouldNot_ContainBusinessEntities()
+    {
+        var result = Types.InCurrentDomain()
+            .That()
+            .HaveName("AuditoriaDbContext")
+            .Should().NotHaveDependencyOn("WebApolice.Modules")
+            .GetResult();
+
+        Assert.True(result.IsSuccessful, "AuditoriaDbContext não contém entidades de negócio.");
+    }
+
+    [Fact]
+    public void SharedKernel_ShouldNot_ContainAuditoriaPersistence()
+    {
+        var result = Types.InCurrentDomain()
+            .That()
+            .ResideInNamespace(SharedKernelNamespace)
+            .Should().NotHaveDependencyOn("WebApolice.Auditoria")
+            .GetResult();
+
+        Assert.True(result.IsSuccessful, "SharedKernel não contém tipos de persistência de auditoria.");
+    }
 }

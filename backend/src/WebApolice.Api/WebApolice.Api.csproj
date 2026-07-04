@@ -27,6 +27,7 @@
   <ItemGroup>
     <ProjectReference Include="..\WebApolice.SharedKernel\WebApolice.SharedKernel.csproj" />
     <ProjectReference Include="..\WebApolice.Shared.Infrastructure\WebApolice.Shared.Infrastructure.csproj" />
+    <ProjectReference Include="..\WebApolice.Auditoria\WebApolice.Auditoria.csproj" />
   </ItemGroup>
 
 

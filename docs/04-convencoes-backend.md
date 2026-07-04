@@ -29,3 +29,9 @@
 *   **API:** Valida formato, presença de campos essenciais de HTTP, limites de requisição e segurança de tokens.
 *   **Application:** Valida pré-condições do caso de uso, disponibilidade e orquestra regras consistentes.
 *   **Domain:** Valida regras de negócio estritas (invariantes) que a entidade nunca pode quebrar.
+
+## 5. Segurança e Auditoria
+
+*   **Identidade e Claims:** A identidade baseia-se na claim `sub` do Keycloak (External ID). Não há tabela de senhas local.
+*   **Auditoria Persistida:** Operações do sistema são auditadas pelo módulo técnico `WebApolice.Auditoria`, que salva o ID do usuário externo, ações e metadados JSONB.
+*   **Mascaramento:** Tokens, senhas e informações confidenciais são removidas da auditoria pelo `ProvedorMascaramento` antes da persistência.

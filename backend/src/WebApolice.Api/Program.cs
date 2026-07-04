@@ -165,6 +165,26 @@ builder.Services.AddDbContext<InfraestruturaDbContext>(options =>
 });
 
 // =============================================================================
+// AUDITORIA (POSTGRESQL + EF CORE)
+// =============================================================================
+builder.Services.AddDbContext<WebApolice.Auditoria.Infrastructure.AuditoriaDbContext>(options =>
+{
+    options.UseNpgsql(connectionString, o => 
+           {
+               o.MigrationsHistoryTable("__EFMigrationsHistory", "auditoria");
+               o.EnableRetryOnFailure(
+                   maxRetryCount: 3,
+                   maxRetryDelay: TimeSpan.FromSeconds(5),
+                   errorCodesToAdd: null);
+           })
+           .UseSnakeCaseNamingConvention();
+});
+
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<WebApolice.Auditoria.Contracts.IContextoAuditoria, WebApolice.Api.Infrastructure.ContextoAuditoriaHttp>();
+builder.Services.AddScoped<WebApolice.Auditoria.Contracts.IRegistradorAuditoria, WebApolice.Auditoria.Infrastructure.RegistradorAuditoria>();
+
+// =============================================================================
 // HEALTH CHECKS
 // =============================================================================
 builder.Services.AddHealthChecks()

@@ -3,10 +3,13 @@
     <Project Path="src/WebApolice.Api/WebApolice.Api.csproj" />
     <Project Path="src/WebApolice.SharedKernel/WebApolice.SharedKernel.csproj" />
     <Project Path="src/WebApolice.Shared.Infrastructure/WebApolice.Shared.Infrastructure.csproj" />
+    <Project Path="src/WebApolice.Auditoria/WebApolice.Auditoria.csproj" />
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/WebApolice.Api.Tests/WebApolice.Api.Tests.csproj" />
     <Project Path="tests/WebApolice.Architecture.Tests/WebApolice.Architecture.Tests.csproj" />
     <Project Path="tests/WebApolice.Integration.Tests/WebApolice.Integration.Tests.csproj" />
+    <Project Path="tests/WebApolice.Auditoria.UnitTests/WebApolice.Auditoria.UnitTests.csproj" />
+    <Project Path="tests/WebApolice.Auditoria.IntegrationTests/WebApolice.Auditoria.IntegrationTests.csproj" />
   </Folder>
 </Solution>

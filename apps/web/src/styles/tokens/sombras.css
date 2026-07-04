@@ -1,0 +1,13 @@
+/* sombras.css */
+
+:root {
+  /* Sombras Sutis para Tema Claro */
+  --sombra-card: 0 2px 4px rgba(26, 26, 26, 0.04), 0 1px 2px rgba(26, 26, 26, 0.03);
+  --sombra-modal: 0 10px 15px -3px rgba(26, 26, 26, 0.08), 0 4px 6px -2px rgba(26, 26, 26, 0.04);
+}
+
+[data-theme="dark"] {
+  /* Sombras para Tema Escuro (Reduzidas ou com maior dispersão/opacidade sobre fundo escuro) */
+  --sombra-card: 0 4px 8px rgba(0, 0, 0, 0.3);
+  --sombra-modal: 0 12px 28px rgba(0, 0, 0, 0.5);
+}

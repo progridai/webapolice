@@ -1,0 +1,21 @@
+/* ErrorPages.css — Estilos compartilhados pelas páginas de erro */
+
+.error-page {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--espaco-6);
+  width: 100%;
+  min-height: 400px;
+}
+
+.error-page-actions {
+  display: flex;
+  gap: var(--espaco-3);
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.error-page-icon {
+  color: var(--cor-texto-secundario);
+}

@@ -1,0 +1,109 @@
+/* Checkbox.css */
+
+.checkbox-container {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--espaco-2);
+  font-size: var(--fonte-tamanho-sm);
+  cursor: pointer;
+  user-select: none;
+  color: var(--cor-texto-principal);
+}
+
+.checkbox-wrapper {
+  position: relative;
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+  vertical-align: middle;
+}
+
+.checkbox-wrapper input {
+  position: absolute;
+  opacity: 0;
+  cursor: pointer;
+  height: 0;
+  width: 0;
+}
+
+.checkbox-custom {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 18px;
+  width: 18px;
+  background-color: var(--cor-fundo-superficie);
+  border: var(--borda-largura-padrao) solid var(--cor-borda-forte);
+  border-radius: var(--raio-pequeno);
+  transition: all 0.15s ease;
+}
+
+.checkbox-wrapper:hover input ~ .checkbox-custom,
+.checkbox-container:hover input ~ .checkbox-wrapper .checkbox-custom {
+  border-color: var(--cor-texto-principal);
+}
+
+.checkbox-wrapper input:checked ~ .checkbox-custom {
+  background-color: var(--cor-marca-principal);
+  border-color: var(--cor-marca-principal-borda);
+}
+
+.checkbox-custom:after {
+  content: '';
+  position: absolute;
+  display: none;
+  left: 6px;
+  top: 2px;
+  width: 4px;
+  height: 9px;
+  border: solid var(--cor-sobre-dourado);
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+.checkbox-wrapper input:checked ~ .checkbox-custom:after {
+  display: block;
+}
+
+/* Indeterminado State visual */
+.checkbox-wrapper input:indeterminate ~ .checkbox-custom {
+  background-color: var(--cor-marca-principal);
+  border-color: var(--cor-marca-principal-borda);
+}
+
+.checkbox-wrapper input:indeterminate ~ .checkbox-custom:after {
+  display: block;
+  left: 5px;
+  top: 7px;
+  width: 8px;
+  height: 2px;
+  border: none;
+  background-color: var(--cor-sobre-dourado);
+  transform: none;
+}
+
+/* Foco */
+.checkbox-wrapper input:focus-visible ~ .checkbox-custom {
+  outline: 2px solid var(--cor-foco);
+  outline-offset: 2px;
+}
+
+.checkbox-wrapper input:disabled ~ .checkbox-custom {
+  background-color: var(--cor-desabilitado-fundo);
+  border-color: var(--cor-borda);
+  cursor: not-allowed;
+}
+
+.checkbox-wrapper input:disabled:checked ~ .checkbox-custom {
+  background-color: var(--cor-desabilitado);
+  border-color: var(--cor-borda);
+}
+
+/* Erro */
+.checkbox-erro .checkbox-custom {
+  border-color: var(--cor-erro) !important;
+}
+
+.checkbox-label-text {
+  line-height: 1;
+}

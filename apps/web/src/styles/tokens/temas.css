@@ -1,0 +1,108 @@
+/* temas.css */
+
+/* Definições padrão para o Tema Claro */
+:root,
+[data-theme="light"] {
+  /* Marca e variações */
+  --cor-marca-principal: var(--palette-dourado);
+  --cor-marca-principal-hover: var(--palette-dourado-hover);
+  --cor-marca-principal-ativa: var(--palette-dourado-ativa);
+  --cor-marca-principal-suave: var(--palette-dourado-suave);
+  --cor-marca-principal-borda: var(--palette-dourado-borda);
+  --cor-marca-principal-texto: var(--palette-preto-suave);
+  --cor-sobre-dourado: var(--palette-preto-suave);
+
+  /* Superfícies e Fundos */
+  --cor-fundo-aplicacao: var(--palette-cinza-claro);
+  --cor-fundo-superficie: var(--palette-branco);
+  --cor-fundo-elevado: var(--palette-branco);
+  --cor-fundo-overlay: rgba(26, 26, 26, 0.6);
+
+  /* Textos */
+  --cor-texto-principal: var(--palette-preto-suave);
+  --cor-texto-secundario: var(--palette-neutral-600); /* Oferece contraste ~5.7:1 no fundo branco */
+  --cor-texto-inverso: var(--palette-branco);
+
+  /* Bordas e Divisores */
+  --cor-borda: var(--palette-neutral-200);
+  --cor-borda-forte: var(--palette-neutral-400);
+  
+  /* Interações */
+  --cor-foco: var(--palette-dourado);
+  --cor-desabilitado: var(--palette-neutral-400);
+  --cor-desabilitado-fundo: var(--palette-neutral-100);
+  --cor-desabilitado-texto: var(--palette-neutral-400);
+
+  /* Funcionais - Sucesso */
+  --cor-sucesso: var(--palette-sucesso-claro-texto);
+  --cor-sucesso-fundo: var(--palette-sucesso-claro-fundo);
+  --cor-sucesso-borda: var(--palette-sucesso-claro-borda);
+
+  /* Funcionais - Erro */
+  --cor-erro: var(--palette-erro-claro-texto);
+  --cor-erro-fundo: var(--palette-erro-claro-fundo);
+  --cor-erro-borda: var(--palette-erro-claro-borda);
+
+  /* Funcionais - Alerta */
+  --cor-alerta: var(--palette-alerta-claro-texto);
+  --cor-alerta-fundo: var(--palette-alerta-claro-fundo);
+  --cor-alerta-borda: var(--palette-alerta-claro-borda);
+
+  /* Funcionais - Informação */
+  --cor-informacao: var(--palette-informacao-claro-texto);
+  --cor-informacao-fundo: var(--palette-informacao-claro-fundo);
+  --cor-informacao-borda: var(--palette-informacao-claro-borda);
+}
+
+/* Definições para o Tema Escuro */
+[data-theme="dark"] {
+  /* Marca e variações */
+  --cor-marca-principal: var(--palette-dourado);
+  --cor-marca-principal-hover: var(--palette-dourado-hover);
+  --cor-marca-principal-ativa: var(--palette-dourado-ativa);
+  --cor-marca-principal-suave: var(--palette-dourado-suave);
+  --cor-marca-principal-borda: var(--palette-dourado-borda);
+  --cor-marca-principal-texto: var(--palette-branco);
+  --cor-sobre-dourado: var(--palette-preto-suave); /* Dourado permanece com texto escuro para contraste */
+
+  /* Superfícies e Fundos */
+  --cor-fundo-aplicacao: var(--palette-neutral-900); /* Preto suave */
+  --cor-fundo-superficie: var(--palette-neutral-850, #222225); /* Tom levemente mais claro */
+  --cor-fundo-elevado: var(--palette-neutral-800); /* Tom escuro elevado */
+  --cor-fundo-overlay: rgba(0, 0, 0, 0.65);
+
+  /* Textos */
+  --cor-texto-principal: var(--palette-neutral-100);
+  --cor-texto-secundario: var(--palette-neutral-400); /* Contraste ~5.4:1 contra o fundo de superfície escuro */
+  --cor-texto-inverso: var(--palette-preto-suave);
+
+  /* Bordas e Divisores */
+  --cor-borda: var(--palette-neutral-700);
+  --cor-borda-forte: var(--palette-neutral-500);
+
+  /* Interações */
+  --cor-foco: var(--palette-dourado);
+  --cor-desabilitado: var(--palette-neutral-600);
+  --cor-desabilitado-fundo: var(--palette-neutral-800);
+  --cor-desabilitado-texto: var(--palette-neutral-500);
+
+  /* Funcionais - Sucesso */
+  --cor-sucesso: var(--palette-sucesso-escuro-texto);
+  --cor-sucesso-fundo: var(--palette-sucesso-escuro-fundo);
+  --cor-sucesso-borda: var(--palette-sucesso-escuro-borda);
+
+  /* Funcionais - Erro */
+  --cor-erro: var(--palette-erro-escuro-texto);
+  --cor-erro-fundo: var(--palette-erro-escuro-fundo);
+  --cor-erro-borda: var(--palette-erro-escuro-borda);
+
+  /* Funcionais - Alerta */
+  --cor-alerta: var(--palette-alerta-escuro-texto);
+  --cor-alerta-fundo: var(--palette-alerta-escuro-fundo);
+  --cor-alerta-borda: var(--palette-alerta-escuro-borda);
+
+  /* Funcionais - Informação */
+  --cor-informacao: var(--palette-informacao-escuro-texto);
+  --cor-informacao-fundo: var(--palette-informacao-escuro-fundo);
+  --cor-informacao-borda: var(--palette-informacao-escuro-borda);
+}

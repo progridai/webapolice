@@ -1,0 +1,26 @@
+/* tipografia.css */
+
+:root {
+  /* Família de Fontes */
+  --fonte-familia-principal: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+
+  /* Tamanhos de Fonte */
+  --fonte-tamanho-xs: 0.75rem;     /* 12px */
+  --fonte-tamanho-sm: 0.875rem;    /* 14px */
+  --fonte-tamanho-md: 1rem;        /* 16px */
+  --fonte-tamanho-lg: 1.125rem;    /* 18px */
+  --fonte-tamanho-xl: 1.25rem;     /* 20px */
+  --fonte-tamanho-2xl: 1.5rem;     /* 24px */
+  --fonte-tamanho-3xl: 1.875rem;   /* 30px */
+
+  /* Pesos de Fonte */
+  --fonte-peso-normal: 400;
+  --fonte-peso-medio: 500;
+  --fonte-peso-seminegrito: 600;
+  --fonte-peso-negrito: 700;
+
+  /* Alturas de Linha */
+  --linha-altura-curta: 1.2;
+  --linha-altura-normal: 1.5;
+  --linha-altura-confortavel: 1.75;
+}

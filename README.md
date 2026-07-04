@@ -143,9 +143,12 @@ A fundação técnica inicial e o primeiro módulo de negócio foram finalizados
 * **Testes de Arquitetura**: Os testes arquiteturais em `WebApolice.Architecture.Tests` garantem o fluxo unidirecional e isolamento dos módulos.
 * **Bateria de Testes**: Suíte robusta com 147 testes (100% aprovados) executados localmente e em ambiente Linux nativo (Docker SDK 10).
 
-> [!IMPORTANT]
-> **Identidade Visual Pendente**:
-> A identidade visual do sistema será definida em uma etapa específica. Até lá, nenhuma IA ou desenvolvedor deve escolher paleta, tipografia, tema, biblioteca visual principal ou padrões definitivos de UI por conta própria. Toda a renderização atual utiliza estilos mínimos de legibilidade padrão.
+> [!NOTE]
+> **Identidade Visual e Design System Reutilizável (Concluído)**:
+> A identidade visual oficial, os design tokens com suporte a temas claro/escuro/sistema e o catálogo completo de componentes UI reutilizáveis estão totalmente implementados e homologados. Os 16 componentes (`Button`, `FormField`, `Input`, `Textarea`, `Select`, `Checkbox`, `Alert`, `Spinner`, `Skeleton`, `Card`, `Badge`, `EmptyState`, `Modal`, `ConfirmDialog`, `Table`, `Pagination`) estão disponíveis via barril `src/components/ui`. O script `npm run lint:design-system` verifica continuamente a conformidade de tokens (zero cores hex/rgb fixadas nos componentes). O catálogo visual está disponível em `/#design-system`.
+> 
+> - [docs/12-identidade-visual-design-system.md](file:///c:/PROJETOS/Rsul%20Automacoes/Projetos/webapolice/docs/12-identidade-visual-design-system.md) — Guia de marca e tokens
+> - [docs/13-componentes-design-system.md](file:///c:/PROJETOS/Rsul%20Automacoes/Projetos/webapolice/docs/13-componentes-design-system.md) — Catálogo de componentes e regras de uso
 
 ---
 

@@ -1,0 +1,111 @@
+/* Modal.css */
+
+.modal-backdrop-component {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: var(--cor-fundo-overlay);
+  backdrop-filter: blur(2px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  padding: var(--espaco-4);
+}
+
+.modal-container-component {
+  background-color: var(--cor-fundo-superficie);
+  border: var(--borda-largura-padrao) solid var(--cor-borda);
+  border-radius: var(--raio-grande);
+  box-shadow: var(--sombra-modal);
+  padding: var(--espaco-6);
+  display: flex;
+  flex-direction: column;
+  max-height: 90vh;
+  width: 100%;
+  outline: none;
+  animation: modal-anim-enter 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Tamanhos */
+.modal-size-small {
+  max-width: 400px;
+}
+
+.modal-size-medium {
+  max-width: 550px;
+}
+
+.modal-size-large {
+  max-width: 800px;
+}
+
+.modal-header-component {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: var(--borda-largura-padrao) solid var(--cor-borda);
+  padding-bottom: var(--espaco-3);
+  margin-bottom: var(--espaco-4);
+  flex-shrink: 0;
+}
+
+.modal-title-text {
+  font-size: var(--fonte-tamanho-lg);
+  font-weight: var(--fonte-peso-seminegrito);
+  color: var(--cor-texto-principal);
+  margin: 0;
+}
+
+.modal-close-btn-component {
+  background: transparent;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: var(--cor-texto-secundario);
+  line-height: 1;
+  padding: 0;
+  margin: 0;
+  opacity: 0.7;
+  transition: opacity 0.15s ease;
+}
+
+.modal-close-btn-component:hover {
+  color: var(--cor-texto-principal);
+  opacity: 1;
+}
+
+.modal-close-btn-component:focus-visible {
+  outline: 2px solid var(--cor-foco);
+  outline-offset: 1px;
+}
+
+.modal-body-component {
+  flex: 1;
+  overflow-y: auto;
+  font-size: var(--fonte-tamanho-sm);
+  color: var(--cor-texto-principal);
+}
+
+.modal-footer-component {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--espaco-2);
+  border-top: var(--borda-largura-padrao) solid var(--cor-borda);
+  padding-top: var(--espaco-4);
+  margin-top: var(--espaco-4);
+  flex-shrink: 0;
+}
+
+@keyframes modal-anim-enter {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}

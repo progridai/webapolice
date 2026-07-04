@@ -1,0 +1,44 @@
+/* HomePage.css */
+
+.home-page {
+  max-width: 900px;
+}
+
+.home-header {
+  margin-bottom: var(--espaco-8);
+}
+
+.home-title {
+  font-size: var(--fonte-tamanho-2xl, 2rem);
+  font-weight: var(--fonte-peso-negrito);
+  color: var(--cor-texto-principal);
+  margin-bottom: var(--espaco-2);
+}
+
+.home-subtitle {
+  font-size: var(--fonte-tamanho-base);
+  color: var(--cor-texto-secundario);
+}
+
+.home-section-title {
+  font-size: var(--fonte-tamanho-lg);
+  font-weight: var(--fonte-peso-semibold);
+  color: var(--cor-texto-principal);
+  margin-bottom: var(--espaco-4);
+}
+
+.home-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: var(--espaco-4);
+}
+
+@media (max-width: 480px) {
+  .home-title {
+    font-size: var(--fonte-tamanho-xl);
+  }
+
+  .home-cards {
+    grid-template-columns: 1fr;
+  }
+}

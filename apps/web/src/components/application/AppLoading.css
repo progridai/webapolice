@@ -1,0 +1,46 @@
+/* AppLoading.css */
+
+.app-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background-color: var(--cor-fundo-aplicacao);
+  color: var(--cor-texto-principal);
+}
+
+.app-loading-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--espaco-5);
+  text-align: center;
+}
+
+.app-loading-logo {
+  display: flex;
+  align-items: center;
+  gap: var(--espaco-2);
+  margin-bottom: var(--espaco-2);
+}
+
+.app-loading-logo-circle {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background-color: var(--cor-marca-principal);
+  display: inline-block;
+}
+
+.app-loading-logo-text {
+  font-family: var(--fonte-familia-principal);
+  font-size: var(--fonte-tamanho-xl);
+  font-weight: var(--fonte-peso-negrito);
+  color: var(--cor-texto-principal);
+  letter-spacing: -0.025em;
+}
+
+.app-loading-message {
+  font-size: var(--fonte-tamanho-sm);
+  color: var(--cor-texto-secundario);
+}

@@ -1,0 +1,32 @@
+/* main.css */
+
+/* Importação de todos os Design Tokens */
+@import './tokens/cores.css';
+@import './tokens/temas.css';
+@import './tokens/tipografia.css';
+@import './tokens/espacamentos.css';
+@import './tokens/bordas.css';
+@import './tokens/sombras.css';
+
+/* Estilos de Reset e Base da Aplicação */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--fonte-familia-principal);
+  font-size: var(--fonte-tamanho-md);
+  font-weight: var(--fonte-peso-normal);
+  line-height: var(--linha-altura-normal);
+  background-color: var(--cor-fundo-aplicacao);
+  color: var(--cor-texto-principal);
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+/* Foco global visível padrão */
+*:focus-visible {
+  outline: 2px solid var(--cor-foco);
+  outline-offset: 2px;
+}

@@ -1,0 +1,17 @@
+/* ErrorBoundary.css */
+
+.error-boundary-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: var(--espaco-6);
+  background-color: var(--cor-fundo-aplicacao);
+}
+
+.error-boundary-actions {
+  display: flex;
+  gap: var(--espaco-3);
+  flex-wrap: wrap;
+  justify-content: center;
+}

@@ -1,0 +1,28 @@
+/* Pagination.css */
+
+.table-pagination-bar-component {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--espaco-3);
+  width: 100%;
+}
+
+.pagination-info-component {
+  font-size: var(--fonte-tamanho-sm);
+  color: var(--cor-texto-secundario);
+}
+
+.pagination-controls-component {
+  display: flex;
+  align-items: center;
+  gap: var(--espaco-1);
+}
+
+.pagination-ellipsis {
+  font-size: var(--fonte-tamanho-sm);
+  color: var(--cor-texto-secundario);
+  padding: 0 var(--espaco-1);
+  user-select: none;
+}

@@ -9,9 +9,10 @@
   },
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
+    "build": "vite build",
     "preview": "vite preview",
     "lint": "eslint .",
+    "lint:design-system": "node scripts/lint-design-system.js",
     "test": "vitest",
     "test:run": "vitest run",
     "format": "prettier --write .",
@@ -19,8 +20,10 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "keycloak-js": "^26.2.4",
     "react": "^19.2.7",
-    "react-dom": "^19.2.7"
+    "react-dom": "^19.2.7",
+    "react-router-dom": "^7.18.1"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

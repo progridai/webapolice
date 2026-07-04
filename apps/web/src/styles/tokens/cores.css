@@ -1,0 +1,61 @@
+/* cores.css */
+
+:root {
+  /* Paleta Base da Marca */
+  --palette-dourado: #D4AF37;
+  --palette-dourado-hover: #C59F2E;
+  --palette-dourado-ativa: #B28E25;
+  --palette-dourado-suave: rgba(212, 175, 55, 0.12);
+  --palette-dourado-borda: #E5C354;
+  
+  --palette-branco: #FFFFFF;
+  --palette-preto-suave: #1A1A1A;
+  --palette-cinza-claro: #F6F6F6;
+
+  /* Cores Neutras Adicionais para Escala e Contraste */
+  --palette-neutral-50: #FAFAFA;
+  --palette-neutral-100: #F4F4F5;
+  --palette-neutral-200: #E4E4E7;
+  --palette-neutral-300: #D4D4D8;
+  --palette-neutral-400: #A1A1AA;
+  --palette-neutral-500: #71717A;
+  --palette-neutral-600: #52525B;
+  --palette-neutral-700: #3F3F46;
+  --palette-neutral-800: #27272A;
+  --palette-neutral-900: #18181B;
+  --palette-neutral-950: #0F0F11;
+
+  /* Cores Funcionais (Não fazem parte da paleta da marca, uso exclusivo para estados) */
+  
+  /* Sucesso */
+  --palette-sucesso-claro-fundo: #E8F5E9;
+  --palette-sucesso-claro-borda: #C8E6C9;
+  --palette-sucesso-claro-texto: #2E7D32;
+  --palette-sucesso-escuro-fundo: #0F2A14;
+  --palette-sucesso-escuro-borda: #1B5E20;
+  --palette-sucesso-escuro-texto: #81C784;
+
+  /* Erro */
+  --palette-erro-claro-fundo: #FFEBEE;
+  --palette-erro-claro-borda: #FFCDD2;
+  --palette-erro-claro-texto: #D32F2F;
+  --palette-erro-escuro-fundo: #2D0F11;
+  --palette-erro-escuro-borda: #C62828;
+  --palette-erro-escuro-texto: #E57373;
+
+  /* Alerta */
+  --palette-alerta-claro-fundo: #FFF8E1;
+  --palette-alerta-claro-borda: #FFE082;
+  --palette-alerta-claro-texto: #F57F17;
+  --palette-alerta-escuro-fundo: #2A210F;
+  --palette-alerta-escuro-borda: #E65100;
+  --palette-alerta-escuro-texto: #FFD54F;
+
+  /* Informação */
+  --palette-informacao-claro-fundo: #E3F2FD;
+  --palette-informacao-claro-borda: #BBDEFB;
+  --palette-informacao-claro-texto: #1565C0;
+  --palette-informacao-escuro-fundo: #0F2035;
+  --palette-informacao-escuro-borda: #0D47A1;
+  --palette-informacao-escuro-texto: #64B5F6;
+}

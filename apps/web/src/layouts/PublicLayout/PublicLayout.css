@@ -1,0 +1,102 @@
+/* PublicLayout.css */
+
+.public-layout {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: var(--cor-fundo-aplicacao);
+  color: var(--cor-texto-principal);
+}
+
+.public-layout-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--espaco-3) var(--espaco-6);
+  background-color: var(--cor-fundo-superficie);
+  border-bottom: var(--borda-largura-padrao) solid var(--cor-borda);
+}
+
+.public-layout-logo {
+  display: flex;
+  align-items: center;
+  gap: var(--espaco-2);
+  text-decoration: none;
+  color: inherit;
+}
+
+.public-logo-circle {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background-color: var(--cor-marca-principal);
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+.public-logo-text {
+  font-family: var(--fonte-familia-principal);
+  font-size: var(--fonte-tamanho-lg);
+  font-weight: var(--fonte-peso-negrito);
+  color: var(--cor-texto-principal);
+  letter-spacing: -0.02em;
+}
+
+.public-layout-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--espaco-2);
+}
+
+.public-theme-select {
+  font-family: var(--fonte-familia-principal);
+  font-size: var(--fonte-tamanho-sm);
+  padding: var(--espaco-1) var(--espaco-2);
+  border: var(--borda-largura-padrao) solid var(--cor-borda);
+  border-radius: var(--borda-raio-md);
+  background-color: var(--cor-fundo-superficie);
+  color: var(--cor-texto-principal);
+  cursor: pointer;
+  outline: none;
+}
+
+.public-theme-select:focus-visible {
+  outline: 2px solid var(--cor-foco);
+  outline-offset: 2px;
+}
+
+.public-layout-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--espaco-8) var(--espaco-4);
+  position: relative;
+}
+
+.public-layout-footer {
+  text-align: center;
+  padding: var(--espaco-4) var(--espaco-6);
+  border-top: var(--borda-largura-padrao) solid var(--cor-borda);
+  font-size: var(--fonte-tamanho-sm);
+  color: var(--cor-texto-secundario);
+}
+
+/* Skip link — visível somente no foco do teclado */
+.skip-link {
+  position: absolute;
+  top: -9999px;
+  left: var(--espaco-4);
+  padding: var(--espaco-2) var(--espaco-4);
+  background-color: var(--cor-marca-principal);
+  color: var(--cor-sobre-dourado);
+  font-weight: var(--fonte-peso-semibold);
+  text-decoration: none;
+  border-radius: var(--borda-raio-md);
+  z-index: 1000;
+}
+
+.skip-link:focus {
+  top: var(--espaco-3);
+}

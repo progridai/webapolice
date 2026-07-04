@@ -33,9 +33,22 @@ Este documento é de leitura **obrigatória e prioritária** para qualquer agent
 19. **Sempre apresentar um resumo claro dos arquivos criados ou alterados** ao final de cada iteração de trabalho.
 20. **Sempre executar todas as validações e testes disponíveis** (build, tests, lint, typecheck) localmente antes de sinalizar a conclusão de uma tarefa.
 21. **Não criar módulos de negócio** ou projetos adicionais na solução .NET sem que haja uma definição de domínio prévia e documentada.
-22. **Restrição de Identidade Visual**:
-    > A identidade visual do sistema será definida em uma etapa específica. Até lá, nenhuma IA ou desenvolvedor deve escolher paleta, tipografia, tema, biblioteca visual principal ou padrões definitivos de UI por conta própria.
-    * É proibido escolher cores arbitrárias, fontes, espaçamentos ou padrões de tela personalizados até a homologação da guia de estilo e marca do projeto.
+22. **Identidade visual e temas**:
+    * Toda tela nova ou componente implementado no frontend deve obrigatoriamente funcionar e ser testado nos temas claro (`light`), escuro (`dark`) e modo sistema (`sistema`).
+    * Componentes comuns e específicos devem consumir exclusivamente tokens semânticos de estilo. É proibido utilizar cores hexadecimais ou rgb diretamente na estilização de componentes.
+    * O dourado `#D4AF37` é a cor principal e de destaque da marca. Branco, preto suave e cinza claro compõem a paleta principal e neutra da aplicação.
+    * As cores verde, vermelha e azul são exclusivamente funcionais (para estados de sucesso, erro/perigo e informação, respectivamente).
+    * O azul não pode ser utilizado como cor dominante ou primária da navegação/aplicação.
+    * O verde não pode ser utilizado como cor padrão de botões principais.
+    * O vermelho deve ser reservado exclusivamente para sinalização de erros críticos ou ações altamente destrutivas.
+    * Nenhuma nova paleta paralela de cores ou estilos ad-hoc pode ser criada fora do design system.
+    * Qualquer novo token semântico necessário deve ser cadastrado e formalmente documentado em `docs/12-identidade-visual-design-system.md`.
+    * A conformidade de acessibilidade e contraste (WCAG) deve ser validada e mantida em todas as interações.
+    * Os estados de erro, sucesso e informação nunca podem depender unicamente da cor para comunicar sua finalidade (devem conter ícones, textos ou labels).
+    * Todo componente interativo novo deve possuir estados de hover, focus-visible, active e disabled definidos nos dois temas.
+    * Nenhuma tela ou componente pode assumir que o fundo da aplicação será sempre branco ou claro.
+    * Nenhum ativo visual ou logotipo original da marca deve ser modificado em suas cores ou proporções sem autorização.
+    * Toda revisão de frontend deve validar ativamente o suporte a temas e o consumo correto dos tokens semânticos.
 
 ---
 

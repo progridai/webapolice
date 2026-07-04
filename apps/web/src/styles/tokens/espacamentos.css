@@ -1,0 +1,13 @@
+/* espacamentos.css */
+
+:root {
+  /* Escala de Espaçamentos (Baseada em múltiplos de 4px) */
+  --espaco-1: 0.25rem;  /* 4px */
+  --espaco-2: 0.5rem;   /* 8px */
+  --espaco-3: 0.75rem;  /* 12px */
+  --espaco-4: 1rem;     /* 16px */
+  --espaco-5: 1.25rem;  /* 20px */
+  --espaco-6: 1.5rem;   /* 24px */
+  --espaco-8: 2rem;     /* 32px */
+  --espaco-10: 2.5rem;  /* 40px */
+}

@@ -1,0 +1,36 @@
+/* FormField.css */
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-1);
+  width: 100%;
+}
+
+.form-label {
+  font-size: var(--fonte-tamanho-sm);
+  font-weight: var(--fonte-peso-seminegrito);
+  color: var(--cor-texto-principal);
+  user-select: none;
+}
+
+.form-label.required::after {
+  content: ' *';
+  color: var(--cor-erro);
+}
+
+.form-error-msg {
+  display: flex;
+  align-items: center;
+  gap: var(--espaco-1);
+  font-size: var(--fonte-tamanho-xs);
+  color: var(--cor-erro);
+  font-weight: var(--fonte-peso-seminegrito);
+  margin-top: var(--espaco-1);
+}
+
+.form-helper {
+  font-size: var(--fonte-tamanho-xs);
+  color: var(--cor-texto-secundario);
+  margin-top: var(--espaco-1);
+}

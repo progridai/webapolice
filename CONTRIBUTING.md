@@ -19,6 +19,16 @@ Este documento estabelece as regras e o fluxo de trabalho obrigatórios para tod
 * **PRs Pequenos e Focados**: Mantenha os Pull Requests com o menor escopo possível. PRs menores facilitam a revisão de código (*code review*), reduzem conflitos de mesclagem e aceleram a integração.
 * **Revisão de Código Obrigatória**: Nenhum código deve ser mesclado na branch principal sem que passe pelo fluxo de aprovação padrão estabelecido pelo time de engenharia.
 * **Sem Mistura de Escopos**: Nunca misture refatorações de código legadas ou formatações estéticas amplas com a implementação de novas regras de negócio ou correções de bugs em um mesmo Pull Requests. Separe-os em tarefas e PRs distintos.
+* **Checklist Obrigatório para Pull Requests de Frontend**:
+  - [ ] Utiliza apenas tokens semânticos
+  - [ ] Funciona no tema claro
+  - [ ] Funciona no tema escuro
+  - [ ] Funciona no modo sistema
+  - [ ] Não introduz cores fixas nos componentes
+  - [ ] Mantém contraste acessível
+  - [ ] Usa cores funcionais somente para estados
+  - [ ] Não cria paleta paralela
+  - [ ] Possui testes dos estados visuais relevantes
 
 ## 4. Gerenciamento de Dependências
 * **Aprovação Prévia**: A adição de qualquer biblioteca externa ou alteração de pacotes no frontend (`package.json`) ou backend (`.csproj`) exige justificativa formal técnica e aprovação da equipe antes de ser integrada ao projeto.

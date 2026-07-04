@@ -1,0 +1,196 @@
+/* DesignSystemPage.css */
+
+.design-system-page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-6);
+  width: 100%;
+}
+
+/* Grids de cores */
+.colors-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: var(--espaco-4);
+}
+
+.color-item {
+  display: flex;
+  flex-direction: column;
+  border: var(--borda-largura-padrao) solid var(--cor-borda);
+  border-radius: var(--raio-medio);
+  overflow: hidden;
+  background-color: var(--cor-fundo-aplicacao);
+}
+
+.color-swatch {
+  height: 80px;
+  width: 100%;
+}
+
+.swatch-gold { background-color: var(--palette-dourado); }
+.swatch-white { background-color: var(--palette-branco); border-bottom: var(--borda-largura-padrao) solid var(--cor-borda); }
+.swatch-dark { background-color: var(--palette-preto-suave); }
+.swatch-gray { background-color: var(--palette-cinza-claro); }
+
+.color-label {
+  padding: var(--espaco-2);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.color-label strong {
+  font-size: var(--fonte-tamanho-sm);
+  color: var(--cor-texto-principal);
+}
+
+.color-label span {
+  font-family: monospace;
+  font-size: var(--fonte-tamanho-xs);
+  color: var(--cor-texto-secundario);
+}
+
+.color-label small {
+  font-size: 10px;
+  color: var(--cor-texto-secundario);
+}
+
+.functional-colors-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--espaco-2);
+}
+
+/* Amostras de Tipografia */
+.typography-samples .h1-sample {
+  font-size: var(--fonte-tamanho-2xl);
+  font-weight: var(--fonte-peso-negrito);
+  margin-top: var(--espaco-2);
+}
+
+.typography-samples .h2-sample {
+  font-size: var(--fonte-tamanho-xl);
+  font-weight: var(--fonte-peso-seminegrito);
+  margin-top: var(--espaco-2);
+}
+
+.typography-samples .h3-sample {
+  font-size: var(--fonte-tamanho-lg);
+  font-weight: var(--fonte-peso-seminegrito);
+  margin-top: var(--espaco-2);
+}
+
+.typography-samples .p-sample {
+  font-size: var(--fonte-tamanho-md);
+  margin-top: var(--espaco-2);
+}
+
+.typography-samples .p-muted-sample {
+  font-size: var(--fonte-tamanho-sm);
+  color: var(--cor-texto-secundario);
+  margin-top: var(--espaco-1);
+}
+
+/* Botões showcase */
+.button-row,
+.badge-row,
+.loading-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--espaco-2);
+  margin-top: var(--espaco-2);
+}
+
+/* Form layouts */
+.showcase-form-layout {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-4);
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: var(--espaco-4);
+}
+
+.form-actions-showcase {
+  display: flex;
+  gap: var(--espaco-2);
+}
+
+/* Alertas list */
+.alerts-showcase-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-3);
+}
+
+/* Tabelas */
+.showcase-table-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.table-controls-row {
+  display: flex;
+  gap: var(--espaco-2);
+}
+
+.table-filter-bar-showcase {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--espaco-4);
+  flex-wrap: wrap;
+}
+
+.search-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex: 1;
+  max-width: 320px;
+}
+
+.search-wrapper .icon {
+  position: absolute;
+  left: var(--espaco-3);
+  color: var(--cor-texto-secundario);
+  z-index: 1;
+}
+
+.search-wrapper input {
+  padding-left: var(--espaco-8) !important;
+}
+
+.selected-count {
+  font-size: var(--fonte-tamanho-sm);
+  color: var(--cor-texto-secundario);
+}
+
+.table-skeletons {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-3);
+  padding: var(--espaco-4);
+}
+
+.table-skeleton-row {
+  width: 100%;
+}
+
+.confirm-dialog-content {
+  display: flex;
+  align-items: flex-start;
+}
+
+/* Responsividade adicional */
+@media (max-width: 768px) {
+  .showcase-table-header {
+    flex-direction: column;
+    gap: var(--espaco-2);
+  }
+}

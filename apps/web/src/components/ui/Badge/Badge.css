@@ -1,0 +1,58 @@
+/* Badge.css */
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--espaco-1);
+  padding: var(--espaco-1) var(--espaco-2);
+  border-radius: var(--raio-pequeno);
+  font-size: var(--fonte-tamanho-xs);
+  font-weight: var(--fonte-peso-seminegrito);
+  border: var(--borda-largura-padrao) solid transparent;
+  line-height: 1;
+  text-transform: capitalize;
+}
+
+.badge-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: currentColor;
+}
+
+/* Variantes */
+.badge-neutral {
+  background-color: var(--cor-desabilitado-fundo);
+  color: var(--cor-desabilitado);
+  border-color: var(--cor-borda);
+}
+
+.badge-success {
+  background-color: var(--cor-sucesso-fundo);
+  color: var(--cor-sucesso);
+  border-color: var(--cor-sucesso-borda);
+}
+
+.badge-warning {
+  background-color: var(--cor-alerta-fundo);
+  color: var(--cor-alerta);
+  border-color: var(--cor-alerta-borda);
+}
+
+.badge-error {
+  background-color: var(--cor-erro-fundo);
+  color: var(--cor-erro);
+  border-color: var(--cor-erro-borda);
+}
+
+.badge-info {
+  background-color: var(--cor-informacao-fundo);
+  color: var(--cor-informacao);
+  border-color: var(--cor-informacao-borda);
+}
+
+.badge-brand {
+  background-color: var(--cor-marca-principal-suave);
+  color: var(--cor-marca-principal);
+  border-color: var(--cor-marca-principal-borda);
+}

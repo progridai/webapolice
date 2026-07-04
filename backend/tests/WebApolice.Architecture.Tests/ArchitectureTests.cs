@@ -8,9 +8,9 @@ namespace WebApolice.Architecture.Tests;
 
 public class ArchitectureTests
 {
-    private const string DomainNamespace = "WebApolice.Modules.*.Domain";
-    private const string ApplicationNamespace = "WebApolice.Modules.*.Application";
-    private const string InfrastructureNamespace = "WebApolice.Modules.*.Infrastructure";
+    private const string DomainNamespace = "WebApolice.Modulos.*.Domain";
+    private const string ApplicationNamespace = "WebApolice.Modulos.*.Application";
+    private const string InfrastructureNamespace = "WebApolice.Modulos.*.Infrastructure";
     private const string SharedInfrastructureNamespace = "WebApolice.Shared.Infrastructure";
     private const string ApiNamespace = "WebApolice.Api";
     private const string SharedKernelNamespace = "WebApolice.SharedKernel";
@@ -81,10 +81,22 @@ public class ArchitectureTests
         var result = Types.InCurrentDomain()
             .That()
             .ResideInNamespace(SharedKernelNamespace)
-            .Should().NotHaveDependencyOn("WebApolice.Modules")
+            .Should().NotHaveDependencyOn("WebApolice.Modulos")
             .GetResult();
 
         Assert.True(result.IsSuccessful, "SharedKernel não deve referenciar módulos de negócio.");
+    }
+
+    [Fact]
+    public void SharedKernel_ShouldNot_DependOnSharedInfrastructure_Or_Api()
+    {
+        var result = Types.InCurrentDomain()
+            .That()
+            .ResideInNamespace(SharedKernelNamespace)
+            .Should().NotHaveDependencyOnAny(SharedInfrastructureNamespace, ApiNamespace)
+            .GetResult();
+
+        Assert.True(result.IsSuccessful, "SharedKernel não deve referenciar Shared.Infrastructure ou API.");
     }
 
     [Fact]
@@ -234,7 +246,7 @@ public class ArchitectureTests
         var result = Types.InCurrentDomain()
             .That()
             .HaveName("AuditoriaDbContext")
-            .Should().NotHaveDependencyOn("WebApolice.Modules")
+            .Should().NotHaveDependencyOn("WebApolice.Modulos")
             .GetResult();
 
         Assert.True(result.IsSuccessful, "AuditoriaDbContext não contém entidades de negócio.");

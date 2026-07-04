@@ -9,8 +9,8 @@ O backend deve aderir à pirâmide de testes para garantir integridade, velocida
 
 ## 2. Testes de Integração (Infrastructure)
 
-*   **Infrastructure:** Responsável por validar as integrações técnicas, como queries no EF Core, mapeamentos objeto-relacional (ORM), e persistência correta no banco de dados, bem como integração com APIs REST externas.
-*   Futuramente, envolverão o banco de dados real via containers efêmeros (ex: Testcontainers) para testar os repositórios reais sem depender do ambiente do desenvolvedor.
+*   Utilizam o banco de dados real via containers efêmeros (ex: Testcontainers) para testar os repositórios reais e garantir transações atômicas seguras no banco de dados físico PostgreSQL.
+*   A atomicidade e concorrência de banco de dados são testadas e homologadas em ambiente Linux/Docker efêmero.
 
 ## 3. Testes de Integração HTTP (API)
 

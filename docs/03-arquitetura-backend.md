@@ -41,8 +41,8 @@ API / Bootstrapper
 *   **Contracts:** Contratos de integração públicos, eventos e interfaces explicitamente desenhadas para compartilhar dados (evite que se torne um "dump" de DTOs).
 *   **API:** Middlewares HTTP, filtros, roteamento, OpenTelemetry/logs estruturados iniciais, conversão de domínios para `ProblemDetails` e integração de autenticação (Keycloak).
 - **WebApolice.Api**: Ponto de entrada (Host). Responsável por roteamento, injeção de dependência e endpoints.
-- **WebApolice.SharedKernel**: Tipos comuns, exceções base, e primitivas de domínio compartilhadas entre todos os módulos. Não pode referenciar nenhum módulo específico.
-- **WebApolice.Shared.Infrastructure**: Infraestrutura transversal compartilhada (ex: `InfraestruturaDbContext` para persistência base).
+- **WebApolice.SharedKernel**: Tipos comuns, exceções base e primitivas de domínio compartilhadas entre todos os módulos. Não pode referenciar nenhum módulo específico nem conceitos HTTP/políticas de segurança.
+- **WebApolice.Shared.Infrastructure**: Infraestrutura transversal compartilhada. Contém também o contrato neutro de autorização (`WebApolice.Shared.Infrastructure.Security`), centralizando PerfisAcesso e PoliticasAutorizacao para os controladores dos módulos, e a infraestrutura de conexão compartilhada (`DbConnection` no escopo do DI) para coordenação atômica de transações locais (sem MSDTC).
 - **WebApolice.Auditoria**: Módulo técnico para gravação persistente de eventos de auditoria com JSONB e isolamento de dependências.
 
 Futuramente, serão adicionados os módulos de negócio seguindo o padrão.

@@ -6,9 +6,10 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using WebApolice.Api.Autenticacao;
-using WebApolice.Api.Autorizacao;
+using WebApolice.Shared.Infrastructure.Security;
 using WebApolice.Api.Infrastructure.Errors;
 using WebApolice.Shared.Infrastructure.Persistence;
+using WebApolice.Modulos.Clientes;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -117,23 +118,21 @@ builder.Services
 // =============================================================================
 // TRANSFORMADOR DE ROLES DO REALM
 // =============================================================================
-// Converte realm_access.roles do JWT Keycloak para ClaimTypes.Role do ASP.NET Core
 builder.Services.AddScoped<IClaimsTransformation, TransformadorRolesDoRealm>();
 
 // =============================================================================
 // AUTORIZAÇÃO COM POLÍTICAS
 // =============================================================================
-// Respostas 403 estruturadas via ProblemDetails para falhas de autorização
 builder.Services.AddAuthorization(opcoes =>
 {
-    opcoes.AddPolicy(PoliticasAutorizacao.Admin, policy =>
-        policy.RequireRole("admin"));
+    opcoes.AddPolicy(PoliticasAutorizacao.Administracao, policy =>
+        policy.RequireRole(PerfisAcesso.Admin));
 
-    opcoes.AddPolicy(PoliticasAutorizacao.Gestor, policy =>
-        policy.RequireRole("gestor"));
+    opcoes.AddPolicy(PoliticasAutorizacao.GestaoClientes, policy =>
+        policy.RequireRole(PerfisAcesso.Gestor, PerfisAcesso.Admin));
 
-    opcoes.AddPolicy(PoliticasAutorizacao.Operador, policy =>
-        policy.RequireRole("operador"));
+    opcoes.AddPolicy(PoliticasAutorizacao.ConsultaClientes, policy =>
+        policy.RequireRole(PerfisAcesso.Operador, PerfisAcesso.Gestor, PerfisAcesso.Admin));
 });
 
 // Suporte a ProblemDetails para respostas 403 estruturadas
@@ -151,15 +150,17 @@ if (string.IsNullOrWhiteSpace(connectionString))
     throw new InvalidOperationException("A configuração 'ConnectionStrings:PostgreSql' é obrigatória.");
 }
 
-builder.Services.AddDbContext<InfraestruturaDbContext>(options =>
+builder.Services.AddScoped<System.Data.Common.DbConnection>(sp =>
 {
-    options.UseNpgsql(connectionString, o => 
+    return new Npgsql.NpgsqlConnection(connectionString);
+});
+
+builder.Services.AddDbContext<InfraestruturaDbContext>((sp, options) =>
+{
+    var connection = sp.GetRequiredService<System.Data.Common.DbConnection>();
+    options.UseNpgsql(connection, o => 
            {
                o.MigrationsHistoryTable("__EFMigrationsHistory", "infraestrutura");
-               o.EnableRetryOnFailure(
-                   maxRetryCount: 3,
-                   maxRetryDelay: TimeSpan.FromSeconds(5),
-                   errorCodesToAdd: null);
            })
            .UseSnakeCaseNamingConvention();
 });
@@ -167,15 +168,12 @@ builder.Services.AddDbContext<InfraestruturaDbContext>(options =>
 // =============================================================================
 // AUDITORIA (POSTGRESQL + EF CORE)
 // =============================================================================
-builder.Services.AddDbContext<WebApolice.Auditoria.Infrastructure.AuditoriaDbContext>(options =>
+builder.Services.AddDbContext<WebApolice.Auditoria.Infrastructure.AuditoriaDbContext>((sp, options) =>
 {
-    options.UseNpgsql(connectionString, o => 
+    var connection = sp.GetRequiredService<System.Data.Common.DbConnection>();
+    options.UseNpgsql(connection, o => 
            {
                o.MigrationsHistoryTable("__EFMigrationsHistory", "auditoria");
-               o.EnableRetryOnFailure(
-                   maxRetryCount: 3,
-                   maxRetryDelay: TimeSpan.FromSeconds(5),
-                   errorCodesToAdd: null);
            })
            .UseSnakeCaseNamingConvention();
 });
@@ -189,6 +187,9 @@ builder.Services.AddScoped<WebApolice.Auditoria.Contracts.IRegistradorAuditoria,
 // =============================================================================
 builder.Services.AddHealthChecks()
     .AddDbContextCheck<InfraestruturaDbContext>("postgresql");
+
+// Módulo Clientes
+builder.Services.AddClientesModule(builder.Configuration);
 
 // =============================================================================
 // OPENAPI & CONTROLLERS
@@ -403,7 +404,7 @@ app.MapGet("/api/admin/ping", () => Results.Ok(new
     area = "admin"
 }))
 .WithName("AdminPing")
-.RequireAuthorization(PoliticasAutorizacao.Admin);
+.RequireAuthorization(PoliticasAutorizacao.Administracao);
 
 app.Run();
 

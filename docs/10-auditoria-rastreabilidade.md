@@ -30,7 +30,7 @@ Caso encontradas (inclusive aninhadas ou em arrays), o registro é **rejeitado i
 Dados pessoais que necessitem mascaramento ou minimização serão controlados e filtrados manualmente pelo domínio antes de enviar para auditoria; o módulo técnico apenas age como última barreira para credenciais.
 
 ## Transações
-A auditoria pode ou não estar na mesma transação. Como o contexto da auditoria não é o mesmo da infraestrutura de negócio, se for exigidaAtomicidade forte, será necessário orquestrar isso no fluxo do MediatR/Handlers do domínio com suporte da API, ou usar transações distribuídas (que são desencorajadas inicialmente). Na versão fundacional, a auditoria grava logo em seguida do SaveChanges do domínio, na porta Application.
+A auditoria e as operações de negócio que exigem atomicidade forte (como o cadastro, alteração e gerenciamento de status de Clientes) são coordenadas em uma única transação física. Ambas utilizam uma `DbConnection` compartilhada (registrada como Scoped no DI), onde um commit/rollback atômico é executado através de um `IClientesTransactionManager`, garantindo que falhas na gravação da auditoria revertam as ações do cliente, e vice-versa, sem requerer MSDTC ou transações distribuídas (que são incompatíveis com o Linux).
 
 ## Limitações Atuais
 - Não implementamos purge automático ou particionamento de tabelas.

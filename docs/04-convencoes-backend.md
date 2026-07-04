@@ -34,4 +34,4 @@
 
 *   **Identidade e Claims:** A identidade baseia-se na claim `sub` do Keycloak (External ID). Não há tabela de senhas local.
 *   **Auditoria Persistida:** Operações do sistema são auditadas pelo módulo técnico `WebApolice.Auditoria`, que salva o ID do usuário externo, ações e metadados JSONB.
-*   **Mascaramento:** Tokens, senhas e informações confidenciais são removidas da auditoria pelo `ProvedorMascaramento` antes da persistência.
+*   **Mascaramento:** Tokens, senhas e informações confidenciais são removidas da auditoria pelo `ProvedorMascaramento` antes da persistência. O CPF é sempre retornado mascarado como `***.***.***-XX` nas respostas da API. A exibição do CPF completo em telas exigirá um endpoint dedicado protegido por permissão específica, justificativa de negócio e auditoria dedicada.

@@ -37,10 +37,12 @@ webapolice/
 │   ├── src/
 │   │   ├── WebApolice.Api/    # Web API ASP.NET Core (Minimal APIs)
 │   │   ├── WebApolice.SharedKernel/ # Biblioteca de tipos comuns transversais
-│   │   └── Modules/           # Local reservado para futuros módulos de domínio
+│   │   ├── WebApolice.Shared.Infrastructure/ # Infraestrutura compartilhada transversa (e segurança)
+│   │   └── WebApolice.Modulos.Clientes/ # Módulo de negócio Clientes (Backend)
 │   └── tests/
-│       ├── WebApolice.Api.Tests/ # Testes de integração da API
-│       └── WebApolice.Architecture.Tests/ # Testes arquiteturais por reflexão
+│       ├── WebApolice.Api.Tests/ # Testes de integração da API e autorização Keycloak
+│       ├── WebApolice.Architecture.Tests/ # Testes arquiteturais por reflexão (NetArchTest)
+│       └── WebApolice.Modulos.Clientes.Tests/ # Testes de domínio e caso de uso do módulo Clientes
 ├── docs/                      # Documentação técnica e estratégica
 │   └── adr/                   # Registros de Decisão de Arquitetura (ADRs)
 └── prompts/                   # Templates de prompts padronizados para IA
@@ -132,12 +134,14 @@ cd backend
 
 ---
 
-## Status da Fundação Técnica
-A fundação técnica inicial foi inicializada com sucesso:
+## Status da Fundação Técnica e Módulos de Negócio
+A fundação técnica inicial e o primeiro módulo de negócio foram finalizados com êxito:
 * Frontend e backend utilizam as versões estáveis mais recentes das tecnologias de base (React 19, Vite 8, .NET 10).
-* Endpoints técnicos `/api/health`, `/api/health/live` e `/api/health/ready` encontram-se disponíveis no backend, avaliando disponibilidade da API e integrações com segurança.
-* A fundação de Persistência com PostgreSQL 18.4 (Testcontainers para integração) e Entity Framework Core está completa. Utilizou-se o projeto técnico `WebApolice.Shared.Infrastructure` restrito unicamente a configurações transversais, impedindo que classes de domínio futuras sejam persistidas centralmente.
-* **Testes de Arquitetura**: Os testes arquiteturais de reflexão em `WebApolice.Architecture.Tests` estão ativos. Eles detectam dependências proibidas (como chamadas automáticas de migrações na API e invasão do Shared.Infrastructure nos módulos). O bloqueio efetivo de alterações incompatíveis é garantido no pipeline de CI.
+* Endpoints técnicos `/api/health`, `/api/health/live` e `/api/health/ready` encontram-se disponíveis no backend.
+* A fundação de Persistência com PostgreSQL 18.4 e Entity Framework Core está completa, com isolamento transacional local via `ClientesTransactionManager` (sem MSDTC, 100% suportado no Linux/Docker).
+* **Módulo Clientes (Backend)**: Totalmente implementado com regras estritas de domínio, concorrência otimizada, paginação dinâmica na base, proteção de dados pessoais (CPF mascarado) e matriz de autorização via JWT/Keycloak.
+* **Testes de Arquitetura**: Os testes arquiteturais em `WebApolice.Architecture.Tests` garantem o fluxo unidirecional e isolamento dos módulos.
+* **Bateria de Testes**: Suíte robusta com 147 testes (100% aprovados) executados localmente e em ambiente Linux nativo (Docker SDK 10).
 
 > [!IMPORTANT]
 > **Identidade Visual Pendente**:

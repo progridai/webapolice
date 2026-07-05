@@ -1,12 +1,60 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-/**  * tests/routes/ProtectedRoute.test.tsx  *  * Testa o componente ProtectedRoute.  */ import {
-  render,
-  screen,
-  waitFor,
-} from '@testing-library/react';
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import React from 'react';
+import { render, screen, waitFor } from '@testing-library/react';
+import { describe, expect, it, vi } from 'vitest';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { ProtectedRoute } from '../../src/app/routes/ProtectedRoute';
 import { AuthContext } from '../../src/auth/AuthContext';
-import type { AuthContextValue } from '../../src/auth/auth.types'; // Mock das variáveis de ambiente vi.mock('../../src/app/config/env', () => ({   ENV: {     API_BASE_URL: 'http://localhost:5000',     KEYCLOAK_URL: 'http://localhost:8080',     KEYCLOAK_REALM: 'webapolice',     KEYCLOAK_CLIENT_ID: 'webapolice-web',     ENABLE_DESIGN_SYSTEM: true,     MODE: 'test',     IS_DEV: false,     APP_VERSION: '0.1.0',   }, }));  const mockAuthValue = (overrides: Partial<AuthContextValue>): AuthContextValue => ({   status: 'unauthenticated',   isLoading: false,   isAuthenticated: false,   user: null,   roles: [],   login: vi.fn(),   logout: vi.fn(),   refreshToken: vi.fn().mockResolvedValue(true),   hasRole: vi.fn().mockReturnValue(false),   hasAnyRole: vi.fn().mockReturnValue(false),   hasAllRoles: vi.fn().mockReturnValue(false),   ...overrides, });  const renderWithRouter = (authValue: AuthContextValue, initialPath = '/protected') =>   render(     <MemoryRouter initialEntries={[initialPath]}>       <AuthContext.Provider value={authValue}>         <Routes>           <Route element={<ProtectedRoute />}>             <Route path="/protected" element={<div>Conteúdo Protegido</div>} />           </Route>           <Route path="/unauthorized" element={<div>Página Não Autorizada</div>} />         </Routes>       </AuthContext.Provider>     </MemoryRouter>   );  describe('ProtectedRoute', () => {   beforeEach(() => {     vi.stubGlobal('matchMedia', vi.fn().mockImplementation((query) => ({       matches: false, media: query, onchange: null,       addListener: vi.fn(), removeListener: vi.fn(),       addEventListener: vi.fn(), removeEventListener: vi.fn(), dispatchEvent: vi.fn(),     })));   });    it('deve exibir conteúdo quando o usuário está autenticado', async () => {     const authValue = mockAuthValue({ status: 'authenticated', isAuthenticated: true });     renderWithRouter(authValue);      await waitFor(() =>       expect(screen.getByText('Conteúdo Protegido')).not.toBeNull()     );   });    it('deve redirecionar para /unauthorized quando não autenticado', async () => {     const authValue = mockAuthValue({ status: 'unauthenticated', isAuthenticated: false });     renderWithRouter(authValue);      await waitFor(() =>       expect(screen.getByText('Página Não Autorizada')).not.toBeNull()     );   });    it('deve exibir carregamento enquanto a autenticação está sendo resolvida', () => {     const authValue = mockAuthValue({ status: 'initializing', isLoading: true });     renderWithRouter(authValue);      // PageLoading deve ser renderizado — verifica que o conteúdo protegido NÃO aparece     expect(screen.queryByText('Conteúdo Protegido')).toBeNull();     expect(screen.queryByText('Página Não Autorizada')).toBeNull();   });    it('deve preservar a rota de origem no state do redirect', async () => {     const authValue = mockAuthValue({ status: 'unauthenticated', isAuthenticated: false });          let capturedState: unknown = null;     const StateCapture: React.FC = () => {       capturedState = window.history.state;       return <div>Não Autorizado</div>;     };      render(       <MemoryRouter initialEntries={['/protected']}>         <AuthContext.Provider value={authValue}>           <Routes>             <Route element={<ProtectedRoute />}>               <Route path="/protected" element={<div>Protegido</div>} />             </Route>             <Route path="/unauthorized" element={<StateCapture />} />           </Routes>         </AuthContext.Provider>       </MemoryRouter>     );      await waitFor(() => expect(screen.getByText('Não Autorizado')).not.toBeNull());     // A rota redirecionou corretamente   }); });
+import type { AuthContextValue } from '../../src/auth/auth.types';
+
+function mockAuthValue(overrides: Partial<AuthContextValue>): AuthContextValue {
+  return {
+    status: 'unauthenticated',
+    isLoading: false,
+    isAuthenticated: false,
+    user: null,
+    roles: [],
+    login: vi.fn(),
+    logout: vi.fn(),
+    refreshToken: vi.fn().mockResolvedValue(true),
+    hasRole: vi.fn().mockReturnValue(false),
+    hasAnyRole: vi.fn().mockReturnValue(false),
+    hasAllRoles: vi.fn().mockReturnValue(false),
+    ...overrides,
+  };
+}
+
+function renderWithRouter(authValue: AuthContextValue) {
+  return render(
+    <MemoryRouter initialEntries={['/protected']}>
+      <AuthContext.Provider value={authValue}>
+        <Routes>
+          <Route element={<ProtectedRoute />}>
+            <Route path="/protected" element={<div>Conteudo Protegido</div>} />
+          </Route>
+          <Route path="/unauthorized" element={<div>Pagina Nao Autorizada</div>} />
+        </Routes>
+      </AuthContext.Provider>
+    </MemoryRouter>
+  );
+}
+
+describe('ProtectedRoute', () => {
+  it('renders protected content when authenticated', async () => {
+    renderWithRouter(mockAuthValue({ status: 'authenticated', isAuthenticated: true }));
+
+    await waitFor(() => expect(screen.getByText('Conteudo Protegido')).not.toBeNull());
+  });
+
+  it('redirects to unauthorized when unauthenticated', async () => {
+    renderWithRouter(mockAuthValue({ status: 'unauthenticated', isAuthenticated: false }));
+
+    await waitFor(() => expect(screen.getByText('Pagina Nao Autorizada')).not.toBeNull());
+  });
+
+  it('renders loading while authentication is being resolved', () => {
+    renderWithRouter(mockAuthValue({ status: 'initializing', isLoading: true }));
+
+    expect(screen.queryByText('Conteudo Protegido')).toBeNull();
+    expect(screen.queryByText('Pagina Nao Autorizada')).toBeNull();
+    expect(screen.getAllByRole('status', { name: /Carregando/ }).length).toBeGreaterThan(0);
+  });
+});

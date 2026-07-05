@@ -8,7 +8,11 @@ public class ClientesDbContextFactory : IDesignTimeDbContextFactory<ClientesDbCo
     public ClientesDbContext CreateDbContext(string[] args)
     {
         var optionsBuilder = new DbContextOptionsBuilder<ClientesDbContext>();
-        optionsBuilder.UseNpgsql("Host=localhost;Database=webapolice_db;Username=postgres;Password=postgres", 
+        var connectionString =
+            Environment.GetEnvironmentVariable("ConnectionStrings__PostgreSql") ??
+            "Host=localhost;Database=webapolice_db;Username=postgres;Password=postgres";
+
+        optionsBuilder.UseNpgsql(connectionString, 
             npgsqlOptions => 
             {
                 npgsqlOptions.MigrationsHistoryTable("__EFMigrationsHistory", "clientes");

@@ -16,13 +16,13 @@ import { AppRoutes } from '../routes/AppRoutes';
 export const AppProviders: React.FC = () => {
   return (
     <ThemeProvider>
-      <HashRouter>
-        <AuthProvider>
+      <AuthProvider>
+        <HashRouter>
           <ErrorBoundary>
             <AppRoutes />
           </ErrorBoundary>
-        </AuthProvider>
-      </HashRouter>
+        </HashRouter>
+      </AuthProvider>
     </ThemeProvider>
   );
 };

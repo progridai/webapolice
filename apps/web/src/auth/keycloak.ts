@@ -8,9 +8,11 @@
  * Utilizar o hook `useAuth` exportado de `src/auth`.
  */
 import Keycloak from 'keycloak-js';
+import type { KeycloakInitOptions } from 'keycloak-js';
 import { ENV } from '../app/config/env';
 
 let _instance: Keycloak | null = null;
+let _initPromise: Promise<boolean> | null = null;
 
 /**
  * Retorna a instância singleton do Keycloak.
@@ -28,9 +30,25 @@ export function getKeycloakInstance(): Keycloak {
 }
 
 /**
+ * Inicializa o Keycloak uma única vez.
+ *
+ * Em desenvolvimento, React StrictMode monta efeitos duas vezes. O keycloak-js
+ * falha se `init()` for chamado novamente na mesma instância, então mantemos a
+ * promessa de inicialização em módulo para reutilizar o resultado.
+ */
+export function initKeycloakOnce(options: KeycloakInitOptions): Promise<boolean> {
+  if (!_initPromise) {
+    _initPromise = getKeycloakInstance().init(options);
+  }
+
+  return _initPromise;
+}
+
+/**
  * Reseta a instância singleton.
  * Uso exclusivo em testes automatizados.
  */
 export function _resetKeycloakInstance(): void {
   _instance = null;
+  _initPromise = null;
 }

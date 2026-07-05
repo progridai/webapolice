@@ -11,6 +11,7 @@ import { useAuth } from '../../auth/useAuth';
 import { ROUTES } from '../../app/routes/routePaths';
 import { Button } from '../../components/ui/Button';
 import { Spinner } from '../../components/ui/Spinner';
+import { createPostLoginRedirectUri } from '../../auth/authRedirect';
 import './LoginPage.css';
 
 export const LoginPage: React.FC = () => {
@@ -39,7 +40,9 @@ export const LoginPage: React.FC = () => {
   }
 
   const handleLogin = async () => {
-    await login(window.location.origin + '/#' + from);
+    // Redireciona para a raiz sem hash para que o OIDC (Keycloak) consiga validar corretamente.
+    // Após o login, o AppRoutes redirecionará da raiz (/) para /app automaticamente.
+    await login(createPostLoginRedirectUri(from));
   };
 
   return (

@@ -1,7 +1,7 @@
-// app-config.ts
+import { ENV } from '../../app/config/env';
 
 export const APP_CONFIG = {
   appName: 'WebApólice',
-  version: '0.1.0',
-  environment: import.meta.env.MODE === 'development' ? 'Development' : import.meta.env.MODE,
+  version: ENV.APP_VERSION,
+  environment: ENV.MODE === 'development' ? 'Development' : ENV.MODE,
 };

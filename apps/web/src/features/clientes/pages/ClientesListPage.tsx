@@ -5,13 +5,13 @@ import { ClientesFilters } from '../components/ClientesFilters';
 import { ClientesTable } from '../components/ClientesTable';
 import { ClientesMobileList } from '../components/ClientesMobileList';
 import { Pagination, EmptyState, Alert, Button, Skeleton } from '../../../components/ui';
+import './ClientesListPage.css';
 
 export const ClientesListPage: React.FC = () => {
   const { filters, setFilters, clearFilters } = useClientesFilters();
   const { data, isLoading, error, retry } = useClientes(filters);
   const [isMobile, setIsMobile] = useState(false);
 
-  // Define isMobile responsivamente para trocar tabela por lista
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
     handleResize();
@@ -19,15 +19,14 @@ export const ClientesListPage: React.FC = () => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // Seta título da página
   useEffect(() => {
-    document.title = 'Clientes | webapolice';
+    document.title = 'Clientes | WebApolice';
   }, []);
 
   const handleSort = (column: string) => {
     setFilters({
       sortBy: column,
-      direction: filters.sortBy === column && filters.direction === 'asc' ? 'desc' : 'asc'
+      direction: filters.sortBy === column && filters.direction === 'asc' ? 'desc' : 'asc',
     });
   };
 
@@ -39,63 +38,66 @@ export const ClientesListPage: React.FC = () => {
   const hasData = data && data.itens && data.itens.length > 0;
 
   return (
-    <div className="flex flex-col gap-6" role="main">
-      <header>
-        <h1 className="text-2xl font-bold tracking-tight">Clientes</h1>
-        <p className="text-gray-500 dark:text-gray-400 mt-1">
+    <div className="clientes-page" role="main">
+      <header className="clientes-page-header">
+        <h1 className="clientes-page-title">Clientes</h1>
+        <p className="clientes-page-subtitle">
           Gerencie e consulte os clientes da plataforma.
         </p>
       </header>
 
       <section aria-label="Filtros de clientes">
-        <ClientesFilters 
-          filters={filters} 
-          onFilterChange={setFilters} 
+        <ClientesFilters
+          filters={filters}
+          onFilterChange={setFilters}
           onClearFilters={clearFilters}
-          isLoading={isLoading && !data} 
+          isLoading={isLoading && !data}
         />
       </section>
 
       {error ? (
-        <div className="flex flex-col items-start gap-4">
-          <Alert
-            variant="error"
-            title="Não foi possível carregar os clientes"
-          >
+        <div className="clientes-error">
+          <Alert variant="error" title="Não foi possível carregar os clientes">
             {error.message}
           </Alert>
-          <Button onClick={retry} size="sm">Tentar novamente</Button>
+          <Button onClick={retry} size="small" loading={isLoading}>
+            Tentar novamente
+          </Button>
         </div>
       ) : isLoading && !data ? (
-        <div className="space-y-4" aria-busy="true" aria-live="polite">
-          <Skeleton className="h-12 w-full" />
-          <Skeleton className="h-12 w-full" />
-          <Skeleton className="h-12 w-full" />
+        <div className="clientes-skeletons" aria-busy="true" aria-live="polite">
+          <Skeleton className="clientes-skeleton-row" />
+          <Skeleton className="clientes-skeleton-row" />
+          <Skeleton className="clientes-skeleton-row" />
         </div>
       ) : !hasData ? (
         <EmptyState
-          title={hasActiveFilters ? "Nenhum cliente encontrado" : "Nenhum cliente cadastrado"}
+          title={hasActiveFilters ? 'Nenhum cliente encontrado' : 'Nenhum cliente cadastrado'}
           description={
-            hasActiveFilters 
-              ? "Não encontramos nenhum cliente com os filtros informados."
-              : "Ainda não existem clientes cadastrados na plataforma."
+            hasActiveFilters
+              ? 'Não encontramos nenhum cliente com os filtros informados.'
+              : 'Ainda não existem clientes cadastrados na plataforma.'
           }
-          action={hasActiveFilters ? (
-            <Button onClick={clearFilters}>Limpar filtros</Button>
-          ) : undefined}
+          action={
+            hasActiveFilters ? (
+              <Button onClick={clearFilters}>
+                Limpar filtros
+              </Button>
+            ) : undefined
+          }
         />
       ) : (
         <>
           <div aria-live="polite" className="sr-only">
             Exibindo {data.itens.length} clientes.
           </div>
-          
+
           {isMobile ? (
             <ClientesMobileList clientes={data.itens} />
           ) : (
-            <ClientesTable 
-              clientes={data.itens} 
-              isLoading={isLoading} 
+            <ClientesTable
+              clientes={data.itens}
+              isLoading={isLoading}
               sortBy={filters.sortBy}
               direction={filters.direction}
               onSort={handleSort}
@@ -103,8 +105,8 @@ export const ClientesListPage: React.FC = () => {
           )}
 
           {data.totalPaginas > 1 && (
-            <div className="mt-4 flex justify-between items-center flex-col sm:flex-row gap-4">
-              <span className="text-sm text-gray-500 dark:text-gray-400">
+            <div className="clientes-pagination">
+              <span className="clientes-pagination-summary">
                 Exibindo página {data.paginaAtual} de {data.totalPaginas} ({data.totalItens} total)
               </span>
               <Pagination

@@ -73,8 +73,24 @@ Após inicializar os containers e garantir que o Keycloak está saudável:
    ```
 
 > [!IMPORTANT]
-> **Integração do Frontend Pendente**:
-> O banco de dados e o Keycloak estão provisionados, e a API Backend (ASP.NET Core) já está **totalmente integrada** ao Keycloak para validação de JWT (Bearer), Audience e RBAC (Role-Based Access Control). No entanto, a integração funcional do *Frontend React* com o fluxo PKCE e persistência ocorrerá nas próximas fases de desenvolvimento.
+> **Integração Frontend/API**:
+> O frontend React está integrado ao Keycloak via Authorization Code + PKCE e consome a API com token Bearer pelo cliente HTTP centralizado. Em desenvolvimento local, use `http://127.0.0.1:5173` para o frontend, `http://127.0.0.1:5007` para a API e `http://127.0.0.1:8080` para o Keycloak.
+
+### Configuração Local do Frontend e API
+
+As variáveis `VITE_*` ficam no `.env` da raiz e são lidas na inicialização do Vite. Após alterá-las, reinicie `npm run dev`.
+
+```env
+VITE_API_BASE_URL=http://127.0.0.1:5007
+VITE_KEYCLOAK_URL=http://127.0.0.1:8080
+VITE_KEYCLOAK_REALM=webapolice
+VITE_KEYCLOAK_CLIENT_ID=webapolice-web
+VITE_ENABLE_DESIGN_SYSTEM=true
+```
+
+A API permite CORS para as origens locais configuradas em `Cors:FrontendOrigins` no `appsettings.Development.json`. A listagem de Clientes usa `GET /api/clientes`.
+
+Se aparecer `Failed to fetch`, verifique: API em execução, `VITE_API_BASE_URL`, reinício do Vite, CORS/preflight, protocolo HTTP/HTTPS e certificado local.
 
 ### Frontend (`apps/web/`)
 
@@ -140,6 +156,7 @@ A fundação técnica inicial e o primeiro módulo de negócio foram finalizados
 * Endpoints técnicos `/api/health`, `/api/health/live` e `/api/health/ready` encontram-se disponíveis no backend.
 * A fundação de Persistência com PostgreSQL 18.4 e Entity Framework Core está completa, com isolamento transacional local via `ClientesTransactionManager` (sem MSDTC, 100% suportado no Linux/Docker).
 * **Módulo Clientes (Backend)**: Totalmente implementado com regras estritas de domínio, concorrência otimizada, paginação dinâmica na base, proteção de dados pessoais (CPF mascarado) e matriz de autorização via JWT/Keycloak.
+* **Listagem de Clientes (Frontend)**: Disponível em `/#/clientes`, integrada ao endpoint `GET /api/clientes`, com filtros responsivos, tratamento seguro de erros de rede e autorização por roles `admin`, `gestor` e `operador`.
 * **Testes de Arquitetura**: Os testes arquiteturais em `WebApolice.Architecture.Tests` garantem o fluxo unidirecional e isolamento dos módulos.
 * **Bateria de Testes**: Suíte robusta com 147 testes (100% aprovados) executados localmente e em ambiente Linux nativo (Docker SDK 10).
 

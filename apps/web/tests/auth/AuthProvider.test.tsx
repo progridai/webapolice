@@ -18,6 +18,7 @@ let mockKeycloakLogout: ReturnType<typeof vi.fn>;
 let mockKeycloakUpdateToken: ReturnType<typeof vi.fn>;
 let mockAuthenticated = false;
 let mockTokenParsed: Record<string, unknown> | null = null;
+const mockSetTokenProvider = vi.hoisted(() => vi.fn());
 
 vi.mock('../../src/auth/keycloak', () => ({
   getKeycloakInstance: () => ({
@@ -29,7 +30,12 @@ vi.mock('../../src/auth/keycloak', () => ({
     updateToken: (...args: unknown[]) => mockKeycloakUpdateToken(...args),
     token: mockAuthenticated ? 'mock-token' : undefined,
   }),
+  initKeycloakOnce: (...args: unknown[]) => mockKeycloakInit(...args),
   _resetKeycloakInstance: vi.fn(),
+}));
+
+vi.mock('../../src/services/http', () => ({
+  setTokenProvider: mockSetTokenProvider,
 }));
 
 // Mock das variáveis de ambiente
@@ -90,8 +96,7 @@ describe('AuthProvider', () => {
     // Init nunca resolve para testar o estado transitório
     mockKeycloakInit = vi.fn().mockImplementation(() => new Promise((resolve) => setTimeout(() => resolve(false), 5000)));
     renderWithAuth();
-    expect(screen.getByTestId('isLoading').textContent).toBe('true');
-    expect(screen.getByTestId('status').textContent).toBe('initializing');
+    expect(screen.getByRole('status', { name: 'Carregando página' })).not.toBeNull();
   });
 
   it('deve ir para "unauthenticated" quando Keycloak retorna false', async () => {
@@ -122,6 +127,7 @@ describe('AuthProvider', () => {
     expect(screen.getByTestId('isAuthenticated').textContent).toBe('true');
     expect(screen.getByTestId('user').textContent).toBe('dev.admin');
     expect(screen.getByTestId('roles').textContent).toBe(APP_ROLES.ADMIN);
+    expect(mockSetTokenProvider).toHaveBeenLastCalledWith(expect.any(Function));
   });
 
   it('deve expor roles do usuário autenticado', async () => {

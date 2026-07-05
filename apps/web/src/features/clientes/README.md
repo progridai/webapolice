@@ -1,79 +1,59 @@
 # Feature: Clientes
 
-## Escopo Futuro
+## Escopo atual
 
-Este módulo implementará a gestão de clientes da plataforma WebApólice.
+Este modulo implementa a listagem de clientes autenticada e autorizada da
+plataforma WebApolice.
 
-### Funcionalidades Previstas
+Nao fazem parte do escopo atual:
 
-- Listagem de clientes com paginação e filtros
-- Cadastro de novo cliente
-- Edição de cliente existente
-- Visualização de detalhes do cliente
-- Inativação de cliente
+- pagina de detalhes;
+- cadastro;
+- edicao;
+- exclusao;
+- inativacao.
 
-### Estrutura Esperada
+## Endpoint utilizado
 
-```
-features/clientes/
-├── api/
-│   ├── clientesApi.ts         # Chamadas HTTP ao backend
-│   └── index.ts
-├── components/
-│   ├── ClienteForm/           # Formulário de cadastro/edição
-│   ├── ClienteTable/          # Tabela com lista de clientes
-│   └── index.ts
-├── hooks/
-│   ├── useClientes.ts         # Hook de listagem
-│   ├── useCliente.ts          # Hook de detalhe
-│   └── index.ts
-├── pages/
-│   ├── ClientesListPage.tsx   # Página: /app/clientes
-│   ├── ClienteDetailPage.tsx  # Página: /app/clientes/:id
-│   └── index.ts
-├── routes/
-│   ├── ClientesRoutes.tsx     # Rotas do módulo
-│   └── index.ts
-├── schemas/
-│   ├── clienteSchema.ts       # Validação Zod (ou similar)
-│   └── index.ts
-├── types/
-│   ├── cliente.types.ts       # Tipos do domínio
-│   └── index.ts
-├── utils/
-│   └── index.ts
-├── README.md                  # Este arquivo
-└── index.ts
+```text
+GET /api/clientes
 ```
 
-### Regras de Organização
+A base da API vem de `VITE_API_BASE_URL`. Em desenvolvimento local:
 
-1. **Sem dependências cruzadas**: esta feature não pode importar de outras features.
-2. **Consome o Design System**: todos os componentes devem usar `src/components/ui`.
-3. **Sem cores fixas**: apenas tokens semânticos via CSS.
-4. **Chamadas HTTP**: sempre via `src/services/http`, nunca direto em componentes.
-5. **Rotas integradas**: as rotas do módulo são registradas em `AppRoutes.tsx` com política de acesso declarada.
-6. **Formulários**: erros de validação do backend normalizados via `flattenValidationErrors`.
-
-### Política de Acesso (prévia)
-
-```
-/app/clientes       → roles: [admin, gestor, operador]
-/app/clientes/:id   → roles: [admin, gestor, operador]
+```text
+http://127.0.0.1:5007/api/clientes
 ```
 
-### Próximos Passos
+## Politica de acesso
 
-- [ ] Definir contrato da API com o backend (endpoints, payloads)
-- [ ] Mapear tipos do domínio (`Cliente`, `ClienteResumo`)
-- [ ] Implementar `clientesApi.ts`
-- [ ] Implementar `ClienteTable`
-- [ ] Implementar `ClientesListPage`
-- [ ] Criar rotas e registrar em `AppRoutes.tsx`
-- [ ] Criar testes
+```text
+/#/clientes -> roles: admin, gestor, operador
+```
 
-### Referências
+## Organizacao
 
-- Backend: `backend/src/WebApolice.Modulos.Clientes/`
-- Documentação: `docs/11-modulo-clientes-backend.md`
-- Fundação Frontend: `docs/14-fundacao-frontend.md`
+- `api/clientesApi.ts`: composicao da query string e chamada via `httpClient`.
+- `hooks/useClientes.ts`: ciclo de carregamento, cancelamento e retry.
+- `hooks/useClientesFilters.ts`: filtros sincronizados com query params.
+- `components/ClientesFilters.tsx`: filtros responsivos.
+- `components/ClientesTable.tsx`: tabela desktop.
+- `components/ClientesMobileList.tsx`: lista mobile.
+- `pages/ClientesListPage.tsx`: pagina da listagem.
+
+## Erros
+
+Erros HTTP e de rede devem vir normalizados de `src/services/http`. A UI nao
+deve exibir mensagens tecnicas cruas, como `Failed to fetch`, stack traces ou
+tokens.
+
+## Design
+
+Todos os controles usam o Design System em `src/components/ui`. Os estilos usam
+tokens CSS, sem cores fixas.
+
+Referencias:
+
+- `docs/14-fundacao-frontend.md`
+- `docs/15-modulo-clientes-listagem.md`
+- `docs/11-modulo-clientes-backend.md`

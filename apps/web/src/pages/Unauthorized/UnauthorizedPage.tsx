@@ -10,6 +10,7 @@ import { useAuth } from '../../auth/useAuth';
 import { EmptyState } from '../../components/ui/EmptyState';
 import { Button } from '../../components/ui/Button';
 import { AlertIcon } from '../../components/ui/Icons';
+import { createPostLoginRedirectUri } from '../../auth/authRedirect';
 import '../ErrorPages.css';
 
 export const UnauthorizedPage: React.FC = () => {
@@ -23,10 +24,8 @@ export const UnauthorizedPage: React.FC = () => {
   }, []);
 
   const handleLogin = async () => {
-    const redirectUri = from
-      ? window.location.origin + '/#' + from
-      : window.location.origin + '/#/app';
-    await login(redirectUri);
+    // Redireciona para a raiz sem hash para que o OIDC (Keycloak) consiga validar corretamente.
+    await login(createPostLoginRedirectUri(from));
   };
 
   return (

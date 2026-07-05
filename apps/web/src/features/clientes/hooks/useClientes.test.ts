@@ -54,7 +54,7 @@ describe('useClientes', () => {
       expect(result.current.isLoading).toBe(false);
     });
 
-    expect(result.current.error).toBe(error);
+    expect(result.current.error?.message).toContain('Não foi possível conectar ao servidor');
     expect(result.current.data).toBeNull();
   });
 

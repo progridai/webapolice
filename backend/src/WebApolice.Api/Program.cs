@@ -141,6 +141,25 @@ builder.Services.AddProblemDetails();
 // Tratamento de exceções via IExceptionHandler
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 
+var frontendOrigins = builder.Configuration
+    .GetSection("Cors:FrontendOrigins")
+    .Get<string[]>()
+    ?? [];
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("Frontend", policy =>
+    {
+        if (frontendOrigins.Length > 0)
+        {
+            policy
+                .WithOrigins(frontendOrigins)
+                .AllowAnyHeader()
+                .AllowAnyMethod();
+        }
+    });
+});
+
 // =============================================================================
 // PERSISTÊNCIA DE DADOS (POSTGRESQL + EF CORE)
 // =============================================================================
@@ -264,6 +283,8 @@ if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
 }
+
+app.UseCors("Frontend");
 
 // Autenticação e Autorização devem ser adicionados antes dos endpoints protegidos
 app.UseAuthentication();

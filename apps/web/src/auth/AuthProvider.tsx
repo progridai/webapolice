@@ -14,13 +14,16 @@
  */
 import React, { useCallback, useEffect, useRef, useState, useMemo } from 'react';
 import { AuthContext } from './AuthContext';
-import { getKeycloakInstance } from './keycloak';
+import { getKeycloakInstance, initKeycloakOnce } from './keycloak';
 import {
   hasAllRoles as hasAllRolesUtil,
   hasAnyRole as hasAnyRoleUtil,
   hasRole as hasRoleUtil,
 } from './roles';
 import type { AuthContextValue, AuthStatus, AuthUser } from './auth.types';
+import { PageLoading } from '../components/application/PageLoading';
+import { getOidcRedirectUri, restorePostLoginRedirect } from './authRedirect';
+import { setTokenProvider } from '../services/http';
 
 interface AuthProviderProps {
   children: React.ReactNode;
@@ -76,6 +79,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       return true;
     } catch {
       // Falha de renovação — encerra sessão de forma segura
+      setTokenProvider(null);
       setStatus('unauthenticated');
       setUser(null);
       try {
@@ -90,15 +94,31 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   }, [kc]);
 
   useEffect(() => {
+    if (!isAuthenticated) {
+      setTokenProvider(null);
+      return;
+    }
+
+    setTokenProvider(async () => {
+      await kc.updateToken(60);
+      return kc.token;
+    });
+
+    return () => setTokenProvider(null);
+  }, [isAuthenticated, kc]);
+
+  useEffect(() => {
     let mounted = true;
 
     async function initKeycloak() {
       try {
-        const authenticated = await kc.init({
+        const authenticated = await initKeycloakOnce({
           onLoad: 'check-sso',
           silentCheckSsoRedirectUri: window.location.origin + '/silent-check-sso.html',
           pkceMethod: 'S256',
           checkLoginIframe: false,
+          redirectUri: getOidcRedirectUri(), // Previne que Keycloak adicione queries no meio do hash (HashRouter)
+          responseMode: 'query', // Isola os parâmetros do Keycloak na querystring, deixando o HashRouter intacto
         });
 
         if (!mounted) return;
@@ -107,6 +127,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           const extractedUser = extractUser(kc);
           setUser(extractedUser);
           setStatus('authenticated');
+          restorePostLoginRedirect();
         } else {
           setStatus('unauthenticated');
         }
@@ -147,6 +168,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const logout = useCallback(
     async (redirectUri?: string) => {
+      setTokenProvider(null);
       setUser(null);
       setStatus('unauthenticated');
       await kc.logout({ redirectUri: redirectUri ?? window.location.origin });
@@ -167,6 +189,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     hasAnyRole,
     hasAllRoles,
   };
+
+  if (isLoading) {
+    // Importante: atrasamos a renderização dos filhos (ex: HashRouter) para que a URL 
+    // original seja preservada enquanto o OIDC valida o token.
+    return <PageLoading />;
+  }
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };

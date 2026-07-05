@@ -17,7 +17,7 @@
  * Use sempre este cliente ou funções de api/ dentro de features.
  */
 import { API_CONFIG } from './apiConfig';
-import { HttpApiError, normalizeError } from './httpError';
+import { HttpApiError, normalizeError, normalizeNetworkError } from './httpError';
 import type { HttpOptions, HttpResponse } from './http.types';
 
 /** Função injetável para obter o token de acesso — evita acoplamento ao Keycloak */
@@ -100,7 +100,12 @@ async function request<T>(
   }
 
   const url = buildUrl(path);
-  const response = await fetchWithTimeout(url, requestOptions, timeoutMs);
+  let response: Response;
+  try {
+    response = await fetchWithTimeout(url, requestOptions, timeoutMs);
+  } catch (error) {
+    throw normalizeNetworkError(error);
+  }
 
   // Resposta sem conteúdo
   if (response.status === 204) {

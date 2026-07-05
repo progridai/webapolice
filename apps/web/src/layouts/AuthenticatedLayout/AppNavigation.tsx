@@ -1,21 +1,15 @@
-/**
- * AppNavigation.tsx
- *
- * Links de navegação principal da aplicação.
- * Usa aria-current="page" para indicar a rota ativa.
- * Itens desabilitados ficam visualmente evidentes mas não são links.
- */
 import React from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { ROUTES } from '../../app/routes/routePaths';
 import { ENV } from '../../app/config/env';
 import { useAuth } from '../../auth/useAuth';
 import { APP_ROLES } from '../../auth/roles';
+import { HomeIcon, PaletteIcon, UsersIcon } from '../../components/ui/Icons';
 
 interface NavItem {
   label: string;
   path: string;
-  icon: string;
+  icon: React.ComponentType<{ size?: number; className?: string }>;
   requiresRoles?: string[];
   requiresEnvFlag?: boolean;
 }
@@ -24,18 +18,18 @@ const NAV_ITEMS: NavItem[] = [
   {
     label: 'Início',
     path: ROUTES.APP,
-    icon: '🏠',
+    icon: HomeIcon,
   },
   {
     label: 'Clientes',
     path: ROUTES.CLIENTES,
-    icon: '👥',
+    icon: UsersIcon,
     requiresRoles: [APP_ROLES.ADMIN, APP_ROLES.GESTOR, APP_ROLES.OPERADOR],
   },
   {
     label: 'Design System',
     path: ROUTES.DESIGN_SYSTEM,
-    icon: '🎨',
+    icon: PaletteIcon,
     requiresRoles: [APP_ROLES.ADMIN],
     requiresEnvFlag: true,
   },
@@ -60,6 +54,8 @@ export const AppNavigation: React.FC<AppNavigationProps> = ({ onNavigate }) => {
       <ul className="app-nav-list" role="list">
         {visibleItems.map((item) => {
           const isActive = location.pathname === item.path;
+          const Icon = item.icon;
+
           return (
             <li key={item.path}>
               <NavLink
@@ -71,7 +67,7 @@ export const AppNavigation: React.FC<AppNavigationProps> = ({ onNavigate }) => {
                 onClick={onNavigate}
               >
                 <span className="app-nav-icon" aria-hidden="true">
-                  {item.icon}
+                  <Icon size={18} />
                 </span>
                 <span className="app-nav-label">{item.label}</span>
               </NavLink>

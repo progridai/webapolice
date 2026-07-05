@@ -15,6 +15,7 @@ import React from 'react';
 import { EmptyState } from '../ui/EmptyState';
 import { Button } from '../ui/Button';
 import { ErrorIcon } from '../ui/Icons';
+import { ENV } from '../../app/config/env';
 import './ErrorBoundary.css';
 
 interface ErrorBoundaryProps {
@@ -41,7 +42,7 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
   componentDidCatch(error: Error, info: React.ErrorInfo): void {
     // Hook para observabilidade futura (ex: Sentry.captureException)
     // Não logar o erro completo para evitar expor dados sensíveis
-    if (import.meta.env.DEV) {
+    if (ENV.IS_DEV) {
       console.error('[ErrorBoundary] Erro capturado:', error.name, error.message);
       console.error('[ErrorBoundary] Component stack:', info.componentStack);
     }

@@ -48,7 +48,7 @@ describe('ClientesListPage', () => {
   it('deve exibir tabela com clientes quando dados forem carregados com sucesso', async () => {
     const mockData = {
       itens: [
-        { id: 1, nome: 'João da Silva', cpfMascarado: '***.123.456-**', status: 'Ativo', dataCadastroUtc: '2026-07-04T12:00:00Z' }
+        { id: 1, nome: 'João da Silva', cpfMascarado: '***.123.456-**', status: 'ativo', dataCadastroUtc: '2026-07-04T12:00:00Z' }
       ],
       paginaAtual: 1,
       tamanhoPagina: 20,
@@ -79,16 +79,17 @@ describe('ClientesListPage', () => {
     });
   });
 
-  it('deve exibir estado de alerta de erro ao falhar a API', async () => {
-    vi.mocked(api.listarClientes).mockRejectedValueOnce(new Error('Erro de conexão interno'));
+  it('deve exibir mensagem segura quando houver erro de rede', async () => {
+    vi.mocked(api.listarClientes).mockRejectedValueOnce(new Error('Failed to fetch'));
 
     render(<ClientesListPage />, { wrapper: Wrapper });
 
     await waitFor(() => {
       expect(screen.getByText(/Não foi possível carregar os clientes/i)).not.toBeNull();
-      expect(screen.getByText('Erro de conexão interno')).not.toBeNull();
+      expect(screen.getByText(/Não foi possível conectar ao servidor/i)).not.toBeNull();
     });
-    
+
+    expect(screen.queryByText('Failed to fetch')).toBeNull();
     expect(screen.getByRole('button', { name: /tentar novamente/i })).not.toBeNull();
   });
 

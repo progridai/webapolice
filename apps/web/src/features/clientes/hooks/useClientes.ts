@@ -6,6 +6,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { listarClientes } from '../api/clientesApi';
 import type { ClienteListItem, ClientesQuery, PagedResult } from '../types/cliente.types';
+import { HttpApiError } from '../../../services/http';
 
 interface UseClientesState {
   data: PagedResult<ClienteListItem> | null;
@@ -45,15 +46,22 @@ export function useClientes(query: ClientesQuery) {
         return;
       }
 
+      const normalizedError =
+        err instanceof HttpApiError
+          ? err
+          : new Error('Não foi possível conectar ao servidor. Verifique sua conexão e tente novamente.');
+
       setState((prev) => ({
         ...prev,
         isLoading: false,
-        error: err instanceof Error ? err : new Error('Erro desconhecido ao carregar clientes.'),
+        error: normalizedError,
       }));
     }
   }, []);
 
   useEffect(() => {
+    // Carrega os dados quando a query muda; o estado local do hook representa o ciclo da requisicao.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchClientes(query);
 
     return () => {

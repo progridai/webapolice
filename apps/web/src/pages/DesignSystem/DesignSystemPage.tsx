@@ -26,6 +26,7 @@ import {
   Pagination,
   SearchIcon,
   SortIcon,
+  UsersIcon,
 } from '../../components/ui';
 import './DesignSystemPage.css';
 
@@ -420,7 +421,7 @@ export const DesignSystemPage: React.FC = () => {
                 <EmptyState
                   title="Nenhum registro encontrado"
                   description="Não encontramos correspondências para a sua pesquisa. Tente ajustar os filtros informados."
-                  icon={<span aria-hidden="true">👥</span>}
+                  icon={<UsersIcon size={48} aria-hidden="true" />}
                   action={
                     <Button variant="primary" size="small" onClick={() => { setFiltroTexto(''); setTabelaVazia(false); }}>
                       Limpar Pesquisa

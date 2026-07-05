@@ -71,6 +71,22 @@ const HTTP_MESSAGES: Record<number, string> = {
   503: 'Serviço temporariamente indisponível. Tente novamente em instantes.',
 };
 
+export function normalizeNetworkError(error: unknown): HttpApiError {
+  if (error instanceof DOMException && error.name === 'AbortError') {
+    throw error;
+  }
+
+  if (error instanceof Error && error.name === 'AbortError') {
+    throw error;
+  }
+
+  return new HttpApiError({
+    code: 'NETWORK_ERROR',
+    message: 'Não foi possível conectar ao servidor. Verifique sua conexão e tente novamente.',
+    details: error instanceof Error ? { name: error.name } : undefined,
+  });
+}
+
 /**
  * Normaliza qualquer erro em um `HttpApiError` tipado.
  * Garante que erros brutos nunca cheguem aos componentes.

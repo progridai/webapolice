@@ -6,11 +6,13 @@
 
 export type StatusClienteEnum = 1 | 2;
 
+export type ClienteStatus = 'ativo' | 'inativo';
+
 export interface ClienteListItem {
   id: number;
   nome: string;
   cpfMascarado: string;
-  status: 'Ativo' | 'Inativo'; // O backend retorna a string, ou a gente mapeia? A struct diz 'string Status'.
+  status: ClienteStatus;
   dataCadastroUtc: string;
 }
 

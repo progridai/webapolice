@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Input, Select, Button, SearchIcon } from '../../../components/ui';
-import type { ClientesQuery } from '../types/cliente.types';
+import type { ClientesQuery, StatusClienteEnum } from '../types/cliente.types';
+import './ClientesFilters.css';
 
 interface ClientesFiltersProps {
   filters: ClientesQuery;
@@ -13,63 +14,63 @@ export const ClientesFilters: React.FC<ClientesFiltersProps> = ({
   filters,
   onFilterChange,
   onClearFilters,
-  isLoading
+  isLoading,
 }) => {
   const [localSearch, setLocalSearch] = useState(filters.nome || filters.cpf || '');
 
-  // Sincroniza o estado local caso a URL mude por fora (ex: botão voltar do navegador)
   useEffect(() => {
+    // Sincroniza o campo quando a URL muda por navegação/limpeza de filtros.
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setLocalSearch(filters.nome || filters.cpf || '');
   }, [filters.nome, filters.cpf]);
 
-  // Aplica debounce na busca por texto
   useEffect(() => {
     const handler = setTimeout(() => {
       const trimmed = localSearch.trim();
-      
-      // Heurística simples para diferenciar CPF de Nome.
-      // Se tiver só números ou formatado como CPF, manda como cpf.
-      // Caso contrário manda como nome. O ideal seria o backend ter uma busca unificada `q`,
-      // mas como temos campos separados, fazemos essa distinção básica.
       const isCpf = /^[\d.-]+$/.test(trimmed) && trimmed.length > 0;
-      
+      const nextNome = isCpf ? '' : trimmed;
+      const nextCpf = isCpf ? trimmed : '';
+
+      if (nextNome === filters.nome && nextCpf === filters.cpf) return;
+
       onFilterChange({
-        nome: isCpf ? '' : trimmed,
-        cpf: isCpf ? trimmed : '',
+        nome: nextNome,
+        cpf: nextCpf,
       });
     }, 500);
 
     return () => clearTimeout(handler);
-  }, [localSearch, onFilterChange]);
+  }, [filters.cpf, filters.nome, localSearch, onFilterChange]);
 
   const hasActiveFilters = Boolean(filters.nome || filters.cpf || filters.status);
 
   return (
-    <div className="flex flex-col sm:flex-row gap-4 items-end mb-6">
-      <div className="flex-1 w-full">
-        <label htmlFor="busca-cliente" className="block text-sm font-medium mb-1">
+    <div className="clientes-filters">
+      <div className="clientes-filter-search">
+        <label htmlFor="busca-cliente" className="clientes-filter-label">
           Buscar cliente
         </label>
         <Input
           id="busca-cliente"
           type="text"
-          placeholder="Nome ou CPF..."
+          placeholder="Nome ou CPF"
           value={localSearch}
-          onChange={(e) => setLocalSearch(e.target.value)}
+          onChange={(event) => setLocalSearch(event.target.value)}
           disabled={isLoading}
           icon={<SearchIcon />}
         />
       </div>
-      
-      <div className="w-full sm:w-48">
-        <label htmlFor="status-cliente" className="block text-sm font-medium mb-1">
+
+      <div className="clientes-filter-status">
+        <label htmlFor="status-cliente" className="clientes-filter-label">
           Status
         </label>
         <Select
-          id="status"
+          id="status-cliente"
           value={filters.status || ''}
-          onChange={(e) => onFilterChange({ status: e.target.value as unknown as StatusClienteEnum | '' })}
+          onChange={(event) =>
+            onFilterChange({ status: event.target.value as unknown as StatusClienteEnum | '' })
+          }
           disabled={isLoading}
           options={[
             { label: 'Todos', value: '' },
@@ -79,13 +80,13 @@ export const ClientesFilters: React.FC<ClientesFiltersProps> = ({
         />
       </div>
 
-      <div className="w-full sm:w-auto">
-        <Button 
-          variant="outline" 
-          onClick={onClearFilters} 
+      <div className="clientes-filter-actions">
+        <Button
+          variant="secondary"
+          onClick={onClearFilters}
           disabled={!hasActiveFilters || isLoading}
           aria-label="Limpar filtros"
-          fullWidth
+          className="clientes-clear-button"
         >
           Limpar
         </Button>

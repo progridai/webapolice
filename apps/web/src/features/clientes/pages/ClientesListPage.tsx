@@ -1,4 +1,6 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { ROUTES } from '../../../app/routes/routePaths';
 import { useClientes } from '../hooks/useClientes';
 import { useClientesFilters } from '../hooks/useClientesFilters';
 import { ClientesFilters } from '../components/ClientesFilters';
@@ -11,6 +13,7 @@ export const ClientesListPage: React.FC = () => {
   const { filters, setFilters, clearFilters } = useClientesFilters();
   const { data, isLoading, error, retry } = useClientes(filters);
   const [isMobile, setIsMobile] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
@@ -40,10 +43,15 @@ export const ClientesListPage: React.FC = () => {
   return (
     <div className="clientes-page" role="main">
       <header className="clientes-page-header">
-        <h1 className="clientes-page-title">Clientes</h1>
-        <p className="clientes-page-subtitle">
-          Gerencie e consulte os clientes da plataforma.
-        </p>
+        <div className="clientes-page-header-text">
+          <h1 className="clientes-page-title">Clientes</h1>
+          <p className="clientes-page-subtitle">
+            Gerencie e consulte os clientes da plataforma.
+          </p>
+        </div>
+        <Button onClick={() => navigate(ROUTES.CLIENTE_NOVO)} variant="primary">
+          Novo Cliente
+        </Button>
       </header>
 
       <section aria-label="Filtros de clientes">

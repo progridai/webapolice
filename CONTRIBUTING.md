@@ -39,3 +39,4 @@ Este documento estabelece as regras e o fluxo de trabalho obrigatórios para tod
 
 ## 6. Atualização de Documentação
 * Se uma alteração alterar o comportamento de uma API, alterar o esquema do banco de dados PostgreSQL ou impactar uma decisão de arquitetura, os arquivos de documentação correlacionados na pasta `docs/` devem ser obrigatoriamente atualizados no mesmo Pull Request.
+  * Em especial, caso haja alterações no banco de dados, certifique-se de atualizar os documentos estruturais como [17-modelagem-banco-dados-webapolice.md](file:///c:/PROJETOS/Rsul%20Automacoes/Projetos/webapolice/docs/17-modelagem-banco-dados-webapolice.md) e [18-modelagem-clientes-core-cadastro.md](file:///c:/PROJETOS/Rsul%20Automacoes/Projetos/webapolice/docs/18-modelagem-clientes-core-cadastro.md).

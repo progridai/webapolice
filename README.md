@@ -167,6 +167,13 @@ A fundação técnica inicial e o primeiro módulo de negócio foram finalizados
 > - [docs/12-identidade-visual-design-system.md](file:///c:/PROJETOS/Rsul%20Automacoes/Projetos/webapolice/docs/12-identidade-visual-design-system.md) — Guia de marca e tokens
 > - [docs/13-componentes-design-system.md](file:///c:/PROJETOS/Rsul%20Automacoes/Projetos/webapolice/docs/13-componentes-design-system.md) — Catálogo de componentes e regras de uso
 
+> [!NOTE]
+> **Modelagem de Banco de Dados e Domínio**:
+> O projeto utiliza PostgreSQL como banco de dados oficial, com separação de responsabilidades por schemas e rastreabilidade legada.
+> 
+> - [docs/17-modelagem-banco-dados-webapolice.md](file:///c:/PROJETOS/Rsul%20Automacoes/Projetos/webapolice/docs/17-modelagem-banco-dados-webapolice.md) — Modelagem geral do banco de dados
+> - [docs/18-modelagem-clientes-core-cadastro.md](file:///c:/PROJETOS/Rsul%20Automacoes/Projetos/webapolice/docs/18-modelagem-clientes-core-cadastro.md) — Modelagem de Clientes (Core e Cadastro)
+
 ---
 
 ## Referência aos ADRs (Architectural Decision Records)

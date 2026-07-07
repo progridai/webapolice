@@ -22,6 +22,9 @@ export const ROUTES = {
   /** Módulo de Clientes — Listagem */
   CLIENTES: '/clientes',
 
+  /** Módulo de Clientes — Novo */
+  CLIENTE_NOVO: '/clientes/novo',
+
   /** Módulo de Clientes — Detalhes (temporário) */
   CLIENTE_DETALHES: '/clientes/:id',
 

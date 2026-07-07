@@ -2,8 +2,7 @@
 
 ## Escopo
 
-A tela atual implementa apenas a listagem de clientes. Nao inclui cadastro,
-edicao, exclusao, inativacao ou detalhes.
+A tela atual implementa a listagem de clientes e inclui um botão "Novo Cliente" no cabeçalho, que redireciona para a rota `/clientes/novo` (tela de cadastro). As demais ações (edição, exclusão, inativação ou detalhes) não fazem parte deste escopo inicial.
 
 ## Endpoint
 
@@ -78,3 +77,8 @@ Os filtros usam uma grade responsiva:
 Os icones estruturais da navegacao usam SVGs centralizados em
 `src/components/ui/Icons.tsx`; emojis nao devem ser usados como icones de
 navegacao.
+
+## Referências Relacionadas
+
+- [17-modelagem-banco-dados-webapolice.md](file:///c:/PROJETOS/Rsul%20Automacoes/Projetos/webapolice/docs/17-modelagem-banco-dados-webapolice.md)
+- [18-modelagem-clientes-core-cadastro.md](file:///c:/PROJETOS/Rsul%20Automacoes/Projetos/webapolice/docs/18-modelagem-clientes-core-cadastro.md)

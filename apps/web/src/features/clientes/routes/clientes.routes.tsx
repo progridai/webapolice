@@ -29,6 +29,17 @@ export const ClientesRoutes = (
       }
     />
     <Route
+      path={ROUTES.CLIENTE_NOVO}
+      element={
+        <Suspense fallback={<PageLoading />}>
+          <div style={{ padding: '2rem' }}>
+            <h1>Cadastro em desenvolvimento</h1>
+            <p>A tela de cadastro de clientes será implementada nesta rota.</p>
+          </div>
+        </Suspense>
+      }
+    />
+    <Route
       path={ROUTES.CLIENTE_DETALHES}
       element={
         <Suspense fallback={<PageLoading />}>

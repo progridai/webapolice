@@ -10,7 +10,7 @@ using WebApolice.Shared.Infrastructure.Security;
 using WebApolice.Api.Infrastructure.Errors;
 using WebApolice.Shared.Infrastructure.Persistence;
 using WebApolice.Modulos.Clientes;
-
+using Scalar.AspNetCore;
 var builder = WebApplication.CreateBuilder(args);
 
 // =============================================================================
@@ -282,6 +282,12 @@ if (!app.Environment.IsDevelopment() && !app.Environment.IsEnvironment("Testing"
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
+    app.MapScalarApiReference(options =>
+    {
+        options.WithTitle("WebApolice API")
+               .WithTheme(ScalarTheme.Mars)
+               .WithDefaultHttpClient(ScalarTarget.CSharp, ScalarClient.HttpClient);
+    });
 }
 
 app.UseCors("Frontend");

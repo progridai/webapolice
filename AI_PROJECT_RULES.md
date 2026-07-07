@@ -23,7 +23,7 @@ Este documento é de leitura **obrigatória e prioritária** para qualquer agent
 9. **Não propor ou criar microsserviços**. A arquitetura inicial do sistema é um monólito modular.
 10. **Não duplicar componentes de UI, esquemas de validação ou contratos de dados**. Reutilize e centralize conforme os padrões de domínio.
 11. **Não alterar contratos de APIs publicadas (endpoints, payloads, schemas) de forma silenciosa**. Qualquer quebra de retrocompatibilidade deve ser sinalizada.
-12. **Não criar tabelas, colunas ou relacionamentos no banco de dados** sem antes documentar as regras de negócio e a modelagem do domínio no diretório `docs/`.
+12. **Não criar tabelas, colunas ou relacionamentos no banco de dados** sem antes documentar as regras de negócio e a modelagem do domínio no diretório `docs/` (Veja as referências em [docs/17-modelagem-banco-dados-webapolice.md](file:///c:/PROJETOS/Rsul%20Automacoes/Projetos/webapolice/docs/17-modelagem-banco-dados-webapolice.md) e [docs/18-modelagem-clientes-core-cadastro.md](file:///c:/PROJETOS/Rsul%20Automacoes/Projetos/webapolice/docs/18-modelagem-clientes-core-cadastro.md)).
 13. **Não usar campos JSON ou tabelas não relacionais de forma indiscriminada** como substitutos para uma modelagem relacional apropriada no PostgreSQL.
 14. **Não armazenar segredos**, chaves de API, senhas, certificados ou credenciais em arquivos do repositório. Utilize variáveis de ambiente ou gerenciadores de segredos.
 15. **Não realizar ações financeiras autônomas** (como disparar pagamentos ou liquidações reais) sob o controle direto de agentes de IA.

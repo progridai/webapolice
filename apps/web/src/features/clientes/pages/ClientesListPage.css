@@ -8,6 +8,14 @@
 
 .clientes-page-header {
   display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--espaco-4);
+}
+
+.clientes-page-header-text {
+  display: flex;
   flex-direction: column;
   gap: var(--espaco-1);
 }

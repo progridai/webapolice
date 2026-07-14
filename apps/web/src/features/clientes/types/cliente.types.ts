@@ -33,3 +33,58 @@ export interface ClientesQuery {
   sortBy?: string;
   direction?: 'asc' | 'desc';
 }
+
+export interface EnderecoRequest {
+  cep?: string;
+  logradouro?: string;
+  numero?: string;
+  complemento?: string;
+  bairro?: string;
+  cidadeId?: number;
+  uf?: string;
+}
+
+export interface CadastrarClienteRequest {
+  tipoPessoa: number; // 1 = PF, 2 = PJ
+  nome: string;
+  documento: string;
+  dataNascimento?: string; // YYYY-MM-DD
+  sexo?: number;
+  observacao?: string;
+  falecido: boolean;
+  dataObito?: string;
+  email?: string;
+  telefone?: string;
+  celular?: string;
+  endereco?: EnderecoRequest;
+}
+
+export interface AlterarClienteRequest {
+  nome: string;
+  dataNascimento?: string;
+  sexo?: number;
+  observacao?: string;
+  falecido: boolean;
+  dataObito?: string;
+  email?: string;
+  telefone?: string;
+  celular?: string;
+  endereco?: EnderecoRequest;
+}
+
+export interface ClienteDetalhe {
+  publicId: string;
+  tipoPessoa: number;
+  nome: string;
+  documentoMascarado: string;
+  dataNascimento?: string;
+  sexo?: number;
+  observacao?: string;
+  falecido: boolean;
+  dataObito?: string;
+  email?: string;
+  telefone?: string;
+  celular?: string;
+  endereco?: EnderecoRequest;
+  status: ClienteStatus;
+}

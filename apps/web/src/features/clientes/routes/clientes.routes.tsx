@@ -11,7 +11,19 @@ const ClientesListPage = lazy(() =>
   import('../pages/ClientesListPage').then((m) => ({ default: m.ClientesListPage }))
 );
 
- 
+const ClienteDetalhePage = lazy(() =>
+  import('../pages/ClienteDetalhePage').then((m) => ({ default: m.ClienteDetalhePage }))
+);
+
+const CadastrarClientePage = lazy(() =>
+  import('../pages/CadastrarClientePage').then((m) => ({ default: m.CadastrarClientePage }))
+);
+
+const EditarClientePage = lazy(() =>
+  import('../pages/EditarClientePage').then((m) => ({ default: m.EditarClientePage }))
+);
+
+
 export const ClientesRoutes = (
   <Route
     element={
@@ -32,10 +44,15 @@ export const ClientesRoutes = (
       path={ROUTES.CLIENTE_NOVO}
       element={
         <Suspense fallback={<PageLoading />}>
-          <div style={{ padding: '2rem' }}>
-            <h1>Cadastro em desenvolvimento</h1>
-            <p>A tela de cadastro de clientes será implementada nesta rota.</p>
-          </div>
+          <CadastrarClientePage />
+        </Suspense>
+      }
+    />
+    <Route
+      path={ROUTES.CLIENTE_EDITAR}
+      element={
+        <Suspense fallback={<PageLoading />}>
+          <EditarClientePage />
         </Suspense>
       }
     />
@@ -43,10 +60,7 @@ export const ClientesRoutes = (
       path={ROUTES.CLIENTE_DETALHES}
       element={
         <Suspense fallback={<PageLoading />}>
-          <div style={{ padding: '2rem' }}>
-            <h1>Detalhes em desenvolvimento</h1>
-            <p>A edição/visualização de detalhes de clientes não faz parte desta etapa.</p>
-          </div>
+          <ClienteDetalhePage />
         </Suspense>
       }
     />

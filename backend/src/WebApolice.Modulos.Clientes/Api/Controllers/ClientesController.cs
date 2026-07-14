@@ -30,22 +30,37 @@ public sealed class ClientesController : ControllerBase
         CancellationToken cancellationToken)
     {
         var command = new CadastrarClienteCommand(
+            request.TipoPessoa,
             request.Nome,
-            request.Cpf,
+            request.Documento,
             request.DataNascimento,
+            request.Sexo,
+            request.Observacao,
+            request.Falecido,
+            request.DataObito,
             request.Email,
             request.Telefone,
-            request.CodigoLegado);
+            request.Celular,
+            request.Endereco != null ? new EnderecoCommand(
+                request.Endereco.Cep,
+                request.Endereco.Logradouro,
+                request.Endereco.Numero,
+                request.Endereco.Complemento,
+                request.Endereco.Bairro,
+                request.Endereco.CidadeId == 0 ? null : request.Endereco.CidadeId,
+                request.Endereco.Uf
+            ) : null
+        );
 
         var result = await handler.Handle(command, UsuarioSub, cancellationToken);
         
-        return CreatedAtAction(nameof(ObterPorId), new { id = result.Id }, result);
+        return CreatedAtAction(nameof(ObterPorId), new { id = result.PublicId }, result);
     }
 
     [HttpGet("{id}")]
     [Authorize(Policy = PoliticasAutorizacao.ConsultaClientes)]
     public async Task<IActionResult> ObterPorId(
-        [FromRoute] long id,
+        [FromRoute] System.Guid id,
         [FromServices] ConsultarClientePorIdHandler handler,
         CancellationToken cancellationToken)
     {
@@ -59,14 +74,14 @@ public sealed class ClientesController : ControllerBase
         [FromQuery] int pagina,
         [FromQuery] int tamanho_pagina,
         [FromQuery] string? nome,
-        [FromQuery] string? cpf,
-        [FromQuery] StatusCliente? status,
+        [FromQuery] string? documento,
+        [FromQuery] short? status_id,
         [FromQuery] string? ordenar_por,
         [FromQuery] string? direcao,
         [FromServices] ListarClientesHandler handler,
         CancellationToken cancellationToken)
     {
-        var query = new ListarClientesQuery(pagina, tamanho_pagina, nome, cpf, status, ordenar_por, direcao);
+        var query = new ListarClientesQuery(pagina, tamanho_pagina, nome, documento, status_id, ordenar_por, direcao);
         var result = await handler.Handle(query, cancellationToken);
         return Ok(result);
     }
@@ -74,7 +89,7 @@ public sealed class ClientesController : ControllerBase
     [HttpPut("{id}")]
     [Authorize(Policy = PoliticasAutorizacao.GestaoClientes)]
     public async Task<IActionResult> Alterar(
-        [FromRoute] long id,
+        [FromRoute] System.Guid id,
         [FromBody] AlterarClienteRequest request,
         [FromServices] AlterarClienteHandler handler,
         CancellationToken cancellationToken)
@@ -83,8 +98,23 @@ public sealed class ClientesController : ControllerBase
             id,
             request.Nome,
             request.DataNascimento,
+            request.Sexo,
+            request.Observacao,
+            request.Falecido,
+            request.DataObito,
             request.Email,
-            request.Telefone);
+            request.Telefone,
+            request.Celular,
+            request.Endereco != null ? new EnderecoCommand(
+                request.Endereco.Cep,
+                request.Endereco.Logradouro,
+                request.Endereco.Numero,
+                request.Endereco.Complemento,
+                request.Endereco.Bairro,
+                request.Endereco.CidadeId == 0 ? null : request.Endereco.CidadeId,
+                request.Endereco.Uf
+            ) : null
+        );
 
         await handler.Handle(command, UsuarioSub, cancellationToken);
         return NoContent();
@@ -93,22 +123,22 @@ public sealed class ClientesController : ControllerBase
     [HttpPost("{id}/ativar")]
     [Authorize(Policy = PoliticasAutorizacao.GestaoClientes)]
     public async Task<IActionResult> Ativar(
-        [FromRoute] long id,
+        [FromRoute] System.Guid id,
         [FromServices] AtivarClienteHandler handler,
         CancellationToken cancellationToken)
     {
-        await handler.Handle(new AtivarClienteCommand(id), UsuarioSub, cancellationToken);
+        await handler.Handle(new AtivarClienteCommand(id), cancellationToken);
         return NoContent();
     }
 
     [HttpPost("{id}/inativar")]
     [Authorize(Policy = PoliticasAutorizacao.GestaoClientes)]
     public async Task<IActionResult> Inativar(
-        [FromRoute] long id,
+        [FromRoute] System.Guid id,
         [FromServices] InativarClienteHandler handler,
         CancellationToken cancellationToken)
     {
-        await handler.Handle(new InativarClienteCommand(id), UsuarioSub, cancellationToken);
+        await handler.Handle(new InativarClienteCommand(id), cancellationToken);
         return NoContent();
     }
 }

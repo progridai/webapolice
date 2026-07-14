@@ -1,5 +1,5 @@
+using System;
 using System.Collections.Generic;
-using WebApolice.Modulos.Clientes.Domain;
 
 namespace WebApolice.Modulos.Clientes.Application.UseCases.ListarClientes;
 
@@ -7,8 +7,8 @@ public sealed record ListarClientesQuery(
     int Pagina,
     int TamanhoPagina,
     string? Nome,
-    string? Cpf,
-    StatusCliente? Status,
+    string? Documento,
+    short? StatusId,
     string? OrdenarPor,
     string? Direcao
 );
@@ -22,9 +22,9 @@ public sealed record ListagemPaginadaResult<T>(
 );
 
 public sealed record ClienteListagemItemResult(
-    long Id,
+    Guid Id,
     string Nome,
-    string CpfMascarado,
+    string DocumentoMascarado,
     string Status,
-    System.DateTime DataCadastroUtc
+    DateTime DataCadastroUtc
 );

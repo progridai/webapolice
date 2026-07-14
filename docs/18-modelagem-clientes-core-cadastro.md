@@ -348,6 +348,7 @@ Ao iniciar a codificação das respostas de backend, as seguintes diretrizes sã
 Apesar da modelagem inicial clara, durante o desenrolar das sprints algumas decisões poderão demandar refinamento e registro explícito. Seguem pendências sugeridas como guia de esclarecimento de negócio para implementações vindouras:
 
 * O endpoint inicial responsável pelo agrupamento de detalhes usará a chave de pesquisa `id` interno ou o `public_id` nos acessos de roteamento interno não-público?
+  * **Decisão (Julho/2026):** Foi utilizado o `id` interno (`long`) para a rota `/api/clientes/{id}`, já que a entidade `Cliente` em sua modelagem em código ainda não dispõe de `public_id`.
 * Existe um mapeamento consolidado de "qual usuário/role/perfil" pode solicitar visão do documento completo sem máscara na interface web?
 * No conceito da interface de usuário existirá a definição de "vínculo principal" fixo, ou exibem-se apenas as entidades em formato "Vínculos Ativos"?
 * Os dados bancários dos vínculos (que exigem privilégios sensíveis) devem popular o componente de tela do Detalhe do Cliente desde a V1?

@@ -1,59 +1,35 @@
-using System.Text.Json;
+using System;
 using System.Threading;
 using System.Threading.Tasks;
-using WebApolice.Auditoria.Contracts;
-using WebApolice.Auditoria.Domain;
 using WebApolice.Modulos.Clientes.Application.Ports;
-using WebApolice.Modulos.Clientes.Domain;
 using WebApolice.Modulos.Clientes.Domain.Exceptions;
 
 namespace WebApolice.Modulos.Clientes.Application.UseCases.InativarCliente;
 
+public sealed record InativarClienteResult(Guid Id, string Status, DateTime UpdatedAt);
+
 public sealed class InativarClienteHandler
 {
-    private readonly IClientesRepository _repository;
-    private readonly IRegistradorAuditoria _auditoria;
-    private readonly IClientesTransactionManager _transactionManager;
+    private readonly IClienteRepository _repository;
 
-    public InativarClienteHandler(
-        IClientesRepository repository, 
-        IRegistradorAuditoria auditoria,
-        IClientesTransactionManager transactionManager)
+    public InativarClienteHandler(IClienteRepository repository)
     {
         _repository = repository;
-        _auditoria = auditoria;
-        _transactionManager = transactionManager;
     }
 
-    public async Task Handle(InativarClienteCommand command, string usuarioSub, CancellationToken cancellationToken)
+    public async Task<InativarClienteResult> Handle(InativarClienteCommand command, CancellationToken cancellationToken)
     {
-        var cliente = await _repository.ObterPorIdAsync(command.Id, cancellationToken);
+        var cliente = await _repository.ObterParaEdicaoPorPublicIdAsync(command.Id, cancellationToken);
         if (cliente == null)
-            throw new ClienteNaoEncontradoException("Cliente não encontrado.");
+            throw new ClienteNaoEncontradoException("Cliente não encontrado ou excluído.");
 
-        if (cliente.Status == StatusCliente.Inativo)
-            return;
+        var statusInativo = await _repository.ObterStatusPorCodigoAsync(WebApolice.Modulos.Clientes.Domain.ClienteStatusCodigos.Inativo, cancellationToken)
+            ?? throw new ClienteInvalidoException($"Status '{WebApolice.Modulos.Clientes.Domain.ClienteStatusCodigos.Inativo}' não encontrado no catálogo.");
 
-        cliente.Inativar();
+        cliente.Inativar(statusInativo.Id);
 
-        await _transactionManager.ExecuteInTransactionAsync(async () =>
-        {
-            await _repository.AtualizarAsync(cliente, cancellationToken);
-            await _repository.SalvarAlteracoesAsync(cancellationToken);
+        await _repository.SalvarAlteracoesAsync(cancellationToken);
 
-            var auditoria = new RegistroAuditoria
-            {
-                UsuarioIdExterno = usuarioSub,
-                Modulo = "clientes",
-                Recurso = "cliente",
-                RecursoId = cliente.Id.ToString(),
-                Acao = "inativar",
-                Resultado = ResultadoAuditoria.Sucesso,
-                DadosAnteriores = JsonSerializer.SerializeToDocument(new { Status = StatusCliente.Ativo.ToString() }),
-                DadosPosteriores = JsonSerializer.SerializeToDocument(new { Status = StatusCliente.Inativo.ToString() })
-            };
-
-            await _auditoria.RegistrarAsync(auditoria, cancellationToken);
-        }, cancellationToken);
+        return new InativarClienteResult(cliente.PublicId, statusInativo.Nome, cliente.UpdatedAt);
     }
 }

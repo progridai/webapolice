@@ -9,6 +9,8 @@ using WebApolice.Modulos.Clientes.Application.UseCases.ConsultarCliente;
 using WebApolice.Modulos.Clientes.Application.UseCases.InativarCliente;
 using WebApolice.Modulos.Clientes.Application.UseCases.ListarClientes;
 using WebApolice.Modulos.Clientes.Infrastructure.Persistence;
+using WebApolice.Modulos.Clientes.Infrastructure.Persistence.Queries;
+using WebApolice.Modulos.Clientes.Infrastructure.Persistence.Repositories;
 
 namespace WebApolice.Modulos.Clientes;
 
@@ -21,11 +23,12 @@ public static class ClientesModuleExtensions
             var connection = sp.GetRequiredService<System.Data.Common.DbConnection>();
             options.UseNpgsql(connection, npgsqlOptions => 
             {
-                npgsqlOptions.MigrationsHistoryTable("__EFMigrationsHistory", "clientes");
+                npgsqlOptions.MigrationsHistoryTable("__EFMigrationsHistory", "cadastro");
             }).UseSnakeCaseNamingConvention();
         });
 
-        services.AddScoped<IClientesRepository, ClientesRepository>();
+        services.AddScoped<IClienteRepository, ClienteRepository>();
+        services.AddScoped<IClientesQueries, ClientesQueries>();
         services.AddScoped<IClientesTransactionManager, ClientesTransactionManager>();
 
         // Handlers

@@ -1,5 +1,8 @@
 import React from 'react';
-import { Table, TableBody, TableCell, TableHeader, TableRow, SortIcon } from '../../../components/ui';
+import { Table, TableBody, TableCell, TableHeader, TableRow, SortIcon, Button } from '../../../components/ui';
+import { EyeIcon } from '../../../components/ui/Icons';
+import { ROUTES, createPath } from '../../../app/routes/routePaths';
+import { useNavigate, useLocation } from 'react-router-dom';
 import type { ClienteListItem } from '../types/cliente.types';
 import { ClienteStatusBadge } from './ClienteStatusBadge';
 import './ClientesTable.css';
@@ -25,6 +28,15 @@ export const ClientesTable: React.FC<ClientesTableProps> = ({
   direction,
   onSort,
 }) => {
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const handleVerDetalhes = (id: number) => {
+    navigate(createPath(ROUTES.CLIENTE_DETALHES, { id: String(id) }), {
+      state: { fromListagem: true, search: location.search },
+    });
+  };
+
   const renderSortHeader = (column: { key: string; label: string }) => {
     const isActive = sortBy === column.key;
 
@@ -50,6 +62,7 @@ export const ClientesTable: React.FC<ClientesTableProps> = ({
           <TableCell header>CPF</TableCell>
           <TableCell header>{renderSortHeader(sortableColumns[1])}</TableCell>
           <TableCell header>{renderSortHeader(sortableColumns[2])}</TableCell>
+          <TableCell header align="right">Ações</TableCell>
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -62,6 +75,17 @@ export const ClientesTable: React.FC<ClientesTableProps> = ({
             </TableCell>
             <TableCell className="clientes-table-muted">
               {new Date(cliente.dataCadastroUtc).toLocaleDateString('pt-BR')}
+            </TableCell>
+            <TableCell align="right">
+              <Button
+                variant="outline"
+                size="sm"
+                icon={<EyeIcon />}
+                onClick={() => handleVerDetalhes(cliente.id)}
+                aria-label={`Ver detalhes de ${cliente.nome}`}
+              >
+                Detalhes
+              </Button>
             </TableCell>
           </TableRow>
         ))}

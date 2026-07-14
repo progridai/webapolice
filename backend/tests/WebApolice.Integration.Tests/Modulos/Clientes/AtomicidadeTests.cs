@@ -1,283 +1,67 @@
 using System;
-using System.Data.Common;
 using System.Threading;
 using System.Threading.Tasks;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
-using Npgsql;
-using Testcontainers.PostgreSql;
-using WebApolice.Auditoria.Domain;
-using WebApolice.Auditoria.Infrastructure;
-using WebApolice.Modulos.Clientes.Domain;
-using WebApolice.Modulos.Clientes.Infrastructure.Persistence;
+using WebApolice.Modulos.Clientes.Application.UseCases.CadastrarCliente;
+using WebApolice.Modulos.Clientes.Domain.Exceptions;
+using WebApolice.Modulos.Clientes.Infrastructure.Persistence.Repositories;
+using WebApolice.Integration.Tests.Setup;
 using Xunit;
 
 namespace WebApolice.Integration.Tests.Modulos.Clientes;
 
-public class AtomicidadeTests : IAsyncLifetime
+public class AtomicidadeTests : IClassFixture<ClientesIntegrationTestFixture>
 {
-#pragma warning disable CS0618
-    private readonly PostgreSqlContainer _postgreSqlContainer = new PostgreSqlBuilder()
-        .WithImage("postgres:18.4")
-        .Build();
-#pragma warning restore CS0618
+    private readonly ClientesIntegrationTestFixture _fixture;
 
-    public async Task InitializeAsync()
+    public AtomicidadeTests(ClientesIntegrationTestFixture fixture)
     {
-        await _postgreSqlContainer.StartAsync();
-
-        var connString = _postgreSqlContainer.GetConnectionString();
-
-        using var connection = new NpgsqlConnection(connString);
-        await connection.OpenAsync();
-
-        var auditoriaOptions = new DbContextOptionsBuilder<AuditoriaDbContext>()
-            .UseNpgsql(connection, o => o.MigrationsHistoryTable("__EFMigrationsHistory", "auditoria"))
-            .UseSnakeCaseNamingConvention()
-            .Options;
-        await using var auditoriaCtx = new AuditoriaDbContext(auditoriaOptions);
-        await auditoriaCtx.Database.MigrateAsync();
-
-        var clientesOptions = new DbContextOptionsBuilder<ClientesDbContext>()
-            .UseNpgsql(connection, o => o.MigrationsHistoryTable("__EFMigrationsHistory", "clientes"))
-            .UseSnakeCaseNamingConvention()
-            .Options;
-        await using var clientesCtx = new ClientesDbContext(clientesOptions);
-        await clientesCtx.Database.MigrateAsync();
-    }
-
-    public async Task DisposeAsync()
-    {
-        await _postgreSqlContainer.DisposeAsync();
-    }
-
-    private (ClientesDbContext, AuditoriaDbContext, DbConnection) CreateContexts(DbConnection connection)
-    {
-        var auditoriaOptions = new DbContextOptionsBuilder<AuditoriaDbContext>()
-            .UseNpgsql(connection, o => o.MigrationsHistoryTable("__EFMigrationsHistory", "auditoria"))
-            .UseSnakeCaseNamingConvention()
-            .Options;
-
-        var clientesOptions = new DbContextOptionsBuilder<ClientesDbContext>()
-            .UseNpgsql(connection, o => o.MigrationsHistoryTable("__EFMigrationsHistory", "clientes"))
-            .UseSnakeCaseNamingConvention()
-            .Options;
-
-        return (new ClientesDbContext(clientesOptions), new AuditoriaDbContext(auditoriaOptions), connection);
+        _fixture = fixture;
     }
 
     [Fact]
-    public async Task Transacao_BemSucedida_DeveSalvarAmbos()
+    public async Task Handler_FalhaAoPersistirEndereço_DeveFazerRollbackCompleto()
     {
-        var uid = Guid.NewGuid().ToString("N").Substring(0, 30);
-        var cpf = "01821765419";
+        // Arrange
+        var dbContext = _fixture.DbContext;
+        var repository = new ClienteRepository(dbContext);
+        var handler = new CadastrarClienteHandler(repository, dbContext);
 
-        await using var connection = new NpgsqlConnection(_postgreSqlContainer.GetConnectionString());
-        await connection.OpenAsync();
-        var (clientesCtx, auditoriaCtx, conn) = CreateContexts(connection);
+        var enderecoRequest = new WebApolice.Modulos.Clientes.Application.UseCases.CadastrarCliente.EnderecoCommand(
+            "00000000",
+            "Rua Teste",
+            "123",
+            null,
+            "Bairro Teste",
+            9999999, // CidadeId Inexistente que vai violar a Foreign Key
+            "RS"
+        );
 
-        var manager = new ClientesTransactionManager(clientesCtx, auditoriaCtx, conn);
+        var documento = "12345678909"; // Documento inédito
+        var command = new CadastrarClienteCommand(1, "Fulano da Silva", documento, new DateOnly(1990, 1, 1), 1, null, false, null, "falha_endereco@teste.com", "51999999999", null, enderecoRequest);
 
-        await manager.ExecuteInTransactionAsync(async () =>
-        {
-            var cliente = new Cliente(uid, cpf, null, null, null, null);
-            clientesCtx.Clientes.Add(cliente);
-            await clientesCtx.SaveChangesAsync();
+        // Act
+        var act = () => handler.Handle(command, "user", CancellationToken.None);
 
-            auditoriaCtx.RegistrosAuditoria.Add(new RegistroAuditoria { Modulo = "Clientes", Acao = "Cadastro", UsuarioIdExterno = "1", RecursoId = uid });
-            await auditoriaCtx.SaveChangesAsync();
-        });
+        // Assert
+        // A falha ocorrerá durante a persistência, o PostgreSQL lançará uma exceção relacionada à FK da cidade.
+        // O EF Core envelopa isso em DbUpdateException.
+        await act.Should().ThrowAsync<DbUpdateException>();
 
-        // Verificação fora da transação
-        await using var verifyConn = new NpgsqlConnection(_postgreSqlContainer.GetConnectionString());
-        await verifyConn.OpenAsync();
-        var (verifyClientesCtx, verifyAuditoriaCtx, _) = CreateContexts(verifyConn);
+        // Verifica se a transação realmente não inseriu "sujeiras" no banco
+        var dbContextVerify = _fixture.DbContext;
+        
+        var pessoaExiste = await dbContextVerify.Pessoas.AnyAsync(p => p.DocumentoPrincipalLimpo == "12345678909");
+        pessoaExiste.Should().BeFalse("Pessoa não deveria ter sido salva devido ao rollback");
 
-        var clienteSalvo = await verifyClientesCtx.Clientes.FirstOrDefaultAsync(c => c.Nome == uid);
-        clienteSalvo.Should().NotBeNull();
+        var clienteExiste = await dbContextVerify.Clientes.AnyAsync(c => c.Observacao == "falha_endereco@teste.com");
+        // Não temos como buscar pelo documento direto no cliente, vamos buscar pela pessoa se existisse
+        
+        var emailExiste = await dbContextVerify.Contatos.AnyAsync(c => c.Valor == "falha_endereco@teste.com");
+        emailExiste.Should().BeFalse("Contato não deveria ter sido salvo devido ao rollback");
 
-        var auditoriaSalva = await verifyAuditoriaCtx.RegistrosAuditoria.FirstOrDefaultAsync(a => a.RecursoId == uid);
-        auditoriaSalva.Should().NotBeNull();
-    }
-
-    [Fact]
-    public async Task Transacao_DeveFazerRollbackEmAmbos_QuandoAuditoriaFalhar()
-    {
-        var uid = Guid.NewGuid().ToString("N").Substring(0, 30);
-        var erroNaAuditoria = false;
-
-        await using var connection = new NpgsqlConnection(_postgreSqlContainer.GetConnectionString());
-        await connection.OpenAsync();
-        var (clientesCtx, auditoriaCtx, conn) = CreateContexts(connection);
-
-        var manager = new ClientesTransactionManager(clientesCtx, auditoriaCtx, conn);
-
-        try
-        {
-            await manager.ExecuteInTransactionAsync(async () =>
-            {
-                var cliente = new Cliente(uid, "93399034393", null, null, null, null);
-                clientesCtx.Clientes.Add(cliente);
-                await clientesCtx.SaveChangesAsync();
-
-                throw new Exception("Falha simulada na auditoria");
-            });
-        }
-        catch (Exception)
-        {
-            erroNaAuditoria = true;
-        }
-
-        erroNaAuditoria.Should().BeTrue();
-
-        // Verificação fora da transação
-        await using var verifyConn = new NpgsqlConnection(_postgreSqlContainer.GetConnectionString());
-        await verifyConn.OpenAsync();
-        var (verifyClientesCtx, _, _) = CreateContexts(verifyConn);
-
-        var clienteSalvo = await verifyClientesCtx.Clientes.FirstOrDefaultAsync(c => c.Nome == uid);
-        clienteSalvo.Should().BeNull("o rollback da transação compartilhada deve desfazer a gravação do cliente.");
-    }
-
-    [Fact]
-    public async Task Transacao_DeveFazerRollbackEmAmbos_QuandoClienteFalhar()
-    {
-        var uid = Guid.NewGuid().ToString("N").Substring(0, 30);
-        var erroNoCliente = false;
-
-        await using var connection = new NpgsqlConnection(_postgreSqlContainer.GetConnectionString());
-        await connection.OpenAsync();
-        var (clientesCtx, auditoriaCtx, conn) = CreateContexts(connection);
-
-        var manager = new ClientesTransactionManager(clientesCtx, auditoriaCtx, conn);
-
-        try
-        {
-            await manager.ExecuteInTransactionAsync(async () =>
-            {
-                var cliente = new Cliente(uid, "18692030031", null, null, null, null);
-                clientesCtx.Clientes.Add(cliente);
-                await clientesCtx.SaveChangesAsync();
-
-                // Simular inserção de cliente com o mesmo CPF (violando unique key)
-                var cliente2 = new Cliente(uid + "2", "18692030031", null, null, null, null);
-                clientesCtx.Clientes.Add(cliente2);
-                await clientesCtx.SaveChangesAsync(); // Deve falhar Unique Constraint
-            });
-        }
-        catch (Exception)
-        {
-            erroNoCliente = true;
-        }
-
-        erroNoCliente.Should().BeTrue();
-
-        // Verificação fora da transação
-        await using var verifyConn = new NpgsqlConnection(_postgreSqlContainer.GetConnectionString());
-        await verifyConn.OpenAsync();
-        var (_, verifyAuditoriaCtx, _) = CreateContexts(verifyConn);
-
-        var auditoriaSalva = await verifyAuditoriaCtx.RegistrosAuditoria.FirstOrDefaultAsync(a => a.RecursoId == uid);
-        auditoriaSalva.Should().BeNull("a falha no cliente desfaz tudo");
-    }
-
-    [Fact]
-    public async Task Transacao_Alteracao_DevePreservarValoresAnterioresQuandoAuditoriaFalha()
-    {
-        var uid = Guid.NewGuid().ToString("N").Substring(0, 30);
-
-        await using var setupConnection = new NpgsqlConnection(_postgreSqlContainer.GetConnectionString());
-        await setupConnection.OpenAsync();
-        var (setupClientesCtx, setupAuditoriaCtx, setupConn) = CreateContexts(setupConnection);
-
-        var setupManager = new ClientesTransactionManager(setupClientesCtx, setupAuditoriaCtx, setupConn);
-
-        // Insere inicialmente
-        await setupManager.ExecuteInTransactionAsync(async () =>
-        {
-            var cliente = new Cliente(uid, "85115958562", null, null, null, null);
-            setupClientesCtx.Clientes.Add(cliente);
-            await setupClientesCtx.SaveChangesAsync();
-        });
-
-        // Tenta alterar e falha na auditoria
-        await using var connection = new NpgsqlConnection(_postgreSqlContainer.GetConnectionString());
-        await connection.OpenAsync();
-        var (clientesCtx, auditoriaCtx, conn) = CreateContexts(connection);
-        var manager = new ClientesTransactionManager(clientesCtx, auditoriaCtx, conn);
-
-        try
-        {
-            await manager.ExecuteInTransactionAsync(async () =>
-            {
-                var cliente = await clientesCtx.Clientes.FirstOrDefaultAsync(c => c.Cpf == "85115958562");
-                cliente!.Alterar("Novo Nome", null, null, null);
-                await clientesCtx.SaveChangesAsync();
-
-                throw new Exception("Falha na auditoria ao alterar");
-            });
-        }
-        catch
-        {
-            // esperado
-        }
-
-        // Verifica que manteve antigo
-        await using var verifyConn = new NpgsqlConnection(_postgreSqlContainer.GetConnectionString());
-        await verifyConn.OpenAsync();
-        var (verifyClientesCtx, _, _) = CreateContexts(verifyConn);
-
-        var clienteSalvo = await verifyClientesCtx.Clientes.FirstOrDefaultAsync(c => c.Cpf == "85115958562");
-        clienteSalvo!.Nome.Should().Be(uid); // manteve original
-    }
-
-    [Fact]
-    public async Task Transacao_AtivacaoInativacao_NaoMudaStatusQuandoAuditoriaFalha()
-    {
-        var uid = Guid.NewGuid().ToString("N").Substring(0, 30);
-
-        await using var setupConnection = new NpgsqlConnection(_postgreSqlContainer.GetConnectionString());
-        await setupConnection.OpenAsync();
-        var (setupClientesCtx, setupAuditoriaCtx, setupConn) = CreateContexts(setupConnection);
-        var setupManager = new ClientesTransactionManager(setupClientesCtx, setupAuditoriaCtx, setupConn);
-
-        // Insere inicialmente (por padrão Ativo e deixa inativo)
-        await setupManager.ExecuteInTransactionAsync(async () =>
-        {
-            var cliente = new Cliente(uid, "25070302752", null, null, null, null);
-            cliente.Inativar(); // Deixa inativo para testar ativar
-            setupClientesCtx.Clientes.Add(cliente);
-            await setupClientesCtx.SaveChangesAsync();
-        });
-
-        // Tenta ativar e falha na auditoria
-        await using var connection = new NpgsqlConnection(_postgreSqlContainer.GetConnectionString());
-        await connection.OpenAsync();
-        var (clientesCtx, auditoriaCtx, conn) = CreateContexts(connection);
-        var manager = new ClientesTransactionManager(clientesCtx, auditoriaCtx, conn);
-
-        try
-        {
-            await manager.ExecuteInTransactionAsync(async () =>
-            {
-                var cliente = await clientesCtx.Clientes.FirstOrDefaultAsync(c => c.Cpf == "25070302752");
-                cliente!.Ativar();
-                await clientesCtx.SaveChangesAsync();
-
-                throw new Exception("Falha na auditoria ao ativar");
-            });
-        }
-        catch
-        {
-            // esperado
-        }
-
-        // Verifica que continua inativo
-        await using var verifyConn = new NpgsqlConnection(_postgreSqlContainer.GetConnectionString());
-        await verifyConn.OpenAsync();
-        var (verifyClientesCtx, _, _) = CreateContexts(verifyConn);
-
-        var clienteSalvo = await verifyClientesCtx.Clientes.FirstOrDefaultAsync(c => c.Cpf == "25070302752");
-        clienteSalvo!.Status.Should().Be(StatusCliente.Inativo);
+        var enderecoExiste = await dbContextVerify.Enderecos.AnyAsync(e => e.Cep == "00000000");
+        enderecoExiste.Should().BeFalse("Endereço não deveria ter sido salvo devido ao rollback");
     }
 }

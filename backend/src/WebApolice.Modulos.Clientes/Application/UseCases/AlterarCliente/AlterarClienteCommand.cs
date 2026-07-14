@@ -3,9 +3,15 @@ using System;
 namespace WebApolice.Modulos.Clientes.Application.UseCases.AlterarCliente;
 
 public sealed record AlterarClienteCommand(
-    long Id,
+    Guid Id,
     string Nome,
     DateOnly? DataNascimento,
+    short? Sexo,
+    string? Observacao,
+    bool Falecido,
+    DateOnly? DataObito,
     string? Email,
-    string? Telefone
+    string? Telefone,
+    string? Celular,
+    WebApolice.Modulos.Clientes.Application.UseCases.CadastrarCliente.EnderecoCommand? Endereco
 );

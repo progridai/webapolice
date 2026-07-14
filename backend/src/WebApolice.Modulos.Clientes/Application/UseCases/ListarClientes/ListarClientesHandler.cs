@@ -1,18 +1,16 @@
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using WebApolice.Modulos.Clientes.Application.Ports;
-using WebApolice.Modulos.Clientes.Domain.Exceptions;
 
 namespace WebApolice.Modulos.Clientes.Application.UseCases.ListarClientes;
 
 public sealed class ListarClientesHandler
 {
-    private readonly IClientesRepository _repository;
+    private readonly IClientesQueries _queries;
 
-    public ListarClientesHandler(IClientesRepository repository)
+    public ListarClientesHandler(IClientesQueries queries)
     {
-        _repository = repository;
+        _queries = queries;
     }
 
     public async Task<ListagemPaginadaResult<ClienteListagemItemResult>> Handle(ListarClientesQuery query, CancellationToken cancellationToken)
@@ -21,26 +19,18 @@ public sealed class ListarClientesHandler
         var tamanhoPagina = query.TamanhoPagina > 0 ? query.TamanhoPagina : 20;
         if (tamanhoPagina > 100) tamanhoPagina = 100;
 
-        var (itens, totalItens, totalPaginas) = await _repository.ListarPaginadoAsync(
+        var (itens, totalItens, totalPaginas) = await _queries.ListarPaginadoAsync(
             pagina,
             tamanhoPagina,
             query.Nome,
-            query.Cpf,
-            query.Status,
+            query.Documento,
+            query.StatusId,
             query.OrdenarPor,
             query.Direcao,
             cancellationToken);
 
-        var itensResult = itens.Select(c => new ClienteListagemItemResult(
-            c.Id,
-            c.Nome,
-            "***.***.***-" + c.Cpf.Substring(c.Cpf.Length - 2),
-            c.Status.ToString().ToLowerInvariant(),
-            c.DataCadastroUtc
-        )).ToList();
-
         return new ListagemPaginadaResult<ClienteListagemItemResult>(
-            itensResult,
+            itens,
             pagina,
             tamanhoPagina,
             totalItens,

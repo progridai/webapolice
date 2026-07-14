@@ -8,66 +8,20 @@ internal sealed class ClienteConfiguration : IEntityTypeConfiguration<Cliente>
 {
     public void Configure(EntityTypeBuilder<Cliente> builder)
     {
-        builder.ToTable("clientes", "clientes", t => 
-        {
-            t.HasCheckConstraint("ck_clientes_status", "status IN ('Ativo', 'Inativo')");
-        });
+        builder.ToTable("cliente", "cadastro", t => t.ExcludeFromMigrations());
+        builder.HasKey(c => c.Id);
 
-        builder.HasKey(c => c.Id).HasName("pk_clientes");
-
-        builder.Property(c => c.Id)
-            .HasColumnName("id")
-            .UseIdentityAlwaysColumn();
-
-        builder.Property(c => c.Nome)
-            .HasColumnName("nome")
-            .HasMaxLength(150)
-            .IsRequired();
-
-        builder.Property(c => c.Cpf)
-            .HasColumnName("cpf")
-            .HasMaxLength(11)
-            .IsRequired();
-
-        builder.Property(c => c.DataNascimento)
-            .HasColumnName("data_nascimento");
-
-        builder.Property(c => c.Email)
-            .HasColumnName("email")
-            .HasMaxLength(254);
-
-        builder.Property(c => c.Telefone)
-            .HasColumnName("telefone")
-            .HasMaxLength(20);
-
-        builder.Property(c => c.Status)
-            .HasColumnName("status")
-            .HasConversion<string>()
-            .HasMaxLength(20)
-            .IsRequired();
-
-        builder.Property(c => c.DataCadastroUtc)
-            .HasColumnName("data_cadastro_utc")
-            .IsRequired();
-
-        builder.Property(c => c.DataAtualizacaoUtc)
-            .HasColumnName("data_atualizacao_utc")
-            .IsRequired();
-
-        builder.Property(c => c.CodigoLegado)
-            .HasColumnName("codigo_legado");
-
-        // Índices
-        builder.HasIndex(c => c.Cpf)
-            .IsUnique()
-            .HasDatabaseName("uk_clientes_cpf");
-
-        builder.HasIndex(c => c.Nome)
-            .HasDatabaseName("ix_clientes_nome");
-
-        builder.HasIndex(c => c.CodigoLegado)
-            .IsUnique()
-            .HasDatabaseName("ix_clientes_codigo_legado")
-            .HasFilter("codigo_legado IS NOT NULL");
+        builder.Property(c => c.Id).HasColumnName("id");
+        builder.Property(c => c.PublicId).HasColumnName("public_id");
+        builder.Property(c => c.PessoaId).HasColumnName("pessoa_id");
+        builder.Property(c => c.StatusId).HasColumnName("status_id");
+        builder.Property(c => c.Falecido).HasColumnName("falecido");
+        builder.Property(c => c.DataObito).HasColumnName("data_obito");
+        builder.Property(c => c.Observacao).HasColumnName("observacao");
+        builder.Property(c => c.DataCadastroLegado).HasColumnName("data_cadastro_legado");
+        builder.Property(c => c.LegadoId).HasColumnName("legado_id");
+        builder.Property(c => c.CreatedAt).HasColumnName("created_at");
+        builder.Property(c => c.UpdatedAt).HasColumnName("updated_at");
+        builder.Property(c => c.DeletedAt).HasColumnName("deleted_at");
     }
 }

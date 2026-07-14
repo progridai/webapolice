@@ -3,18 +3,34 @@ using System;
 namespace WebApolice.Modulos.Clientes.Application.UseCases.CadastrarCliente;
 
 public sealed record CadastrarClienteCommand(
+    short TipoPessoa,
     string Nome,
-    string Cpf,
+    string Documento,
     DateOnly? DataNascimento,
+    short? Sexo,
+    string? Observacao,
+    bool Falecido,
+    DateOnly? DataObito,
     string? Email,
     string? Telefone,
-    long? CodigoLegado
+    string? Celular,
+    EnderecoCommand? Endereco
+);
+
+public sealed record EnderecoCommand(
+    string? Cep,
+    string? Logradouro,
+    string? Numero,
+    string? Complemento,
+    string? Bairro,
+    long? CidadeId,
+    string? Uf
 );
 
 public sealed record CadastrarClienteResult(
-    long Id,
+    Guid PublicId,
     string Nome,
-    string CpfMascarado,
+    string DocumentoMascarado,
     string Status,
     DateTime DataCadastroUtc
 );

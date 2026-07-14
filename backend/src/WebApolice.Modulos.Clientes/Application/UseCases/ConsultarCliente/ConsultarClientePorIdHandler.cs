@@ -7,32 +7,19 @@ namespace WebApolice.Modulos.Clientes.Application.UseCases.ConsultarCliente;
 
 public sealed class ConsultarClientePorIdHandler
 {
-    private readonly IClientesRepository _repository;
+    private readonly IClientesQueries _queries;
 
-    public ConsultarClientePorIdHandler(IClientesRepository repository)
+    public ConsultarClientePorIdHandler(IClientesQueries queries)
     {
-        _repository = repository;
+        _queries = queries;
     }
 
     public async Task<ConsultarClienteResult> Handle(ConsultarClientePorIdQuery query, CancellationToken cancellationToken)
     {
-        var cliente = await _repository.ObterPorIdAsync(query.Id, cancellationToken);
-        if (cliente == null)
+        var result = await _queries.ObterDetalheAsync(query.Id, cancellationToken);
+        if (result == null)
             throw new ClienteNaoEncontradoException("Cliente não encontrado.");
 
-        var cpfMascarado = "***.***.***-" + cliente.Cpf.Substring(cliente.Cpf.Length - 2);
-
-        return new ConsultarClienteResult(
-            cliente.Id,
-            cliente.Nome,
-            cpfMascarado,
-            cliente.DataNascimento,
-            cliente.Email,
-            cliente.Telefone,
-            cliente.Status.ToString().ToLowerInvariant(),
-            cliente.DataCadastroUtc,
-            cliente.DataAtualizacaoUtc,
-            cliente.CodigoLegado
-        );
+        return result;
     }
 }

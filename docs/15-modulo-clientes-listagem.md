@@ -2,7 +2,7 @@
 
 ## Escopo
 
-A tela atual implementa a listagem de clientes e inclui um botão "Novo Cliente" no cabeçalho, que redireciona para a rota `/clientes/novo` (tela de cadastro). As demais ações (edição, exclusão, inativação ou detalhes) não fazem parte deste escopo inicial.
+A tela atual implementa a listagem de clientes e inclui um botão "Novo Cliente" no cabeçalho, que redireciona para a rota `/clientes/novo` (tela de cadastro). A ação "Detalhes" está implementada e leva à tela de Detalhes do Cliente. As demais ações (edição, exclusão, inativação) não fazem parte deste escopo inicial.
 
 ## Endpoint
 
@@ -82,3 +82,4 @@ navegacao.
 
 - [17-modelagem-banco-dados-webapolice.md](file:///c:/PROJETOS/Rsul%20Automacoes/Projetos/webapolice/docs/17-modelagem-banco-dados-webapolice.md)
 - [18-modelagem-clientes-core-cadastro.md](file:///c:/PROJETOS/Rsul%20Automacoes/Projetos/webapolice/docs/18-modelagem-clientes-core-cadastro.md)
+- [19-modulo-clientes-detalhes.md](file:///c:/PROJETOS/Rsul%20Automacoes/Projetos/webapolice/docs/19-modulo-clientes-detalhes.md)

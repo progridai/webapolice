@@ -6,7 +6,7 @@ using WebApolice.Modulos.Clientes.Infrastructure.Persistence.Models.Vinculos;
 
 namespace WebApolice.Modulos.Clientes.Infrastructure.Persistence;
 
-public sealed class ClientesDbContext : DbContext
+public class ClientesDbContext : DbContext
 {
     public ClientesDbContext(DbContextOptions<ClientesDbContext> options)
         : base(options)
@@ -39,7 +39,7 @@ public sealed class ClientesDbContext : DbContext
         base.OnModelCreating(modelBuilder);
     }
 
-    public Task<Microsoft.EntityFrameworkCore.Storage.IDbContextTransaction> BeginTransactionAsync(CancellationToken cancellationToken = default)
+    public virtual Task<Microsoft.EntityFrameworkCore.Storage.IDbContextTransaction> BeginTransactionAsync(CancellationToken cancellationToken = default)
     {
         return Database.BeginTransactionAsync(cancellationToken);
     }

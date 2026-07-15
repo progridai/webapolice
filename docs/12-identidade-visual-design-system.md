@@ -41,9 +41,15 @@ As cores funcionais **não fazem parte** da paleta de marketing da marca e são 
 
 Para garantir conformidade com as diretrizes WCAG (mínimo de **4.5:1** para texto normal e **3:1** para textos grandes):
 
-### Contraste do Dourado (`#D4AF37`)
-- **Texto Branco (`#FFFFFF`) sobre Dourado**: Contraste de **2.09:1** (REPROVADO). **Nunca utilize.**
-- **Texto Preto Suave (`#1A1A1A`) sobre Dourado**: Contraste de **8.30:1** (APROVADO em conformidade máxima AAA). **Combinação oficial obrigatória para botões primários.**
+### Contraste da Marca Principal
+- **Texto Branco (`#FFFFFF`) sobre Dourado Padrão**: Contraste de **2.09:1** (REPROVADO). **Nunca utilize.**
+- **Texto Preto Suave (`#1A1A1A`) sobre Dourado Padrão**: Contraste de **8.30:1** (APROVADO em conformidade máxima). **Combinação oficial obrigatória para botões primários.**
+
+A camada de serviço (`IdentidadeVisualService`) assegura o contraste dinamicamente para identidades de organizações (White-label):
+- Calcula a luminância relativa da `marcaPrincipal`.
+- Se a luminância for `> 0.179`, o texto sobre a marca (`--cor-sobre-marca-principal`) será `#1A1A1A`.
+- Se a luminância for `<= 0.179`, o texto será `#FFFFFF`.
+- O mínimo obrigatório para texto legível sobre a marca principal é **WCAG AA (4.5:1)**. O serviço garante matematicamente o cumprimento desta norma ao escolher entre preto ou branco puro baseando-se na luminância.
 
 ### Contraste de Textos Secundários
 - **Tema Claro**: O texto secundário mapeado para `#52525B` sobre fundo branco possui contraste de **5.73:1** (Aprovado).
@@ -70,15 +76,15 @@ Os estilos e tokens estão organizados de forma modular sob `apps/web/src/styles
 ### Lista de Principais Tokens de Cores Semânticas
 
 ```css
---cor-marca-principal:        Dourado (#D4AF37)
---cor-marca-principal-hover:  Dourado Hover (#C59F2E)
---cor-marca-principal-ativa:  Dourado Ativo (#B28E25)
+--cor-marca-principal:        Cor de Marca (Padrão: #D4AF37)
+--cor-marca-principal-hover:  Hover da Marca (Padrão: #C59F2E)
+--cor-marca-principal-ativa:  Active da Marca (Padrão: #B28E25)
 --cor-fundo-aplicacao:        Fundo de tela neutro (Claro: #F6F6F6 | Escuro: #18181B)
 --cor-fundo-superficie:       Cards e tabelas (Claro: #FFFFFF | Escuro: #222225)
 --cor-texto-principal:        Títulos e textos comuns (Claro: #1A1A1A | Escuro: #F4F4F5)
 --cor-texto-secundario:       Apoio e legendas (Claro: #52525B | Escuro: #A1A1AA)
 --cor-borda:                  Bordas padrão sutis (Claro: #E4E4E7 | Escuro: #3F3F46)
---cor-sobre-dourado:          Texto sobre botões dourados (Sempre #1A1A1A)
+--cor-sobre-marca-principal:  Texto legível garantido sobre a marca principal
 ```
 
 ---
@@ -133,7 +139,7 @@ A aplicação implementa suporte completo a três modos de tema:
 
 .my-button {
   background-color: var(--cor-marca-principal);
-  color: var(--cor-sobre-dourado);
+  color: var(--cor-sobre-marca-principal);
 }
 ```
 
@@ -150,9 +156,41 @@ const { temaResolvido } = useTema();
   border: 1px solid #e4e4e7;
 }
 
-/* Incorreto: Texto branco sobre dourado (Falta de contraste) */
+/* Incorreto: Texto branco ou hardcoded sobre botão */
 .my-button {
   background-color: #D4AF37;
   color: #FFFFFF; 
 }
 ```
+
+---
+
+## 7. Identidade Visual por Organização (White-label)
+
+A aplicação suporta identidades visuais dinâmicas (branding) definidas por organização.
+O WebApólice possui o Dourado (`#D4AF37`) como identidade **padrão** (Fallback seguro).
+
+### Conceito e Propriedades Configuráveis
+A cada organização é permitido configurar:
+- **`marcaPrincipal`**: Cor base da marca.
+- **`logotipoUrl` e `nomeExibicao`**.
+- As cores de interação (`hover`, `ativa`) e a `corSobreMarcaPrincipal` podem ser calculadas dinamicamente caso não fornecidas.
+
+### Propriedades Não Configuráveis
+Para manter consistência, acessibilidade e harmonia estrutural, as organizações **não podem** customizar livremente:
+- Cores Funcionais de Status (Sucesso, Erro, Alerta, Informação).
+- Fundo da Aplicação e de Superfície.
+- Tipografia e Espaçamentos.
+- Raios de borda e Sombras.
+
+### Cache Versionado e Validade
+A identidade é armazenada no `localStorage` sob o modelo `IdentidadeVisualCache`:
+- O cache possui `versao` (atual: '1.0') e `atualizadoEm`.
+- Possui uma expiração máxima de 7 dias, obrigando o frontend a atualizar eventuais mudanças da API após esse período.
+- Em caso de logout explícito ou encerramento da sessão de um usuário, o método `IdentidadeVisualService.restaurarIdentidadePadrao()` deve ser chamado, apagando a chave `webapolice-identidade-atual`. Isso previne o vazamento visual de uma organização (Ex: Org A) na tela pública antes de um usuário da Org B fazer login.
+
+### Resolução e Prevenção de FOUC
+- Os dados da organização carregada ficam cacheados no `localStorage` (Chave: `webapolice-identidade-{organizacaoId}`).
+- O script no `<head>` de `index.html` resolve o tema (Claro/Escuro/Sistema) e, síncronamente, verifica se existe uma identidade de organização no cache que seja compatível com a versão atual e dentro do prazo de validade. Se for validada, os tokens são injetados no `:root`.
+- O FOUC de identidade visual é mitigado SEM realizar cálculos demorados (HSL, Luminância) dentro do html. Ele carrega cegamente um JSON validado, mas faz sanity-check do payload e tempo de vida.
+- A mudança na paleta da organização não afeta a preferência do usuário (Claro/Escuro/Sistema). O Modo Dark mode funciona em harmonia com qualquer cor escolhida.

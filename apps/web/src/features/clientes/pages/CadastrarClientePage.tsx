@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { ClienteForm, type ClienteFormData } from '../components/ClienteForm';
 import { cadastrarCliente } from '../api/clienteWriteApi';
 import { Alert } from '../../../components/ui/Alert';
+import { PageHeader, Breadcrumbs, UsersIcon, HomeIcon } from '../../../components/ui';
 
 export const CadastrarClientePage: React.FC = () => {
   const navigate = useNavigate();
@@ -44,16 +45,22 @@ export const CadastrarClientePage: React.FC = () => {
     navigate('/clientes');
   };
 
+  const breadcrumbItems = [
+    { label: 'Início', href: '/', icon: <HomeIcon size={14} /> },
+    { label: 'Clientes', href: '/clientes', icon: <UsersIcon size={14} /> },
+    { label: 'Novo Cliente' }
+  ];
+
   return (
     <div className="clientes-page" role="main">
-      <header className="clientes-page-header">
-        <div className="clientes-page-header-text">
-          <h1 className="clientes-page-title">Novo Cliente</h1>
-          <p className="clientes-page-subtitle">Preencha os dados abaixo para cadastrar um novo cliente.</p>
-        </div>
-      </header>
+      <PageHeader 
+        title="Novo Cliente"
+        description="Preencha os dados abaixo para cadastrar um novo cliente."
+        icon={<UsersIcon size={24} />}
+        breadcrumbs={<Breadcrumbs items={breadcrumbItems} />}
+      />
 
-      <div className="page-content">
+      <div className="page-content" style={{ maxWidth: '800px' }}>
         {error && (
           <div className="mb-4">
             <Alert variant="error" title="Erro no Cadastro">{error}</Alert>

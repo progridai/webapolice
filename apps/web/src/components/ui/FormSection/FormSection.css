@@ -1,0 +1,61 @@
+.form-section {
+  background-color: var(--cor-fundo-superficie);
+  border: var(--borda-largura-padrao) solid var(--cor-borda);
+  border-radius: var(--raio-medio);
+  margin-bottom: var(--espaco-6);
+  overflow: hidden;
+}
+
+.form-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--espaco-4) var(--espaco-5);
+  border-bottom: var(--borda-largura-padrao) solid var(--cor-borda);
+  background-color: var(--cor-fundo-aplicacao);
+  gap: var(--espaco-4);
+}
+
+.form-section-title-group {
+  display: flex;
+  align-items: center;
+  gap: var(--espaco-3);
+}
+
+.form-section-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--cor-marca-principal);
+}
+
+.form-section-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-section-title {
+  margin: 0;
+  font-size: var(--fonte-tamanho-lg);
+  font-weight: 600;
+  color: var(--cor-texto-principal);
+}
+
+.form-section-description {
+  margin: var(--espaco-1) 0 0 0;
+  font-size: var(--fonte-tamanho-sm);
+  color: var(--cor-texto-secundario);
+}
+
+.form-section-content {
+  padding: var(--espaco-5);
+}
+
+@media (max-width: 640px) {
+  .form-section-header {
+    padding: var(--espaco-4);
+  }
+  .form-section-content {
+    padding: var(--espaco-4);
+  }
+}

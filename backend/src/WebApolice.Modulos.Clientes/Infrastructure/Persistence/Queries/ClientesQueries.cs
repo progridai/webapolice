@@ -102,14 +102,14 @@ internal sealed class ClientesQueries : IClientesQueries
         // 1 = Pessoa Física (CPF), 2 = Pessoa Jurídica (CNPJ)
         if (tipoPessoa == 1 && limpo.Length == 11)
         {
-            return $"***.***.{limpo.Substring(6, 3)}-{limpo.Substring(9, 2)}";
+            return $"{limpo.Substring(0, 3)}.{limpo.Substring(3, 3)}.{limpo.Substring(6, 3)}-{limpo.Substring(9, 2)}";
         }
         if (tipoPessoa == 2 && limpo.Length == 14)
         {
-            return $"***.***.{limpo.Substring(5, 3)}/{limpo.Substring(8, 4)}-{limpo.Substring(12, 2)}";
+            return $"{limpo.Substring(0, 2)}.{limpo.Substring(2, 3)}.{limpo.Substring(5, 3)}/{limpo.Substring(8, 4)}-{limpo.Substring(12, 2)}";
         }
 
-        return "Documento Inválido";
+        return limpo;
     }
 
     public async Task<ConsultarClienteResult?> ObterDetalheAsync(Guid id, CancellationToken cancellationToken)
@@ -147,7 +147,7 @@ internal sealed class ClientesQueries : IClientesQueries
             .ToListAsync(cancellationToken);
             
         var enderecos = enderecosRaw.Select(e => new ClienteEnderecoResponse(
-            e.TipoEndereco, e.Cep ?? "", e.Logradouro ?? "", e.Numero ?? "", e.Complemento ?? "", e.Bairro ?? "", "", e.Uf ?? "", e.Principal, e.Ativo
+            e.TipoEndereco, e.Cep ?? "", e.Logradouro ?? "", e.Numero ?? "", e.Complemento ?? "", e.Bairro ?? "", "", e.CidadeId, e.Uf ?? "", e.Principal, e.Ativo
         )).ToList();
 
         // 4. Vínculos Resolvendo Nomes
@@ -190,9 +190,11 @@ internal sealed class ClientesQueries : IClientesQueries
         return new ConsultarClienteResult(
             baseInfo.c.PublicId,
             baseInfo.p.Nome,
+            baseInfo.p.DocumentoPrincipal ?? "",
             MascararDocumento(baseInfo.p.DocumentoPrincipal, baseInfo.p.TipoPessoa),
             new ClienteStatusResponse(baseInfo.s.Codigo, baseInfo.s.Nome),
             baseInfo.p.DataNascimento,
+            baseInfo.p.Sexo,
             baseInfo.c.Falecido,
             baseInfo.c.DataObito,
             contatos,

@@ -1,10 +1,9 @@
 import React from 'react';
-import { Table, TableBody, TableCell, TableHeader, TableRow, SortIcon, Button } from '../../../components/ui';
-import { EyeIcon } from '../../../components/ui/Icons';
+import { DataTable, StatusBadge, RowActions, EyeIcon, EditIcon, Button } from '../../../components/ui';
+import type { Column } from '../../../components/ui/DataTable/DataTable';
 import { ROUTES, createPath } from '../../../app/routes/routePaths';
 import { useNavigate, useLocation } from 'react-router-dom';
 import type { ClienteListItem } from '../types/cliente.types';
-import { ClienteStatusBadge } from './ClienteStatusBadge';
 import './ClientesTable.css';
 
 interface ClientesTableProps {
@@ -13,13 +12,9 @@ interface ClientesTableProps {
   sortBy?: string;
   direction?: 'asc' | 'desc';
   onSort: (column: string) => void;
+  hasActiveFilters?: boolean;
+  onClearFilters?: () => void;
 }
-
-const sortableColumns = [
-  { key: 'nome', label: 'Nome do cliente' },
-  { key: 'status', label: 'Status' },
-  { key: 'data_cadastro', label: 'Data de cadastro' },
-];
 
 export const ClientesTable: React.FC<ClientesTableProps> = ({
   clientes,
@@ -27,6 +22,8 @@ export const ClientesTable: React.FC<ClientesTableProps> = ({
   sortBy,
   direction,
   onSort,
+  hasActiveFilters,
+  onClearFilters,
 }) => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -37,59 +34,85 @@ export const ClientesTable: React.FC<ClientesTableProps> = ({
     });
   };
 
-  const renderSortHeader = (column: { key: string; label: string }) => {
-    const isActive = sortBy === column.key;
-
-    return (
-      <button
-        type="button"
-        className="clientes-table-sort"
-        onClick={() => onSort(column.key)}
-        disabled={isLoading}
-        aria-sort={isActive ? (direction === 'desc' ? 'descending' : 'ascending') : 'none'}
-      >
-        <span>{column.label}</span>
-        <SortIcon size={14} aria-hidden="true" />
-      </button>
-    );
+  const handleEditar = (id: number) => {
+    navigate(`/clientes/${id}/editar`);
   };
 
+  const columns: Column<ClienteListItem>[] = [
+    {
+      key: 'nome',
+      label: 'Nome do cliente',
+      sortable: true,
+      render: (cliente) => <span className="clientes-table-name">{cliente.nome}</span>,
+    },
+    {
+      key: 'cpfMascarado',
+      label: 'CPF',
+      render: (cliente) => <span className="clientes-table-muted">{cliente.cpfMascarado}</span>,
+    },
+    {
+      key: 'status',
+      label: 'Status',
+      sortable: true,
+      render: (cliente) => <StatusBadge status={cliente.status} />,
+    },
+    {
+      key: 'data_cadastro',
+      label: 'Data de cadastro',
+      sortable: true,
+      render: (cliente) => (
+        <span className="clientes-table-muted">
+          {new Date(cliente.dataCadastroUtc).toLocaleDateString('pt-BR')}
+        </span>
+      ),
+    },
+    {
+      key: 'acoes',
+      label: 'Ações',
+      align: 'right',
+      render: (cliente) => (
+        <RowActions
+          primaryAction={{
+            label: 'Detalhes',
+            icon: <EyeIcon />,
+            onClick: () => handleVerDetalhes(cliente.id),
+          }}
+          actions={[
+            {
+              label: 'Editar',
+              icon: <EditIcon />,
+              onClick: () => handleEditar(cliente.id),
+            },
+          ]}
+          ariaLabel={`Ações para ${cliente.nome}`}
+        />
+      ),
+    },
+  ];
+
   return (
-    <Table aria-label="Lista de clientes">
-      <TableHeader>
-        <TableRow>
-          <TableCell header>{renderSortHeader(sortableColumns[0])}</TableCell>
-          <TableCell header>CPF</TableCell>
-          <TableCell header>{renderSortHeader(sortableColumns[1])}</TableCell>
-          <TableCell header>{renderSortHeader(sortableColumns[2])}</TableCell>
-          <TableCell header align="right">Ações</TableCell>
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {clientes.map((cliente) => (
-          <TableRow key={cliente.id}>
-            <TableCell className="clientes-table-name">{cliente.nome}</TableCell>
-            <TableCell className="clientes-table-muted">{cliente.cpfMascarado}</TableCell>
-            <TableCell>
-              <ClienteStatusBadge status={cliente.status} />
-            </TableCell>
-            <TableCell className="clientes-table-muted">
-              {new Date(cliente.dataCadastroUtc).toLocaleDateString('pt-BR')}
-            </TableCell>
-            <TableCell align="right">
-              <Button
-                variant="outline"
-                size="sm"
-                icon={<EyeIcon />}
-                onClick={() => handleVerDetalhes(cliente.id)}
-                aria-label={`Ver detalhes de ${cliente.nome}`}
-              >
-                Detalhes
-              </Button>
-            </TableCell>
-          </TableRow>
-        ))}
-      </TableBody>
-    </Table>
+    <DataTable
+      data={clientes}
+      columns={columns}
+      keyExtractor={(item) => item.id}
+      isLoading={isLoading}
+      sortBy={sortBy}
+      direction={direction}
+      onSort={onSort}
+      aria-label="Lista de clientes"
+      emptyTitle={hasActiveFilters ? 'Nenhum cliente encontrado' : 'Nenhum cliente cadastrado'}
+      emptyDescription={
+        hasActiveFilters
+          ? 'Não encontramos nenhum cliente com os filtros informados.'
+          : 'Ainda não existem clientes cadastrados na plataforma.'
+      }
+      emptyAction={
+        hasActiveFilters && onClearFilters ? (
+          <Button onClick={onClearFilters}>
+            Limpar filtros
+          </Button>
+        ) : undefined
+      }
+    />
   );
 };

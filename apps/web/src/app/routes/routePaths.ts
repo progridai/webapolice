@@ -28,6 +28,9 @@ export const ROUTES = {
   /** Módulo de Clientes — Detalhes (temporário) */
   CLIENTE_DETALHES: '/clientes/:id',
 
+  /** Módulo de Clientes — Editar */
+  CLIENTE_EDITAR: '/clientes/:id/editar',
+
   /** Catálogo do Design System (acesso restrito: role admin) */
   DESIGN_SYSTEM: '/design-system',
 

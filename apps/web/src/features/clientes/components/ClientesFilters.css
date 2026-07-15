@@ -1,14 +1,18 @@
-.clientes-filters {
-  display: grid;
-  grid-template-columns: minmax(20rem, 2fr) minmax(12rem, 1fr) auto;
-  gap: var(--espaco-4);
-  align-items: end;
+/* Os elementos de filtro crescem dentro do FilterBar (flex row em desktop) */
+.clientes-filter-search {
+  flex: 1 1 280px;
+  min-width: 0;
 }
 
-.clientes-filter-search,
-.clientes-filter-status,
+.clientes-filter-status {
+  flex: 0 1 180px;
+  min-width: 120px;
+}
+
 .clientes-filter-actions {
-  min-width: 0;
+  flex: 0 0 auto;
+  display: flex;
+  align-items: flex-end;
 }
 
 .clientes-filter-label {
@@ -19,33 +23,7 @@
   font-weight: var(--fonte-peso-medio);
 }
 
-.clientes-filter-actions {
-  display: flex;
-  justify-content: flex-end;
-}
-
 .clientes-clear-button {
   min-width: 6rem;
 }
 
-@media (max-width: 900px) {
-  .clientes-filters {
-    grid-template-columns: minmax(16rem, 1fr) minmax(12rem, 1fr);
-  }
-
-  .clientes-filter-actions {
-    grid-column: 1 / -1;
-    justify-content: flex-start;
-  }
-}
-
-@media (max-width: 640px) {
-  .clientes-filters {
-    grid-template-columns: 1fr;
-  }
-
-  .clientes-filter-actions,
-  .clientes-clear-button {
-    width: 100%;
-  }
-}

@@ -9,6 +9,7 @@
 import React from 'react';
 import { HashRouter } from 'react-router-dom';
 import { ThemeProvider } from '../../shared/theme/ThemeContext';
+import { IdentidadeVisualProvider } from '../../shared/identidade';
 import { AuthProvider } from '../../auth/AuthProvider';
 import { ErrorBoundary } from '../../components/application/ErrorBoundary';
 import { AppRoutes } from '../routes/AppRoutes';
@@ -16,13 +17,15 @@ import { AppRoutes } from '../routes/AppRoutes';
 export const AppProviders: React.FC = () => {
   return (
     <ThemeProvider>
-      <AuthProvider>
-        <HashRouter>
-          <ErrorBoundary>
-            <AppRoutes />
-          </ErrorBoundary>
-        </HashRouter>
-      </AuthProvider>
+      <IdentidadeVisualProvider>
+        <AuthProvider>
+          <HashRouter>
+            <ErrorBoundary>
+              <AppRoutes />
+            </ErrorBoundary>
+          </HashRouter>
+        </AuthProvider>
+      </IdentidadeVisualProvider>
     </ThemeProvider>
   );
 };

@@ -1,10 +1,8 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Card, CardHeader, CardContent, Button } from '../../../components/ui';
-import { EyeIcon } from '../../../components/ui/Icons';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { Card, CardHeader, CardContent, RowActions, EyeIcon, EditIcon, StatusBadge } from '../../../components/ui';
 import { ROUTES, createPath } from '../../../app/routes/routePaths';
 import type { ClienteListItem } from '../types/cliente.types';
-import { ClienteStatusBadge } from './ClienteStatusBadge';
 
 interface ClientesMobileListProps {
   clientes: ClienteListItem[];
@@ -12,6 +10,17 @@ interface ClientesMobileListProps {
 
 export const ClientesMobileList: React.FC<ClientesMobileListProps> = ({ clientes }) => {
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const handleVerDetalhes = (id: number) => {
+    navigate(createPath(ROUTES.CLIENTE_DETALHES, { id: String(id) }), {
+      state: { fromListagem: true, search: location.search },
+    });
+  };
+
+  const handleEditar = (id: number) => {
+    navigate(`/clientes/${id}/editar`);
+  };
 
   return (
     <div className="flex flex-col gap-4">
@@ -24,22 +33,28 @@ export const ClientesMobileList: React.FC<ClientesMobileListProps> = ({ clientes
                 {cliente.cpfMascarado}
               </p>
             </div>
-            <ClienteStatusBadge status={cliente.status} />
+            <StatusBadge status={cliente.status} />
           </CardHeader>
           <CardContent className="pt-0">
             <div className="flex justify-between items-end mt-4">
               <span className="text-xs text-gray-400">
                 Cadastrado em {new Date(cliente.dataCadastroUtc).toLocaleDateString('pt-BR')}
               </span>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => navigate(createPath(ROUTES.CLIENTE_DETALHES, { id: String(cliente.id) }))}
-                aria-label={`Visualizar detalhes de ${cliente.nome}`}
-                icon={<EyeIcon />}
-              >
-                Detalhes
-              </Button>
+              <RowActions
+                primaryAction={{
+                  label: 'Detalhes',
+                  icon: <EyeIcon />,
+                  onClick: () => handleVerDetalhes(cliente.id),
+                }}
+                actions={[
+                  {
+                    label: 'Editar',
+                    icon: <EditIcon />,
+                    onClick: () => handleEditar(cliente.id),
+                  },
+                ]}
+                ariaLabel={`Ações para ${cliente.nome}`}
+              />
             </div>
           </CardContent>
         </Card>

@@ -28,9 +28,9 @@
   width: 100%;
 }
 
-.swatch-gold { background-color: var(--palette-dourado); }
-.swatch-white { background-color: var(--palette-branco); border-bottom: var(--borda-largura-padrao) solid var(--cor-borda); }
-.swatch-dark { background-color: var(--palette-preto-suave); }
+.swatch-marca { background-color: var(--cor-marca-principal); }
+.swatch-white { background-color: var(--cor-fundo-superficie); border-bottom: var(--borda-largura-padrao) solid var(--cor-borda); }
+.swatch-dark { background-color: var(--cor-texto-principal); }
 .swatch-gray { background-color: var(--palette-cinza-claro); }
 
 .color-label {

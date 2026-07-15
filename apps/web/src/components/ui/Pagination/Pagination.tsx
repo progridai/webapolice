@@ -7,8 +7,6 @@ export interface PaginationProps {
   totalPages: number;
   onPageChange: (page: number) => void;
   disabled?: boolean;
-  totalItems?: number;
-  pageSize?: number;
 }
 
 export const Pagination: React.FC<PaginationProps> = ({
@@ -16,28 +14,12 @@ export const Pagination: React.FC<PaginationProps> = ({
   totalPages,
   onPageChange,
   disabled = false,
-  totalItems,
-  pageSize,
 }) => {
   const isFirstPage = currentPage === 1;
   const isLastPage = currentPage === totalPages || totalPages === 0;
 
-  // Calcula faixas mostradas (ex: 1-5 de 15)
-  const showRangeInfo = totalItems !== undefined && pageSize !== undefined;
-  const startItem = (currentPage - 1) * pageSize! + 1;
-  const endItem = Math.min(currentPage * pageSize!, totalItems || 0);
-
   return (
     <div className="table-pagination-bar-component">
-      {showRangeInfo ? (
-        <span className="pagination-info-component">
-          Mostrando {startItem}-{endItem} de {totalItems} registros
-        </span>
-      ) : (
-        <span className="pagination-info-component">
-          Página {currentPage} de {totalPages || 1}
-        </span>
-      )}
       <div className="pagination-controls-component">
         <Button
           variant="secondary"

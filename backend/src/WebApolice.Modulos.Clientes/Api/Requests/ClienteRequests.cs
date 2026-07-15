@@ -19,6 +19,7 @@ public sealed record CadastrarClienteRequest(
 
 public sealed record AlterarClienteRequest(
     string Nome,
+    string? Documento,
     DateOnly? DataNascimento,
     short? Sexo,
     string? Observacao,

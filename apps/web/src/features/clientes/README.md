@@ -57,3 +57,12 @@ Referencias:
 - `docs/14-fundacao-frontend.md`
 - `docs/15-modulo-clientes-listagem.md`
 - `docs/11-modulo-clientes-backend.md`
+
+## Auditoria de Edição (Julho 2026)
+
+* **Causa da falha anterior**:
+  * A rota de edição (`/clientes/:id/editar`) não estava declarada no `routePaths.ts`, resultando em página 404.
+  * O `ClienteForm.tsx` não estava recarregando os dados do backend porque faltava a chamada para `reset(initialData)` da biblioteca React Hook Form.
+  * As listagens e a tela de detalhe não apresentavam os botões e atalhos para a funcionalidade.
+* **Arquivos alterados**: `routePaths.ts`, `ClienteForm.tsx`, `ClienteDetalhePage.tsx`, `ClientesTable.tsx`, `ClientesMobileList.tsx`, `EditarClientePage.test.tsx`.
+* **Experiência Final**: Botão 'Editar' adicionado na listagem e nos detalhes. Formulário exibe CPF/CNPJ como 'somente leitura'. Erros 409 (conflito de pessoa compartilhada) são mantidos em tela sem redirecionamento, comunicando o usuário claramente.

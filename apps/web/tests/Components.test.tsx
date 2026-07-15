@@ -263,8 +263,6 @@ describe('UI Components Unit Tests', () => {
         />
       );
 
-      expect(screen.getByText(/Mostrando 1-5 de 15 registros/i)).not.toBeNull();
-
       const nextPageBtn = screen.getByRole('button', { name: /Ir para a próxima página/i });
       fireEvent.click(nextPageBtn);
       expect(handlePageChange).toHaveBeenCalledWith(2);

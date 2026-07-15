@@ -50,6 +50,15 @@ public sealed class AlterarClienteHandler
 
             // Atualiza Dados Pessoais e Cliente
             pessoa.AtualizarDadosPessoais(command.Nome, command.DataNascimento, command.Sexo, command.Observacao);
+            if (!string.IsNullOrWhiteSpace(command.Documento))
+            {
+                var documentoLimpo = LimparDocumento(command.Documento);
+                var documentoValido = ValidarDocumento(documentoLimpo, pessoa.TipoPessoa);
+                if (!documentoValido)
+                    throw new ClienteInvalidoException("Documento inválido.");
+                pessoa.AtualizarDocumento(command.Documento, documentoLimpo);
+            }
+
             cliente.AtualizarDados(command.Falecido, command.DataObito, command.Observacao);
 
             // Contatos
@@ -63,16 +72,30 @@ public sealed class AlterarClienteHandler
             {
                 if (enderecoAtual != null)
                 {
-                    enderecoAtual.AtualizarEndereco(
-                        command.Endereco.CidadeId,
-                        command.Endereco.Cep,
-                        command.Endereco.Logradouro,
-                        command.Endereco.Numero,
-                        command.Endereco.Complemento,
-                        command.Endereco.Bairro,
-                        command.Endereco.Uf,
-                        true
-                    );
+                    bool mudouEndereco = enderecoAtual.CidadeId != command.Endereco.CidadeId ||
+                                         enderecoAtual.Cep != command.Endereco.Cep ||
+                                         enderecoAtual.Logradouro != command.Endereco.Logradouro ||
+                                         enderecoAtual.Numero != command.Endereco.Numero ||
+                                         enderecoAtual.Complemento != command.Endereco.Complemento ||
+                                         enderecoAtual.Bairro != command.Endereco.Bairro ||
+                                         enderecoAtual.Uf != command.Endereco.Uf;
+
+                    if (mudouEndereco)
+                    {
+                        enderecoAtual.Inativar();
+                        _repository.AdicionarEndereco(new PessoaEnderecoModel(
+                            pessoa.Id,
+                            command.Endereco.CidadeId,
+                            "RESIDENCIAL",
+                            command.Endereco.Cep,
+                            command.Endereco.Logradouro,
+                            command.Endereco.Numero,
+                            command.Endereco.Complemento,
+                            command.Endereco.Bairro,
+                            command.Endereco.Uf,
+                            true
+                        ));
+                    }
                 }
                 else
                 {
@@ -115,7 +138,11 @@ public sealed class AlterarClienteHandler
             
             if (contatoAtual != null)
             {
-                contatoAtual.AtualizarValor(valor, valorLimpo, true);
+                if (contatoAtual.ValorNormalizado != valorLimpo)
+                {
+                    contatoAtual.Inativar();
+                    _repository.AdicionarContato(new PessoaContatoModel(pessoaId, tipoContato, valor, valorLimpo, true));
+                }
             }
             else
             {
@@ -128,5 +155,13 @@ public sealed class AlterarClienteHandler
     {
         if (string.IsNullOrWhiteSpace(doc)) return "";
         return new string(doc.Where(char.IsDigit).ToArray());
+    }
+
+    private static bool ValidarDocumento(string limpo, short tipoPessoa)
+    {
+        // Simplificado para o escopo
+        if (tipoPessoa == 1) return limpo.Length == 11;
+        if (tipoPessoa == 2) return limpo.Length == 14;
+        return false;
     }
 }

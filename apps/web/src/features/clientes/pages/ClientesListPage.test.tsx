@@ -40,7 +40,7 @@ describe('ClientesListPage', () => {
     
     render(<ClientesListPage />, { wrapper: Wrapper });
     
-    expect(screen.getByText('Clientes')).not.toBeNull();
+    expect(screen.getByRole('heading', { name: 'Clientes' })).not.toBeNull();
     // Como os Skeletons não tem role fácil, verificamos o aria-busy no container
     expect(document.querySelector('[aria-busy="true"]')).not.toBeNull();
   });
@@ -48,7 +48,7 @@ describe('ClientesListPage', () => {
   it('deve exibir tabela com clientes quando dados forem carregados com sucesso', async () => {
     const mockData = {
       itens: [
-        { id: 1, nome: 'João da Silva', cpfMascarado: '***.123.456-**', status: 'ativo', dataCadastroUtc: '2026-07-04T12:00:00Z' }
+        { id: 1, nome: 'João da Silva', cpfMascarado: '111.123.456-11', status: 'ativo', dataCadastroUtc: '2026-07-04T12:00:00Z' }
       ],
       paginaAtual: 1,
       tamanhoPagina: 20,
@@ -63,7 +63,7 @@ describe('ClientesListPage', () => {
       expect(screen.getByText('João da Silva')).not.toBeNull();
     });
     
-    expect(screen.getByText('***.123.456-**')).not.toBeNull();
+    expect(screen.getByText('111.123.456-11')).not.toBeNull();
     expect(screen.getByText('Ativo')).not.toBeNull();
     // Deve ter a tabela renderizada
     expect(screen.getByRole('table', { name: /lista de clientes/i })).not.toBeNull();

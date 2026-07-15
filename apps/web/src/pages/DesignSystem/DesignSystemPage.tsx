@@ -28,6 +28,7 @@ import {
   SortIcon,
   UsersIcon,
 } from '../../components/ui';
+import { IdentidadeVisualService } from '../../shared/identidade';
 import './DesignSystemPage.css';
 
 interface ClienteMock {
@@ -39,11 +40,11 @@ interface ClienteMock {
 }
 
 const CLIENTES_INICIAIS: ClienteMock[] = [
-  { id: 1, nome: 'Rodrigo Silva de Souza', cpf: '***.482.193-**', email: 'rodrigo.silva@example.com', status: 'ativo' },
-  { id: 2, nome: 'Ana Maria Oliveira', cpf: '***.918.423-**', email: 'ana.maria@example.com', status: 'ativo' },
-  { id: 3, nome: 'Carlos Souza Araujo', cpf: '***.294.851-**', email: 'carlos.souza@example.com', status: 'inativo' },
-  { id: 4, nome: 'Beatriz Santos Pinheiro', cpf: '***.159.357-**', email: 'beatriz.santos@example.com', status: 'ativo' },
-  { id: 5, nome: 'Eduardo Pereira Neto', cpf: '***.753.951-**', email: 'eduardo.pereira@example.com', status: 'inativo' },
+  { id: 1, nome: 'Rodrigo Silva de Souza', cpf: '123.482.193-45', email: 'rodrigo.silva@example.com', status: 'ativo' },
+  { id: 2, nome: 'Ana Maria Oliveira', cpf: '098.918.423-76', email: 'ana.maria@example.com', status: 'ativo' },
+  { id: 3, nome: 'Carlos Souza Araujo', cpf: '456.294.851-32', email: 'carlos.souza@example.com', status: 'inativo' },
+  { id: 4, nome: 'Beatriz Santos Pinheiro', cpf: '789.159.357-12', email: 'beatriz.santos@example.com', status: 'ativo' },
+  { id: 5, nome: 'Eduardo Pereira Neto', cpf: '321.753.951-98', email: 'eduardo.pereira@example.com', status: 'inativo' },
 ];
 
 export const DesignSystemPage: React.FC = () => {
@@ -65,6 +66,18 @@ export const DesignSystemPage: React.FC = () => {
   const [termoCheckbox, setTermoCheckbox] = useState(false);
   const [comentarioTextarea, setComentarioTextarea] = useState('');
   const [nomeErro, setNomeErro] = useState('');
+
+  // Troca de marca simulada
+  const setMarcaSimulada = (cor: string) => {
+    IdentidadeVisualService.aplicarIdentidadeVisual({
+      organizacaoId: 'teste-' + cor.replace('#', ''),
+      marcaPrincipal: cor,
+    });
+  };
+
+  const restaurarPadrao = () => {
+    IdentidadeVisualService.restaurarIdentidadePadrao();
+  };
 
   const handleSalvarCliente = (e: React.FormEvent) => {
     e.preventDefault();
@@ -130,10 +143,10 @@ export const DesignSystemPage: React.FC = () => {
           <CardContent>
             <div className="colors-grid">
               <div className="color-item">
-                <div className="color-swatch swatch-gold" />
+                <div className="color-swatch swatch-marca" />
                 <div className="color-label">
-                  <strong>Dourado Oficial</strong>
-                  <span>#D4AF37</span>
+                  <strong>Cor da Marca (Principal)</strong>
+                  <span>var(--cor-marca-principal)</span>
                   <small>Destaque e Marca</small>
                 </div>
               </div>
@@ -171,6 +184,39 @@ export const DesignSystemPage: React.FC = () => {
                 <span className="badge badge-warning"><span className="badge-dot" /> Alerta (Amarelo)</span>
                 <span className="badge badge-info"><span className="badge-dot" /> Informação (Azul)</span>
               </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* NOVA SEÇÃO: Validador de Identidade (Apenas Local/Showcase) */}
+        <Card className="col-span-2">
+          <CardHeader>
+            <CardTitle>Validador de Identidade (Simulador White-label)</CardTitle>
+            <CardDescription>Altere temporariamente a cor principal para testar contrastes dinâmicos e regras automáticas (WCAG AA).</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="button-row">
+              <Button onClick={() => restaurarPadrao()}>
+                Dourado (Padrão)
+              </Button>
+              <Button style={{ backgroundColor: '#0055FF', color: '#FFF', borderColor: '#0055FF' }} onClick={() => setMarcaSimulada('#0055FF')}>
+                Azul Escuro
+              </Button>
+              <Button style={{ backgroundColor: '#00FF00', color: '#000', borderColor: '#00FF00' }} onClick={() => setMarcaSimulada('#00FF00')}>
+                Verde Neon
+              </Button>
+              <Button style={{ backgroundColor: '#FF0000', color: '#FFF', borderColor: '#FF0000' }} onClick={() => setMarcaSimulada('#FF0000')}>
+                Vermelho Vivo
+              </Button>
+              <Button style={{ backgroundColor: '#6B21A8', color: '#FFF', borderColor: '#6B21A8' }} onClick={() => setMarcaSimulada('#6B21A8')}>
+                Roxo Escuro
+              </Button>
+              <Button style={{ backgroundColor: '#000000', color: '#FFF', borderColor: '#000000' }} onClick={() => setMarcaSimulada('#000000')}>
+                Preto Absoluto
+              </Button>
+              <Button style={{ backgroundColor: '#FFFFFF', color: '#000', border: '1px solid #CCC' }} onClick={() => setMarcaSimulada('#FFFFFF')}>
+                Branco Puro
+              </Button>
             </div>
           </CardContent>
         </Card>
@@ -287,7 +333,7 @@ export const DesignSystemPage: React.FC = () => {
                   hint="Preenchido com a máscara padrão."
                 >
                   <Input
-                    placeholder="Ex: ***.***.***-**"
+                    placeholder="Ex: 000.000.000-00"
                     value={cpfInput}
                     onChange={(e) => setCpfInput(e.target.value)}
                   />

@@ -90,7 +90,7 @@
   left: var(--espaco-4);
   padding: var(--espaco-2) var(--espaco-4);
   background-color: var(--cor-marca-principal);
-  color: var(--cor-sobre-dourado);
+  color: var(--cor-sobre-marca-principal);
   font-weight: var(--fonte-peso-semibold);
   text-decoration: none;
   border-radius: var(--borda-raio-md);

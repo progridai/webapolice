@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 using FluentAssertions;
@@ -24,7 +24,7 @@ public class AlterarClienteHandlerTests
     public async Task Handle_NomeVazio_LancaClienteInvalidoException()
     {
         // Arrange
-        var command = new AlterarClienteCommand(Guid.NewGuid(), "", null, null, null, false, null, null, null, null, null);
+        var command = new AlterarClienteCommand(Guid.NewGuid(), "", null, null, null, null, false, null, null, null, null, null);
 
         // Act
         var act = () => _handler.Handle(command, "user123", CancellationToken.None);

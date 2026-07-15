@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { Input, Select, Button, SearchIcon } from '../../../components/ui';
+import React from 'react';
+import { Select, Button, FilterBar, SearchField } from '../../../components/ui';
 import type { ClientesQuery, StatusClienteEnum } from '../types/cliente.types';
 import './ClientesFilters.css';
 
@@ -16,48 +16,36 @@ export const ClientesFilters: React.FC<ClientesFiltersProps> = ({
   onClearFilters,
   isLoading,
 }) => {
-  const [localSearch, setLocalSearch] = useState(filters.nome || filters.cpf || '');
+  const handleSearchChange = (value: string) => {
+    const trimmed = value.trim();
+    const isCpf = /^[\d.-]+$/.test(trimmed) && trimmed.length > 0;
+    const nextNome = isCpf ? '' : trimmed;
+    const nextCpf = isCpf ? trimmed : '';
 
-  useEffect(() => {
-    // Sincroniza o campo quando a URL muda por navegação/limpeza de filtros.
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setLocalSearch(filters.nome || filters.cpf || '');
-  }, [filters.nome, filters.cpf]);
+    if (nextNome === filters.nome && nextCpf === filters.cpf) return;
 
-  useEffect(() => {
-    const handler = setTimeout(() => {
-      const trimmed = localSearch.trim();
-      const isCpf = /^[\d.-]+$/.test(trimmed) && trimmed.length > 0;
-      const nextNome = isCpf ? '' : trimmed;
-      const nextCpf = isCpf ? trimmed : '';
-
-      if (nextNome === filters.nome && nextCpf === filters.cpf) return;
-
-      onFilterChange({
-        nome: nextNome,
-        cpf: nextCpf,
-      });
-    }, 500);
-
-    return () => clearTimeout(handler);
-  }, [filters.cpf, filters.nome, localSearch, onFilterChange]);
+    onFilterChange({
+      nome: nextNome,
+      cpf: nextCpf,
+      page: 1, // Reset to first page on search
+    });
+  };
 
   const hasActiveFilters = Boolean(filters.nome || filters.cpf || filters.status);
+  const searchValue = filters.nome || filters.cpf || '';
 
   return (
-    <div className="clientes-filters">
+    <FilterBar>
       <div className="clientes-filter-search">
         <label htmlFor="busca-cliente" className="clientes-filter-label">
           Buscar cliente
         </label>
-        <Input
+        <SearchField
           id="busca-cliente"
-          type="text"
           placeholder="Nome ou CPF"
-          value={localSearch}
-          onChange={(event) => setLocalSearch(event.target.value)}
+          value={searchValue}
+          onChange={handleSearchChange}
           disabled={isLoading}
-          icon={<SearchIcon />}
         />
       </div>
 
@@ -69,7 +57,10 @@ export const ClientesFilters: React.FC<ClientesFiltersProps> = ({
           id="status-cliente"
           value={filters.status || ''}
           onChange={(event) =>
-            onFilterChange({ status: event.target.value as unknown as StatusClienteEnum | '' })
+            onFilterChange({ 
+              status: event.target.value as unknown as StatusClienteEnum | '',
+              page: 1 // Reset to first page on filter change
+            })
           }
           disabled={isLoading}
           options={[
@@ -91,6 +82,6 @@ export const ClientesFilters: React.FC<ClientesFiltersProps> = ({
           Limpar
         </Button>
       </div>
-    </div>
+    </FilterBar>
   );
 };

@@ -6,8 +6,12 @@ import { useClientesFilters } from '../hooks/useClientesFilters';
 import { ClientesFilters } from '../components/ClientesFilters';
 import { ClientesTable } from '../components/ClientesTable';
 import { ClientesMobileList } from '../components/ClientesMobileList';
-import { Pagination, EmptyState, Alert, Button, Skeleton } from '../../../components/ui';
+import {
+  Pagination, EmptyState, Alert, Button, Skeleton, ResultsSummary,
+  PageHeader, Breadcrumbs, UsersIcon
+} from '../../../components/ui';
 import './ClientesListPage.css';
+
 
 export const ClientesListPage: React.FC = () => {
   const { filters, setFilters, clearFilters } = useClientesFilters();
@@ -41,18 +45,25 @@ export const ClientesListPage: React.FC = () => {
   const hasData = data && data.itens && data.itens.length > 0;
 
   return (
-    <div className="clientes-page" role="main">
-      <header className="clientes-page-header">
-        <div className="clientes-page-header-text">
-          <h1 className="clientes-page-title">Clientes</h1>
-          <p className="clientes-page-subtitle">
-            Gerencie e consulte os clientes da plataforma.
-          </p>
-        </div>
-        <Button onClick={() => navigate(ROUTES.CLIENTE_NOVO)} variant="primary">
-          Novo Cliente
-        </Button>
-      </header>
+    <main className="p-6 max-w-7xl mx-auto focus:outline-none flex flex-col gap-6">
+      <PageHeader
+        title="Clientes"
+        description="Gerencie e consulte os clientes da plataforma."
+        icon={<UsersIcon size={24} />}
+        breadcrumbs={
+          <Breadcrumbs
+            items={[
+              { label: 'Início', href: '/' },
+              { label: 'Clientes' },
+            ]}
+          />
+        }
+        actions={
+          <Button onClick={() => navigate(ROUTES.CLIENTE_NOVO)} variant="primary">
+            Novo Cliente
+          </Button>
+        }
+      />
 
       <section aria-label="Filtros de clientes">
         <ClientesFilters
@@ -72,13 +83,13 @@ export const ClientesListPage: React.FC = () => {
             Tentar novamente
           </Button>
         </div>
-      ) : isLoading && !data ? (
+      ) : isLoading && !data && isMobile ? (
         <div className="clientes-skeletons" aria-busy="true" aria-live="polite">
           <Skeleton className="clientes-skeleton-row" />
           <Skeleton className="clientes-skeleton-row" />
           <Skeleton className="clientes-skeleton-row" />
         </div>
-      ) : !hasData ? (
+      ) : !hasData && isMobile ? (
         <EmptyState
           title={hasActiveFilters ? 'Nenhum cliente encontrado' : 'Nenhum cliente cadastrado'}
           description={
@@ -95,28 +106,35 @@ export const ClientesListPage: React.FC = () => {
           }
         />
       ) : (
-        <>
+        <div className="flex flex-col gap-3">
+          {data && hasData && (
+            <ResultsSummary
+              currentPage={data.paginaAtual}
+              pageSize={data.tamanhoPagina}
+              totalItems={data.totalItens}
+            />
+          )}
+
           <div aria-live="polite" className="sr-only">
-            Exibindo {data.itens.length} clientes.
+            Exibindo {data?.itens.length || 0} clientes.
           </div>
 
           {isMobile ? (
-            <ClientesMobileList clientes={data.itens} />
+            <ClientesMobileList clientes={data?.itens || []} />
           ) : (
             <ClientesTable
-              clientes={data.itens}
+              clientes={data?.itens || []}
               isLoading={isLoading}
               sortBy={filters.sortBy}
               direction={filters.direction}
               onSort={handleSort}
+              hasActiveFilters={hasActiveFilters}
+              onClearFilters={clearFilters}
             />
           )}
 
-          {data.totalPaginas > 1 && (
+          {data && data.totalPaginas > 1 && (
             <div className="clientes-pagination">
-              <span className="clientes-pagination-summary">
-                Exibindo página {data.paginaAtual} de {data.totalPaginas} ({data.totalItens} total)
-              </span>
               <Pagination
                 currentPage={data.paginaAtual}
                 totalPages={data.totalPaginas}
@@ -125,8 +143,10 @@ export const ClientesListPage: React.FC = () => {
               />
             </div>
           )}
-        </>
+        </div>
       )}
-    </div>
+    </main>
   );
 };
+
+

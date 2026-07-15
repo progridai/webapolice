@@ -36,7 +36,7 @@
 /* Variantes */
 .btn-primary {
   background-color: var(--cor-marca-principal);
-  color: var(--cor-sobre-dourado);
+  color: var(--cor-sobre-marca-principal);
   border-color: var(--cor-marca-principal-borda);
 }
 

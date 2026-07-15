@@ -262,8 +262,8 @@
   border: var(--borda-largura-padrao) solid var(--cor-borda);
 }
 
-.bg-gold-token {
-  background-color: var(--palette-dourado);
+.bg-marca-token {
+  background-color: var(--cor-marca-principal);
 }
 
 .bg-white-token {
@@ -343,7 +343,7 @@
 
 .btn-primario {
   background-color: var(--cor-marca-principal);
-  color: var(--cor-sobre-dourado); /* Contraste preto sutil para melhor legibilidade WCAG AAA */
+  color: var(--cor-sobre-marca-principal); /* Contraste preto sutil para melhor legibilidade WCAG AAA */
   border-color: var(--cor-marca-principal-borda);
 }
 
@@ -599,7 +599,7 @@
   top: 2px;
   width: 4px;
   height: 9px;
-  border: solid var(--cor-sobre-dourado);
+  border: solid var(--cor-sobre-marca-principal);
   border-width: 0 2px 2px 0;
   transform: rotate(45deg);
 }

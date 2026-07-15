@@ -74,3 +74,12 @@ O mapeamento da funcionalidade foi estendido prevendo futuras ramificaÃ§Ãµes nÃ£
 * ImplementaÃ§Ã£o do controle de concorrÃªncia com travas otimistas (RowVersion) para a rota de ediÃ§Ã£o de Cliente (`PUT`), protegendo *updates* simultÃ¢neos.
 * ConcepÃ§Ã£o e implantaÃ§Ã£o de uma rota ou tela estritamente exclusiva (e altamente auditada) para fins de correÃ§Ã£o documental, com a capacidade de transpor a imutabilidade habitual de CPF/CNPJs equivocados.
 * IntegraÃ§Ã£o e suporte completo Ã  ediÃ§Ã£o das propostas, convÃªnios, controle financeiro, gerenciamento de vinculaÃ§Ãµes de dependentes diretos e empresas consorciadas (Estipulantes/CorreÃ§Ãµes).
+
+## 6. Auditoria de Edição de Clientes (Julho 2026)
+
+* **Causa da falha anterior**:
+  * **Backend**: As atualizações de contatos e endereços subscreviam indevidamente o registro histórico.
+  * **Frontend**: A rota de edição não estava configurada, botões de ação estavam ausentes, e o formulário não era recarregado via `reset` após leitura assíncrona.
+* **Arquivos alterados**: `AlterarClienteHandler.cs`, `PessoaEnderecoModel.cs`, `routePaths.ts`, `ClienteForm.tsx`, `ClienteDetalhePage.tsx`, `ClientesTable.tsx`, `ClientesMobileList.tsx`, `EditarClientePage.test.tsx`.
+* **Comportamento Pessoa Compartilhada**: Bloqueio total (HTTP 409) para dados globais caso a Pessoa pertença a múltiplos papéis.
+* **Estratégia Contatos/Endereços**: Comparação prévia. Em caso de mudança, o registro antigo é inativado (`Ativo = false`) e um novo é criado, mantendo auditoria.

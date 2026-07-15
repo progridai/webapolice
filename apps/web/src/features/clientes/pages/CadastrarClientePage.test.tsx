@@ -17,7 +17,7 @@ describe('CadastrarClientePage', () => {
       </BrowserRouter>
     );
 
-    expect(screen.getByText('Novo Cliente')).toBeTruthy();
+    expect(screen.getByRole('heading', { name: 'Novo Cliente' })).toBeTruthy();
     expect(screen.getByLabelText(/Nome Completo/i)).toBeTruthy();
     expect(screen.getByLabelText(/Documento/i)).toBeTruthy();
   });
@@ -33,6 +33,7 @@ describe('CadastrarClientePage', () => {
 
     fireEvent.change(screen.getByLabelText(/Nome Completo/i), { target: { value: 'João da Silva' } });
     fireEvent.change(screen.getByLabelText(/Documento/i), { target: { value: '03619574044' } });
+    fireEvent.change(screen.getByLabelText(/Data de Nascimento/i), { target: { value: '1990-01-01' } });
 
     fireEvent.click(screen.getByRole('button', { name: /Salvar Cliente/i }));
 

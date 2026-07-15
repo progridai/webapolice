@@ -1,6 +1,4 @@
-export { ClienteResumoCard } from './ClienteResumoCard';
-export { ClienteDadosPessoaisCard } from './ClienteDadosPessoaisCard';
-export { ClienteContatosCard } from './ClienteContatosCard';
-export { ClienteEnderecosCard } from './ClienteEnderecosCard';
-export { ClienteVinculosCard } from './ClienteVinculosCard';
-export { ClienteDependentesCard } from './ClienteDependentesCard';
+export * from './ClientesTable';
+export * from './ClientesFilters';
+export * from './ClienteForm';
+export * from './ClientesMobileList';

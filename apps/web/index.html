@@ -8,14 +8,43 @@
     <script>
       (function() {
         try {
-          const saved = localStorage.getItem('webapolice-tema') || 'sistema';
-          let resolved = saved;
-          if (saved === 'sistema') {
+          // Inicializar Tema (Claro/Escuro/Sistema)
+          const savedTema = localStorage.getItem('webapolice-tema') || 'sistema';
+          let resolved = savedTema;
+          if (savedTema === 'sistema') {
             resolved = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
           }
           document.documentElement.setAttribute('data-theme', resolved);
+
+          // Inicializar Identidade Visual por Organização (se houver)
+          const atualId = localStorage.getItem('webapolice-identidade-atual');
+          if (atualId && atualId !== 'padrao') {
+            const rawCache = localStorage.getItem('webapolice-identidade-' + atualId);
+            if (rawCache) {
+              const cache = JSON.parse(rawCache);
+              
+              // Verifica estrutura do cache e se a versão corresponde
+              if (cache && cache.versao === '1.0' && cache.identidade) {
+                const dataAtualizacao = new Date(cache.atualizadoEm || 0).getTime();
+                const validadeMs = 7 * 24 * 60 * 60 * 1000;
+                
+                // Só aplica se não estiver expirado
+                if (Date.now() - dataAtualizacao <= validadeMs) {
+                  const identidade = cache.identidade;
+                  const docEl = document.documentElement;
+                  if (identidade.marcaPrincipal) docEl.style.setProperty('--cor-marca-principal', identidade.marcaPrincipal);
+                  if (identidade.marcaPrincipalHover) docEl.style.setProperty('--cor-marca-principal-hover', identidade.marcaPrincipalHover);
+                  if (identidade.marcaPrincipalAtiva) docEl.style.setProperty('--cor-marca-principal-ativa', identidade.marcaPrincipalAtiva);
+                  if (identidade.corSobreMarcaPrincipal) docEl.style.setProperty('--cor-sobre-marca-principal', identidade.corSobreMarcaPrincipal);
+                  if (identidade.marcaPrincipal) docEl.style.setProperty('--cor-marca-principal-suave', identidade.marcaPrincipal + '20');
+                  if (identidade.marcaPrincipalHover) docEl.style.setProperty('--cor-marca-principal-borda', identidade.marcaPrincipalHover);
+                  if (identidade.marcaPrincipal) docEl.style.setProperty('--cor-foco', identidade.marcaPrincipal);
+                }
+              }
+            }
+          }
         } catch (e) {
-          console.error('Falha ao inicializar o tema síncrono:', e);
+          console.error('Falha ao inicializar o tema/identidade síncrono:', e);
         }
       })();
     </script>

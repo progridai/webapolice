@@ -10,7 +10,8 @@
   --cor-marca-principal-suave: var(--palette-dourado-suave);
   --cor-marca-principal-borda: var(--palette-dourado-borda);
   --cor-marca-principal-texto: var(--palette-preto-suave);
-  --cor-sobre-dourado: var(--palette-preto-suave);
+  --cor-sobre-marca-principal: var(--palette-preto-suave);
+  --cor-sobre-dourado: var(--cor-sobre-marca-principal); /* Alias temporário de retrocompatibilidade */
 
   /* Superfícies e Fundos */
   --cor-fundo-aplicacao: var(--palette-cinza-claro);
@@ -63,7 +64,8 @@
   --cor-marca-principal-suave: var(--palette-dourado-suave);
   --cor-marca-principal-borda: var(--palette-dourado-borda);
   --cor-marca-principal-texto: var(--palette-branco);
-  --cor-sobre-dourado: var(--palette-preto-suave); /* Dourado permanece com texto escuro para contraste */
+  --cor-sobre-marca-principal: var(--palette-preto-suave); /* Dourado permanece com texto escuro para contraste */
+  --cor-sobre-dourado: var(--cor-sobre-marca-principal); /* Alias temporário de retrocompatibilidade */
 
   /* Superfícies e Fundos */
   --cor-fundo-aplicacao: var(--palette-neutral-900); /* Preto suave */

@@ -24,6 +24,7 @@ import type { AuthContextValue, AuthStatus, AuthUser } from './auth.types';
 import { PageLoading } from '../components/application/PageLoading';
 import { getOidcRedirectUri, restorePostLoginRedirect } from './authRedirect';
 import { setTokenProvider } from '../services/http';
+import { IdentidadeVisualService } from '../shared/identidade';
 
 interface AuthProviderProps {
   children: React.ReactNode;
@@ -82,6 +83,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setTokenProvider(null);
       setStatus('unauthenticated');
       setUser(null);
+      IdentidadeVisualService.restaurarIdentidadePadrao();
       try {
         await kc.logout();
       } catch {
@@ -171,6 +173,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setTokenProvider(null);
       setUser(null);
       setStatus('unauthenticated');
+      IdentidadeVisualService.restaurarIdentidadePadrao();
       await kc.logout({ redirectUri: redirectUri ?? window.location.origin });
     },
     [kc]

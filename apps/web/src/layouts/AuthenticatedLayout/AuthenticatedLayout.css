@@ -212,7 +212,7 @@
   height: 28px;
   border-radius: 50%;
   background-color: var(--cor-marca-principal);
-  color: var(--cor-sobre-dourado);
+  color: var(--cor-sobre-marca-principal);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -364,7 +364,7 @@
   left: var(--espaco-4);
   padding: var(--espaco-2) var(--espaco-4);
   background-color: var(--cor-marca-principal);
-  color: var(--cor-sobre-dourado);
+  color: var(--cor-sobre-marca-principal);
   font-weight: var(--fonte-peso-semibold);
   text-decoration: none;
   border-radius: var(--borda-raio-md);

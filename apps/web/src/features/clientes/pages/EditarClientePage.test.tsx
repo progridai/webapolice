@@ -29,7 +29,9 @@ describe('EditarClientePage', () => {
       id: 123,
       tipoPessoa: 'Física',
       nome: 'João da Silva',
+      documento: '03644455544',
       documentoMascarado: '036.***.***-44',
+      dataNascimento: '1990-01-01T00:00:00Z',
       contatos: [],
       enderecos: []
     });

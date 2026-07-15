@@ -1,0 +1,5 @@
+.results-summary {
+  font-size: 0.875rem; /* text-sm */
+  color: var(--cor-texto-secundario, #6b7280);
+  line-height: 1.25rem;
+}

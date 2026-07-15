@@ -54,4 +54,11 @@ public sealed class PessoaModel
         Observacao = observacao;
         UpdatedAt = DateTime.UtcNow;
     }
+
+    public void AtualizarDocumento(string? documentoPrincipal, string? documentoPrincipalLimpo)
+    {
+        DocumentoPrincipal = documentoPrincipal;
+        DocumentoPrincipalLimpo = documentoPrincipalLimpo;
+        UpdatedAt = DateTime.UtcNow;
+    }
 }

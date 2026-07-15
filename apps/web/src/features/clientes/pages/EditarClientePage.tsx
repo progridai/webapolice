@@ -5,6 +5,7 @@ import { alterarCliente } from '../api/clienteWriteApi';
 import { obterClienteDetalhe } from '../api/obterClienteDetalhe';
 import { Alert } from '../../../components/ui/Alert';
 import { Spinner } from '../../../components/ui/Spinner';
+import { PageHeader, Breadcrumbs, UsersIcon, HomeIcon } from '../../../components/ui';
 
 export const EditarClientePage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -27,7 +28,7 @@ export const EditarClientePage: React.FC = () => {
           nome: data.nome,
           documento: data.cpfCnpjMascarado || data.documentoMascarado || '',
           dataNascimento: data.dataNascimento ? new Date(data.dataNascimento).toISOString().split('T')[0] : '',
-          sexo: undefined, // Ajustar mapeamento real do backend
+          sexo: data.sexo, // Ajustar mapeamento real do backend
           observacao: '',
           falecido: false,
           dataObito: '',
@@ -112,16 +113,22 @@ export const EditarClientePage: React.FC = () => {
     );
   }
 
+  const breadcrumbItems = [
+    { label: 'Início', href: '/', icon: <HomeIcon size={14} /> },
+    { label: 'Clientes', href: '/clientes', icon: <UsersIcon size={14} /> },
+    { label: 'Editar Cliente' }
+  ];
+
   return (
     <div className="clientes-page" role="main">
-      <header className="clientes-page-header">
-        <div className="clientes-page-header-text">
-          <h1 className="clientes-page-title">Editar Cliente</h1>
-          <p className="clientes-page-subtitle">Atualize os dados do cliente.</p>
-        </div>
-      </header>
+      <PageHeader 
+        title="Editar Cliente"
+        description="Atualize os dados do cliente."
+        icon={<UsersIcon size={24} />}
+        breadcrumbs={<Breadcrumbs items={breadcrumbItems} />}
+      />
 
-      <div className="page-content">
+      <div className="page-content" style={{ maxWidth: '800px' }}>
         {error && (
           <div className="mb-4">
             <Alert variant="error" title="Erro ao Salvar">{error}</Alert>

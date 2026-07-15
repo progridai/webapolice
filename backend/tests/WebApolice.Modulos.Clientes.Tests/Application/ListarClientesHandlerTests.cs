@@ -26,20 +26,22 @@ public class ListarClientesHandlerTests
     public async Task Handle_DeveRetornarCpfMascarado()
     {
         // Arrange
-        var clienteItem = new ClienteListagemItemResult(Guid.NewGuid(), "Fulano", "***.***.***-19", "Ativo", DateTime.UtcNow);
-        var lista = new List<ClienteListagemItemResult> { clienteItem };
-        
-        var expectedResult = (lista.ToArray(), 1, 1);
-        _queriesMock.Setup(q => q.ListarPaginadoAsync(1, 20, null, null, null, null, null, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(expectedResult);
-
+        var clienteItem = new ClienteListagemItemResult(Guid.NewGuid(), "Fulano", "123.456.789-19", "Ativo", DateTime.UtcNow);
+        var mockResult = (Itens: new[] { clienteItem }, TotalItens: 1, TotalPaginas: 1);
         var query = new ListarClientesQuery(1, 20, null, null, null, null, null);
+
+        _queriesMock.Setup(q => q.ListarPaginadoAsync(
+            query.Pagina, query.TamanhoPagina, query.Nome, query.Documento,
+            query.StatusId, query.OrdenarPor, query.Direcao, CancellationToken.None
+        )).ReturnsAsync(mockResult);
 
         // Act
         var result = await _handler.Handle(query, CancellationToken.None);
 
         // Assert
+        result.Should().NotBeNull();
+        result.TotalItens.Should().Be(1);
         result.Itens.Should().HaveCount(1);
-        result.Itens.First().DocumentoMascarado.Should().Be("***.***.***-19");
+        result.Itens.First().DocumentoMascarado.Should().Be("123.456.789-19");
     }
 }

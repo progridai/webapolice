@@ -52,4 +52,9 @@ public sealed class PessoaEnderecoModel
         Uf = uf;
         Principal = principal;
     }
+
+    public void Inativar()
+    {
+        Ativo = false;
+    }
 }

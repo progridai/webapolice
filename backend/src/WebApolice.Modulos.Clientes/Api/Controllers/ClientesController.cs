@@ -97,6 +97,7 @@ public sealed class ClientesController : ControllerBase
         var command = new AlterarClienteCommand(
             id,
             request.Nome,
+            request.Documento,
             request.DataNascimento,
             request.Sexo,
             request.Observacao,

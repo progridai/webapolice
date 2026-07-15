@@ -174,10 +174,10 @@ public sealed class CadastrarClienteHandler
     private static string MascararDocumento(string limpo, short tipoPessoa)
     {
         if (tipoPessoa == 1 && limpo.Length == 11)
-            return $"***.***.{limpo.Substring(6, 3)}-{limpo.Substring(9, 2)}";
+            return $"{limpo.Substring(0, 3)}.{limpo.Substring(3, 3)}.{limpo.Substring(6, 3)}-{limpo.Substring(9, 2)}";
         if (tipoPessoa == 2 && limpo.Length == 14)
-            return $"***.***.{limpo.Substring(5, 3)}/{limpo.Substring(8, 4)}-{limpo.Substring(12, 2)}";
+            return $"{limpo.Substring(0, 2)}.{limpo.Substring(2, 3)}.{limpo.Substring(5, 3)}/{limpo.Substring(8, 4)}-{limpo.Substring(12, 2)}";
         
-        return "Documento Inválido";
+        return limpo;
     }
 }

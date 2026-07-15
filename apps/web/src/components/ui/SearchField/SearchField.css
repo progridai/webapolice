@@ -1,0 +1,32 @@
+.search-field {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.search-field-clear {
+  position: absolute;
+  right: var(--espaco-2);
+  top: 50%;
+  transform: translateY(-50%);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: var(--cor-texto-secundario);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  font-size: 18px;
+  line-height: 1;
+}
+
+.search-field-clear:hover,
+.search-field-clear:focus {
+  background-color: var(--cor-fundo-hover, rgba(0,0,0,0.05));
+  color: var(--cor-texto-principal);
+  outline: none;
+}

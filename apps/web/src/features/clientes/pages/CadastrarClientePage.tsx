@@ -15,16 +15,30 @@ export const CadastrarClientePage: React.FC = () => {
     setError(null);
     try {
       const response = await cadastrarCliente({
-        ...data,
-        documento: data.documento.replace(/\D/g, ''), // Limpa o documento
         tipoPessoa: Number(data.tipoPessoa),
-        sexo: data.sexo ? Number(data.sexo) : undefined,
+        nome: data.nome,
+        documento: data.documento.replace(/\D/g, ''),
         dataNascimento: data.dataNascimento || undefined,
+        sexo: data.sexo ? Number(data.sexo) : undefined,
+        observacao: data.observacao || undefined,
+        falecido: data.falecido,
         dataObito: data.dataObito || undefined,
-        endereco: data.endereco && Object.values(data.endereco).some(val => val !== "" && val !== undefined && val !== 0) ? {
-          ...data.endereco,
-          cidadeId: data.endereco.cidadeId || undefined
-        } : undefined,
+        contatos: data.contatos.map(c => ({
+          tipoContato: c.tipoContato,
+          valor: c.valor,
+          principal: c.principal,
+        })),
+        enderecos: data.enderecos.map(e => ({
+          tipoEndereco: e.tipoEndereco,
+          cep: e.cep || undefined,
+          logradouro: e.logradouro || undefined,
+          numero: e.numero || undefined,
+          complemento: e.complemento || undefined,
+          bairro: e.bairro || undefined,
+          cidadeId: e.cidadeId ? Number(e.cidadeId) : undefined,
+          uf: e.uf || undefined,
+          principal: e.principal,
+        })),
       });
       navigate(`/clientes/${response.id}`);
     } catch (err: unknown) {

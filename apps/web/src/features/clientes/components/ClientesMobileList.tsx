@@ -30,7 +30,7 @@ export const ClientesMobileList: React.FC<ClientesMobileListProps> = ({ clientes
             <div>
               <h3 className="font-semibold text-lg">{cliente.nome}</h3>
               <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                {cliente.cpfMascarado}
+                {cliente.documentoMascarado}
               </p>
             </div>
             <StatusBadge status={cliente.status} />

@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using System.Linq;
 using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
@@ -38,18 +40,18 @@ public sealed class ClientesController : ControllerBase
             request.Observacao,
             request.Falecido,
             request.DataObito,
-            request.Email,
-            request.Telefone,
-            request.Celular,
-            request.Endereco != null ? new EnderecoCommand(
-                request.Endereco.Cep,
-                request.Endereco.Logradouro,
-                request.Endereco.Numero,
-                request.Endereco.Complemento,
-                request.Endereco.Bairro,
-                request.Endereco.CidadeId == 0 ? null : request.Endereco.CidadeId,
-                request.Endereco.Uf
-            ) : null
+            request.Contatos?.Select(c => new ContatoCommand(c.TipoContato, c.Valor, c.Principal)).ToList() ?? new List<ContatoCommand>(),
+            request.Enderecos?.Select(e => new EnderecoCommand(
+                e.TipoEndereco,
+                e.Cep,
+                e.Logradouro,
+                e.Numero,
+                e.Complemento,
+                e.Bairro,
+                e.CidadeId == 0 ? null : e.CidadeId,
+                e.Uf,
+                e.Principal
+            )).ToList() ?? new List<EnderecoCommand>()
         );
 
         var result = await handler.Handle(command, UsuarioSub, cancellationToken);
@@ -103,18 +105,18 @@ public sealed class ClientesController : ControllerBase
             request.Observacao,
             request.Falecido,
             request.DataObito,
-            request.Email,
-            request.Telefone,
-            request.Celular,
-            request.Endereco != null ? new EnderecoCommand(
-                request.Endereco.Cep,
-                request.Endereco.Logradouro,
-                request.Endereco.Numero,
-                request.Endereco.Complemento,
-                request.Endereco.Bairro,
-                request.Endereco.CidadeId == 0 ? null : request.Endereco.CidadeId,
-                request.Endereco.Uf
-            ) : null
+            request.Contatos?.Select(c => new ContatoCommand(c.TipoContato, c.Valor, c.Principal)).ToList() ?? new List<ContatoCommand>(),
+            request.Enderecos?.Select(e => new EnderecoCommand(
+                e.TipoEndereco,
+                e.Cep,
+                e.Logradouro,
+                e.Numero,
+                e.Complemento,
+                e.Bairro,
+                e.CidadeId == 0 ? null : e.CidadeId,
+                e.Uf,
+                e.Principal
+            )).ToList() ?? new List<EnderecoCommand>()
         );
 
         await handler.Handle(command, UsuarioSub, cancellationToken);

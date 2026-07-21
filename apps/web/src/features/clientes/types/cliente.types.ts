@@ -11,7 +11,7 @@ export type ClienteStatus = 'ativo' | 'inativo';
 export interface ClienteListItem {
   id: number;
   nome: string;
-  cpfMascarado: string;
+  documentoMascarado: string;
   status: ClienteStatus;
   dataCadastroUtc: string;
 }
@@ -34,7 +34,14 @@ export interface ClientesQuery {
   direction?: 'asc' | 'desc';
 }
 
+export interface ContatoRequest {
+  tipoContato: string;
+  valor: string;
+  principal: boolean;
+}
+
 export interface EnderecoRequest {
+  tipoEndereco: string;
   cep?: string;
   logradouro?: string;
   numero?: string;
@@ -42,6 +49,7 @@ export interface EnderecoRequest {
   bairro?: string;
   cidadeId?: number;
   uf?: string;
+  principal: boolean;
 }
 
 export interface CadastrarClienteRequest {
@@ -53,23 +61,20 @@ export interface CadastrarClienteRequest {
   observacao?: string;
   falecido: boolean;
   dataObito?: string;
-  email?: string;
-  telefone?: string;
-  celular?: string;
-  endereco?: EnderecoRequest;
+  contatos: ContatoRequest[];
+  enderecos: EnderecoRequest[];
 }
 
 export interface AlterarClienteRequest {
   nome: string;
+  documento?: string;
   dataNascimento?: string;
   sexo?: number;
   observacao?: string;
   falecido: boolean;
   dataObito?: string;
-  email?: string;
-  telefone?: string;
-  celular?: string;
-  endereco?: EnderecoRequest;
+  contatos: ContatoRequest[];
+  enderecos: EnderecoRequest[];
 }
 
 export interface ClienteDetalhe {

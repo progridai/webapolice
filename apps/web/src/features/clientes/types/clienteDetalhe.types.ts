@@ -44,6 +44,7 @@ export interface ClienteDependenteResponse {
 export interface ClienteDetalheResponse {
   id: number;
   nome: string;
+  documento: string;
   documentoMascarado: string;
   status: ClienteStatusResponse;
   dataNascimento?: string;

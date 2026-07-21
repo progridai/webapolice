@@ -24,27 +24,30 @@ export const EditarClientePage: React.FC = () => {
         
         // Mapeia o ClienteDetalheResponse para ClienteFormData
         setInitialData({
-          tipoPessoa: data.tipoPessoa === 'Física' ? 1 : 2, // Depende do retorno real, ajustar se necessário
+          tipoPessoa: data.documento?.replace(/\D/g, '').length === 11 ? 1 : 2,
           nome: data.nome,
-          documento: data.cpfCnpjMascarado || data.documentoMascarado || '',
+          documento: data.documento || data.documentoMascarado || '',
           dataNascimento: data.dataNascimento ? new Date(data.dataNascimento).toISOString().split('T')[0] : '',
-          sexo: data.sexo, // Ajustar mapeamento real do backend
+          sexo: data.sexo,
           observacao: '',
-          falecido: false,
-          dataObito: '',
-          // Contatos e Endereço devem ser mapeados conforme o array retornado
-          email: data.contatos?.find((c: { tipo: string; valor: string }) => c.tipo === 'EMAIL')?.valor || '',
-          telefone: data.contatos?.find((c: { tipo: string; valor: string }) => c.tipo === 'TELEFONE')?.valor || '',
-          celular: data.contatos?.find((c: { tipo: string; valor: string }) => c.tipo === 'CELULAR')?.valor || '',
-          endereco: data.enderecos?.[0] ? {
-            cep: data.enderecos[0].cep,
-            logradouro: data.enderecos[0].logradouro,
-            numero: data.enderecos[0].numero,
-            complemento: data.enderecos[0].complemento,
-            bairro: data.enderecos[0].bairro,
-            cidadeId: data.enderecos[0].cidadeId,
-            uf: data.enderecos[0].uf,
-          } : undefined,
+          falecido: data.falecido || false,
+          dataObito: data.dataObito ? new Date(data.dataObito).toISOString().split('T')[0] : '',
+          contatos: data.contatos?.map((c: { tipo: string; valor: string; principal: boolean }) => ({
+            tipoContato: c.tipo,
+            valor: c.valor,
+            principal: c.principal,
+          })) || [],
+          enderecos: data.enderecos?.map((e: any) => ({
+            tipoEndereco: e.tipo || 'RESIDENCIAL',
+            cep: e.cep || '',
+            logradouro: e.logradouro || '',
+            numero: e.numero || '',
+            complemento: e.complemento || '',
+            bairro: e.bairro || '',
+            cidadeId: e.cidadeId || undefined,
+            uf: e.uf || '',
+            principal: e.principal || false,
+          })) || [],
         });
       } catch (err) {
         console.error('Erro ao carregar cliente:', err);
@@ -64,18 +67,28 @@ export const EditarClientePage: React.FC = () => {
     try {
       await alterarCliente(id, {
         nome: data.nome,
+        documento: data.documento.replace(/\D/g, ''),
         dataNascimento: data.dataNascimento || undefined,
         sexo: data.sexo ? Number(data.sexo) : undefined,
         observacao: data.observacao || undefined,
         falecido: data.falecido,
         dataObito: data.dataObito || undefined,
-        email: data.email || undefined,
-        telefone: data.telefone || undefined,
-        celular: data.celular || undefined,
-        endereco: data.endereco && Object.values(data.endereco).some(val => val !== "" && val !== undefined && val !== 0) ? {
-          ...data.endereco,
-          cidadeId: data.endereco.cidadeId || undefined
-        } : undefined,
+        contatos: data.contatos.map(c => ({
+          tipoContato: c.tipoContato,
+          valor: c.valor,
+          principal: c.principal,
+        })),
+        enderecos: data.enderecos.map(e => ({
+          tipoEndereco: e.tipoEndereco,
+          cep: e.cep || undefined,
+          logradouro: e.logradouro || undefined,
+          numero: e.numero || undefined,
+          complemento: e.complemento || undefined,
+          bairro: e.bairro || undefined,
+          cidadeId: e.cidadeId ? Number(e.cidadeId) : undefined,
+          uf: e.uf || undefined,
+          principal: e.principal,
+        })),
       });
       navigate(`/clientes/${id}`);
     } catch (err: unknown) {

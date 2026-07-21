@@ -43,9 +43,10 @@ Os dois conceitos centrais de armazenamento estão subdivididos: `core.pessoa` (
 * Fundamental notar que a flag booleana `cliente_status.ativo` serve *exclusivamente* para determinar se aquele respectivo status continua disponível no catálogo (para ser associado a clientes novos). O "estado" do Cliente é verificado pelo vínculo ao seu `status_id`.
 
 ### Contatos e Endereços
-* O agrupamento relacional de endereços de entrega/cobrança, além dos dados de contato, integram o conglomerado da Pessoa.
-* Regra basilar no Update: Nenhuma alteração pontual subscreve (*overwrite*) o campo preexistente. As edições desencadeiam a inativação da entrada atual, promovendo a inclusão de um contato ou endereço perfeitamente novo — salvaguardando a trilha histórica do registro de auditoria.
-* Durante a consulta dos dados completos do detalhe do Cliente, priorizam-se exclusivamente os laços que estejam abertos e designados como "principais".
+O agrupamento relacional de endereços de entrega/cobrança, além dos dados de contato, integram o conglomerado da Pessoa.
+* **Múltiplos Contatos e Endereços**: O sistema suporta múltiplos registros de contato (com diferentes tipos como EMAIL, TELEFONE, CELULAR) e de endereço (RESIDENCIAL, COMERCIAL, CORRESPONDENCIA, OUTRO) associados a uma mesma Pessoa.
+* **Marcação de Principal**: Cada contato ou endereço possui um indicador lógico `Principal` para definir qual registro deve ser considerado como padrão/principal para comunicação ou correspondência. Apenas um contato e um endereço podem ser designados como principal de cada vez no formulário.
+* **Regra basilar no Update**: Nenhuma alteração pontual subscreve (overwrite) o valor de um contato ou endereço existente. As edições desencadeiam a inativação da entrada atual (`Ativo = false`), promovendo a inclusão de um contato ou endereço perfeitamente novo — salvaguardando a trilha histórica e integridade do registro de auditoria. Caso o valor permaneça idêntico, o registro ativo existente é mantido.
 * **Exceção Assumida (Cidades)**: O registro no banco conta momentaneamente com submissões usando a chave `cidadeId` baseada em numerais (ID de integração legado). Por conta da indefinição ou omissão de um `public_id` formatado em `core.cidade`, essa exceção vigora como dívida provisória de desenho.
 
 ### Atomicidade Comprovada
@@ -75,11 +76,17 @@ O mapeamento da funcionalidade foi estendido prevendo futuras ramificações nã
 * Concepção e implantação de uma rota ou tela estritamente exclusiva (e altamente auditada) para fins de correção documental, com a capacidade de transpor a imutabilidade habitual de CPF/CNPJs equivocados.
 * Integração e suporte completo à edição das propostas, convênios, controle financeiro, gerenciamento de vinculações de dependentes diretos e empresas consorciadas (Estipulantes/Correções).
 
-## 6. Auditoria de Edi��o de Clientes (Julho 2026)
+---
+
+## 6. Auditoria de Edição de Clientes (Julho 2026)
 
 * **Causa da falha anterior**:
-  * **Backend**: As atualiza��es de contatos e endere�os subscreviam indevidamente o registro hist�rico.
-  * **Frontend**: A rota de edi��o n�o estava configurada, bot�es de a��o estavam ausentes, e o formul�rio n�o era recarregado via `reset` ap�s leitura ass�ncrona.
+  * **Backend**: As atualizações de contatos e endereços subscreviam indevidamente o registro histórico.
+  * **Frontend**: A rota de edição não estava configurada, botões de ação estavam ausentes, e o formulário não era recarregado via `reset` após leitura assíncrona.
 * **Arquivos alterados**: `AlterarClienteHandler.cs`, `PessoaEnderecoModel.cs`, `routePaths.ts`, `ClienteForm.tsx`, `ClienteDetalhePage.tsx`, `ClientesTable.tsx`, `ClientesMobileList.tsx`, `EditarClientePage.test.tsx`.
-* **Comportamento Pessoa Compartilhada**: Bloqueio total (HTTP 409) para dados globais caso a Pessoa perten�a a m�ltiplos pap�is.
-* **Estrat�gia Contatos/Endere�os**: Compara��o pr�via. Em caso de mudan�a, o registro antigo � inativado (`Ativo = false`) e um novo � criado, mantendo auditoria.
+* **Comportamento Pessoa Compartilhada**: Bloqueio total (HTTP 409) para dados globais caso a Pessoa pertença a múltiplos papéis.
+* **Estratégia Contatos/Endereços**: Comparação prévia. Em caso de mudança, o registro antigo é inativado (`Ativo = false`) e um novo é criado, mantendo auditoria.
+* **Evolução de Múltiplos Contatos/Endereços (Julho 2026)**:
+  * Refatorado o fluxo de cadastro e edição de Clientes para suportar múltiplos registros de contatos e endereços (com marcação de principal).
+  * O formulário no frontend (`ClienteForm.tsx`) foi atualizado utilizando o utilitário `useFieldArray` para permitir a inserção e remoção dinâmica desses registros.
+  * O backend foi modificado (`CadastrarClienteCommand`, `AlterarClienteCommand` e respectivos handlers) para processar e persistir essas listas respeitando a regra de auditoria (inativação e nova inserção).

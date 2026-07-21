@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using WebApolice.Modulos.Clientes.Application.UseCases.CadastrarCliente;
 
 namespace WebApolice.Modulos.Clientes.Application.UseCases.AlterarCliente;
 
@@ -11,8 +13,6 @@ public sealed record AlterarClienteCommand(
     string? Observacao,
     bool Falecido,
     DateOnly? DataObito,
-    string? Email,
-    string? Telefone,
-    string? Celular,
-    WebApolice.Modulos.Clientes.Application.UseCases.CadastrarCliente.EnderecoCommand? Endereco
+    IReadOnlyList<ContatoCommand> Contatos,
+    IReadOnlyList<EnderecoCommand> Enderecos
 );

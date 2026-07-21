@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace WebApolice.Modulos.Clientes.Application.UseCases.CadastrarCliente;
 
@@ -11,20 +12,26 @@ public sealed record CadastrarClienteCommand(
     string? Observacao,
     bool Falecido,
     DateOnly? DataObito,
-    string? Email,
-    string? Telefone,
-    string? Celular,
-    EnderecoCommand? Endereco
+    IReadOnlyList<ContatoCommand> Contatos,
+    IReadOnlyList<EnderecoCommand> Enderecos
+);
+
+public sealed record ContatoCommand(
+    string TipoContato,
+    string Valor,
+    bool Principal
 );
 
 public sealed record EnderecoCommand(
+    string TipoEndereco,
     string? Cep,
     string? Logradouro,
     string? Numero,
     string? Complemento,
     string? Bairro,
     long? CidadeId,
-    string? Uf
+    string? Uf,
+    bool Principal
 );
 
 public sealed record CadastrarClienteResult(

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace WebApolice.Modulos.Clientes.Api.Requests;
 
@@ -11,10 +12,8 @@ public sealed record CadastrarClienteRequest(
     string? Observacao,
     bool Falecido,
     DateOnly? DataObito,
-    string? Email,
-    string? Telefone,
-    string? Celular,
-    EnderecoRequest? Endereco
+    IReadOnlyList<ContatoRequest> Contatos,
+    IReadOnlyList<EnderecoRequest> Enderecos
 );
 
 public sealed record AlterarClienteRequest(
@@ -25,18 +24,24 @@ public sealed record AlterarClienteRequest(
     string? Observacao,
     bool Falecido,
     DateOnly? DataObito,
-    string? Email,
-    string? Telefone,
-    string? Celular,
-    EnderecoRequest? Endereco
+    IReadOnlyList<ContatoRequest> Contatos,
+    IReadOnlyList<EnderecoRequest> Enderecos
+);
+
+public sealed record ContatoRequest(
+    string TipoContato,
+    string Valor,
+    bool Principal
 );
 
 public sealed record EnderecoRequest(
+    string TipoEndereco,
     string? Cep,
     string? Logradouro,
     string? Numero,
     string? Complemento,
     string? Bairro,
     long? CidadeId,
-    string? Uf
+    string? Uf,
+    bool Principal
 );

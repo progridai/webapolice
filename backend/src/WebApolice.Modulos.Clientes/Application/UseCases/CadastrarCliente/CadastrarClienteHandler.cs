@@ -102,38 +102,35 @@ public sealed class CadastrarClienteHandler
             _repository.AdicionarCliente(cliente);
 
             // Contatos
-            if (!string.IsNullOrWhiteSpace(command.Email))
+            if (command.Contatos != null)
             {
-                _repository.AdicionarContato(new PessoaContatoModel(pessoaId, "EMAIL", command.Email, command.Email.ToUpperInvariant(), true));
+                foreach (var contato in command.Contatos)
+                {
+                    if (string.IsNullOrWhiteSpace(contato.Valor)) continue;
+                    var tipo = contato.TipoContato.ToUpperInvariant();
+                    var valorLimpo = tipo != "EMAIL" ? LimparDocumento(contato.Valor) : contato.Valor.ToUpperInvariant();
+                    _repository.AdicionarContato(new PessoaContatoModel(pessoaId, tipo, contato.Valor, valorLimpo, contato.Principal));
+                }
             }
 
-            if (!string.IsNullOrWhiteSpace(command.Telefone))
+            // Endereços
+            if (command.Enderecos != null)
             {
-                var telLimpo = LimparDocumento(command.Telefone);
-                _repository.AdicionarContato(new PessoaContatoModel(pessoaId, "TELEFONE", command.Telefone, telLimpo, true));
-            }
-
-            if (!string.IsNullOrWhiteSpace(command.Celular))
-            {
-                var celLimpo = LimparDocumento(command.Celular);
-                _repository.AdicionarContato(new PessoaContatoModel(pessoaId, "CELULAR", command.Celular, celLimpo, true));
-            }
-
-            // Endereço
-            if (command.Endereco != null)
-            {
-                _repository.AdicionarEndereco(new PessoaEnderecoModel(
-                    pessoaId,
-                    command.Endereco.CidadeId,
-                    "RESIDENCIAL",
-                    command.Endereco.Cep,
-                    command.Endereco.Logradouro,
-                    command.Endereco.Numero,
-                    command.Endereco.Complemento,
-                    command.Endereco.Bairro,
-                    command.Endereco.Uf,
-                    true
-                ));
+                foreach (var end in command.Enderecos)
+                {
+                    _repository.AdicionarEndereco(new PessoaEnderecoModel(
+                        pessoaId,
+                        end.CidadeId,
+                        end.TipoEndereco.ToUpperInvariant(),
+                        end.Cep,
+                        end.Logradouro,
+                        end.Numero,
+                        end.Complemento,
+                        end.Bairro,
+                        end.Uf,
+                        end.Principal
+                    ));
+                }
             }
 
             await _repository.SalvarAlteracoesAsync(cancellationToken);

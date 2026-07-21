@@ -46,9 +46,9 @@ export const ClientesTable: React.FC<ClientesTableProps> = ({
       render: (cliente) => <span className="clientes-table-name">{cliente.nome}</span>,
     },
     {
-      key: 'cpfMascarado',
+      key: 'documentoMascarado',
       label: 'CPF',
-      render: (cliente) => <span className="clientes-table-muted">{cliente.cpfMascarado}</span>,
+      render: (cliente) => <span className="clientes-table-muted">{cliente.documentoMascarado}</span>,
     },
     {
       key: 'status',

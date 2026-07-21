@@ -1,7 +1,9 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 using WebApolice.Modulos.Clientes.Application.Ports;
 using WebApolice.Modulos.Clientes.Domain.Exceptions;
 using WebApolice.Modulos.Clientes.Infrastructure.Persistence;
@@ -62,55 +64,103 @@ public sealed class AlterarClienteHandler
             cliente.AtualizarDados(command.Falecido, command.DataObito, command.Observacao);
 
             // Contatos
-            await TratarContato(pessoa.Id, "EMAIL", command.Email, cancellationToken);
-            await TratarContato(pessoa.Id, "TELEFONE", command.Telefone, cancellationToken);
-            await TratarContato(pessoa.Id, "CELULAR", command.Celular, cancellationToken);
+            var contatosAtuais = await _dbContext.Contatos
+                .Where(x => x.PessoaId == pessoa.Id && x.Ativo)
+                .ToListAsync(cancellationToken);
 
-            // Endereço
-            var enderecoAtual = await _repository.ObterEnderecoPrincipalAsync(pessoa.Id, cancellationToken);
-            if (command.Endereco != null)
+            var contatosManter = new HashSet<long>();
+
+            if (command.Contatos != null)
             {
-                if (enderecoAtual != null)
+                foreach (var incoming in command.Contatos)
                 {
-                    bool mudouEndereco = enderecoAtual.CidadeId != command.Endereco.CidadeId ||
-                                         enderecoAtual.Cep != command.Endereco.Cep ||
-                                         enderecoAtual.Logradouro != command.Endereco.Logradouro ||
-                                         enderecoAtual.Numero != command.Endereco.Numero ||
-                                         enderecoAtual.Complemento != command.Endereco.Complemento ||
-                                         enderecoAtual.Bairro != command.Endereco.Bairro ||
-                                         enderecoAtual.Uf != command.Endereco.Uf;
+                    if (string.IsNullOrWhiteSpace(incoming.Valor)) continue;
 
-                    if (mudouEndereco)
+                    var tipo = incoming.TipoContato.ToUpperInvariant();
+                    var valorLimpo = NormalizarContatoValor(tipo, incoming.Valor);
+
+                    var matching = contatosAtuais.FirstOrDefault(c =>
+                        c.TipoContato.Equals(tipo, StringComparison.OrdinalIgnoreCase) &&
+                        c.ValorNormalizado == valorLimpo &&
+                        c.Principal == incoming.Principal
+                    );
+
+                    if (matching != null)
                     {
-                        enderecoAtual.Inativar();
-                        _repository.AdicionarEndereco(new PessoaEnderecoModel(
+                        contatosManter.Add(matching.Id);
+                    }
+                    else
+                    {
+                        _repository.AdicionarContato(new PessoaContatoModel(
                             pessoa.Id,
-                            command.Endereco.CidadeId,
-                            "RESIDENCIAL",
-                            command.Endereco.Cep,
-                            command.Endereco.Logradouro,
-                            command.Endereco.Numero,
-                            command.Endereco.Complemento,
-                            command.Endereco.Bairro,
-                            command.Endereco.Uf,
-                            true
+                            tipo,
+                            incoming.Valor,
+                            valorLimpo,
+                            incoming.Principal
                         ));
                     }
                 }
-                else
+            }
+
+            foreach (var contato in contatosAtuais)
+            {
+                if (!contatosManter.Contains(contato.Id))
                 {
-                    _repository.AdicionarEndereco(new PessoaEnderecoModel(
-                        pessoa.Id,
-                        command.Endereco.CidadeId,
-                        "RESIDENCIAL",
-                        command.Endereco.Cep,
-                        command.Endereco.Logradouro,
-                        command.Endereco.Numero,
-                        command.Endereco.Complemento,
-                        command.Endereco.Bairro,
-                        command.Endereco.Uf,
-                        true
-                    ));
+                    contato.Inativar();
+                }
+            }
+
+            // Endereços
+            var enderecosAtuais = await _dbContext.Enderecos
+                .Where(x => x.PessoaId == pessoa.Id && x.Ativo)
+                .ToListAsync(cancellationToken);
+
+            var enderecosManter = new HashSet<long>();
+
+            if (command.Enderecos != null)
+            {
+                foreach (var incoming in command.Enderecos)
+                {
+                    var tipoEnd = incoming.TipoEndereco.ToUpperInvariant();
+                    var matching = enderecosAtuais.FirstOrDefault(e =>
+                        e.TipoEndereco.Equals(tipoEnd, StringComparison.OrdinalIgnoreCase) &&
+                        e.Cep == incoming.Cep &&
+                        e.Logradouro == incoming.Logradouro &&
+                        e.Numero == incoming.Numero &&
+                        e.Complemento == incoming.Complemento &&
+                        e.Bairro == incoming.Bairro &&
+                        e.CidadeId == incoming.CidadeId &&
+                        e.Uf == incoming.Uf &&
+                        e.Principal == incoming.Principal
+                    );
+
+                    if (matching != null)
+                    {
+                        enderecosManter.Add(matching.Id);
+                    }
+                    else
+                    {
+                        _repository.AdicionarEndereco(new PessoaEnderecoModel(
+                            pessoa.Id,
+                            incoming.CidadeId,
+                            tipoEnd,
+                            incoming.Cep,
+                            incoming.Logradouro,
+                            incoming.Numero,
+                            incoming.Complemento,
+                            incoming.Bairro,
+                            incoming.Uf,
+                            incoming.Principal
+                        ));
+                    }
+                }
+            }
+
+            foreach (var end in enderecosAtuais)
+            {
+                if (!enderecosManter.Contains(end.Id))
+                {
+                    end.Inativar();
                 }
             }
 
@@ -124,31 +174,9 @@ public sealed class AlterarClienteHandler
         }
     }
 
-    private async Task TratarContato(long pessoaId, string tipoContato, string? valor, CancellationToken cancellationToken)
+    private static string NormalizarContatoValor(string tipo, string valor)
     {
-        var contatoAtual = await _repository.ObterContatoPrincipalAsync(pessoaId, tipoContato, cancellationToken);
-
-        if (string.IsNullOrWhiteSpace(valor))
-        {
-            contatoAtual?.Inativar();
-        }
-        else
-        {
-            var valorLimpo = tipoContato != "EMAIL" ? LimparDocumento(valor) : valor.ToUpperInvariant();
-            
-            if (contatoAtual != null)
-            {
-                if (contatoAtual.ValorNormalizado != valorLimpo)
-                {
-                    contatoAtual.Inativar();
-                    _repository.AdicionarContato(new PessoaContatoModel(pessoaId, tipoContato, valor, valorLimpo, true));
-                }
-            }
-            else
-            {
-                _repository.AdicionarContato(new PessoaContatoModel(pessoaId, tipoContato, valor, valorLimpo, true));
-            }
-        }
+        return tipo.ToUpperInvariant() != "EMAIL" ? LimparDocumento(valor) : valor.ToUpperInvariant();
     }
 
     private static string LimparDocumento(string? doc)

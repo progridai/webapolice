@@ -48,7 +48,7 @@ describe('ClientesListPage', () => {
   it('deve exibir tabela com clientes quando dados forem carregados com sucesso', async () => {
     const mockData = {
       itens: [
-        { id: 1, nome: 'João da Silva', cpfMascarado: '111.123.456-11', status: 'ativo', dataCadastroUtc: '2026-07-04T12:00:00Z' }
+        { id: 1, nome: 'João da Silva', documentoMascarado: '111.123.456-11', status: 'ativo', dataCadastroUtc: '2026-07-04T12:00:00Z' }
       ],
       paginaAtual: 1,
       tamanhoPagina: 20,

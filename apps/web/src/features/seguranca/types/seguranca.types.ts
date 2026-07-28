@@ -163,4 +163,8 @@ export type AuditoriaDetalheDto = AuditoriaListDto;
 export interface AuditoriaQuery {
   page?: number;
   pageSize?: number;
+  acao?: string;
+  entidade?: string;
+  dataInicial?: string;
+  dataFinal?: string;
 }

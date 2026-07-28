@@ -14,10 +14,11 @@ import {
   ResultsSummary,
   RowActions,
   Skeleton,
+  Input,
 } from '../../../components/ui';
 import './Seguranca.css';
 import type { Column } from '../../../components/ui/DataTable/DataTable';
-import type { AuditoriaListDto } from '../types/seguranca.types';
+import type { AuditoriaListDto, AuditoriaQuery } from '../types/seguranca.types';
 
 const PAGE_SIZE = 20;
 
@@ -37,9 +38,44 @@ function formatDate(iso: string): string {
 
 export const AuditoriaListPage: React.FC = () => {
   const [page, setPage] = useState(1);
+  const [filters, setFilters] = useState({
+    acao: '',
+    entidade: '',
+    dataInicial: '',
+    dataFinal: '',
+  });
+  
+  const [query, setQuery] = useState<AuditoriaQuery>({
+    page: 1,
+    pageSize: PAGE_SIZE,
+  });
+  
   const navigate = useNavigate();
 
-  const { data, isLoading, error, retry } = useAuditoriaList({ page, pageSize: PAGE_SIZE });
+  const { data, isLoading, error, retry } = useAuditoriaList(query);
+
+  const handleFilter = (e: React.FormEvent) => {
+    e.preventDefault();
+    setPage(1);
+    setQuery({
+      page: 1,
+      pageSize: PAGE_SIZE,
+      acao: filters.acao || undefined,
+      entidade: filters.entidade || undefined,
+      dataInicial: filters.dataInicial || undefined,
+      dataFinal: filters.dataFinal || undefined,
+    });
+  };
+
+  const handleClearFilters = () => {
+    setFilters({ acao: '', entidade: '', dataInicial: '', dataFinal: '' });
+    setPage(1);
+    setQuery({ page: 1, pageSize: PAGE_SIZE });
+  };
+
+  useEffect(() => {
+    setQuery(prev => ({ ...prev, page }));
+  }, [page]);
 
   useEffect(() => {
     document.title = 'Auditoria | WebApolice';
@@ -120,13 +156,52 @@ export const AuditoriaListPage: React.FC = () => {
           <Skeleton className="seguranca-skeleton-row" />
           <Skeleton className="seguranca-skeleton-row" />
         </div>
-      ) : !hasData && !isLoading ? (
+      ) : !hasData && !isLoading && Object.keys(query).length <= 2 ? (
         <EmptyState
           title="Nenhum registro de auditoria"
           description="Ainda não há eventos de auditoria registrados no sistema."
         />
       ) : (
         <div className="seguranca-content">
+          <form className="seguranca-filters" onSubmit={handleFilter} style={{ display: 'flex', gap: '16px', marginBottom: '24px', flexWrap: 'wrap', alignItems: 'flex-end' }}>
+            <div style={{ flex: '1', minWidth: '150px' }}>
+              <label className="ui-label text-sm font-medium">Ação</label>
+              <Input
+                placeholder="Ex: USUARIO_CRIADO"
+                value={filters.acao}
+                onChange={(e) => setFilters(f => ({ ...f, acao: e.target.value }))}
+              />
+            </div>
+            <div style={{ flex: '1', minWidth: '150px' }}>
+              <label className="ui-label text-sm font-medium">Entidade</label>
+              <Input
+                placeholder="Ex: USUARIO"
+                value={filters.entidade}
+                onChange={(e) => setFilters(f => ({ ...f, entidade: e.target.value }))}
+              />
+            </div>
+            <div style={{ flex: '1', minWidth: '150px' }}>
+              <label className="ui-label text-sm font-medium">Data Inicial</label>
+              <Input
+                type="date"
+                value={filters.dataInicial}
+                onChange={(e) => setFilters(f => ({ ...f, dataInicial: e.target.value }))}
+              />
+            </div>
+            <div style={{ flex: '1', minWidth: '150px' }}>
+              <label className="ui-label text-sm font-medium">Data Final</label>
+              <Input
+                type="date"
+                value={filters.dataFinal}
+                onChange={(e) => setFilters(f => ({ ...f, dataFinal: e.target.value }))}
+              />
+            </div>
+            <div style={{ display: 'flex', gap: '8px' }}>
+              <Button type="submit" variant="primary">Filtrar</Button>
+              <Button type="button" variant="secondary" onClick={handleClearFilters}>Limpar</Button>
+            </div>
+          </form>
+
           {data && hasData && (
             <ResultsSummary
               currentPage={data.paginaAtual}

@@ -18,9 +18,13 @@ public class AuditoriaController : ControllerBase
         [FromServices] ListarAuditoriaUseCase useCase,
         [FromQuery] int pagina = 1,
         [FromQuery] int tamanhoPagina = 20,
+        [FromQuery] string? acao = null,
+        [FromQuery] string? entidade = null,
+        [FromQuery] DateTime? dataInicial = null,
+        [FromQuery] DateTime? dataFinal = null,
         CancellationToken cancellationToken = default)
     {
-        var resultado = await useCase.ExecuteAsync(pagina, tamanhoPagina, cancellationToken);
+        var resultado = await useCase.ExecuteAsync(pagina, tamanhoPagina, acao, entidade, dataInicial, dataFinal, cancellationToken);
         return Ok(resultado);
     }
 

@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using WebApolice.Modulos.Seguranca.Application.Ports;
 using WebApolice.Modulos.Seguranca.Domain;
+using WebApolice.Modulos.Seguranca.Domain.Exceptions;
 using WebApolice.Modulos.Seguranca.Infrastructure.Persistence;
 
 namespace WebApolice.Modulos.Seguranca.Application.UseCases.Usuarios;
@@ -40,10 +41,10 @@ public class CriarUsuarioUseCase
         List<Guid> perfilPublicIds,
         CancellationToken cancellationToken)
     {
-        if (string.IsNullOrWhiteSpace(username)) throw new ArgumentException("Username é obrigatório");
-        if (string.IsNullOrWhiteSpace(nome)) throw new ArgumentException("Nome é obrigatório");
-        if (string.IsNullOrWhiteSpace(email)) throw new ArgumentException("E-mail é obrigatório");
-        if (string.IsNullOrWhiteSpace(senhaTemporaria)) throw new ArgumentException("Senha temporária é obrigatória");
+        if (string.IsNullOrWhiteSpace(username)) throw new UsuarioInvalidoException("Username é obrigatório");
+        if (string.IsNullOrWhiteSpace(nome)) throw new UsuarioInvalidoException("Nome é obrigatório");
+        if (string.IsNullOrWhiteSpace(email)) throw new UsuarioInvalidoException("E-mail é obrigatório");
+        if (string.IsNullOrWhiteSpace(senhaTemporaria)) throw new UsuarioInvalidoException("Senha temporária é obrigatória");
 
         var perfisParaAtribuir = await _dbContext.Perfis
             .Where(p => perfilPublicIds.Contains(p.PublicId) && p.Ativo)
@@ -51,17 +52,17 @@ public class CriarUsuarioUseCase
 
         if (perfisParaAtribuir.Count != perfilPublicIds.Count)
         {
-            throw new InvalidOperationException("Um ou mais perfis informados são inválidos ou estão inativos.");
+            throw new UsuarioInvalidoException("Um ou mais perfis informados são inválidos ou estão inativos.");
         }
 
         var duplicado = await _dbContext.Usuarios.AnyAsync(u => u.Username == username || u.Email == email, cancellationToken);
-        if (duplicado) throw new InvalidOperationException("Username ou E-mail já cadastrado localmente.");
+        if (duplicado) throw new UsuarioInvalidoException("Username ou E-mail já cadastrado localmente.");
 
         if (await _keycloakClient.ExisteUsernameAsync(username, cancellationToken))
-            throw new InvalidOperationException("Username já existe no Keycloak.");
+            throw new UsuarioInvalidoException("Username já existe no Keycloak.");
 
         if (await _keycloakClient.ExisteEmailAsync(email, cancellationToken))
-            throw new InvalidOperationException("E-mail já existe no Keycloak.");
+            throw new UsuarioInvalidoException("E-mail já existe no Keycloak.");
 
         var keycloakSub = await _keycloakClient.CriarUsuarioAsync(username, email, nome, ativo, cancellationToken);
 

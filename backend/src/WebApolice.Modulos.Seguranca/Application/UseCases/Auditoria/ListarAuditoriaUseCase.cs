@@ -21,9 +21,35 @@ public class ListarAuditoriaUseCase
     public async Task<ListagemPaginadaDto<AuditoriaDto>> ExecuteAsync(
         int pagina,
         int tamanhoPagina,
+        string? acao,
+        string? entidade,
+        DateTime? dataInicial,
+        DateTime? dataFinal,
         CancellationToken cancellationToken)
     {
         var query = _dbContext.AuditoriaPermissoes.AsNoTracking();
+
+        if (!string.IsNullOrWhiteSpace(acao))
+        {
+            query = query.Where(a => a.Acao.Contains(acao));
+        }
+        
+        if (!string.IsNullOrWhiteSpace(entidade))
+        {
+            query = query.Where(a => a.EntidadeTipo.Contains(entidade));
+        }
+
+        if (dataInicial.HasValue)
+        {
+            var start = dataInicial.Value.Date.ToUniversalTime();
+            query = query.Where(a => a.CreatedAt >= start);
+        }
+
+        if (dataFinal.HasValue)
+        {
+            var end = dataFinal.Value.Date.AddDays(1).AddTicks(-1).ToUniversalTime();
+            query = query.Where(a => a.CreatedAt <= end);
+        }
 
         var totalItens = await query.CountAsync(cancellationToken);
         

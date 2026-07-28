@@ -31,6 +31,8 @@ export interface HttpOptions {
   timeoutMs?: number;
   /** Não incluir o token de autorização (para rotas públicas) */
   skipAuth?: boolean;
+  /** Query parameters */
+  params?: Record<string, string | number | boolean>;
 }
 
 /** Resposta tipada do cliente HTTP */

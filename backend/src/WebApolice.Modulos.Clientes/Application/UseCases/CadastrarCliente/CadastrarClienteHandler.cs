@@ -8,17 +8,23 @@ using WebApolice.Modulos.Clientes.Domain.Exceptions;
 using WebApolice.Modulos.Clientes.Infrastructure.Persistence;
 using WebApolice.Modulos.Clientes.Infrastructure.Persistence.Models;
 
+using WebApolice.Auditoria.Contracts;
+using WebApolice.Auditoria.Domain;
+using System.Text.Json;
+
 namespace WebApolice.Modulos.Clientes.Application.UseCases.CadastrarCliente;
 
 public sealed class CadastrarClienteHandler
 {
     private readonly IClienteRepository _repository;
     private readonly ClientesDbContext _dbContext;
+    private readonly IRegistradorAuditoria _auditoria;
 
-    public CadastrarClienteHandler(IClienteRepository repository, ClientesDbContext dbContext)
+    public CadastrarClienteHandler(IClienteRepository repository, ClientesDbContext dbContext, IRegistradorAuditoria auditoria)
     {
         _repository = repository;
         _dbContext = dbContext;
+        _auditoria = auditoria;
     }
 
     public async Task<CadastrarClienteResult> Handle(CadastrarClienteCommand command, string usuarioSub, CancellationToken cancellationToken)
@@ -135,6 +141,16 @@ public sealed class CadastrarClienteHandler
 
             await _repository.SalvarAlteracoesAsync(cancellationToken);
             await transaction.CommitAsync(cancellationToken);
+
+            await _auditoria.RegistrarAsync(new RegistroAuditoria
+            {
+                Acao = "CLIENTE_CRIADO",
+                Modulo = "Clientes",
+                Recurso = "cliente",
+                RecursoId = cliente.PublicId.ToString(),
+                Resultado = ResultadoAuditoria.Sucesso,
+                DadosPosteriores = JsonSerializer.SerializeToDocument(new { command.Nome, command.Documento, command.TipoPessoa })
+            }, cancellationToken);
 
             var docMascarado = MascararDocumento(documentoLimpo, command.TipoPessoa);
             var statusStr = cliente.StatusId == statusAtivo.Id ? statusAtivo.Nome : statusInativo.Nome;

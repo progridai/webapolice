@@ -34,10 +34,24 @@ export function setTokenProvider(provider: TokenProvider): void {
 }
 
 /** Constrói a URL completa a partir do path */
-function buildUrl(path: string): string {
+function buildUrl(path: string, params?: Record<string, string | number | boolean>): string {
   const base = API_CONFIG.BASE_URL.replace(/\/$/, '');
   const normalizedPath = path.startsWith('/') ? path : `/${path}`;
-  return `${base}${normalizedPath}`;
+  let url = `${base}${normalizedPath}`;
+  
+  if (params) {
+    const searchParams = new URLSearchParams();
+    Object.entries(params).forEach(([key, value]) => {
+      if (value !== undefined && value !== null) {
+        searchParams.append(key, String(value));
+      }
+    });
+    const queryString = searchParams.toString();
+    if (queryString) {
+      url += `?${queryString}`;
+    }
+  }
+  return url;
 }
 
 /** Executa uma requisição com timeout */
@@ -105,7 +119,7 @@ async function request<T>(
     requestOptions.body = JSON.stringify(body);
   }
 
-  const url = buildUrl(path);
+  const url = buildUrl(path, options.params);
   let response: Response;
   try {
     response = await fetchWithTimeout(url, requestOptions, timeoutMs);

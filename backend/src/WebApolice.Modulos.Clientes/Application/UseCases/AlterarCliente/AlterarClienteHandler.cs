@@ -9,17 +9,23 @@ using WebApolice.Modulos.Clientes.Domain.Exceptions;
 using WebApolice.Modulos.Clientes.Infrastructure.Persistence;
 using WebApolice.Modulos.Clientes.Infrastructure.Persistence.Models;
 
+using WebApolice.Auditoria.Contracts;
+using WebApolice.Auditoria.Domain;
+using System.Text.Json;
+
 namespace WebApolice.Modulos.Clientes.Application.UseCases.AlterarCliente;
 
 public sealed class AlterarClienteHandler
 {
     private readonly IClienteRepository _repository;
     private readonly ClientesDbContext _dbContext;
+    private readonly IRegistradorAuditoria _auditoria;
 
-    public AlterarClienteHandler(IClienteRepository repository, ClientesDbContext dbContext)
+    public AlterarClienteHandler(IClienteRepository repository, ClientesDbContext dbContext, IRegistradorAuditoria auditoria)
     {
         _repository = repository;
         _dbContext = dbContext;
+        _auditoria = auditoria;
     }
 
     public async Task Handle(AlterarClienteCommand command, string usuarioSub, CancellationToken cancellationToken)
@@ -166,6 +172,16 @@ public sealed class AlterarClienteHandler
 
             await _repository.SalvarAlteracoesAsync(cancellationToken);
             await transaction.CommitAsync(cancellationToken);
+
+            await _auditoria.RegistrarAsync(new RegistroAuditoria
+            {
+                Acao = "CLIENTE_ALTERADO",
+                Modulo = "Clientes",
+                Recurso = "cliente",
+                RecursoId = cliente.PublicId.ToString(),
+                Resultado = ResultadoAuditoria.Sucesso,
+                DadosPosteriores = JsonSerializer.SerializeToDocument(new { command.Nome, command.Documento })
+            }, cancellationToken);
         }
         catch (Exception)
         {

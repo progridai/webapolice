@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using WebApolice.Modulos.Seguranca.Application.Ports;
 using WebApolice.Modulos.Seguranca.Domain;
+using WebApolice.Modulos.Seguranca.Domain.Exceptions;
 using WebApolice.Modulos.Seguranca.Infrastructure.Persistence;
 
 namespace WebApolice.Modulos.Seguranca.Application.UseCases.Usuarios;
@@ -44,9 +45,9 @@ public class AtualizarUsuarioUseCase
             .ThenInclude(up => up.Perfil)
             .FirstOrDefaultAsync(u => u.PublicId == publicId, cancellationToken);
 
-        if (usuario == null) throw new InvalidOperationException("Usuário não encontrado.");
-        if (string.IsNullOrWhiteSpace(nome)) throw new ArgumentException("Nome é obrigatório");
-        if (string.IsNullOrWhiteSpace(email)) throw new ArgumentException("E-mail é obrigatório");
+        if (usuario == null) throw new UsuarioInvalidoException("Usuário não encontrado.");
+        if (string.IsNullOrWhiteSpace(nome)) throw new UsuarioInvalidoException("Nome é obrigatório");
+        if (string.IsNullOrWhiteSpace(email)) throw new UsuarioInvalidoException("E-mail é obrigatório");
 
         var perfisParaAtribuir = await _dbContext.Perfis
             .Where(p => perfilPublicIds.Contains(p.PublicId))
@@ -54,11 +55,11 @@ public class AtualizarUsuarioUseCase
 
         if (perfisParaAtribuir.Any(p => !p.Ativo && !usuario.Perfis.Any(up => up.PerfilId == p.Id)))
         {
-            throw new InvalidOperationException("Não é permitido atribuir um perfil inativo que o usuário já não possua.");
+            throw new UsuarioInvalidoException("Não é permitido atribuir um perfil inativo que o usuário já não possua.");
         }
 
         var keycloakAnterior = await _keycloakClient.ObterUsuarioPorSubAsync(usuario.KeycloakSub, cancellationToken);
-        if (keycloakAnterior == null) throw new InvalidOperationException("Usuário não encontrado no Keycloak.");
+        if (keycloakAnterior == null) throw new UsuarioInvalidoException("Usuário não encontrado no Keycloak.");
 
         await _keycloakClient.AtualizarUsuarioAsync(usuario.KeycloakSub, email, nome, ativo, cancellationToken);
 

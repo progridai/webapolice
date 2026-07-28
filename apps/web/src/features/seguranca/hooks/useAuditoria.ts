@@ -20,7 +20,7 @@ export function useAuditoriaList(query: AuditoriaQuery) {
     error: null,
   });
 
-  const fetch = useCallback(async () => {
+  const fetch = async () => {
     setState((prev) => ({ ...prev, isLoading: true, error: null }));
     try {
       const data = await listarAuditoria(query);
@@ -32,13 +32,12 @@ export function useAuditoriaList(query: AuditoriaQuery) {
         error: new Error('Não foi possível carregar os registros de auditoria.'),
       }));
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [query.page, query.pageSize]);
+  };
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetch();
-  }, [fetch]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [query.page, query.pageSize, query.acao, query.entidade, query.dataInicial, query.dataFinal]);
 
   return { ...state, retry: fetch };
 }

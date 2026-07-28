@@ -13,6 +13,7 @@ using Xunit;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using WebApolice.Auditoria.Contracts;
 
 namespace WebApolice.Modulos.Clientes.Tests.Application.UseCases.AlterarCliente;
 
@@ -31,7 +32,8 @@ public class AlterarClienteHandlerTests
         var transactionMock = new Mock<IDbContextTransaction>();
         _dbContextMock.Setup(x => x.BeginTransactionAsync(It.IsAny<CancellationToken>())).ReturnsAsync(transactionMock.Object);
 
-        _handler = new AlterarClienteHandler(_repositoryMock.Object, _dbContextMock.Object);
+        var auditoriaMock = new Mock<IRegistradorAuditoria>();
+        _handler = new AlterarClienteHandler(_repositoryMock.Object, _dbContextMock.Object, auditoriaMock.Object);
     }
 
     [Fact]

@@ -8,6 +8,8 @@ using WebApolice.Modulos.Clientes.Domain.Exceptions;
 using WebApolice.Modulos.Clientes.Infrastructure.Persistence.Repositories;
 using WebApolice.Integration.Tests.Setup;
 using Xunit;
+using Moq;
+using WebApolice.Auditoria.Contracts;
 
 namespace WebApolice.Integration.Tests.Modulos.Clientes;
 
@@ -26,7 +28,8 @@ public class AtomicidadeTests : IClassFixture<ClientesIntegrationTestFixture>
         // Arrange
         var dbContext = _fixture.DbContext;
         var repository = new ClienteRepository(dbContext);
-        var handler = new CadastrarClienteHandler(repository, dbContext);
+        var auditoriaMock = new Mock<IRegistradorAuditoria>();
+        var handler = new CadastrarClienteHandler(repository, dbContext, auditoriaMock.Object);
 
         var enderecoRequest = new WebApolice.Modulos.Clientes.Application.UseCases.CadastrarCliente.EnderecoCommand(
             "RESIDENCIAL",

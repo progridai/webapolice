@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using WebApolice.Modulos.Clientes.Domain.Exceptions;
+using WebApolice.Modulos.Seguranca.Domain.Exceptions;
 
 namespace WebApolice.Api.Infrastructure.Errors;
 
@@ -82,6 +83,14 @@ public class GlobalExceptionHandler : IExceptionHandler
                 Instance = context.Request.Path
             },
             ClienteInvalidoException => new ProblemDetails
+            {
+                Type = "https://webapolice/errors/regra-de-negocio",
+                Title = "Regra de negócio violada",
+                Status = StatusCodes.Status422UnprocessableEntity,
+                Detail = exception.Message,
+                Instance = context.Request.Path
+            },
+            UsuarioInvalidoException => new ProblemDetails
             {
                 Type = "https://webapolice/errors/regra-de-negocio",
                 Title = "Regra de negócio violada",

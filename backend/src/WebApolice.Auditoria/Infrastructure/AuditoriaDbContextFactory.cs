@@ -1,3 +1,4 @@
+using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 
@@ -8,7 +9,11 @@ public class AuditoriaDbContextFactory : IDesignTimeDbContextFactory<AuditoriaDb
     public AuditoriaDbContext CreateDbContext(string[] args)
     {
         var optionsBuilder = new DbContextOptionsBuilder<AuditoriaDbContext>();
-        optionsBuilder.UseNpgsql("Host=localhost;Database=dummy;Username=postgres;Password=postgres", 
+        
+        var connectionString = Environment.GetEnvironmentVariable("ConnectionStrings__PostgreSql") 
+            ?? "Host=painel.bravida.com.br;Port=5432;Database=webapolice;Username=webapolice_app;Password=app_bravida";
+
+        optionsBuilder.UseNpgsql(connectionString, 
             o => 
             {
                 o.MigrationsHistoryTable("__EFMigrationsHistory", "auditoria");

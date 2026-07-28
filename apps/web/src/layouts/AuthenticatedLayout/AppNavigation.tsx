@@ -2,15 +2,25 @@ import React from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { ROUTES } from '../../app/routes/routePaths';
 import { ENV } from '../../app/config/env';
-import { useAuth } from '../../auth/useAuth';
-import { APP_ROLES } from '../../auth/roles';
-import { HomeIcon, PaletteIcon, UsersIcon } from '../../components/ui/Icons';
+import { useAuthorization } from '../../auth/AuthorizationProvider';
+import {
+  BookOpenIcon,
+  ClipboardListIcon,
+  HomeIcon,
+  PaletteIcon,
+  SettingsIcon,
+  ShieldIcon,
+  UserIcon,
+  UsersIcon,
+} from '../../components/ui/Icons';
 
 interface NavItem {
   label: string;
   path: string;
   icon: React.ComponentType<{ size?: number; className?: string }>;
-  requiresRoles?: string[];
+  moduloCodigo?: string;
+  permissaoCodigo?: string;
+  somenteOperador?: boolean;
   requiresEnvFlag?: boolean;
 }
 
@@ -24,13 +34,47 @@ const NAV_ITEMS: NavItem[] = [
     label: 'Clientes',
     path: ROUTES.CLIENTES,
     icon: UsersIcon,
-    requiresRoles: [APP_ROLES.ADMIN, APP_ROLES.GESTOR, APP_ROLES.OPERADOR],
+    moduloCodigo: 'CADASTRO',
+  },
+  {
+    label: 'Usuários',
+    path: ROUTES.SEGURANCA_USUARIOS,
+    icon: UserIcon,
+    moduloCodigo: 'SEGURANCA',
+    permissaoCodigo: 'seguranca.usuarios.visualizar',
+  },
+  {
+    label: 'Perfis',
+    path: ROUTES.SEGURANCA_PERFIS,
+    icon: ShieldIcon,
+    moduloCodigo: 'SEGURANCA',
+    permissaoCodigo: 'seguranca.perfis.visualizar',
+  },
+  {
+    label: 'Catálogo',
+    path: ROUTES.SEGURANCA_CATALOGO,
+    icon: BookOpenIcon,
+    moduloCodigo: 'SEGURANCA',
+    permissaoCodigo: 'seguranca.catalogo.visualizar',
+  },
+  {
+    label: 'Auditoria',
+    path: ROUTES.SEGURANCA_AUDITORIA,
+    icon: ClipboardListIcon,
+    moduloCodigo: 'SEGURANCA',
+    permissaoCodigo: 'seguranca.auditoria.visualizar',
+  },
+  {
+    label: 'Módulos',
+    path: ROUTES.SEGURANCA_MODULOS,
+    icon: SettingsIcon,
+    somenteOperador: true,
   },
   {
     label: 'Design System',
     path: ROUTES.DESIGN_SYSTEM,
     icon: PaletteIcon,
-    requiresRoles: [APP_ROLES.ADMIN],
+    somenteOperador: true,
     requiresEnvFlag: true,
   },
 ];
@@ -40,12 +84,14 @@ interface AppNavigationProps {
 }
 
 export const AppNavigation: React.FC<AppNavigationProps> = ({ onNavigate }) => {
-  const { hasAnyRole } = useAuth();
+  const { ehOperadorSistema, possuiModulo, possuiPermissao, possuiAcessoTotal } = useAuthorization();
   const location = useLocation();
 
   const visibleItems = NAV_ITEMS.filter((item) => {
     if (item.requiresEnvFlag && !ENV.ENABLE_DESIGN_SYSTEM) return false;
-    if (item.requiresRoles && !hasAnyRole(item.requiresRoles)) return false;
+    if (item.somenteOperador && !ehOperadorSistema()) return false;
+    if (item.moduloCodigo && !possuiModulo(item.moduloCodigo)) return false;
+    if (item.permissaoCodigo && !possuiAcessoTotal() && !possuiPermissao(item.permissaoCodigo)) return false;
     return true;
   });
 

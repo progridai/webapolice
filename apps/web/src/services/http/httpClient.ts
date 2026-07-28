@@ -76,11 +76,17 @@ async function request<T>(
   const authHeaders: Record<string, string> = {};
   if (!skipAuth && _tokenProvider) {
     try {
-      const token = await _tokenProvider();
+      // Adiciona um timeout de 5 segundos para a obtenção do token
+      const tokenPromise = _tokenProvider();
+      const timeoutPromise = new Promise<never>((_, reject) => {
+        setTimeout(() => reject(new Error('Timeout ao obter token')), 5000);
+      });
+      const token = await Promise.race([tokenPromise, timeoutPromise]);
       if (token) {
         authHeaders['Authorization'] = `Bearer ${token}`;
       }
-    } catch {
+    } catch (err) {
+      console.warn('[httpClient] Falha ao obter token de acesso:', err);
       // Falha silenciosa — a API retornará 401 e o fluxo de renovação cuidará disso
     }
   }
@@ -104,6 +110,7 @@ async function request<T>(
   try {
     response = await fetchWithTimeout(url, requestOptions, timeoutMs);
   } catch (error) {
+    console.error(`[httpClient] Falha de rede ao acessar ${url}:`, error);
     throw normalizeNetworkError(error);
   }
 

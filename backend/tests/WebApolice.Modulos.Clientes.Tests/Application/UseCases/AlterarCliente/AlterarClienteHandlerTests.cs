@@ -38,7 +38,7 @@ public class AlterarClienteHandlerTests
     public async Task Handle_DeveLancarExcecao_QuandoClienteNaoExistir()
     {
         // Arrange
-        var command = new AlterarClienteCommand(Guid.NewGuid(), "Nome", null, new DateOnly(1990, 1, 1), null, null, false, null, "Email", "Tel", "Cel", null);
+        var command = new AlterarClienteCommand(Guid.NewGuid(), "Nome", null, new DateOnly(1990, 1, 1), null, null, false, null, Array.Empty<WebApolice.Modulos.Clientes.Application.UseCases.CadastrarCliente.ContatoCommand>(), Array.Empty<WebApolice.Modulos.Clientes.Application.UseCases.CadastrarCliente.EnderecoCommand>());
         _repositoryMock.Setup(x => x.ObterParaEdicaoPorPublicIdAsync(command.Id, It.IsAny<CancellationToken>()))
             .ReturnsAsync((Cliente?)null);
 
@@ -55,7 +55,7 @@ public class AlterarClienteHandlerTests
         // Arrange
         var cliente = new Cliente(1, 1);
         var pessoa = new PessoaModel(1, "Nome", "12345678901", "12345678901", true, new DateOnly(1990, 1, 1), 1, "");
-        var command = new AlterarClienteCommand(cliente.PublicId, "Novo Nome", null, new DateOnly(1990, 1, 1), null, null, false, null, null, null, null, null);
+        var command = new AlterarClienteCommand(cliente.PublicId, "Novo Nome", null, new DateOnly(1990, 1, 1), null, null, false, null, Array.Empty<WebApolice.Modulos.Clientes.Application.UseCases.CadastrarCliente.ContatoCommand>(), Array.Empty<WebApolice.Modulos.Clientes.Application.UseCases.CadastrarCliente.EnderecoCommand>());
 
         _repositoryMock.Setup(x => x.ObterParaEdicaoPorPublicIdAsync(command.Id, It.IsAny<CancellationToken>())).ReturnsAsync(cliente);
         _repositoryMock.Setup(x => x.LocalizarPessoaPorIdAsync(cliente.PessoaId, It.IsAny<CancellationToken>())).ReturnsAsync(pessoa);
@@ -74,7 +74,7 @@ public class AlterarClienteHandlerTests
         // Arrange
         var cliente = new Cliente(1, 1);
         var pessoa = new PessoaModel(1, "Nome Antigo", "12345678901", "12345678901", true, new DateOnly(1990, 1, 1), 1, "");
-        var command = new AlterarClienteCommand(cliente.PublicId, "Nome Novo", null, new DateOnly(1990, 1, 1), 2, null, false, null, null, null, null, null);
+        var command = new AlterarClienteCommand(cliente.PublicId, "Nome Novo", null, new DateOnly(1990, 1, 1), 2, null, false, null, Array.Empty<WebApolice.Modulos.Clientes.Application.UseCases.CadastrarCliente.ContatoCommand>(), Array.Empty<WebApolice.Modulos.Clientes.Application.UseCases.CadastrarCliente.EnderecoCommand>());
 
         _repositoryMock.Setup(x => x.ObterParaEdicaoPorPublicIdAsync(command.Id, It.IsAny<CancellationToken>())).ReturnsAsync(cliente);
         _repositoryMock.Setup(x => x.LocalizarPessoaPorIdAsync(cliente.PessoaId, It.IsAny<CancellationToken>())).ReturnsAsync(pessoa);
@@ -98,7 +98,7 @@ public class AlterarClienteHandlerTests
         // Arrange
         var cliente = new Cliente(1, 1);
         var pessoa = new PessoaModel(1, "Nome", "12345678901", "12345678901", true, new DateOnly(1990, 1, 1), 1, "");
-        var command = new AlterarClienteCommand(cliente.PublicId, "Nome", null, new DateOnly(1990, 1, 1), null, null, false, null, "", null, null, null);
+        var command = new AlterarClienteCommand(cliente.PublicId, "Nome", null, new DateOnly(1990, 1, 1), null, null, false, null, Array.Empty<WebApolice.Modulos.Clientes.Application.UseCases.CadastrarCliente.ContatoCommand>(), Array.Empty<WebApolice.Modulos.Clientes.Application.UseCases.CadastrarCliente.EnderecoCommand>());
 
         var contatoEmailExistente = new PessoaContatoModel(pessoa.Id, "EMAIL", "teste@teste.com", "TESTE@TESTE.COM", true);
 

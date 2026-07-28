@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { ROUTES } from '../../../app/routes/routePaths';
 import { useClientes } from '../hooks/useClientes';
 import { useClientesFilters } from '../hooks/useClientesFilters';
+import { useAuthorization } from '../../../auth/AuthorizationProvider';
 import { ClientesFilters } from '../components/ClientesFilters';
 import { ClientesTable } from '../components/ClientesTable';
 import { ClientesMobileList } from '../components/ClientesMobileList';
@@ -18,6 +19,10 @@ export const ClientesListPage: React.FC = () => {
   const { data, isLoading, error, retry } = useClientes(filters);
   const [isMobile, setIsMobile] = useState(false);
   const navigate = useNavigate();
+  const { possuiPermissao, possuiAcessoTotal } = useAuthorization();
+
+  const podeInserir = possuiAcessoTotal() || possuiPermissao('clientes.inserir');
+  const podeAlterar = possuiAcessoTotal() || possuiPermissao('clientes.alterar');
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
@@ -45,7 +50,7 @@ export const ClientesListPage: React.FC = () => {
   const hasData = data && data.itens && data.itens.length > 0;
 
   return (
-    <main className="p-6 max-w-7xl mx-auto focus:outline-none flex flex-col gap-6">
+    <main className="clientes-page" tabIndex={-1}>
       <PageHeader
         title="Clientes"
         description="Gerencie e consulte os clientes da plataforma."
@@ -59,9 +64,11 @@ export const ClientesListPage: React.FC = () => {
           />
         }
         actions={
-          <Button onClick={() => navigate(ROUTES.CLIENTE_NOVO)} variant="primary">
-            Novo Cliente
-          </Button>
+          podeInserir && (
+            <Button onClick={() => navigate(ROUTES.CLIENTE_NOVO)} variant="primary">
+              Novo Cliente
+            </Button>
+          )
         }
       />
 
@@ -120,7 +127,7 @@ export const ClientesListPage: React.FC = () => {
           </div>
 
           {isMobile ? (
-            <ClientesMobileList clientes={data?.itens || []} />
+            <ClientesMobileList clientes={data?.itens || []} podeAlterar={podeAlterar} />
           ) : (
             <ClientesTable
               clientes={data?.itens || []}
@@ -130,6 +137,7 @@ export const ClientesListPage: React.FC = () => {
               onSort={handleSort}
               hasActiveFilters={hasActiveFilters}
               onClearFilters={clearFilters}
+              podeAlterar={podeAlterar}
             />
           )}
 

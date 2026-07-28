@@ -5,6 +5,6 @@
  */
 export { AppRoutes } from './AppRoutes';
 export { ProtectedRoute } from './ProtectedRoute';
-export { RoleProtectedRoute } from './RoleProtectedRoute';
+export { PermissionProtectedRoute } from './PermissionProtectedRoute';
 export { ROUTES, createPath } from './routePaths';
 export type { RoutePath } from './routePaths';

@@ -16,12 +16,15 @@ import {
 import { DescriptionItem } from '../../../components/ui/DescriptionList';
 import { useClienteDetalhe } from '../hooks/useClienteDetalhe';
 import { formatarDataOuVazio } from '../../../shared/utils/formatters';
+import { useAuthorization } from '../../../auth/AuthorizationProvider';
 
 export const ClienteDetalhePage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const location = useLocation();
   const mainRef = useRef<HTMLElement>(null);
+  const { possuiPermissao, possuiAcessoTotal } = useAuthorization();
+  const podeAlterar = possuiAcessoTotal() || possuiPermissao('clientes.alterar');
   
   const { data: cliente, isLoading, error, retry } = useClienteDetalhe(id);
 
@@ -134,7 +137,9 @@ export const ClienteDetalhePage: React.FC = () => {
         actions={
           <div className="flex gap-2">
             <Button variant="ghost" onClick={handleVoltar}>Voltar</Button>
-            <Button variant="primary" onClick={() => navigate(`/clientes/${id}/editar`)}>Editar Cliente</Button>
+            {podeAlterar && (
+              <Button variant="primary" onClick={() => navigate(`/clientes/${id}/editar`)}>Editar Cliente</Button>
+            )}
           </div>
         }
       />

@@ -5,8 +5,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using WebApolice.Shared.Infrastructure.Security;
 using WebApolice.Modulos.Clientes.Api.Requests;
+using WebApolice.Modulos.Seguranca.Application.Authorization;
+using WebApolice.Modulos.Seguranca.Infrastructure.Authorization;
 using WebApolice.Modulos.Clientes.Application.UseCases.AlterarCliente;
 using WebApolice.Modulos.Clientes.Application.UseCases.AtivarCliente;
 using WebApolice.Modulos.Clientes.Application.UseCases.CadastrarCliente;
@@ -25,7 +26,7 @@ public sealed class ClientesController : ControllerBase
     private string UsuarioSub => User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "sistema";
 
     [HttpPost]
-    [Authorize(Policy = PoliticasAutorizacao.GestaoClientes)]
+    [AuthorizePermissao(PermissoesSeguranca.Clientes.Inserir)]
     public async Task<IActionResult> Cadastrar(
         [FromBody] CadastrarClienteRequest request,
         [FromServices] CadastrarClienteHandler handler,
@@ -60,7 +61,7 @@ public sealed class ClientesController : ControllerBase
     }
 
     [HttpGet("{id}")]
-    [Authorize(Policy = PoliticasAutorizacao.ConsultaClientes)]
+    [AuthorizePermissao(PermissoesSeguranca.Clientes.Visualizar)]
     public async Task<IActionResult> ObterPorId(
         [FromRoute] System.Guid id,
         [FromServices] ConsultarClientePorIdHandler handler,
@@ -71,7 +72,7 @@ public sealed class ClientesController : ControllerBase
     }
 
     [HttpGet]
-    [Authorize(Policy = PoliticasAutorizacao.ConsultaClientes)]
+    [AuthorizePermissao(PermissoesSeguranca.Clientes.Visualizar)]
     public async Task<IActionResult> Listar(
         [FromQuery] int pagina,
         [FromQuery] int tamanho_pagina,
@@ -89,7 +90,7 @@ public sealed class ClientesController : ControllerBase
     }
 
     [HttpPut("{id}")]
-    [Authorize(Policy = PoliticasAutorizacao.GestaoClientes)]
+    [AuthorizePermissao(PermissoesSeguranca.Clientes.Alterar)]
     public async Task<IActionResult> Alterar(
         [FromRoute] System.Guid id,
         [FromBody] AlterarClienteRequest request,
@@ -124,7 +125,7 @@ public sealed class ClientesController : ControllerBase
     }
 
     [HttpPost("{id}/ativar")]
-    [Authorize(Policy = PoliticasAutorizacao.GestaoClientes)]
+    [AuthorizePermissao(PermissoesSeguranca.Clientes.Reativar)]
     public async Task<IActionResult> Ativar(
         [FromRoute] System.Guid id,
         [FromServices] AtivarClienteHandler handler,
@@ -135,7 +136,7 @@ public sealed class ClientesController : ControllerBase
     }
 
     [HttpPost("{id}/inativar")]
-    [Authorize(Policy = PoliticasAutorizacao.GestaoClientes)]
+    [AuthorizePermissao(PermissoesSeguranca.Clientes.Inativar)]
     public async Task<IActionResult> Inativar(
         [FromRoute] System.Guid id,
         [FromServices] InativarClienteHandler handler,

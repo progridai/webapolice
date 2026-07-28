@@ -16,8 +16,7 @@ import React, { Suspense, lazy } from 'react';
 import { Navigate, Route, Routes } from 'react-router-dom';
 import { ROUTES } from './routePaths';
 import { ProtectedRoute } from './ProtectedRoute';
-import { RoleProtectedRoute } from './RoleProtectedRoute';
-import { APP_ROLES } from '../../auth/roles';
+import { PermissionProtectedRoute } from './PermissionProtectedRoute';
 import { ENV } from '../config/env';
 
 // Layouts
@@ -44,6 +43,7 @@ import { PageLoading } from '../../components/application/PageLoading';
 
 // Módulos
 import { ClientesRoutes } from '../../features/clientes/routes/clientes.routes';
+import { SegurancaRoutes } from '../../features/seguranca/routes/seguranca.routes';
 
 export const AppRoutes: React.FC = () => {
   return (
@@ -76,14 +76,15 @@ export const AppRoutes: React.FC = () => {
 
       {/* ── Módulos de Funcionalidade ── */}
       {ClientesRoutes}
+      {SegurancaRoutes}
 
-      {/* ── Design System (autenticado + role admin) ── */}
+      {/* ── Design System (autenticado + operador de sistema) ── */}
       {ENV.ENABLE_DESIGN_SYSTEM && (
         <Route
           element={
-            <RoleProtectedRoute allowedRoles={[APP_ROLES.ADMIN]}>
+            <PermissionProtectedRoute somenteOperador={true}>
               <AuthenticatedLayout />
-            </RoleProtectedRoute>
+            </PermissionProtectedRoute>
           }
         >
           <Route

@@ -14,6 +14,7 @@ interface ClientesTableProps {
   onSort: (column: string) => void;
   hasActiveFilters?: boolean;
   onClearFilters?: () => void;
+  podeAlterar?: boolean;
 }
 
 export const ClientesTable: React.FC<ClientesTableProps> = ({
@@ -24,6 +25,7 @@ export const ClientesTable: React.FC<ClientesTableProps> = ({
   onSort,
   hasActiveFilters,
   onClearFilters,
+  podeAlterar = false,
 }) => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -78,11 +80,11 @@ export const ClientesTable: React.FC<ClientesTableProps> = ({
             onClick: () => handleVerDetalhes(cliente.id),
           }}
           actions={[
-            {
+            ...(podeAlterar ? [{
               label: 'Editar',
               icon: <EditIcon />,
               onClick: () => handleEditar(cliente.id),
-            },
+            }] : []),
           ]}
           ariaLabel={`Ações para ${cliente.nome}`}
         />

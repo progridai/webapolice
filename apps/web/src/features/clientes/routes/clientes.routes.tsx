@@ -2,8 +2,7 @@
 import React, { Suspense, lazy } from 'react';
 import { Route } from 'react-router-dom';
 import { ROUTES } from '../../../app/routes/routePaths';
-import { RoleProtectedRoute } from '../../../app/routes/RoleProtectedRoute';
-import { APP_ROLES } from '../../../auth/roles';
+import { PermissionProtectedRoute } from '../../../app/routes/PermissionProtectedRoute';
 import { AuthenticatedLayout } from '../../../layouts/AuthenticatedLayout';
 import { PageLoading } from '../../../components/application/PageLoading';
 
@@ -23,13 +22,12 @@ const EditarClientePage = lazy(() =>
   import('../pages/EditarClientePage').then((m) => ({ default: m.EditarClientePage }))
 );
 
-
 export const ClientesRoutes = (
   <Route
     element={
-      <RoleProtectedRoute allowedRoles={[APP_ROLES.ADMIN, APP_ROLES.GESTOR, APP_ROLES.OPERADOR]}>
+      <PermissionProtectedRoute moduloCodigo="CADASTRO" permissaoCodigo="clientes.visualizar">
         <AuthenticatedLayout />
-      </RoleProtectedRoute>
+      </PermissionProtectedRoute>
     }
   >
     <Route
@@ -43,17 +41,21 @@ export const ClientesRoutes = (
     <Route
       path={ROUTES.CLIENTE_NOVO}
       element={
-        <Suspense fallback={<PageLoading />}>
-          <CadastrarClientePage />
-        </Suspense>
+        <PermissionProtectedRoute moduloCodigo="CADASTRO" permissaoCodigo="clientes.inserir">
+          <Suspense fallback={<PageLoading />}>
+            <CadastrarClientePage />
+          </Suspense>
+        </PermissionProtectedRoute>
       }
     />
     <Route
       path={ROUTES.CLIENTE_EDITAR}
       element={
-        <Suspense fallback={<PageLoading />}>
-          <EditarClientePage />
-        </Suspense>
+        <PermissionProtectedRoute moduloCodigo="CADASTRO" permissaoCodigo="clientes.alterar">
+          <Suspense fallback={<PageLoading />}>
+            <EditarClientePage />
+          </Suspense>
+        </PermissionProtectedRoute>
       }
     />
     <Route

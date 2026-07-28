@@ -29,17 +29,22 @@ public class AtomicidadeTests : IClassFixture<ClientesIntegrationTestFixture>
         var handler = new CadastrarClienteHandler(repository, dbContext);
 
         var enderecoRequest = new WebApolice.Modulos.Clientes.Application.UseCases.CadastrarCliente.EnderecoCommand(
+            "RESIDENCIAL",
             "00000000",
             "Rua Teste",
             "123",
             null,
             "Bairro Teste",
             9999999, // CidadeId Inexistente que vai violar a Foreign Key
-            "RS"
+            "RS",
+            true
         );
 
+        var contatoRequest = new WebApolice.Modulos.Clientes.Application.UseCases.CadastrarCliente.ContatoCommand(
+            "EMAIL", "falha_endereco@teste.com", true);
+
         var documento = "12345678909"; // Documento inédito
-        var command = new CadastrarClienteCommand(1, "Fulano da Silva", documento, new DateOnly(1990, 1, 1), 1, null, false, null, "falha_endereco@teste.com", "51999999999", null, enderecoRequest);
+        var command = new CadastrarClienteCommand(1, "Fulano da Silva", documento, new DateOnly(1990, 1, 1), 1, null, false, null, new[] { contatoRequest }, new[] { enderecoRequest });
 
         // Act
         var act = () => handler.Handle(command, "user", CancellationToken.None);

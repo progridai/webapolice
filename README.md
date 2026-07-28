@@ -52,37 +52,21 @@ webapolice/
 
 ## Comandos para Execução e Testes
 
-### Infraestrutura Local (Docker Compose)
-Para inicializar os serviços locais de apoio (PostgreSQL e Keycloak) necessários para o projeto:
-1. Copie o arquivo `.env.example` para `.env` na raiz do projeto e ajuste as senhas locais.
-2. Navegue até a pasta `infrastructure/` e execute:
-   ```bash
-   docker compose --env-file ../.env up -d
-   ```
-Para detalhes completos de inicialização, logs, volumes e conectividade externa de banco, consulte a documentação em [infrastructure/README.md](file:///c:/PROJETOS/Rsul%20Automacoes/Projetos/webapolice/infrastructure/README.md).
-
-#### Provisionamento e Auditoria do Keycloak
-Após inicializar os containers e garantir que o Keycloak está saudável:
-1. **Provisionamento Automatizado**: Aplique as configurações declarativas do realm `webapolice`, clients OIDC, roles globais e o usuário administrativo de desenvolvimento executando:
-   ```bash
-   docker compose --env-file ../.env exec keycloak bash /opt/keycloak/keycloak_shared/scripts/configure-realm.sh
-   ```
-2. **Auditoria de Segurança**: Para validar se as configurações locais cumprem todas as regras de segurança exigidas (como PKCE obrigatório S256, Standard Flow ativo e fluxos inseguros desativados), execute:
-   ```bash
-   docker compose --env-file ../.env exec keycloak bash /opt/keycloak/keycloak_shared/scripts/validate-realm.sh
-   ```
+### Infraestrutura (Nuvem)
+Os serviços de apoio (PostgreSQL e Keycloak) estão hospedados na nuvem, portanto **não é necessário** rodar contêineres locais via Docker Compose.
+Certifique-se de que o seu arquivo `.env` (ou `.env.local` do backend) está configurado corretamente com as credenciais e conexões da nuvem.
 
 > [!IMPORTANT]
 > **Integração Frontend/API**:
-> O frontend React está integrado ao Keycloak via Authorization Code + PKCE e consome a API com token Bearer pelo cliente HTTP centralizado. Em desenvolvimento local, use `http://127.0.0.1:5173` para o frontend, `http://127.0.0.1:5007` para a API e `http://127.0.0.1:8080` para o Keycloak.
+> O frontend React está integrado ao Keycloak via Authorization Code + PKCE e consome a API com token Bearer pelo cliente HTTP centralizado. Em desenvolvimento local, use `http://127.0.0.1:5173` para o frontend, `http://localhost:5007` para a API e a URL da nuvem para o Keycloak.
 
 ### Configuração Local do Frontend e API
 
 As variáveis `VITE_*` ficam no `.env` da raiz e são lidas na inicialização do Vite. Após alterá-las, reinicie `npm run dev`.
 
 ```env
-VITE_API_BASE_URL=http://127.0.0.1:5007
-VITE_KEYCLOAK_URL=http://127.0.0.1:8080
+VITE_API_BASE_URL=http://localhost:5007
+VITE_KEYCLOAK_URL=https://auth.bravida.com.br
 VITE_KEYCLOAK_REALM=webapolice
 VITE_KEYCLOAK_CLIENT_ID=webapolice-web
 VITE_ENABLE_DESIGN_SYSTEM=true
@@ -90,7 +74,7 @@ VITE_ENABLE_DESIGN_SYSTEM=true
 
 A API permite CORS para as origens locais configuradas em `Cors:FrontendOrigins` no `appsettings.Development.json`. A listagem de Clientes usa `GET /api/clientes`.
 
-Se aparecer `Failed to fetch`, verifique: API em execução, `VITE_API_BASE_URL`, reinício do Vite, CORS/preflight, protocolo HTTP/HTTPS e certificado local.
+Se aparecer `Failed to fetch`, verifique: API em execução, `VITE_API_BASE_URL`, reinício do Vite, CORS/preflight e protocolo HTTP/HTTPS.
 
 ### Frontend (`apps/web/`)
 
@@ -130,10 +114,28 @@ cd apps/web
 
 ### Backend (`backend/`)
 
-Navegue para o diretório do backend:
-```bash
-cd backend
-```
+**Executar o backend localmente**
+
+Para iniciar a API e carregar as configurações de ambiente automaticamente de forma segura:
+
+1. Acesse a pasta do projeto e execute:
+   ```cmd
+   backend\run-api-local.bat
+   ```
+2. Na **primeira execução**, o inicializador solicitará as variáveis sensíveis:
+   - *Connection string do PostgreSQL*
+   - *Client Secret do Keycloak* (será digitado de forma invisível/mascarada)
+3. Aguarde a inicialização automática da API.
+4. Nas **próximas execuções**, execute apenas o mesmo `.bat` (a API iniciará diretamente sem novas perguntas).
+
+**Sobre o gerenciamento de configurações locais:**
+* O script salvará suas respostas no arquivo `backend/.env.local`.
+* Este arquivo funciona como a fonte local das variáveis de ambiente e **nunca deve ser commitado** (já está configurado no `.gitignore`).
+* O inicializador carrega essas variáveis somente no processo da API em execução (não polui as variáveis do Windows).
+* O "Client Secret" solicitado **não é um token** e não deve ser confundido com um; o token administrativo real é obtido automaticamente pela própria API usando o fluxo `client_credentials`.
+* Cada computador da equipe terá o seu próprio arquivo `.env.local` único. Em ambientes de servidor ou containers, estas mesmas chaves serão passadas nativamente pelas variáveis de ambiente da infraestrutura.
+
+**Outros comandos úteis (Diretório `backend/`):**
 
 * **Restaurar Dependências NuGet**:
   ```bash

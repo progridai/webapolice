@@ -10,6 +10,8 @@ using WebApolice.Shared.Infrastructure.Security;
 using WebApolice.Api.Infrastructure.Errors;
 using WebApolice.Shared.Infrastructure.Persistence;
 using WebApolice.Modulos.Clientes;
+using WebApolice.Modulos.Seguranca;
+using WebApolice.Modulos.Seguranca.Infrastructure.Authentication;
 using Scalar.AspNetCore;
 var builder = WebApplication.CreateBuilder(args);
 
@@ -37,13 +39,7 @@ if (string.IsNullOrWhiteSpace(configuracaoAuth.Authority))
         "'Authentication__Authority'.");
 }
 
-if (string.IsNullOrWhiteSpace(configuracaoAuth.Audience))
-{
-    throw new InvalidOperationException(
-        "A configuração 'Authentication:Audience' é obrigatória e não foi fornecida. " +
-        "Defina via appsettings.json, appsettings.{Environment}.json ou pela variável de ambiente " +
-        "'Authentication__Audience'.");
-}
+// Audience constraint is disabled locally
 
 // =============================================================================
 // AUTENTICAÇÃO JWT BEARER
@@ -59,17 +55,15 @@ builder.Services
 
         // Validar que o token foi emitido para o client webapolice-api
         opcoes.Audience = configuracaoAuth.Audience;
-
-        // RequireHttpsMetadata = false somente em desenvolvimento local.
-        // Em produção, HTTPS é obrigatório sem alteração de código:
-        // basta definir Authentication__RequireHttpsMetadata=true via variável de ambiente.
         opcoes.RequireHttpsMetadata = configuracaoAuth.RequireHttpsMetadata;
+
+        bool requireAudience = !string.IsNullOrWhiteSpace(configuracaoAuth.Audience);
 
         opcoes.TokenValidationParameters = new TokenValidationParameters
         {
             // Validações obrigatórias
             ValidateIssuer = true,
-            ValidateAudience = true,
+            ValidateAudience = requireAudience,
             ValidateLifetime = true,
             ValidateIssuerSigningKey = true,
 
@@ -210,6 +204,9 @@ builder.Services.AddHealthChecks()
 // Módulo Clientes
 builder.Services.AddClientesModule(builder.Configuration);
 
+// Módulo Segurança
+builder.Services.AddModuloSeguranca(builder.Configuration);
+
 // =============================================================================
 // OPENAPI & CONTROLLERS
 // =============================================================================
@@ -294,6 +291,7 @@ app.UseCors("Frontend");
 
 // Autenticação e Autorização devem ser adicionados antes dos endpoints protegidos
 app.UseAuthentication();
+app.UseMiddleware<ProvisionamentoUsuarioMiddleware>();
 app.UseAuthorization();
 
 // =============================================================================

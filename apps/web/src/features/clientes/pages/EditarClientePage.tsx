@@ -37,7 +37,7 @@ export const EditarClientePage: React.FC = () => {
             valor: c.valor,
             principal: c.principal,
           })) || [],
-          enderecos: data.enderecos?.map((e: any) => ({
+          enderecos: data.enderecos?.map((e: Record<string, string>) => ({
             tipoEndereco: e.tipo || 'RESIDENCIAL',
             cep: e.cep || '',
             logradouro: e.logradouro || '',

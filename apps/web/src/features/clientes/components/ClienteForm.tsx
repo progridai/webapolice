@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useForm, Controller, useFieldArray, useWatch } from 'react-hook-form';
+import { useForm, Controller, useFieldArray, useWatch, type UseFormRegister, type Control, type FieldErrors } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { FormField } from '../../../components/ui/FormField';
@@ -68,9 +68,9 @@ export type ClienteFormData = z.infer<typeof clienteSchema>;
 
 interface EnderecoRowProps {
   index: number;
-  register: any;
-  control: any;
-  errors: any;
+  register: UseFormRegister<ClienteFormData>;
+  control: Control<ClienteFormData>;
+  errors: FieldErrors<ClienteFormData>;
   onRemove: () => void;
   canRemove: boolean;
   onMakePrincipal: () => void;
@@ -286,6 +286,7 @@ export const ClienteForm: React.FC<ClienteFormProps> = ({
     }
   }, [initialData, reset]);
 
+  // eslint-disable-next-line react-hooks/incompatible-library
   const isFalecido = watch('falecido');
 
   const handleMakeContatoPrincipal = (index: number) => {

@@ -95,19 +95,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   }, [kc]);
 
-  useEffect(() => {
-    if (!isAuthenticated) {
-      setTokenProvider(null);
-      return;
-    }
-
-    setTokenProvider(async () => {
-      await kc.updateToken(60);
-      return kc.token;
-    });
-
-    return () => setTokenProvider(null);
-  }, [isAuthenticated, kc]);
+  // Registra o provedor de token síncronamente antes dos filhos renderizarem
+  if (isAuthenticated) {
+    setTokenProvider(async () => kc.token);
+  } else {
+    setTokenProvider(null);
+  }
 
   useEffect(() => {
     let mounted = true;

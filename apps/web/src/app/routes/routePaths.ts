@@ -31,6 +31,28 @@ export const ROUTES = {
   /** Módulo de Clientes — Editar */
   CLIENTE_EDITAR: '/clientes/:id/editar',
 
+  /** Módulo de Segurança — Usuários */
+  SEGURANCA_USUARIOS: '/seguranca/usuarios',
+  SEGURANCA_USUARIO_NOVO: '/seguranca/usuarios/novo',
+  SEGURANCA_USUARIO_DETALHES: '/seguranca/usuarios/:publicId',
+  SEGURANCA_USUARIO_EDITAR: '/seguranca/usuarios/:publicId/editar',
+
+  /** Módulo de Segurança — Perfis */
+  SEGURANCA_PERFIS: '/seguranca/perfis',
+  SEGURANCA_PERFIL_NOVO: '/seguranca/perfis/novo',
+  SEGURANCA_PERFIL_DETALHES: '/seguranca/perfis/:publicId',
+  SEGURANCA_PERFIL_EDITAR: '/seguranca/perfis/:publicId/editar',
+
+  /** Módulo de Segurança — Configurações */
+  SEGURANCA_MODULOS: '/seguranca/modulos',
+
+  /** Módulo de Segurança — Catálogo (somente leitura) */
+  SEGURANCA_CATALOGO: '/seguranca/catalogo',
+
+  /** Módulo de Segurança — Auditoria */
+  SEGURANCA_AUDITORIA: '/seguranca/auditoria',
+  SEGURANCA_AUDITORIA_DETALHES: '/seguranca/auditoria/:publicId',
+
   /** Catálogo do Design System (acesso restrito: role admin) */
   DESIGN_SYSTEM: '/design-system',
 

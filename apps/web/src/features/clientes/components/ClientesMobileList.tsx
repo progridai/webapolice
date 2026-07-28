@@ -6,9 +6,10 @@ import type { ClienteListItem } from '../types/cliente.types';
 
 interface ClientesMobileListProps {
   clientes: ClienteListItem[];
+  podeAlterar?: boolean;
 }
 
-export const ClientesMobileList: React.FC<ClientesMobileListProps> = ({ clientes }) => {
+export const ClientesMobileList: React.FC<ClientesMobileListProps> = ({ clientes, podeAlterar = false }) => {
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -47,11 +48,11 @@ export const ClientesMobileList: React.FC<ClientesMobileListProps> = ({ clientes
                   onClick: () => handleVerDetalhes(cliente.id),
                 }}
                 actions={[
-                  {
+                  ...(podeAlterar ? [{
                     label: 'Editar',
                     icon: <EditIcon />,
                     onClick: () => handleEditar(cliente.id),
-                  },
+                  }] : []),
                 ]}
                 ariaLabel={`Ações para ${cliente.nome}`}
               />

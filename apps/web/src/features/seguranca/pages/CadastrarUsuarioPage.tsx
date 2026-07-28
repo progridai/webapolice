@@ -41,8 +41,8 @@ export const CadastrarUsuarioPage: React.FC = () => {
         perfilPublicIds: data.perfilPublicIds,
       });
       // "O formulário de criação de usuário deve limpar imediatamente os campos de senha após sucesso"
-      // Como estamos navegando para detalhes, o componente será desmontado.
-      navigate(`/seguranca/usuarios/${(response as any).id || (response as any).publicId}`);
+      // Redirecionar para detalhes (ou listagem)
+      navigate(`/seguranca/usuarios/${response.id}`);
     } catch (err: unknown) {
       console.error('Erro ao cadastrar usuário:', err);
       const errorResponse = err as { response?: { status?: number; data?: { message?: string } } };

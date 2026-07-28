@@ -34,7 +34,7 @@ const NAV_ITEMS: NavItem[] = [
     label: 'Clientes',
     path: ROUTES.CLIENTES,
     icon: UsersIcon,
-    moduloCodigo: 'CADASTRO',
+    moduloCodigo: 'CLIENTES',
   },
   {
     label: 'Usuários',

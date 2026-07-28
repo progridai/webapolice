@@ -25,7 +25,7 @@ const EditarClientePage = lazy(() =>
 export const ClientesRoutes = (
   <Route
     element={
-      <PermissionProtectedRoute moduloCodigo="CADASTRO" permissaoCodigo="clientes.visualizar">
+      <PermissionProtectedRoute moduloCodigo="CLIENTES" permissaoCodigo="clientes.visualizar">
         <AuthenticatedLayout />
       </PermissionProtectedRoute>
     }
@@ -41,7 +41,7 @@ export const ClientesRoutes = (
     <Route
       path={ROUTES.CLIENTE_NOVO}
       element={
-        <PermissionProtectedRoute moduloCodigo="CADASTRO" permissaoCodigo="clientes.inserir">
+        <PermissionProtectedRoute moduloCodigo="CLIENTES" permissaoCodigo="clientes.inserir">
           <Suspense fallback={<PageLoading />}>
             <CadastrarClientePage />
           </Suspense>
@@ -51,7 +51,7 @@ export const ClientesRoutes = (
     <Route
       path={ROUTES.CLIENTE_EDITAR}
       element={
-        <PermissionProtectedRoute moduloCodigo="CADASTRO" permissaoCodigo="clientes.alterar">
+        <PermissionProtectedRoute moduloCodigo="CLIENTES" permissaoCodigo="clientes.alterar">
           <Suspense fallback={<PageLoading />}>
             <EditarClientePage />
           </Suspense>

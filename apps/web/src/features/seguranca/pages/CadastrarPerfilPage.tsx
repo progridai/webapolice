@@ -39,7 +39,7 @@ export const CadastrarPerfilPage: React.FC = () => {
         ativo: data.ativo,
         permissaoPublicIds: data.permissaoPublicIds,
       });
-      navigate(`/seguranca/perfis/${(response as any).id || (response as any).publicId}`);
+      navigate(`/seguranca/perfis/${response.id}`);
     } catch (err: unknown) {
       console.error('Erro ao cadastrar perfil:', err);
       const errorResponse = err as { response?: { status?: number; data?: { message?: string } } };

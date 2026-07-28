@@ -49,26 +49,24 @@ export const ModulosPage: React.FC = () => {
         </div>
       ) : (
         <div className="seguranca-content">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '16px' }}>
             {modulos.map((modulo) => {
               const isSeguranca = modulo.codigo === 'SEGURANCA';
               return (
-                <div key={modulo.codigo} className="flex items-center justify-between p-4 bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700">
-                  <div className="flex flex-col">
-                    <span className="font-semibold text-slate-900 dark:text-white flex items-center gap-2">
+                <div key={modulo.codigo} style={{ display: 'flex', alignItems: 'center', gap: '16px', padding: '16px', border: '1px solid var(--cor-borda)', borderRadius: '8px', backgroundColor: 'var(--cor-fundo-superficie)' }}>
+                  <input
+                    type="checkbox"
+                    checked={modulo.habilitado}
+                    onChange={() => handleToggleModulo(modulo.publicId, modulo.habilitado)}
+                    disabled={isSeguranca}
+                    aria-label={`Habilitar módulo ${modulo.nome}`}
+                    style={{ width: '20px', height: '20px', cursor: isSeguranca ? 'not-allowed' : 'pointer' }}
+                  />
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <span style={{ fontWeight: '600', fontSize: '1.125rem', color: 'var(--cor-texto-principal)' }}>
                       {modulo.nome}
-                      {isSeguranca && <Badge variant="primary">Essencial</Badge>}
                     </span>
-                  </div>
-                  <div className="ml-4 flex items-center">
-                    <input
-                      type="checkbox"
-                      checked={modulo.habilitado}
-                      onChange={() => handleToggleModulo(modulo.publicId, modulo.habilitado)}
-                      disabled={isSeguranca}
-                      aria-label={`Habilitar módulo ${modulo.nome}`}
-                      className="w-5 h-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                    />
+                    {isSeguranca && <Badge variant="primary">Essencial</Badge>}
                   </div>
                 </div>
               );

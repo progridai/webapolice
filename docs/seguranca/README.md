@@ -16,6 +16,7 @@ O objetivo do módulo é substituir a autorização atual — baseada nas Realm 
 4. [Perfis e Permissões Iniciais](04-perfis-permissoes-iniciais.md)
 5. [Auditoria de Segurança](05-auditoria-seguranca.md)
 6. [Plano de Implementação](06-plano-implementacao.md)
+7. [Guia Oficial para Implementação de Novos Módulos](guia-implementacao-novos-modulos.md)
 
 ## Estado Atual
 

@@ -10,6 +10,7 @@ using WebApolice.Shared.Infrastructure.Security;
 using WebApolice.Api.Infrastructure.Errors;
 using WebApolice.Shared.Infrastructure.Persistence;
 using WebApolice.Modulos.Clientes;
+using WebApolice.Modulos.Estipulantes;
 using WebApolice.Modulos.Seguranca;
 using WebApolice.Modulos.Seguranca.Infrastructure.Authentication;
 using Scalar.AspNetCore;
@@ -202,10 +203,9 @@ builder.Services.AddHealthChecks()
     .AddDbContextCheck<InfraestruturaDbContext>("postgresql");
 
 // Módulo Clientes
-builder.Services.AddClientesModule(builder.Configuration);
-
-// Módulo Segurança
 builder.Services.AddModuloSeguranca(builder.Configuration);
+builder.Services.AddClientesModule(builder.Configuration);
+builder.Services.AddEstipulantesModule(builder.Configuration);
 
 // =============================================================================
 // OPENAPI & CONTROLLERS

@@ -145,19 +145,19 @@ const EnderecoRow: React.FC<EnderecoRowProps> = ({
           </FormField>
         </div>
 
-        <div className="lg:col-span-4">
+        <div className="lg:col-span-5">
           <FormField label="Complemento" error={errors?.complemento?.message}>
             <Input {...register(`enderecos.${index}.complemento`)} placeholder="Apto, Bloco..." />
           </FormField>
         </div>
 
-        <div className="lg:col-span-3">
+        <div className="lg:col-span-5">
           <FormField label="Bairro" error={errors?.bairro?.message}>
             <Input {...register(`enderecos.${index}.bairro`)} placeholder="Bairro" />
           </FormField>
         </div>
 
-        <div className="lg:col-span-1">
+        <div className="lg:col-span-2">
           <FormField label="UF" error={errors?.uf?.message}>
             <Select {...register(`enderecos.${index}.uf`)}>
               <option value="">...</option>
@@ -168,14 +168,24 @@ const EnderecoRow: React.FC<EnderecoRowProps> = ({
           </FormField>
         </div>
 
-        <div className="lg:col-span-2">
+        <div className="lg:col-span-4">
           <FormField label="Cidade" error={errors?.cidadeId?.message}>
-            <Select {...register(`enderecos.${index}.cidadeId`)} disabled={loadingCidades || cidades.length === 0}>
-              <option value="">{loadingCidades ? 'Carregando...' : 'Selecione'}</option>
-              {cidades.map(c => (
-                <option key={c.id} value={c.id}>{c.nome}</option>
-              ))}
-            </Select>
+            <Controller
+              name={`enderecos.${index}.cidadeId`}
+              control={control}
+              render={({ field }) => (
+                <Select 
+                  {...field} 
+                  value={field.value || ""} 
+                  disabled={loadingCidades || cidades.length === 0}
+                >
+                  <option value="">{loadingCidades ? 'Carregando...' : 'Selecione'}</option>
+                  {cidades.map(c => (
+                    <option key={c.id} value={c.id}>{c.nome}</option>
+                  ))}
+                </Select>
+              )}
+            />
           </FormField>
         </div>
 
@@ -200,7 +210,7 @@ const EnderecoRow: React.FC<EnderecoRowProps> = ({
           />
         </div>
 
-        <div className="lg:col-span-10 flex items-center justify-end pt-5">
+        <div className="lg:col-span-4 flex items-center justify-end pt-5">
           <Button
             type="button"
             variant="text"

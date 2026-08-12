@@ -1,0 +1,1 @@
+using System; using Npgsql; var connString = "Host=painel.bravida.com.br;Port=5432;Database=postgres;Username=bravito;Password=Bravida@2023!"; using var conn = new NpgsqlConnection(connString); conn.Open(); using var cmd = new NpgsqlCommand("CREATE DATABASE webapolice_teste;", conn); cmd.ExecuteNonQuery(); Console.WriteLine("Database created.");

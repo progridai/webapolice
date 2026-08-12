@@ -1,0 +1,80 @@
+import React from 'react';
+import { Select, Button, FilterBar, SearchField } from '../../../components/ui';
+import type { EstipulantesQuery, StatusEstipulanteEnum } from '../types/estipulante.types';
+
+interface EstipulantesFiltersProps {
+  filters: EstipulantesQuery;
+  onFilterChange: (filters: Partial<EstipulantesQuery>) => void;
+  onClearFilters: () => void;
+  isLoading?: boolean;
+}
+
+export const EstipulantesFilters: React.FC<EstipulantesFiltersProps> = ({
+  filters,
+  onFilterChange,
+  onClearFilters,
+  isLoading,
+}) => {
+  const handleSearchChange = (value: string) => {
+    const trimmed = value.trim();
+    if (trimmed === filters.busca) return;
+
+    onFilterChange({
+      busca: trimmed,
+      page: 1, // Reset to first page on search
+    });
+  };
+
+  const hasActiveFilters = Boolean(filters.busca || filters.status);
+  const searchValue = filters.busca || '';
+
+  return (
+    <FilterBar>
+      <div className="estipulantes-filter-search">
+        <label htmlFor="busca-estipulante" className="sr-only">
+          Buscar estipulante
+        </label>
+        <SearchField
+          id="busca-estipulante"
+          placeholder="Razão Social, CNPJ ou Código"
+          value={searchValue}
+          onChange={handleSearchChange}
+          disabled={isLoading}
+        />
+      </div>
+
+      <div className="estipulantes-filter-status">
+        <label htmlFor="status-estipulante" className="sr-only">
+          Status
+        </label>
+        <Select
+          id="status-estipulante"
+          value={filters.status || ''}
+          onChange={(event) =>
+            onFilterChange({ 
+              status: event.target.value as unknown as StatusEstipulanteEnum | '',
+              page: 1 // Reset to first page on filter change
+            })
+          }
+          disabled={isLoading}
+          options={[
+            { label: 'Todos', value: '' },
+            { label: 'Ativos', value: '1' },
+            { label: 'Inativos', value: '2' },
+          ]}
+        />
+      </div>
+
+      <div className="estipulantes-filter-actions">
+        <Button
+          variant="secondary"
+          onClick={onClearFilters}
+          disabled={!hasActiveFilters || isLoading}
+          aria-label="Limpar filtros"
+        >
+          Limpar
+        </Button>
+      </div>
+    </FilterBar>
+  );
+};

@@ -74,6 +74,7 @@ export const AuditoriaListPage: React.FC = () => {
   };
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setQuery(prev => ({ ...prev, page }));
   }, [page]);
 

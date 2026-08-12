@@ -43,6 +43,7 @@ import { PageLoading } from '../../components/application/PageLoading';
 
 // Módulos
 import { ClientesRoutes } from '../../features/clientes/routes/clientes.routes';
+import { EstipulantesRoutes } from '../../features/estipulantes/routes/estipulantes.routes';
 import { SegurancaRoutes } from '../../features/seguranca/routes/seguranca.routes';
 
 export const AppRoutes: React.FC = () => {
@@ -76,6 +77,7 @@ export const AppRoutes: React.FC = () => {
 
       {/* ── Módulos de Funcionalidade ── */}
       {ClientesRoutes}
+      {EstipulantesRoutes}
       {SegurancaRoutes}
 
       {/* ── Design System (autenticado + operador de sistema) ── */}

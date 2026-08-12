@@ -12,4 +12,14 @@ public static class PermissoesSeguranca
         public const string Inativar = "clientes.inativar";
         public const string Reativar = "clientes.reativar";
     }
+
+    public static class Estipulantes
+    {
+        public const string Visualizar = "estipulantes.visualizar";
+        public const string Inserir = "estipulantes.inserir";
+        public const string Alterar = "estipulantes.alterar";
+        public const string Excluir = "estipulantes.excluir";
+        public const string Inativar = "estipulantes.inativar";
+        public const string Reativar = "estipulantes.reativar";
+    }
 }

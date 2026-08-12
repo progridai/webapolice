@@ -30,6 +30,7 @@
     <ProjectReference Include="..\WebApolice.Shared.Infrastructure\WebApolice.Shared.Infrastructure.csproj" />
     <ProjectReference Include="..\WebApolice.Auditoria\WebApolice.Auditoria.csproj" />
     <ProjectReference Include="..\WebApolice.Modulos.Clientes\WebApolice.Modulos.Clientes.csproj" />
+    <ProjectReference Include="..\WebApolice.Modulos.Estipulantes\WebApolice.Modulos.Estipulantes.csproj" />
     <ProjectReference Include="..\WebApolice.Modulos.Seguranca\WebApolice.Modulos.Seguranca.csproj" />
   </ItemGroup>
 

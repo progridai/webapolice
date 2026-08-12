@@ -6,6 +6,7 @@
     <Project Path="src/WebApolice.Shared.Infrastructure/WebApolice.Shared.Infrastructure.csproj" />
     <Project Path="src/WebApolice.Auditoria/WebApolice.Auditoria.csproj" />
     <Project Path="src/WebApolice.Modulos.Seguranca/WebApolice.Modulos.Seguranca.csproj" />
+    <Project Path="src/WebApolice.Modulos.Estipulantes/WebApolice.Modulos.Estipulantes.csproj" />
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/WebApolice.Api.Tests/WebApolice.Api.Tests.csproj" />

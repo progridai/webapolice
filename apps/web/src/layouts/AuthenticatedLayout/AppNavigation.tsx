@@ -12,6 +12,7 @@ import {
   ShieldIcon,
   UserIcon,
   UsersIcon,
+  BriefcaseIcon,
 } from '../../components/ui/Icons';
 
 interface NavItem {
@@ -35,6 +36,13 @@ const NAV_ITEMS: NavItem[] = [
     path: ROUTES.CLIENTES,
     icon: UsersIcon,
     moduloCodigo: 'CLIENTES',
+  },
+  {
+    label: 'Estipulantes',
+    path: ROUTES.ESTIPULANTES,
+    icon: BriefcaseIcon,
+    moduloCodigo: 'ESTIPULANTES',
+    permissaoCodigo: 'estipulantes.visualizar',
   },
   {
     label: 'Usuários',

@@ -35,6 +35,7 @@ export function useAuditoriaList(query: AuditoriaQuery) {
   };
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetch();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [query.page, query.pageSize, query.acao, query.entidade, query.dataInicial, query.dataFinal]);

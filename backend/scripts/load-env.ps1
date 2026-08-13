@@ -6,6 +6,7 @@ $RequiredKeys = @(
     "ASPNETCORE_ENVIRONMENT",
     "ConnectionStrings__PostgreSql",
     "ConnectionStrings__PostgreSqlTestes",
+    "ConnectionStrings__PostgreSqlProducao",
     "KeycloakAdmin__BaseUrl",
     "KeycloakAdmin__Realm",
     "KeycloakAdmin__ClientId",
@@ -63,6 +64,16 @@ foreach ($Key in $RequiredKeys) {
                 $Value = Read-Host "Informe a connection string do PostgreSQL para os testes de integração"
                 if ([string]::IsNullOrWhiteSpace($Value)) {
                     Write-Error "A connection string de testes é obrigatória."
+                    exit 1
+                }
+                $EnvVars[$Key] = $Value
+                $Updated = $true
+            }
+            elseif ($Key -eq "ConnectionStrings__PostgreSqlProducao") {
+                Write-Host "Configuração ausente: $Key" -ForegroundColor Yellow
+                $Value = Read-Host "Informe a connection string do PostgreSQL de PRODUCAO (apenas para migrations)"
+                if ([string]::IsNullOrWhiteSpace($Value)) {
+                    Write-Error "A connection string de produção é obrigatória."
                     exit 1
                 }
                 $EnvVars[$Key] = $Value

@@ -181,6 +181,54 @@ public sealed class AtualizarEstipulanteHandler
                 }
             }
 
+            // Atualização de Contatos Institucionais
+            var contatosInstAtuais = await _repository.ObterContatosInstitucionaisAtivosAsync(pessoa.Id, cancellationToken);
+            var contatosInstManter = new System.Collections.Generic.HashSet<long>();
+
+            if (command.ContatosInstitucionais != null)
+            {
+                foreach (var incoming in command.ContatosInstitucionais)
+                {
+                    if (string.IsNullOrWhiteSpace(incoming.Nome) && string.IsNullOrWhiteSpace(incoming.Departamento)) continue;
+
+                    var matching = contatosInstAtuais.FirstOrDefault(c =>
+                        c.Nome.Equals(incoming.Nome, StringComparison.OrdinalIgnoreCase) &&
+                        c.Departamento.Equals(incoming.Departamento, StringComparison.OrdinalIgnoreCase)
+                    );
+
+                    if (matching != null)
+                    {
+                        // Atualiza dados adicionais caso tenham mudado
+                        matching.Email = incoming.Email;
+                        matching.Telefone = incoming.Telefone;
+                        matching.Ramal = incoming.Ramal;
+                        contatosInstManter.Add(matching.Id);
+                    }
+                    else
+                    {
+                        _repository.AdicionarContatoInstitucional(new PessoaContatoInstitucionalModel
+                        {
+                            PessoaId = pessoa.Id,
+                            Nome = incoming.Nome,
+                            Departamento = incoming.Departamento,
+                            Email = incoming.Email,
+                            Telefone = incoming.Telefone,
+                            Ramal = incoming.Ramal,
+                            Ativo = true,
+                            CreatedAt = DateTimeOffset.UtcNow
+                        });
+                    }
+                }
+            }
+
+            foreach (var contato in contatosInstAtuais)
+            {
+                if (!contatosInstManter.Contains(contato.Id))
+                {
+                    contato.Ativo = false;
+                }
+            }
+
             var config = await _repository.ObterConfiguracaoPorEstipulanteIdAsync(estipulante.Id, cancellationToken);
 
             if (config == null)

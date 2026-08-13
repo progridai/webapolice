@@ -52,6 +52,13 @@ export const EditarEstipulantePage: React.FC = () => {
             valor: c.valor,
             principal: c.principal
           })) || [],
+          contatosInstitucionais: estipulanteData.contatosInstitucionais?.map((c: any) => ({
+            nome: c.nome,
+            departamento: c.departamento,
+            email: c.email,
+            telefone: c.telefone,
+            ramal: c.ramal
+          })) || [],
           configuracao: configData ? {
             dataInicioVigencia: configData.dataInicioVigencia ? new Date(configData.dataInicioVigencia).toISOString().split('T')[0] : '',
             dataFimVigencia: configData.dataFimVigencia ? new Date(configData.dataFimVigencia).toISOString().split('T')[0] : '',
@@ -89,6 +96,13 @@ export const EditarEstipulantePage: React.FC = () => {
           tipoContato: c.tipoContato,
           valor: c.valor,
           principal: c.principal,
+        })) : undefined,
+        contatosInstitucionais: data.contatosInstitucionais && data.contatosInstitucionais.length > 0 ? data.contatosInstitucionais.map(c => ({
+          nome: c.nome,
+          departamento: c.departamento,
+          email: c.email,
+          telefone: c.telefone,
+          ramal: c.ramal
         })) : undefined,
         configuracao: {
           dataInicioVigencia: data.configuracao.dataInicioVigencia,

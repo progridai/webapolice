@@ -6,7 +6,6 @@ using WebApolice.Modulos.Estipulantes.Application.UseCases.ConsultarEstipulante;
 using WebApolice.Modulos.Estipulantes.Application.UseCases.ConsultarEstipulanteConfiguracao;
 using WebApolice.Modulos.Estipulantes.Application.UseCases.CriarEstipulante;
 using WebApolice.Modulos.Estipulantes.Application.UseCases.AtualizarEstipulante;
-using WebApolice.Modulos.Estipulantes.Application.UseCases.AtualizarConfiguracao;
 using WebApolice.Modulos.Estipulantes.Application.UseCases.InativarEstipulante;
 using WebApolice.Modulos.Estipulantes.Application.UseCases.ExcluirEstipulante;
 using WebApolice.Modulos.Estipulantes.Application.UseCases.ReativarEstipulante;
@@ -35,7 +34,6 @@ public static class EstipulantesModuleExtensions
 
         services.AddScoped<CriarEstipulanteHandler>();
         services.AddScoped<AtualizarEstipulanteHandler>();
-        services.AddScoped<AtualizarConfiguracaoHandler>();
         services.AddScoped<InativarEstipulanteHandler>();
         services.AddScoped<ExcluirEstipulanteHandler>();
         services.AddScoped<ReativarEstipulanteHandler>();

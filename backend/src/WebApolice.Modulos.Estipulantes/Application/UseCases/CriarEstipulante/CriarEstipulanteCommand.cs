@@ -12,6 +12,7 @@ public sealed record CriarEstipulanteCommand(
     string? Observacao,
     CriarEstipulanteEnderecoCommand? Endereco,
     IReadOnlyList<CriarEstipulanteContatoCommand>? Contatos,
+    IReadOnlyList<CriarEstipulanteContatoInstitucionalCommand>? ContatosInstitucionais,
     CriarEstipulanteConfiguracaoCommand Configuracao
 );
 
@@ -29,6 +30,14 @@ public sealed record CriarEstipulanteContatoCommand(
     string TipoContato,
     string Valor,
     bool Principal
+);
+
+public sealed record CriarEstipulanteContatoInstitucionalCommand(
+    string Nome,
+    string Departamento,
+    string? Email,
+    string? Telefone,
+    string? Ramal
 );
 
 public sealed record CriarEstipulanteConfiguracaoCommand(

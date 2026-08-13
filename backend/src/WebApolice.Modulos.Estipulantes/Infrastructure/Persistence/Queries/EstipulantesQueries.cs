@@ -129,6 +129,23 @@ public class EstipulantesQueries : IEstipulantesQueries
                     Principal = c.Principal
                 }).ToList();
             }
+
+            var contatosInstDb = await _dbContext.ContatosInstitucionais
+                .AsNoTracking()
+                .Where(c => c.PessoaId == estipulante.PessoaId.Value && c.Ativo)
+                .ToListAsync(cancellationToken);
+
+            if (contatosInstDb.Any())
+            {
+                result.ContatosInstitucionais = contatosInstDb.Select(c => new EstipulanteDetalheResult.ContatoInstitucionalDetalheResult
+                {
+                    Nome = c.Nome,
+                    Departamento = c.Departamento,
+                    Email = c.Email,
+                    Telefone = c.Telefone,
+                    Ramal = c.Ramal
+                }).ToList();
+            }
         }
 
         return result;

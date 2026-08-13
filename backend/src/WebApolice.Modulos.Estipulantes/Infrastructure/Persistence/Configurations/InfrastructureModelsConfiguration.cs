@@ -38,6 +38,24 @@ public class PessoaContatoConfiguration : IEntityTypeConfiguration<PessoaContato
     }
 }
 
+public class PessoaContatoInstitucionalConfiguration : IEntityTypeConfiguration<PessoaContatoInstitucionalModel>
+{
+    public void Configure(EntityTypeBuilder<PessoaContatoInstitucionalModel> builder)
+    {
+        builder.ToTable("pessoa_contato_institucional", "core", t => t.ExcludeFromMigrations());
+        builder.HasKey(x => x.Id);
+        builder.Property(x => x.Id).HasColumnName("id");
+        builder.Property(x => x.PessoaId).HasColumnName("pessoa_id");
+        builder.Property(x => x.Nome).HasColumnName("nome");
+        builder.Property(x => x.Departamento).HasColumnName("departamento");
+        builder.Property(x => x.Email).HasColumnName("email");
+        builder.Property(x => x.Telefone).HasColumnName("telefone");
+        builder.Property(x => x.Ramal).HasColumnName("ramal");
+        builder.Property(x => x.Ativo).HasColumnName("ativo");
+        builder.Property(x => x.CreatedAt).HasColumnName("created_at");
+    }
+}
+
 public class GrupoConfiguration : IEntityTypeConfiguration<GrupoModel>
 {
     public void Configure(EntityTypeBuilder<GrupoModel> builder)

@@ -45,6 +45,14 @@ const estipulanteSchema = z.object({
   
   contatos: z.array(contatoSchema),
   
+  contatosInstitucionais: z.array(z.object({
+    nome: z.string().min(1, 'O Nome é obrigatório'),
+    departamento: z.string().min(1, 'O Departamento é obrigatório'),
+    email: z.string().email('E-mail inválido').optional().or(z.literal('')),
+    telefone: z.string().optional().or(z.literal('')),
+    ramal: z.string().optional().or(z.literal('')),
+  })).optional(),
+  
   configuracao: z.object({
     dataInicioVigencia: z.string().min(1, 'A data de início da vigência é obrigatória'),
     dataFimVigencia: z.string().optional().or(z.literal('')),
@@ -104,6 +112,7 @@ export const EstipulanteForm: React.FC<EstipulanteFormProps> = ({
         cidadeId: undefined,
       },
       contatos: initialData?.contatos || [{ tipoContato: 'EMAIL', valor: '', principal: true }],
+      contatosInstitucionais: initialData?.contatosInstitucionais || [],
       configuracao: initialData?.configuracao || {
         dataInicioVigencia: '',
         dataFimVigencia: '',
@@ -127,6 +136,7 @@ export const EstipulanteForm: React.FC<EstipulanteFormProps> = ({
         contatos: initialData.contatos && initialData.contatos.length > 0 
           ? initialData.contatos 
           : [{ tipoContato: 'EMAIL', valor: '', principal: true }],
+        contatosInstitucionais: initialData.contatosInstitucionais || [],
         configuracao: initialData.configuracao || {
           dataInicioVigencia: '', dataFimVigencia: ''
         },
@@ -141,6 +151,15 @@ export const EstipulanteForm: React.FC<EstipulanteFormProps> = ({
   } = useFieldArray({
     control,
     name: 'contatos',
+  });
+
+  const {
+    fields: contatoInstFields,
+    append: appendContatoInst,
+    remove: removeContatoInst,
+  } = useFieldArray({
+    control,
+    name: 'contatosInstitucionais',
   });
 
   const handleMakeContatoPrincipal = (index: number) => {
@@ -189,11 +208,13 @@ export const EstipulanteForm: React.FC<EstipulanteFormProps> = ({
       data.endereco.cep || data.endereco.logradouro || data.endereco.cidadeId || data.endereco.uf
     );
     const contatosFiltrados = data.contatos.filter(c => c.valor && c.valor.trim() !== '');
+    const contatosInstFiltrados = data.contatosInstitucionais?.filter(c => c.nome.trim() !== '' && c.departamento.trim() !== '');
 
     onSubmit({
       ...data,
       endereco: hasEndereco ? data.endereco : undefined,
       contatos: contatosFiltrados,
+      contatosInstitucionais: contatosInstFiltrados,
     });
   };
 
@@ -382,6 +403,61 @@ export const EstipulanteForm: React.FC<EstipulanteFormProps> = ({
               onClick={() => appendContato({ tipoContato: 'EMAIL', valor: '', principal: false })}
             >
               + Adicionar Contato
+            </Button>
+          </div>
+        </div>
+      </FormSection>
+
+      <FormSection title="Contatos Institucionais" icon={<BriefcaseIcon size={20} />}>
+        <div className="flex flex-col gap-4">
+          {contatoInstFields.map((field, index) => (
+            <div key={field.id} className="border border-gray-200 dark:border-gray-700 p-4 rounded-lg bg-gray-50 dark:bg-gray-800/30 relative">
+              <div className="absolute top-4 right-4">
+                <Button
+                  type="button"
+                  variant="text"
+                  className="text-red-500 hover:text-red-700 p-0"
+                  onClick={() => removeContatoInst(index)}
+                >
+                  Remover
+                </Button>
+              </div>
+              <FormGrid>
+                <div className="lg:col-span-6">
+                  <FormField label="Nome" required error={errors.contatosInstitucionais?.[index]?.nome?.message}>
+                    <Input {...register(`contatosInstitucionais.${index}.nome` as const)} placeholder="Nome do contato" />
+                  </FormField>
+                </div>
+                <div className="lg:col-span-6">
+                  <FormField label="Departamento" required error={errors.contatosInstitucionais?.[index]?.departamento?.message}>
+                    <Input {...register(`contatosInstitucionais.${index}.departamento` as const)} placeholder="Ex: Financeiro, RH" />
+                  </FormField>
+                </div>
+                <div className="lg:col-span-6">
+                  <FormField label="E-mail" error={errors.contatosInstitucionais?.[index]?.email?.message}>
+                    <Input type="email" {...register(`contatosInstitucionais.${index}.email` as const)} placeholder="email@empresa.com" />
+                  </FormField>
+                </div>
+                <div className="lg:col-span-3">
+                  <FormField label="Telefone" error={errors.contatosInstitucionais?.[index]?.telefone?.message}>
+                    <Input {...register(`contatosInstitucionais.${index}.telefone` as const)} placeholder="(00) 0000-0000" />
+                  </FormField>
+                </div>
+                <div className="lg:col-span-3">
+                  <FormField label="Ramal" error={errors.contatosInstitucionais?.[index]?.ramal?.message}>
+                    <Input {...register(`contatosInstitucionais.${index}.ramal` as const)} placeholder="Ex: 123" />
+                  </FormField>
+                </div>
+              </FormGrid>
+            </div>
+          ))}
+          <div className="flex justify-start mt-2">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => appendContatoInst({ nome: '', departamento: '', email: '', telefone: '', ramal: '' })}
+            >
+              + Adicionar Contato Institucional
             </Button>
           </div>
         </div>

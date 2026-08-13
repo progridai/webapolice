@@ -18,6 +18,7 @@ public class CriarEstipulanteRequest
     
     public CriarEstipulanteEnderecoRequest? Endereco { get; set; }
     public System.Collections.Generic.List<CriarEstipulanteContatoRequest>? Contatos { get; set; }
+    public System.Collections.Generic.List<CriarEstipulanteContatoInstitucionalRequest>? ContatosInstitucionais { get; set; }
     public CriarEstipulanteConfiguracaoRequest Configuracao { get; set; } = new();
 }
 
@@ -39,6 +40,15 @@ public class CriarEstipulanteContatoRequest
     public string TipoContato { get; set; } = string.Empty;
     public string Valor { get; set; } = string.Empty;
     public bool Principal { get; set; }
+}
+
+public class CriarEstipulanteContatoInstitucionalRequest
+{
+    public string Nome { get; set; } = string.Empty;
+    public string Departamento { get; set; } = string.Empty;
+    public string? Email { get; set; }
+    public string? Telefone { get; set; }
+    public string? Ramal { get; set; }
 }
 
 public class CriarEstipulanteConfiguracaoRequest

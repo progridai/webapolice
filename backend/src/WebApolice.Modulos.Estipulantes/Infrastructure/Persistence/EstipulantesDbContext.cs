@@ -9,6 +9,7 @@ public class EstipulantesDbContext(DbContextOptions<EstipulantesDbContext> optio
     public DbSet<PessoaModel> Pessoas { get; set; }
     public DbSet<PessoaEnderecoModel> Enderecos { get; set; }
     public DbSet<PessoaContatoModel> Contatos { get; set; }
+    public DbSet<PessoaContatoInstitucionalModel> ContatosInstitucionais { get; set; }
     public DbSet<EstipulanteModel> Estipulantes { get; set; }
     public DbSet<EstipulanteConfiguracaoModel> Configuracoes { get; set; }
     public DbSet<GrupoModel> Grupos { get; set; }

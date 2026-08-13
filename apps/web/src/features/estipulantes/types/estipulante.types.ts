@@ -42,6 +42,14 @@ export interface EstipulanteContatoRequest {
   principal: boolean;
 }
 
+export interface EstipulanteContatoInstitucionalRequest {
+  nome: string;
+  departamento: string;
+  email?: string;
+  telefone?: string;
+  ramal?: string;
+}
+
 export interface EstipulanteEnderecoRequest {
   cep?: string;
   logradouro?: string;
@@ -67,6 +75,7 @@ export interface CriarEstipulanteRequest {
   observacao?: string;
   endereco?: EstipulanteEnderecoRequest;
   contatos?: EstipulanteContatoRequest[];
+  contatosInstitucionais?: EstipulanteContatoInstitucionalRequest[];
   configuracao: EstipulanteConfiguracaoRequest;
 }
 
@@ -79,6 +88,7 @@ export interface AtualizarEstipulanteRequest {
   observacao?: string;
   endereco?: EstipulanteEnderecoRequest;
   contatos?: EstipulanteContatoRequest[];
+  contatosInstitucionais?: EstipulanteContatoInstitucionalRequest[];
   configuracao: EstipulanteConfiguracaoRequest;
 }
 
@@ -111,6 +121,13 @@ export interface EstipulanteDetalheResponse {
     tipoContato: string;
     valor: string;
     principal: boolean;
+  }[];
+  contatosInstitucionais?: {
+    nome: string;
+    departamento: string;
+    email?: string;
+    telefone?: string;
+    ramal?: string;
   }[];
 }
 

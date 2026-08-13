@@ -12,6 +12,7 @@ public record AtualizarEstipulanteCommand(
     string? Observacao,
     AtualizarEstipulanteEnderecoCommand? Endereco,
     IReadOnlyList<AtualizarEstipulanteContatoCommand>? Contatos,
+    IReadOnlyList<AtualizarEstipulanteContatoInstitucionalCommand>? ContatosInstitucionais,
     AtualizarEstipulanteConfiguracaoCommand Configuracao
 );
 
@@ -38,4 +39,12 @@ public record AtualizarEstipulanteContatoCommand(
     string TipoContato,
     string Valor,
     bool Principal
+);
+
+public record AtualizarEstipulanteContatoInstitucionalCommand(
+    string Nome,
+    string Departamento,
+    string? Email,
+    string? Telefone,
+    string? Ramal
 );

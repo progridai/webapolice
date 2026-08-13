@@ -12,6 +12,7 @@ public class AtualizarEstipulanteRequest
     public string? Observacao { get; set; }
     public AtualizarEstipulanteEnderecoRequest? Endereco { get; set; }
     public System.Collections.Generic.List<AtualizarEstipulanteContatoRequest>? Contatos { get; set; }
+    public System.Collections.Generic.List<AtualizarEstipulanteContatoInstitucionalRequest>? ContatosInstitucionais { get; set; }
     public AtualizarEstipulanteConfiguracaoRequest Configuracao { get; set; } = new();
 }
 
@@ -41,4 +42,13 @@ public class AtualizarEstipulanteContatoRequest
     public string TipoContato { get; set; } = string.Empty;
     public string Valor { get; set; } = string.Empty;
     public bool Principal { get; set; }
+}
+
+public class AtualizarEstipulanteContatoInstitucionalRequest
+{
+    public string Nome { get; set; } = string.Empty;
+    public string Departamento { get; set; } = string.Empty;
+    public string? Email { get; set; }
+    public string? Telefone { get; set; }
+    public string? Ramal { get; set; }
 }

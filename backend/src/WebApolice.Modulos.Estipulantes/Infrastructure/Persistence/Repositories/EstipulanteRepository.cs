@@ -80,6 +80,13 @@ public class EstipulanteRepository : IEstipulanteRepository
             .ToListAsync(cancellationToken);
     }
 
+    public async Task<System.Collections.Generic.IReadOnlyList<PessoaContatoInstitucionalModel>> ObterContatosInstitucionaisAtivosAsync(long pessoaId, CancellationToken cancellationToken)
+    {
+        return await _dbContext.ContatosInstitucionais
+            .Where(c => c.PessoaId == pessoaId && c.Ativo)
+            .ToListAsync(cancellationToken);
+    }
+
     public async Task<PessoaEnderecoModel?> ObterEnderecoPrincipalAsync(long pessoaId, CancellationToken cancellationToken)
     {
         return await _dbContext.Enderecos
@@ -132,6 +139,11 @@ public class EstipulanteRepository : IEstipulanteRepository
     public void AdicionarContato(PessoaContatoModel contato)
     {
         _dbContext.Contatos.Add(contato);
+    }
+
+    public void AdicionarContatoInstitucional(PessoaContatoInstitucionalModel contato)
+    {
+        _dbContext.ContatosInstitucionais.Add(contato);
     }
 
     public void AdicionarConfiguracao(EstipulanteConfiguracaoModel configuracao)

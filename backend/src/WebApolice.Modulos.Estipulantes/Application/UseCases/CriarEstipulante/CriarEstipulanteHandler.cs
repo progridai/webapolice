@@ -136,6 +136,28 @@ public sealed class CriarEstipulanteHandler
                 }
             }
 
+            // Contatos Institucionais
+            if (command.ContatosInstitucionais != null && command.ContatosInstitucionais.Any())
+            {
+                foreach (var contatoInst in command.ContatosInstitucionais)
+                {
+                    if (string.IsNullOrWhiteSpace(contatoInst.Nome) && string.IsNullOrWhiteSpace(contatoInst.Departamento)) continue;
+
+                    _repository.AdicionarContatoInstitucional(new PessoaContatoInstitucionalModel
+                    {
+                        PessoaId = pessoaId,
+                        Nome = contatoInst.Nome,
+                        Departamento = contatoInst.Departamento,
+                        Email = contatoInst.Email,
+                        Telefone = contatoInst.Telefone,
+                        Ramal = contatoInst.Ramal,
+                        Ativo = true,
+                        CreatedAt = DateTimeOffset.UtcNow
+                    });
+                }
+            }
+
+
             // Endereço
             if (command.Endereco != null)
             {

@@ -31,6 +31,19 @@ public class PessoaContatoModel
     public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.UtcNow;
 }
 
+public class PessoaContatoInstitucionalModel
+{
+    public long Id { get; set; }
+    public long PessoaId { get; set; }
+    public string Nome { get; set; } = string.Empty;
+    public string Departamento { get; set; } = string.Empty;
+    public string? Email { get; set; }
+    public string? Telefone { get; set; }
+    public string? Ramal { get; set; }
+    public bool Ativo { get; set; } = true;
+    public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.UtcNow;
+}
+
 public class GrupoModel
 {
     public long Id { get; set; }

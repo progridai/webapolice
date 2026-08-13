@@ -19,6 +19,7 @@ public class EstipulanteDetalheResult
     public string? Observacao { get; set; }
     public EnderecoDetalheResult? Endereco { get; set; }
     public IReadOnlyList<ContatoDetalheResult>? Contatos { get; set; }
+    public IReadOnlyList<ContatoInstitucionalDetalheResult>? ContatosInstitucionais { get; set; }
 
     public class EnderecoDetalheResult
     {
@@ -36,5 +37,14 @@ public class EstipulanteDetalheResult
         public string TipoContato { get; set; } = string.Empty;
         public string Valor { get; set; } = string.Empty;
         public bool Principal { get; set; }
+    }
+
+    public class ContatoInstitucionalDetalheResult
+    {
+        public string Nome { get; set; } = string.Empty;
+        public string Departamento { get; set; } = string.Empty;
+        public string? Email { get; set; }
+        public string? Telefone { get; set; }
+        public string? Ramal { get; set; }
     }
 }

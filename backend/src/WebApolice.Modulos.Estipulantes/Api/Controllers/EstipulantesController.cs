@@ -95,6 +95,7 @@ public class EstipulantesController : ControllerBase
             request.Observacao,
             request.Endereco != null ? new CriarEstipulanteEnderecoCommand(request.Endereco.Cep, request.Endereco.Logradouro, request.Endereco.Numero, request.Endereco.Complemento, request.Endereco.Bairro, request.Endereco.CidadeId, request.Endereco.Uf) : null,
             request.Contatos != null ? request.Contatos.Select(c => new CriarEstipulanteContatoCommand(c.TipoContato, c.Valor, c.Principal)).ToList() : null,
+            request.ContatosInstitucionais != null ? request.ContatosInstitucionais.Select(c => new CriarEstipulanteContatoInstitucionalCommand(c.Nome, c.Departamento, c.Email, c.Telefone, c.Ramal)).ToList() : null,
             new CriarEstipulanteConfiguracaoCommand(request.Configuracao.DataInicioVigencia, request.Configuracao.DataFimVigencia, request.Configuracao.Carencia, request.Configuracao.AdesaoPor, request.Configuracao.Custeio, request.Configuracao.Adesao)
         );
 
@@ -116,6 +117,7 @@ public class EstipulantesController : ControllerBase
             request.Observacao,
             request.Endereco != null ? new AtualizarEstipulanteEnderecoCommand(request.Endereco.Cep, request.Endereco.Logradouro, request.Endereco.Numero, request.Endereco.Complemento, request.Endereco.Bairro, request.Endereco.CidadeId, request.Endereco.Uf) : null,
             request.Contatos != null ? request.Contatos.Select(c => new AtualizarEstipulanteContatoCommand(c.TipoContato, c.Valor, c.Principal)).ToList() : null,
+            request.ContatosInstitucionais != null ? request.ContatosInstitucionais.Select(c => new AtualizarEstipulanteContatoInstitucionalCommand(c.Nome, c.Departamento, c.Email, c.Telefone, c.Ramal)).ToList() : null,
             new AtualizarEstipulanteConfiguracaoCommand(request.Configuracao.DataInicioVigencia, request.Configuracao.DataFimVigencia, request.Configuracao.Carencia, request.Configuracao.AdesaoPor, request.Configuracao.Custeio, request.Configuracao.Adesao)
         );
 

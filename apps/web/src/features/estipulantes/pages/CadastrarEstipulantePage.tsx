@@ -30,6 +30,13 @@ export const CadastrarEstipulantePage: React.FC = () => {
           valor: c.valor,
           principal: c.principal,
         })) : undefined,
+        contatosInstitucionais: data.contatosInstitucionais && data.contatosInstitucionais.length > 0 ? data.contatosInstitucionais.map(c => ({
+          nome: c.nome,
+          departamento: c.departamento,
+          email: c.email,
+          telefone: c.telefone,
+          ramal: c.ramal
+        })) : undefined,
         configuracao: {
           dataInicioVigencia: data.configuracao.dataInicioVigencia,
           dataFimVigencia: data.configuracao.dataFimVigencia,

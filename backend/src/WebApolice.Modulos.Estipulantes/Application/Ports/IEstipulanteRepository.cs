@@ -16,6 +16,7 @@ public interface IEstipulanteRepository
     
     Task<PessoaContatoModel?> ObterContatoPrincipalAsync(long pessoaId, string tipoContato, CancellationToken cancellationToken);
     Task<System.Collections.Generic.IReadOnlyList<PessoaContatoModel>> ObterContatosAtivosAsync(long pessoaId, CancellationToken cancellationToken);
+    Task<System.Collections.Generic.IReadOnlyList<PessoaContatoInstitucionalModel>> ObterContatosInstitucionaisAtivosAsync(long pessoaId, CancellationToken cancellationToken);
     Task<PessoaEnderecoModel?> ObterEnderecoPrincipalAsync(long pessoaId, CancellationToken cancellationToken);
     Task<EstipulanteConfiguracaoModel?> ObterConfiguracaoPorEstipulanteIdAsync(long estipulanteId, CancellationToken cancellationToken);
     
@@ -27,6 +28,7 @@ public interface IEstipulanteRepository
     void AdicionarEstipulante(EstipulanteModel estipulante);
     void AdicionarEndereco(PessoaEnderecoModel endereco);
     void AdicionarContato(PessoaContatoModel contato);
+    void AdicionarContatoInstitucional(PessoaContatoInstitucionalModel contato);
     void AdicionarConfiguracao(EstipulanteConfiguracaoModel configuracao);
 
     Task SalvarAlteracoesAsync(CancellationToken cancellationToken);

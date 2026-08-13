@@ -4,7 +4,7 @@ import { PageHeader, Breadcrumbs, Alert, Skeleton, Badge } from '../../../compon
 import './Seguranca.css';
 
 export const ModulosPage: React.FC = () => {
-  const { modulos, isLoading, error, toggleError, handleToggleModulo, recarregar } = useModulos();
+  const { modulos, isLoading, error, toggleError, handleToggleModulo, handleToggleRecurso, recarregar } = useModulos();
 
   useEffect(() => {
     document.title = 'Módulos do Sistema | WebApolice';
@@ -52,22 +52,46 @@ export const ModulosPage: React.FC = () => {
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '16px' }}>
             {modulos.map((modulo) => {
               const isSeguranca = modulo.codigo === 'SEGURANCA';
+              const recursosOpcionais = modulo.recursos?.filter(r => r.codigo !== modulo.codigo) || [];
+              
               return (
-                <div key={modulo.codigo} style={{ display: 'flex', alignItems: 'center', gap: '16px', padding: '16px', border: '1px solid var(--cor-borda)', borderRadius: '8px', backgroundColor: 'var(--cor-fundo-superficie)' }}>
-                  <input
-                    type="checkbox"
-                    checked={modulo.habilitado}
-                    onChange={() => handleToggleModulo(modulo.publicId, modulo.habilitado)}
-                    disabled={isSeguranca}
-                    aria-label={`Habilitar módulo ${modulo.nome}`}
-                    style={{ width: '20px', height: '20px', cursor: isSeguranca ? 'not-allowed' : 'pointer' }}
-                  />
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <span style={{ fontWeight: '600', fontSize: '1.125rem', color: 'var(--cor-texto-principal)' }}>
-                      {modulo.nome}
-                    </span>
-                    {isSeguranca && <Badge variant="primary">Essencial</Badge>}
+                <div key={modulo.codigo} style={{ display: 'flex', flexDirection: 'column', gap: '8px', padding: '16px', border: '1px solid var(--cor-borda)', borderRadius: '8px', backgroundColor: 'var(--cor-fundo-superficie)' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                    <input
+                      type="checkbox"
+                      checked={modulo.habilitado}
+                      onChange={() => handleToggleModulo(modulo.publicId, modulo.habilitado)}
+                      disabled={isSeguranca}
+                      aria-label={`Habilitar módulo ${modulo.nome}`}
+                      style={{ width: '20px', height: '20px', cursor: isSeguranca ? 'not-allowed' : 'pointer' }}
+                    />
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <span style={{ fontWeight: '600', fontSize: '1.125rem', color: 'var(--cor-texto-principal)' }}>
+                        {modulo.nome}
+                      </span>
+                      {isSeguranca && <Badge variant="primary">Essencial</Badge>}
+                    </div>
                   </div>
+                  {recursosOpcionais.length > 0 && (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginLeft: '36px', marginTop: '8px' }}>
+                      {!isSeguranca && <span style={{ fontSize: '0.875rem', fontWeight: 500, color: 'var(--cor-texto-secundario)' }}>Recursos Opcionais</span>}
+                      {recursosOpcionais.map(recurso => (
+                        <div key={recurso.codigo} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                          <input
+                            type="checkbox"
+                            checked={recurso.habilitado}
+                            onChange={() => handleToggleRecurso(modulo.publicId, recurso.publicId, recurso.habilitado)}
+                            disabled={!modulo.habilitado}
+                            aria-label={`Habilitar recurso ${recurso.nome}`}
+                            style={{ width: '16px', height: '16px', cursor: !modulo.habilitado ? 'not-allowed' : 'pointer' }}
+                          />
+                          <span style={{ fontSize: '0.9rem', color: 'var(--cor-texto-principal)', opacity: modulo.habilitado ? 1 : 0.6 }}>
+                            {recurso.nome}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               );
             })}

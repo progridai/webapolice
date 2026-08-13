@@ -28,5 +28,6 @@ public sealed record ConsultarClienteResult(
     IReadOnlyList<ClienteContatoResponse> Contatos,
     IReadOnlyList<ClienteEnderecoResponse> Enderecos,
     IReadOnlyList<ClienteVinculoResponse> Vinculos,
-    IReadOnlyList<ClienteDependenteResponse> Dependentes
+    IReadOnlyList<ClienteDependenteResponse> Dependentes,
+    string? Re = null
 );

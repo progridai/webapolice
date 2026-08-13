@@ -23,6 +23,7 @@ export const CadastrarClientePage: React.FC = () => {
         observacao: data.observacao || undefined,
         falecido: data.falecido,
         dataObito: data.dataObito || undefined,
+        re: data.re || undefined,
         contatos: data.contatos.map(c => ({
           tipoContato: c.tipoContato,
           valor: c.valor,

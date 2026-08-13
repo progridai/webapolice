@@ -54,6 +54,7 @@ public static class SegurancaModuleExtensions
 
         services.AddScoped<ListarModulosUseCase>();
         services.AddScoped<AlterarHabilitacaoModuloUseCase>();
+        services.AddScoped<WebApolice.Modulos.Seguranca.Application.UseCases.Recursos.AlterarHabilitacaoRecursoUseCase>();
         services.AddScoped<WebApolice.Modulos.Seguranca.Application.UseCases.Me.ObterUsuarioAutenticadoUseCase>();
 
         services.Configure<WebApolice.Modulos.Seguranca.Infrastructure.Keycloak.KeycloakAdminOptions>(

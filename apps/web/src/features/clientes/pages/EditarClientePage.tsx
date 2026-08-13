@@ -29,7 +29,8 @@ export const EditarClientePage: React.FC = () => {
           documento: data.documento || data.documentoMascarado || '',
           dataNascimento: data.dataNascimento ? new Date(data.dataNascimento).toISOString().split('T')[0] : '',
           sexo: data.sexo,
-          observacao: '',
+          observacao: data.observacao || '',
+          re: data.re || '',
           falecido: data.falecido || false,
           dataObito: data.dataObito ? new Date(data.dataObito).toISOString().split('T')[0] : '',
           contatos: data.contatos?.map((c: { tipo: string; valor: string; principal: boolean }) => ({
@@ -73,6 +74,7 @@ export const EditarClientePage: React.FC = () => {
         observacao: data.observacao || undefined,
         falecido: data.falecido,
         dataObito: data.dataObito || undefined,
+        re: data.re || undefined,
         contatos: data.contatos.map(c => ({
           tipoContato: c.tipoContato,
           valor: c.valor,

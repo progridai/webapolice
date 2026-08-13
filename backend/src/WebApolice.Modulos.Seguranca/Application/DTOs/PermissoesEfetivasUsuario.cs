@@ -8,4 +8,5 @@ public sealed record PermissoesEfetivasUsuario(
     bool AcessoTotal,
     bool OperadorSistema,
     IReadOnlyCollection<string> ModulosHabilitados,
+    IReadOnlyCollection<string> RecursosHabilitados,
     IReadOnlyCollection<string> Permissoes);

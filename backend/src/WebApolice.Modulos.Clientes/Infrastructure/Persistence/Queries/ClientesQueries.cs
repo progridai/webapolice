@@ -200,7 +200,8 @@ internal sealed class ClientesQueries : IClientesQueries
             contatos,
             enderecos,
             vinculos,
-            dependentes
+            dependentes,
+            baseInfo.c.Re
         );
     }
 }

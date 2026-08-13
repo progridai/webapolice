@@ -14,5 +14,6 @@ public sealed record AlterarClienteCommand(
     bool Falecido,
     DateOnly? DataObito,
     IReadOnlyList<ContatoCommand> Contatos,
-    IReadOnlyList<EnderecoCommand> Enderecos
+    IReadOnlyList<EnderecoCommand> Enderecos,
+    string? Re = null
 );

@@ -22,6 +22,7 @@ public sealed class Cliente
     public string? Observacao { get; private set; }
     public DateOnly? DataCadastroLegado { get; private set; }
     public int? LegadoId { get; private set; }
+    public string? Re { get; private set; }
     
     public DateTime CreatedAt { get; private set; }
     public DateTime UpdatedAt { get; private set; }
@@ -60,11 +61,12 @@ public sealed class Cliente
         UpdatedAt = DateTime.UtcNow;
     }
 
-    public void AtualizarDados(bool falecido, DateOnly? dataObito, string? observacao)
+    public void AtualizarDados(bool falecido, DateOnly? dataObito, string? observacao, string? re)
     {
         Falecido = falecido;
         DataObito = dataObito;
         Observacao = observacao;
+        Re = re;
         UpdatedAt = DateTime.UtcNow;
     }
 }

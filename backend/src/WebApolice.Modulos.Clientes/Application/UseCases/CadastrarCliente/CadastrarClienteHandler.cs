@@ -11,6 +11,8 @@ using WebApolice.Modulos.Clientes.Infrastructure.Persistence.Models;
 using WebApolice.Auditoria.Contracts;
 using WebApolice.Auditoria.Domain;
 using System.Text.Json;
+using Microsoft.EntityFrameworkCore;
+using System.Linq;
 
 namespace WebApolice.Modulos.Clientes.Application.UseCases.CadastrarCliente;
 
@@ -19,16 +21,31 @@ public sealed class CadastrarClienteHandler
     private readonly IClienteRepository _repository;
     private readonly ClientesDbContext _dbContext;
     private readonly IRegistradorAuditoria _auditoria;
+    private readonly WebApolice.Modulos.Seguranca.Infrastructure.Persistence.SegurancaDbContext _segurancaDbContext;
 
-    public CadastrarClienteHandler(IClienteRepository repository, ClientesDbContext dbContext, IRegistradorAuditoria auditoria)
+    public CadastrarClienteHandler(IClienteRepository repository, ClientesDbContext dbContext, IRegistradorAuditoria auditoria, WebApolice.Modulos.Seguranca.Infrastructure.Persistence.SegurancaDbContext segurancaDbContext)
     {
         _repository = repository;
         _dbContext = dbContext;
         _auditoria = auditoria;
+        _segurancaDbContext = segurancaDbContext;
     }
 
     public async Task<CadastrarClienteResult> Handle(CadastrarClienteCommand command, string usuarioSub, CancellationToken cancellationToken)
     {
+        if (!string.IsNullOrWhiteSpace(command.Re))
+        {
+            var recursoRe = await _segurancaDbContext.Recursos
+                .Include(r => r.Modulo)
+                .Where(r => r.Codigo == "RE" && r.Modulo.Codigo == "CLIENTES")
+                .FirstOrDefaultAsync(cancellationToken);
+
+            if (recursoRe == null || !recursoRe.Habilitado || !recursoRe.Ativo || !recursoRe.Modulo.Habilitado || !recursoRe.Modulo.Ativo)
+            {
+                throw new ClienteInvalidoException("O campo RE não está habilitado no sistema.");
+            }
+        }
+
         if (string.IsNullOrWhiteSpace(command.Nome))
             throw new ClienteInvalidoException("O nome é obrigatório.");
 
@@ -100,10 +117,7 @@ public sealed class CadastrarClienteHandler
             {
                 cliente.RegistrarObito(command.DataObito.Value);
             }
-            else if (!string.IsNullOrWhiteSpace(command.Observacao))
-            {
-                cliente.AtualizarDados(false, null, command.Observacao);
-            }
+            cliente.AtualizarDados(command.Falecido, command.DataObito, command.Observacao, command.Re);
             
             _repository.AdicionarCliente(cliente);
 

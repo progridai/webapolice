@@ -21,6 +21,7 @@ internal sealed class RecursoConfiguration : IEntityTypeConfiguration<Recurso>
         builder.Property(r => r.RotaFrontend).HasMaxLength(255);
         builder.Property(r => r.Ordem).HasDefaultValue(0);
         builder.Property(r => r.Ativo).HasDefaultValue(true);
+        builder.Property(r => r.Habilitado).HasDefaultValue(true);
         builder.Property(r => r.CreatedAt).HasDefaultValueSql("now()").IsRequired();
         builder.Property(r => r.UpdatedAt).HasDefaultValueSql("now()").IsRequired();
 

@@ -52,7 +52,8 @@ public sealed class ClientesController : ControllerBase
                 e.CidadeId == 0 ? null : e.CidadeId,
                 e.Uf,
                 e.Principal
-            )).ToList() ?? new List<EnderecoCommand>()
+            )).ToList() ?? new List<EnderecoCommand>(),
+            request.Re
         );
 
         var result = await handler.Handle(command, UsuarioSub, cancellationToken);
@@ -117,7 +118,8 @@ public sealed class ClientesController : ControllerBase
                 e.CidadeId == 0 ? null : e.CidadeId,
                 e.Uf,
                 e.Principal
-            )).ToList() ?? new List<EnderecoCommand>()
+            )).ToList() ?? new List<EnderecoCommand>(),
+            request.Re
         );
 
         await handler.Handle(command, UsuarioSub, cancellationToken);

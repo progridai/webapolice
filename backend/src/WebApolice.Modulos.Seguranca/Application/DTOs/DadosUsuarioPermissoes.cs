@@ -7,5 +7,6 @@ public sealed record DadosUsuarioPermissoes(
     bool AcessoTotal,
     bool OperadorSistema,
     IReadOnlyCollection<string> ModulosHabilitados,
+    IReadOnlyCollection<string> RecursosHabilitados,
     IReadOnlyCollection<string> Permissoes
 );

@@ -36,6 +36,10 @@ public class UsuarioRepository : IUsuarioRepository
                     .Where(m => m.Ativo && m.Habilitado)
                     .Select(m => m.Codigo)
                     .ToList(),
+                RecursosHabilitados = _context.Set<Domain.Recurso>()
+                    .Where(r => r.Ativo && r.Habilitado && r.Modulo.Ativo && r.Modulo.Habilitado)
+                    .Select(r => r.Codigo)
+                    .ToList(),
                 Permissoes = u.Perfis
                     .Where(up => up.Perfil.Ativo)
                     .SelectMany(up => up.Perfil.Permissoes)
@@ -54,6 +58,7 @@ public class UsuarioRepository : IUsuarioRepository
             projection.AcessoTotal,
             projection.OperadorSistema,
             projection.ModulosHabilitados,
+            projection.RecursosHabilitados,
             projection.Permissoes.Distinct().ToList()
         );
     }

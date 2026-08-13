@@ -27,6 +27,7 @@ public class PermissoesEfetivasService : IPermissoesEfetivasService
                 AcessoTotal: false,
                 OperadorSistema: false,
                 ModulosHabilitados: Array.Empty<string>(),
+                RecursosHabilitados: Array.Empty<string>(),
                 Permissoes: Array.Empty<string>()
             );
         }
@@ -39,6 +40,7 @@ public class PermissoesEfetivasService : IPermissoesEfetivasService
                 AcessoTotal: false,
                 OperadorSistema: false,
                 ModulosHabilitados: Array.Empty<string>(),
+                RecursosHabilitados: Array.Empty<string>(),
                 Permissoes: Array.Empty<string>()
             );
         }
@@ -49,6 +51,7 @@ public class PermissoesEfetivasService : IPermissoesEfetivasService
             AcessoTotal: dados.AcessoTotal,
             OperadorSistema: dados.OperadorSistema,
             ModulosHabilitados: dados.ModulosHabilitados,
+            RecursosHabilitados: dados.RecursosHabilitados,
             Permissoes: dados.Permissoes
         );
     }

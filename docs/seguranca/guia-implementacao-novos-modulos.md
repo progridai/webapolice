@@ -59,6 +59,7 @@ A IA deve fazer as seguintes perguntas de forma guiada, utilizando linguagem sim
 9. A funcionalidade depende de outro módulo habilitado? *(Exemplo: Apólices depende de Clientes)*
 10. Quais ações precisam ser registradas na auditoria?
 11. Existem informações que não podem aparecer na auditoria? *(Senhas, tokens, dados sensíveis desnecessários)*
+12. Existem recursos (funcionalidades específicas ou campos) que devem ser opcionais e habilitados apenas para determinados clientes? *(Se sim: listar quais são. A IA deverá propor a criação desses itens como Recursos Opcionais vinculados ao módulo)*
 
 *Quando o usuário não souber responder, a IA deverá explicar a decisão tecnicamente, apresentar o padrão do projeto, recomendar uma opção e pedir confirmação. Não inicie a implementação enquanto houver decisão obrigatória pendente.*
 
@@ -81,6 +82,7 @@ A IA deverá preencher essa matriz a partir das respostas do responsável:
 - **Usuários e Perfis:** O usuário pode possuir zero, um ou vários perfis. As permissões efetivas são a união dos perfis ativos. Não criar permissões diretas por usuário (não existe tabela `usuario_permissao`).
 - **Acesso Total:** O perfil `ADMINISTRADOR` utiliza `acesso_total` e não precisa ter os vínculos individuais de permissão gravados. Nenhum perfil recebe novas permissões sem aprovação.
 - **Módulos Habilitados:** Módulo desabilitado bloqueia menu, rota e API. A flag `acesso_total` não ignora módulo desabilitado. O módulo `SEGURANCA` permanece essencial.
+- **Recursos Opcionais:** Funcionalidades ou campos específicos que não se aplicam a todos os clientes devem ser cadastrados como "Recursos" opcionais vinculados ao módulo pai (ex: recurso `RE` no módulo `CLIENTES`). A interface e a API devem validar se o recurso opcional está habilitado (ex: `possuiRecurso('RE')` no frontend) antes de exibir ou processar a funcionalidade, garantindo que o módulo funcione perfeitamente com o recurso habilitado ou desabilitado.
 - **Auditoria:** Eventos funcionais e eventos de segurança (mudanças em perfis, permissões, usuários) devem ser auditados.
 
 ---
@@ -110,6 +112,7 @@ O frontend foca em UX, ocultando e bloqueando elementos baseados nas permissões
 2. **Rotas Protegidas:** Englobar as rotas do novo módulo no componente `<PermissionProtectedRoute>` passando a permissão e o módulo correspondentes.
 3. **Menu de Navegação:** Atualizar `AppNavigation.tsx` adicionando o novo item no menu lateral, condicionado às permissões ou módulo.
 4. **Componentes Visuais:** Controlar a exibição de botões (ex: "Novo Cadastro", "Inativar") e colunas de ação nas tabelas usando funções de validação interna do provider como `possuiPermissao('clientes.inserir')` ou `possuiModulo('CLIENTES')`.
+5. **Tela de Módulos (UX e Redundância):** Ao listar recursos opcionais dentro de um módulo na interface de gestão (ex: `ModulosPage`), **oculte** recursos cujo código seja exatamente igual ao código do módulo pai (ex: Módulo `CLIENTES` contendo recurso `CLIENTES`). O *toggle* mestre do módulo já é suficiente para habilitar/desabilitar o domínio inteiro, e exibir o recurso homônimo apenas gera confusão e redundância visual para o administrador.
 
 ## 7. Migration do Catálogo de Segurança
 

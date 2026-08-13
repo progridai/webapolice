@@ -24,7 +24,7 @@ public class ObterUsuarioAutenticadoUseCase
     {
         if (!_contexto.EstaAutenticado || string.IsNullOrEmpty(_contexto.KeycloakSub))
         {
-            return new UsuarioAutenticadoDto(false, false, false, false, Array.Empty<string>(), Array.Empty<string>());
+            return new UsuarioAutenticadoDto(false, false, false, false, Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>());
         }
 
         var permissoesEfetivas = await _permissoesService.CalcularPermissoesAsync(_contexto.KeycloakSub, cancellationToken);
@@ -35,6 +35,7 @@ public class ObterUsuarioAutenticadoUseCase
             permissoesEfetivas.AcessoTotal,
             permissoesEfetivas.OperadorSistema,
             permissoesEfetivas.ModulosHabilitados.ToList(),
+            permissoesEfetivas.RecursosHabilitados.ToList(),
             permissoesEfetivas.Permissoes.ToList()
         );
     }

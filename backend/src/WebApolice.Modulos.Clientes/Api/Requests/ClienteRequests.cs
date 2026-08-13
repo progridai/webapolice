@@ -13,7 +13,8 @@ public sealed record CadastrarClienteRequest(
     bool Falecido,
     DateOnly? DataObito,
     IReadOnlyList<ContatoRequest> Contatos,
-    IReadOnlyList<EnderecoRequest> Enderecos
+    IReadOnlyList<EnderecoRequest> Enderecos,
+    string? Re = null
 );
 
 public sealed record AlterarClienteRequest(
@@ -25,7 +26,8 @@ public sealed record AlterarClienteRequest(
     bool Falecido,
     DateOnly? DataObito,
     IReadOnlyList<ContatoRequest> Contatos,
-    IReadOnlyList<EnderecoRequest> Enderecos
+    IReadOnlyList<EnderecoRequest> Enderecos,
+    string? Re = null
 );
 
 public sealed record ContatoRequest(

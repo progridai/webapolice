@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using WebApolice.Modulos.Seguranca.Infrastructure.Persistence;
@@ -11,9 +12,11 @@ using WebApolice.Modulos.Seguranca.Infrastructure.Persistence;
 namespace WebApolice.Modulos.Seguranca.Migrations
 {
     [DbContext(typeof(SegurancaDbContext))]
-    partial class SegurancaDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260813143942_AddRecursoHabilitadoAndRE")]
+    partial class AddRecursoHabilitadoAndRE
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

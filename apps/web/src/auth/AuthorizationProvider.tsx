@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
+import { createContext, useContext, useEffect, useState, useCallback, ReactNode } from 'react';
 import { useAuth } from './useAuth';
 import { httpClient } from '../services/http/httpClient';
 
@@ -10,6 +10,7 @@ export interface UsuarioAutenticadoResponse {
   acessoTotal: boolean;
   operadorSistema: boolean;
   modulosHabilitados: string[];
+  recursosHabilitados: string[];
   permissoes: string[];
 }
 
@@ -21,11 +22,14 @@ interface AuthorizationContextData {
   acessoTotal: boolean;
   operadorSistema: boolean;
   modulosHabilitados: string[];
+  recursosHabilitados: string[];
   permissoes: string[];
   possuiModulo: (codigo: string) => boolean;
+  possuiRecurso: (codigo: string) => boolean;
   possuiPermissao: (codigo: string) => boolean;
   possuiAcessoTotal: () => boolean;
   ehOperadorSistema: () => boolean;
+  refresh: () => Promise<void>;
 }
 
 const AuthorizationContext = createContext<AuthorizationContextData | undefined>(undefined);
@@ -36,28 +40,28 @@ export function AuthorizationProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
-  useEffect(() => {
-    async function loadData() {
-      if (!isAuthenticated) {
-        setIsLoading(false);
-        return;
-      }
-
-      try {
-        console.log('[AuthorizationProvider] Iniciando requisição para /api/seguranca/me');
-        const res = await httpClient.get<UsuarioAutenticadoResponse>('/api/seguranca/me');
-        console.log('[AuthorizationProvider] Resposta recebida:', res);
-        setData(res.data);
-      } catch (err) {
-        console.error('[AuthorizationProvider] Erro ao buscar /api/seguranca/me:', err);
-        setError(err instanceof Error ? err : new Error(String(err)));
-      } finally {
-        setIsLoading(false);
-      }
+  const loadData = useCallback(async () => {
+    if (!isAuthenticated) {
+      setIsLoading(false);
+      return;
     }
 
-    loadData();
+    try {
+      console.log('[AuthorizationProvider] Iniciando requisição para /api/seguranca/me');
+      const res = await httpClient.get<UsuarioAutenticadoResponse>('/api/seguranca/me');
+      console.log('[AuthorizationProvider] Resposta recebida:', res);
+      setData(res.data);
+    } catch (err) {
+      console.error('[AuthorizationProvider] Erro ao buscar /api/seguranca/me:', err);
+      setError(err instanceof Error ? err : new Error(String(err)));
+    } finally {
+      setIsLoading(false);
+    }
   }, [isAuthenticated]);
+
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
 
 
 
@@ -69,11 +73,14 @@ export function AuthorizationProvider({ children }: { children: ReactNode }) {
     acessoTotal: data?.acessoTotal ?? false,
     operadorSistema: data?.operadorSistema ?? false,
     modulosHabilitados: data?.modulosHabilitados ?? [],
+    recursosHabilitados: data?.recursosHabilitados ?? [],
     permissoes: data?.permissoes ?? [],
     possuiModulo: (codigo: string) => data?.modulosHabilitados.includes(codigo) ?? false,
+    possuiRecurso: (codigo: string) => data?.recursosHabilitados.includes(codigo) ?? false,
     possuiPermissao: (codigo: string) => data?.permissoes.includes(codigo) ?? false,
     possuiAcessoTotal: () => data?.acessoTotal ?? false,
     ehOperadorSistema: () => data?.operadorSistema ?? false,
+    refresh: loadData,
   };
 
   if (error) {

@@ -10,6 +10,7 @@ import { Checkbox } from '../../../components/ui/Checkbox';
 import { Button } from '../../../components/ui/Button';
 import { FormSection, FormGrid, FormActions, ReadOnlyField, UsersIcon, HomeIcon, InfoIcon } from '../../../components/ui';
 import { buscarCidadesPorUf, type CidadeResponse } from '../api/localidadesApi';
+import { useAuthorization } from '../../../auth/AuthorizationProvider';
 
 const ESTADOS_BRASILEIROS = [
   'AC', 'AL', 'AP', 'AM', 'BA', 'CE', 'DF', 'ES', 'GO', 'MA', 'MT', 'MS', 'MG',
@@ -49,6 +50,7 @@ const clienteSchema = z.object({
   documento: z.string().min(11, 'Documento inválido'),
   dataNascimento: z.string().min(1, 'A data de nascimento é obrigatória'),
   sexo: z.coerce.number().optional(),
+  re: z.string().max(32, 'O RE pode ter no máximo 32 caracteres').optional().or(z.literal('')),
   observacao: z.string().optional(),
   falecido: z.boolean().default(false),
   dataObito: z.string().optional().or(z.literal('')),
@@ -241,6 +243,7 @@ export const ClienteForm: React.FC<ClienteFormProps> = ({
   onSubmit,
   onCancel,
 }) => {
+  const { possuiRecurso } = useAuthorization();
   const {
     register,
     handleSubmit,
@@ -257,6 +260,7 @@ export const ClienteForm: React.FC<ClienteFormProps> = ({
       documento: initialData?.documento || '',
       dataNascimento: initialData?.dataNascimento || '',
       sexo: initialData?.sexo || undefined,
+      re: initialData?.re || '',
       observacao: initialData?.observacao || '',
       falecido: initialData?.falecido || false,
       dataObito: initialData?.dataObito || '',
@@ -283,6 +287,7 @@ export const ClienteForm: React.FC<ClienteFormProps> = ({
         documento: initialData.documento || '',
         dataNascimento: initialData.dataNascimento || '',
         sexo: initialData.sexo || undefined,
+        re: initialData.re || '',
         observacao: initialData.observacao || '',
         falecido: initialData.falecido || false,
         dataObito: initialData.dataObito || '',
@@ -373,6 +378,14 @@ export const ClienteForm: React.FC<ClienteFormProps> = ({
               </Select>
             </FormField>
           </div>
+
+          {possuiRecurso('RE') && (
+            <div className="lg:col-span-6">
+              <FormField label="RE" error={errors.re?.message}>
+                <Input {...register('re')} placeholder="Número do RE (Opcional)" maxLength={32} />
+              </FormField>
+            </div>
+          )}
         </FormGrid>
       </FormSection>
 

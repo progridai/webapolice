@@ -58,6 +58,7 @@ export interface CadastrarClienteRequest {
   documento: string;
   dataNascimento?: string; // YYYY-MM-DD
   sexo?: number;
+  re?: string;
   observacao?: string;
   falecido: boolean;
   dataObito?: string;
@@ -70,6 +71,7 @@ export interface AlterarClienteRequest {
   documento?: string;
   dataNascimento?: string;
   sexo?: number;
+  re?: string;
   observacao?: string;
   falecido: boolean;
   dataObito?: string;
@@ -84,6 +86,7 @@ export interface ClienteDetalhe {
   documentoMascarado: string;
   dataNascimento?: string;
   sexo?: number;
+  re?: string;
   observacao?: string;
   falecido: boolean;
   dataObito?: string;

@@ -23,7 +23,7 @@ export const ClienteDetalhePage: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const mainRef = useRef<HTMLElement>(null);
-  const { possuiPermissao, possuiAcessoTotal } = useAuthorization();
+  const { possuiPermissao, possuiAcessoTotal, possuiRecurso } = useAuthorization();
   const podeAlterar = possuiAcessoTotal() || possuiPermissao('clientes.alterar');
   
   const { data: cliente, isLoading, error, retry } = useClienteDetalhe(id);
@@ -172,6 +172,9 @@ export const ClienteDetalhePage: React.FC = () => {
             <DescriptionList columns={2}>
               <DescriptionItem label="Nome completo" value={cliente.nome} />
               <DescriptionItem label="Documento principal" value={cliente.documentoMascarado} />
+              {possuiRecurso('RE') && (
+                <DescriptionItem label="RE" value={cliente.re || 'Não informado'} />
+              )}
               {/* Mais dados poderiam ser exibidos aqui */}
             </DescriptionList>
           </DetailsSection>

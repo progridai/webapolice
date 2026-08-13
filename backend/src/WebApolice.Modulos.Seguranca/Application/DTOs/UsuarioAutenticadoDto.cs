@@ -8,5 +8,6 @@ public sealed record UsuarioAutenticadoDto(
     bool AcessoTotal,
     bool OperadorSistema,
     IReadOnlyList<string> ModulosHabilitados,
+    IReadOnlyList<string> RecursosHabilitados,
     IReadOnlyList<string> Permissoes
 );

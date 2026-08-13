@@ -18,7 +18,7 @@ public class MeController : ControllerBase
         CancellationToken cancellationToken)
     {
         var resultado = await useCase.ExecuteAsync(cancellationToken);
-        Console.WriteLine($"[DEBUG] MeController result: Encontrado={resultado.UsuarioEncontrado}, Ativo={resultado.UsuarioAtivo}, AcessoTotal={resultado.AcessoTotal}, Operador={resultado.OperadorSistema}, Modulos={string.Join(",", resultado.ModulosHabilitados)}, Permissoes={string.Join(",", resultado.Permissoes)}");
+        Console.WriteLine($"[DEBUG] MeController result: Encontrado={resultado.UsuarioEncontrado}, Ativo={resultado.UsuarioAtivo}, AcessoTotal={resultado.AcessoTotal}, Operador={resultado.OperadorSistema}, Modulos={string.Join(",", resultado.ModulosHabilitados)}, Recursos={string.Join(",", resultado.RecursosHabilitados)}, Permissoes={string.Join(",", resultado.Permissoes)}");
         return Ok(resultado);
     }
 }

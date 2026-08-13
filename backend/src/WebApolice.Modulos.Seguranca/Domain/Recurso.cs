@@ -14,6 +14,7 @@ public sealed class Recurso
     public string? RotaFrontend { get; private set; }
     public int Ordem { get; private set; }
     public bool Ativo { get; private set; }
+    public bool Habilitado { get; private set; } = true;
     public DateTime CreatedAt { get; private set; }
     public DateTime UpdatedAt { get; private set; }
 
@@ -21,4 +22,7 @@ public sealed class Recurso
     public ICollection<Permissao> Permissoes { get; private set; } = new List<Permissao>();
 
     private Recurso() { }
+
+    public void Habilitar() => Habilitado = true;
+    public void Desabilitar() => Habilitado = false;
 }

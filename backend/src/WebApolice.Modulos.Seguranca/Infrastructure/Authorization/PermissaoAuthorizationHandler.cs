@@ -45,30 +45,52 @@ public sealed class PermissaoAuthorizationHandler : AuthorizationHandler<Permiss
         // Obtém o token de cancelamento a partir da requisição HTTP (se disponível)
         var cancellationToken = _httpContextAccessor.HttpContext?.RequestAborted ?? default;
 
-        // Verifica o módulo ao qual a permissão pertence
-        var modulo = await Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.FirstOrDefaultAsync(
+        // Verifica o módulo e o recurso ao qual a permissão pertence
+        var permissaoData = await Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.FirstOrDefaultAsync(
             System.Linq.Queryable.Select(
                 System.Linq.Queryable.Where(_dbContext.Permissoes, p => p.Codigo == requirement.CodigoPermissao),
-                p => new { p.Recurso.Modulo.Codigo, p.Recurso.Modulo.Habilitado }
+                p => new { ModuloCodigo = p.Recurso.Modulo.Codigo, ModuloHabilitado = p.Recurso.Modulo.Habilitado, RecursoCodigo = p.Recurso.Codigo, RecursoHabilitado = p.Recurso.Habilitado }
             ), cancellationToken);
 
-        if (modulo != null && !modulo.Habilitado)
+        if (permissaoData != null)
         {
-            if (_httpContextAccessor.HttpContext != null)
+            if (!permissaoData.ModuloHabilitado)
             {
-                _httpContextAccessor.HttpContext.Response.StatusCode = 403;
-                _httpContextAccessor.HttpContext.Response.ContentType = "application/problem+json; charset=utf-8";
-                await _httpContextAccessor.HttpContext.Response.WriteAsJsonAsync(new Microsoft.AspNetCore.Mvc.ProblemDetails
+                if (_httpContextAccessor.HttpContext != null)
                 {
-                    Type = "https://webapolice/errors/modulo-nao-habilitado",
-                    Title = "Módulo não habilitado",
-                    Status = 403,
-                    Detail = $"O módulo '{modulo.Codigo}' está desabilitado no sistema."
-                });
-                await _httpContextAccessor.HttpContext.Response.Body.FlushAsync();
+                    _httpContextAccessor.HttpContext.Response.StatusCode = 403;
+                    _httpContextAccessor.HttpContext.Response.ContentType = "application/problem+json; charset=utf-8";
+                    await _httpContextAccessor.HttpContext.Response.WriteAsJsonAsync(new Microsoft.AspNetCore.Mvc.ProblemDetails
+                    {
+                        Type = "https://webapolice/errors/modulo-nao-habilitado",
+                        Title = "Módulo não habilitado",
+                        Status = 403,
+                        Detail = $"O módulo '{permissaoData.ModuloCodigo}' está desabilitado no sistema."
+                    });
+                    await _httpContextAccessor.HttpContext.Response.Body.FlushAsync();
+                }
+                context.Fail();
+                return;
             }
-            context.Fail();
-            return;
+
+            if (!permissaoData.RecursoHabilitado)
+            {
+                if (_httpContextAccessor.HttpContext != null)
+                {
+                    _httpContextAccessor.HttpContext.Response.StatusCode = 403;
+                    _httpContextAccessor.HttpContext.Response.ContentType = "application/problem+json; charset=utf-8";
+                    await _httpContextAccessor.HttpContext.Response.WriteAsJsonAsync(new Microsoft.AspNetCore.Mvc.ProblemDetails
+                    {
+                        Type = "https://webapolice/errors/recurso-nao-habilitado",
+                        Title = "Recurso não habilitado",
+                        Status = 403,
+                        Detail = $"O recurso '{permissaoData.RecursoCodigo}' do módulo '{permissaoData.ModuloCodigo}' está desabilitado no sistema."
+                    });
+                    await _httpContextAccessor.HttpContext.Response.Body.FlushAsync();
+                }
+                context.Fail();
+                return;
+            }
         }
 
         // O serviço trata de devolver os booleanos UsuarioEncontrado e UsuarioAtivo

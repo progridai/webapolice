@@ -11,7 +11,7 @@ public class AuditoriaDbContextFactory : IDesignTimeDbContextFactory<AuditoriaDb
         var optionsBuilder = new DbContextOptionsBuilder<AuditoriaDbContext>();
         
         var connectionString = Environment.GetEnvironmentVariable("ConnectionStrings__PostgreSql") 
-            ?? "Host=painel.bravida.com.br;Port=5432;Database=webapolice;Username=webapolice_app;Password=app_bravida";
+            ?? "Host=localhost;Port=5432;Database=webapolice;Username=postgres;Password=postgres";
 
         optionsBuilder.UseNpgsql(connectionString, 
             o => 

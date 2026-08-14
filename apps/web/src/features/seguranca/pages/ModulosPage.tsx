@@ -1,7 +1,6 @@
 import React, { useEffect } from 'react';
 import { useModulos } from '../hooks/useModulos';
 import { PageHeader, Breadcrumbs, Alert, Skeleton, Badge } from '../../../components/ui';
-import './Seguranca.css';
 
 export const ModulosPage: React.FC = () => {
   const { modulos, isLoading, error, toggleError, handleToggleModulo, handleToggleRecurso, recarregar } = useModulos();

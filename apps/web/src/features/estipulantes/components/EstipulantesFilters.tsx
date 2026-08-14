@@ -31,38 +31,33 @@ export const EstipulantesFilters: React.FC<EstipulantesFiltersProps> = ({
   return (
     <FilterBar>
       <div className="estipulantes-filter-search">
-        <label htmlFor="busca-estipulante" className="sr-only">
-          Buscar estipulante
-        </label>
         <SearchField
           id="busca-estipulante"
           placeholder="Razão Social, CNPJ ou Código"
           value={searchValue}
           onChange={handleSearchChange}
           disabled={isLoading}
+          aria-label="Buscar estipulante"
         />
       </div>
 
       <div className="estipulantes-filter-status">
-        <label htmlFor="status-estipulante" className="sr-only">
-          Status
-        </label>
         <Select
           id="status-estipulante"
           value={filters.status || ''}
           onChange={(event) =>
             onFilterChange({ 
               status: event.target.value as unknown as StatusEstipulanteEnum | '',
-              page: 1 // Reset to first page on filter change
+              page: 1
             })
           }
           disabled={isLoading}
-          options={[
-            { label: 'Todos', value: '' },
-            { label: 'Ativos', value: '1' },
-            { label: 'Inativos', value: '2' },
-          ]}
-        />
+          aria-label="Status do estipulante"
+        >
+          <option value="">Todos</option>
+          <option value="1">Ativos</option>
+          <option value="2">Inativos</option>
+        </Select>
       </div>
 
       <div className="estipulantes-filter-actions">

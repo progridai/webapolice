@@ -116,7 +116,7 @@ const EnderecoRow: React.FC<EnderecoRowProps> = ({
   }, [ufSelecionada]);
 
   return (
-    <div className="border border-gray-200 dark:border-gray-700 p-4 rounded-lg bg-gray-50 dark:bg-gray-800/30 mb-4">
+    <div className="border border-borda p-4 rounded-lg bg-fundo-aplicacao mb-4">
       <FormGrid>
         <div className="lg:col-span-3">
           <FormField label="Tipo de Endereço" required error={errors?.tipoEndereco?.message}>
@@ -216,7 +216,7 @@ const EnderecoRow: React.FC<EnderecoRowProps> = ({
           <Button
             type="button"
             variant="text"
-            className="text-red-500 hover:text-red-700"
+            className="text-erro hover:text-erro/80 font-medium"
             onClick={onRemove}
             disabled={!canRemove}
           >
@@ -392,7 +392,7 @@ export const ClienteForm: React.FC<ClienteFormProps> = ({
       <FormSection title="Contatos" icon={<InfoIcon size={20} />}>
         <div className="flex flex-col gap-4">
           {contatoFields.map((field, index) => (
-            <div key={field.id} className="border border-gray-200 dark:border-gray-700 p-4 rounded-lg bg-gray-50 dark:bg-gray-800/30">
+            <div key={field.id} className="border border-borda p-4 rounded-lg bg-fundo-aplicacao">
               <FormGrid>
                 <div className="lg:col-span-3">
                   <FormField label="Tipo de Contato" required error={errors.contatos?.[index]?.tipoContato?.message}>
@@ -432,7 +432,7 @@ export const ClienteForm: React.FC<ClienteFormProps> = ({
                   <Button
                     type="button"
                     variant="text"
-                    className="text-red-500 hover:text-red-700"
+                    className="text-erro hover:text-erro/80 font-medium"
                     onClick={() => removeContato(index)}
                     disabled={contatoFields.length <= 1}
                   >

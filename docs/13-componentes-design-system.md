@@ -418,13 +418,99 @@ Componente reutilizável (`Card` especializado) para agrupar informações de le
 ### DescriptionList
 
 Lista descritiva padronizada com colunas (1 a 3) usando `dl`, `dt` e `dd` nativos, focado na acessibilidade de chave-valor. Requer a importação conjunta do subcomponente `DescriptionItem`.
+Este componente é a base estrutural para o padrão de **Composição de Dados (Detail Views)** do WebApólice.
 
 ```tsx
 <DescriptionList columns={2}>
   <DescriptionItem label="Nome" value={cliente.nome} />
-  <DescriptionItem label="E-mail" value={cliente.email} />
+  <DescriptionItem label="E-mail" value={<a href={`mailto:${cliente.email}`}>{cliente.email}</a>} />
 </DescriptionList>
 ```
+
+---
+
+### Padrão de Composição de Dados (Detail Views)
+
+Para exibir dados nas telas de detalhes, **não** utilize classes utilitárias isoladas ou textos genéricos. O `DescriptionList` possui as classes semânticas e tratativas prontas para diferentes semânticas de valor.
+
+As regras de tipografia e layout são garantidas pelas classes nativas do componente:
+- **Responsividade (Layout)**: O `DescriptionList` organiza internamente os itens de forma empilhada (vertical) em telas pequenas (mobile), e **lado a lado (horizontal)** em telas médias e grandes (tablet/desktop) para facilitar a varredura e otimizar o espaço vertical.
+- **Densidade de Dados**: Pode assumir `density="compact"` (padrão para Detail Views administrativas) ou `density="comfortable"`. O padrão compacto aproxima as linhas verticalmente para permitir a leitura de 10 a 20 campos na tela sem rolagem excessiva.
+- **Colunas**: Utilize `columns={1}` para agrupamentos curtos (ex: 3 campos) e `columns={2}` no desktop para formulários longos (ex: tela de Estipulante).
+- **Label**: Identifica o campo. Possui peso `semibold`, tamanho `14px` e cor secundária. No desktop, possui largura fixa.
+- **Value**: Valor normal de leitura. Possui peso `normal`, tamanho `16px` e suporte dinâmico à quebra automática de texto longo.
+
+#### Valores Acionáveis (Links, E-mails, Telefones)
+O `DescriptionList` não interpreta strings automaticamente. Você deve passar uma tag `<a>` envolta no valor para torná-lo um link com hover/focus adequado:
+
+```tsx
+<DescriptionItem 
+  label="E-mail" 
+  value={<a href="mailto:admin@progridai.com">admin@progridai.com</a>} 
+/>
+<DescriptionItem 
+  label="Site" 
+  value={<a href="https://empresa.com.br" target="_blank" rel="noreferrer">empresa.com.br</a>} 
+/>
+<DescriptionItem 
+  label="Telefone" 
+  value={<a href="tel:51999999999">(51) 99999-9999</a>} 
+/>
+```
+
+#### Identificadores e Códigos Técnicos
+Para exibir UUIDs, matrículas, chaves externas ou códigos onde a clareza caractere a caractere importa, utilize a classe `.desc-item-code` dentro do valor:
+
+```tsx
+<DescriptionItem 
+  label="Código Interno" 
+  value={<span className="desc-item-code">USR-00128</span>} 
+/>
+```
+
+#### Metadata (Informações complementares ao valor)
+Para detalhamentos de um valor (ex: o cargo atrelado a um nome), use `.desc-item-metadata`:
+
+```tsx
+<DescriptionItem 
+  label="Responsável" 
+  value={
+    <>
+      <div>João Silva</div>
+      <span className="desc-item-metadata">Diretor Comercial</span>
+    </>
+  } 
+/>
+```
+
+#### Estado Vazio (Empty State)
+Se o `value` passado for `null`, `undefined` ou `''`, o componente renderizará automaticamente *Não informado* (em itálico, com cor secundária). Se for preciso forçar esse estado, pode-se usar a classe:
+
+```tsx
+<DescriptionItem 
+  label="Último acesso" 
+  value={<span className="desc-item-empty">Nunca acessou</span>} 
+/>
+```
+
+#### Status
+O status continua usando o `StatusBadge` como valor direto, sem variações específicas no DescriptionList:
+
+```tsx
+<DescriptionItem 
+  label="Status" 
+  value={<StatusBadge status="ativo" />} 
+/>
+```
+
+#### Regra Arquitetural: Remoção de Redundância e Top Cards
+Em telas de detalhes e cards, obedeça a seguinte regra de Composição de Dados:
+> Informações secundárias devem complementar a informação principal. Não devem repetir integral ou parcialmente o dado principal sem acrescentar significado.
+
+- **Evite**: Exibir o "username" (ex: admin) logo abaixo do nome completo se ele for visualmente a mesma coisa que o primeiro nome, gerando poluição.
+- **Evite**: Exibir o "código" de um perfil (ex: ADMINISTRADOR) logo abaixo do nome dele ("Administrador") quando as strings forem textualmente idênticas.
+- **Evite Cards Gigantes no Topo**: O `PageHeader` possui a propriedade `titleExtras` para ancorar badges (ex: Status) direto no título da página. Remova o `EntitySummary` do topo das telas de Detalhes Administrativas para liberar altura na tela. Mova dados secundários como "Último acesso" para os blocos de `DetailsSection`.
+- **Agrupamento Semântico**: Não jogue 30 campos num único agrupamento. Divida a tela em blocos menores (ex: Dados Gerais, Endereço, Bancário).
 
 ---
 

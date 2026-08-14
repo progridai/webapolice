@@ -81,7 +81,7 @@ export const EditarPerfilPage: React.FC = () => {
 
   if (isProtegido) {
     return (
-      <main className="p-6 max-w-7xl mx-auto focus:outline-none flex flex-col gap-6">
+      <main className="flex flex-col gap-6 w-full max-w-[1440px] mx-auto p-0 focus:outline-none">
         <Alert variant="warning" title="Acesso Restrito">
           O perfil <strong>ADMINISTRADOR</strong> é protegido pelo sistema e não pode ser editado.
         </Alert>
@@ -99,7 +99,7 @@ export const EditarPerfilPage: React.FC = () => {
 
   if (error && !initialData) {
     return (
-      <main className="p-6 max-w-7xl mx-auto focus:outline-none">
+      <main className="flex flex-col gap-6 w-full max-w-[1440px] mx-auto p-0 focus:outline-none">
         <Alert variant="error" title="Erro">{error}</Alert>
         <Button className="mt-4" onClick={() => navigate('/seguranca/perfis')}>
           Voltar
@@ -109,7 +109,7 @@ export const EditarPerfilPage: React.FC = () => {
   }
 
   return (
-    <main className="p-6 max-w-7xl mx-auto focus:outline-none flex flex-col gap-6">
+    <main className="flex flex-col gap-6 w-full max-w-[1440px] mx-auto p-0 focus:outline-none">
       <PageHeader
         title="Editar Perfil"
         description="Atualize os dados e permissões deste perfil."
@@ -125,7 +125,7 @@ export const EditarPerfilPage: React.FC = () => {
         }
       />
 
-      <div className="max-w-4xl">
+      <div className="w-full max-w-[800px]">
         {error && (
           <div className="mb-4">
             <Alert variant="error" title="Erro ao Salvar">{error}</Alert>

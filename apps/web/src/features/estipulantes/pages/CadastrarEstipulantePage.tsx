@@ -74,15 +74,14 @@ export const CadastrarEstipulantePage: React.FC = () => {
   ];
 
   return (
-    <div className="estipulantes-page" role="main">
+    <div className="flex flex-col gap-6 w-full max-w-[1440px] mx-auto p-0 focus:outline-none" role="main">
       <PageHeader 
         title="Novo Estipulante"
         description="Cadastre os dados básicos da empresa estipulante."
-        icon={<BriefcaseIcon size={24} />}
         breadcrumbs={<Breadcrumbs items={breadcrumbItems} />}
       />
 
-      <div className="page-content" style={{ maxWidth: '800px' }}>
+      <div className="w-full max-w-[800px]">
         {error && (
           <div className="mb-4">
             <Alert variant="error" title="Erro no Cadastro">{error}</Alert>

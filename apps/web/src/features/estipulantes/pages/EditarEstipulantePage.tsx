@@ -155,7 +155,7 @@ export const EditarEstipulantePage: React.FC = () => {
 
   if (notFound) {
     return (
-      <div className="page-container">
+      <div className="flex flex-col gap-6 w-full max-w-[1440px] mx-auto p-0 focus:outline-none">
         <EmptyState
           title="Estipulante não encontrado"
           description="O registro que você tentou acessar não existe ou foi removido."
@@ -167,7 +167,7 @@ export const EditarEstipulantePage: React.FC = () => {
 
   if (error && !initialData) {
     return (
-      <div className="page-container">
+      <div className="flex flex-col gap-6 w-full max-w-[1440px] mx-auto p-0 focus:outline-none">
         <Alert variant="error" title="Erro">{error}</Alert>
         <Button className="mt-4" onClick={() => navigate('/estipulantes')}>Voltar</Button>
       </div>
@@ -181,20 +181,14 @@ export const EditarEstipulantePage: React.FC = () => {
   ];
 
   return (
-    <div className="estipulantes-page" role="main">
+    <div className="flex flex-col gap-6 w-full max-w-[1440px] mx-auto p-0 focus:outline-none" role="main">
       <PageHeader 
         title="Editar Estipulante"
         description="Atualize os dados e a configuração operacional do estipulante."
-        icon={<BriefcaseIcon size={24} />}
         breadcrumbs={<Breadcrumbs items={breadcrumbItems} />}
-        actions={
-          <Button variant="danger" onClick={handleDelete} disabled={isSubmitting || isLoading}>
-            Excluir
-          </Button>
-        }
       />
 
-      <div className="page-content" style={{ maxWidth: '800px' }}>
+      <div className="w-full max-w-[800px]">
         {error && (
           <div className="mb-4">
             <Alert variant="error" title="Erro ao Salvar">{error}</Alert>
@@ -207,6 +201,7 @@ export const EditarEstipulantePage: React.FC = () => {
             isEdit={true}
             onSubmit={handleSubmit}
             onCancel={handleCancel}
+            onDelete={handleDelete}
             isSubmitting={isSubmitting}
           />
         )}

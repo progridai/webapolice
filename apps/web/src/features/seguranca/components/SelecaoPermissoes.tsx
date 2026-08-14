@@ -43,7 +43,7 @@ export const SelecaoPermissoes: React.FC<SelecaoPermissoesProps> = ({
 
   if (catalogo.length === 0) {
     return (
-      <p className="text-sm text-slate-500 dark:text-slate-400">
+      <p className="text-sm text-texto-secundario">
         Nenhuma permissão disponível no catálogo.
       </p>
     );
@@ -65,7 +65,7 @@ export const SelecaoPermissoes: React.FC<SelecaoPermissoesProps> = ({
                   <div className="mb-1">
                     <Checkbox
                       label={
-                        <span className="font-medium text-sm text-slate-700 dark:text-slate-300">
+                        <span className="font-medium text-sm text-texto-principal">
                           {recurso.nome}
                         </span>
                       }
@@ -82,10 +82,10 @@ export const SelecaoPermissoes: React.FC<SelecaoPermissoesProps> = ({
                       <Checkbox
                         key={perm.publicId}
                         label={
-                          <span className="text-sm text-slate-600 dark:text-slate-400">
+                          <span className="text-sm text-texto-principal">
                             {perm.nome}
                             {perm.descricao && (
-                              <span className="ml-1 text-xs text-slate-400 dark:text-slate-500">
+                              <span className="ml-1 text-xs text-texto-secundario">
                                 — {perm.descricao}
                               </span>
                             )}

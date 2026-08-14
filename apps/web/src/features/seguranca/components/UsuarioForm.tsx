@@ -82,7 +82,7 @@ export const UsuarioForm: React.FC<UsuarioFormProps> = ({
   }, [initialData, reset]);
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-8" noValidate>
+    <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-6" noValidate>
       <FormSection title="Dados Gerais" description="Informações de acesso do usuário.">
         <FormGrid>
           <FormField label="Username" error={errors.username?.message} required>
@@ -135,7 +135,7 @@ export const UsuarioForm: React.FC<UsuarioFormProps> = ({
             </>
           )}
 
-          <FormField label="Status" className="col-span-1 md:col-span-2">
+          <FormField label="Status" className="sm:col-span-full lg:col-span-full">
             <Controller
               name="ativo"
               control={control}

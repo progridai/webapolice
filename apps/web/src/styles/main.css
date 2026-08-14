@@ -1,5 +1,4 @@
 /* main.css */
-
 /* Importação de todos os Design Tokens */
 @import './tokens/cores.css';
 @import './tokens/temas.css';
@@ -7,6 +6,10 @@
 @import './tokens/espacamentos.css';
 @import './tokens/bordas.css';
 @import './tokens/sombras.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 /* Estilos de Reset e Base da Aplicação */
 * {

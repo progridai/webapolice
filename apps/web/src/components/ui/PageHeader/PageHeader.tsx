@@ -3,6 +3,7 @@ import './PageHeader.css';
 
 export interface PageHeaderProps {
   title: string;
+  titleExtras?: React.ReactNode;
   description?: string;
   icon?: React.ReactNode;
   breadcrumbs?: React.ReactNode;
@@ -12,6 +13,7 @@ export interface PageHeaderProps {
 
 export const PageHeader: React.FC<PageHeaderProps> = ({
   title,
+  titleExtras,
   description,
   icon,
   breadcrumbs,
@@ -26,7 +28,10 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
         <div className="page-header-title-group">
           {icon && <div className="page-header-icon" aria-hidden="true">{icon}</div>}
           <div className="page-header-text">
-            <h1 className="page-header-title">{title}</h1>
+            <div className="page-header-title-wrapper">
+              <h1 className="page-header-title">{title}</h1>
+              {titleExtras && <div className="page-header-title-extras">{titleExtras}</div>}
+            </div>
             {description && <p className="page-header-description">{description}</p>}
           </div>
         </div>

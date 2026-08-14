@@ -22,7 +22,6 @@ import {
   EditIcon,
   Badge,
 } from '../../../components/ui';
-import './Seguranca.css';
 import type { Column } from '../../../components/ui/DataTable/DataTable';
 import type { UsuarioListDto } from '../types/seguranca.types';
 import { useAuthorization } from '../../../auth/AuthorizationProvider';
@@ -56,10 +55,9 @@ export const UsuariosListPage: React.FC = () => {
       key: 'nome',
       label: 'Usuário',
       render: (u) => (
-        <div className="seguranca-flex-col">
-          <span className="seguranca-user-name">{u.nome}</span>
-          <span className="seguranca-user-username">{u.username}</span>
-        </div>
+      <div className="flex flex-col gap-1">
+        <span className="font-semibold text-texto-principal">{u.nome}</span>
+      </div>
       ),
     },
     {
@@ -71,7 +69,7 @@ export const UsuariosListPage: React.FC = () => {
       key: 'perfis',
       label: 'Perfis',
       render: (u) => (
-        <div className="seguranca-badge-list">
+        <div className="flex flex-wrap gap-1">
           {u.perfis.length > 0 ? (
             u.perfis.map((p, i) => (
               <Badge key={i} variant="neutral">
@@ -79,7 +77,7 @@ export const UsuariosListPage: React.FC = () => {
               </Badge>
             ))
           ) : (
-            <span className="seguranca-empty-badges">Nenhum</span>
+            <span className="text-xs text-texto-secundario">Nenhum</span>
           )}
         </div>
       ),
@@ -116,7 +114,7 @@ export const UsuariosListPage: React.FC = () => {
   ];
 
   return (
-    <main className="seguranca-page" tabIndex={-1}>
+    <main className="flex flex-col gap-6 w-full max-w-[1440px] mx-auto p-0 focus:outline-none" tabIndex={-1}>
       <PageHeader
         title="Usuários"
         description="Gerencie os usuários que possuem acesso ao sistema."
@@ -138,10 +136,10 @@ export const UsuariosListPage: React.FC = () => {
         }
       />
 
-      <section aria-label="Filtros de usuários">
+      <section aria-label="Filtros de usuários" style={{ position: 'relative', zIndex: 10 }}>
         <FilterBar>
           <div>
-            <label htmlFor="busca-usuario" className="block text-sm mb-1 font-medium text-slate-700 dark:text-slate-300">
+            <label htmlFor="busca-usuario" className="block text-sm mb-1 font-medium text-texto-secundario">
               Buscar usuário
             </label>
             <SearchField
@@ -154,7 +152,7 @@ export const UsuariosListPage: React.FC = () => {
           </div>
 
           <div>
-            <label htmlFor="status-usuario" className="block text-sm mb-1 font-medium text-slate-700 dark:text-slate-300">
+            <label htmlFor="status-usuario" className="block text-sm mb-1 font-medium text-texto-secundario">
               Status
             </label>
             <Select
@@ -165,12 +163,11 @@ export const UsuariosListPage: React.FC = () => {
                 setFilters({ ativo: v === '' ? '' : v === 'true' });
               }}
               disabled={isLoading && !data}
-              options={[
-                { label: 'Todos', value: '' },
-                { label: 'Ativo', value: 'true' },
-                { label: 'Inativo', value: 'false' },
-              ]}
-            />
+            >
+              <option value="">Todos</option>
+              <option value="true">Ativo</option>
+              <option value="false">Inativo</option>
+            </Select>
           </div>
 
           <div className="flex items-end">
@@ -186,7 +183,7 @@ export const UsuariosListPage: React.FC = () => {
       </section>
 
       {error ? (
-        <div className="seguranca-error">
+        <div className="flex flex-col items-start gap-4">
           <Alert variant="error" title="Não foi possível carregar os usuários">
             {error.message}
           </Alert>
@@ -195,10 +192,10 @@ export const UsuariosListPage: React.FC = () => {
           </Button>
         </div>
       ) : isLoading && !data && isMobile ? (
-        <div aria-busy="true" aria-live="polite" className="seguranca-skeletons">
-          <Skeleton className="seguranca-skeleton-row" />
-          <Skeleton className="seguranca-skeleton-row" />
-          <Skeleton className="seguranca-skeleton-row" />
+        <div aria-busy="true" aria-live="polite" className="flex flex-col gap-4">
+          <Skeleton className="w-full h-12 rounded-lg" />
+          <Skeleton className="w-full h-12 rounded-lg" />
+          <Skeleton className="w-full h-12 rounded-lg" />
         </div>
       ) : !hasData && !isLoading ? (
         <EmptyState
@@ -211,7 +208,7 @@ export const UsuariosListPage: React.FC = () => {
           action={hasActiveFilters ? <Button onClick={clearFilters}>Limpar filtros</Button> : undefined}
         />
       ) : (
-        <div className="seguranca-content">
+        <div className="flex flex-col gap-3">
           {data && hasData && (
             <ResultsSummary
               currentPage={data.paginaAtual}

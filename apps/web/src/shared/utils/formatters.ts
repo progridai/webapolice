@@ -25,3 +25,44 @@ export function formatarDataOuVazio(dataString?: string | null): string {
 
   return 'Data inválida';
 }
+
+/**
+ * Formata um número de telefone ou celular (ex: 51999999999 -> (51) 99999-9999)
+ */
+export function formatarTelefone(valor?: string | null): string {
+  if (!valor) return '';
+  const apenasNumeros = valor.replace(/\D/g, '');
+  
+  if (apenasNumeros.length === 11) {
+    return `(${apenasNumeros.substring(0, 2)}) ${apenasNumeros.substring(2, 7)}-${apenasNumeros.substring(7)}`;
+  }
+  
+  if (apenasNumeros.length === 10) {
+    return `(${apenasNumeros.substring(0, 2)}) ${apenasNumeros.substring(2, 6)}-${apenasNumeros.substring(6)}`;
+  }
+  
+  return valor;
+}
+
+/**
+ * Formata o valor do contato com base no seu tipo (EMAIL, CELULAR, TELEFONE)
+ */
+export function formatarValorContato(tipo: string, valor: string): string {
+  const tipoUpper = tipo.toUpperCase();
+  if (tipoUpper === 'CELULAR' || tipoUpper === 'TELEFONE') {
+    return formatarTelefone(valor);
+  }
+  return valor;
+}
+
+/**
+ * Formata um CEP (ex: 93037570 -> 93037-570)
+ */
+export function formatarCep(valor?: string | null): string {
+  if (!valor) return '';
+  const apenasNumeros = valor.replace(/\D/g, '');
+  if (apenasNumeros.length === 8) {
+    return `${apenasNumeros.substring(0, 5)}-${apenasNumeros.substring(5)}`;
+  }
+  return valor;
+}

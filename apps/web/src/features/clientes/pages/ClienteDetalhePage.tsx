@@ -15,7 +15,7 @@ import {
 } from '../../../components/ui';
 import { DescriptionItem } from '../../../components/ui/DescriptionList';
 import { useClienteDetalhe } from '../hooks/useClienteDetalhe';
-import { formatarDataOuVazio } from '../../../shared/utils/formatters';
+import { formatarDataOuVazio, formatarValorContato, formatarCep } from '../../../shared/utils/formatters';
 import { useAuthorization } from '../../../auth/AuthorizationProvider';
 
 export const ClienteDetalhePage: React.FC = () => {
@@ -151,13 +151,13 @@ export const ClienteDetalhePage: React.FC = () => {
         secondaryInfo={
           <div className="flex flex-wrap gap-6">
             <div className="flex flex-col">
-              <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Nascimento</span>
-              <span className="text-sm text-slate-900 dark:text-slate-50">{formatarDataOuVazio(cliente.dataNascimento)}</span>
+              <span className="text-xs font-semibold text-texto-secundario uppercase tracking-wider">Nascimento</span>
+              <span className="text-sm text-texto-principal">{formatarDataOuVazio(cliente.dataNascimento)}</span>
             </div>
             {cliente.falecido && (
               <div className="flex flex-col">
-                <span className="text-xs font-semibold text-red-500 uppercase tracking-wider">Falecido</span>
-                <span className="text-sm text-slate-900 dark:text-slate-50">
+                <span className="text-xs font-semibold text-erro uppercase tracking-wider">Falecido</span>
+                <span className="text-sm text-texto-principal">
                   Sim {cliente.dataObito ? `(${formatarDataOuVazio(cliente.dataObito)})` : ''}
                 </span>
               </div>
@@ -182,12 +182,12 @@ export const ClienteDetalhePage: React.FC = () => {
           <DetailsSection title="Contatos" isEmpty={contatosAtivos.length === 0} emptyState="Nenhum contato cadastrado.">
             <div className="flex flex-col gap-4">
               {contatosAtivos.map((contato, index) => (
-                <div key={index} className="flex items-center justify-between p-3 rounded-md bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700/50">
+                <div key={index} className="flex items-center justify-between p-3 rounded-md bg-fundo-aplicacao border border-borda">
                   <div>
-                    <p className="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">
+                    <p className="text-xs font-medium text-texto-secundario uppercase tracking-wider mb-1">
                       {contato.tipo}
                     </p>
-                    <p className="text-base text-slate-900 dark:text-slate-50">{contato.valor}</p>
+                    <p className="text-base text-texto-principal">{formatarValorContato(contato.tipo, contato.valor)}</p>
                   </div>
                   {contato.principal && (
                     <Badge variant="neutral" className="bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-800">
@@ -202,22 +202,22 @@ export const ClienteDetalhePage: React.FC = () => {
           <DetailsSection title="Endereços" isEmpty={enderecosAtivos.length === 0} emptyState="Nenhum endereço cadastrado.">
             <div className="flex flex-col gap-4">
               {enderecosAtivos.map((endereco, index) => (
-                <div key={index} className="flex flex-col p-4 rounded-md bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700/50">
+                <div key={index} className="flex flex-col p-4 rounded-md bg-fundo-aplicacao border border-borda">
                   <div className="flex items-center gap-2 mb-2">
-                    <p className="text-sm font-semibold text-slate-900 dark:text-slate-50">{endereco.tipo}</p>
+                    <p className="text-sm font-semibold text-texto-principal">{endereco.tipo}</p>
                     {endereco.principal && (
                       <Badge variant="neutral" className="bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-800">
                         Principal
                       </Badge>
                     )}
                   </div>
-                  <p className="text-sm text-slate-700 dark:text-slate-300">
+                  <p className="text-sm text-texto-secundario">
                     {endereco.logradouro}, {endereco.numero} {endereco.complemento && `- ${endereco.complemento}`}
                   </p>
-                  <p className="text-sm text-slate-700 dark:text-slate-300">
+                  <p className="text-sm text-texto-secundario">
                     {endereco.bairro} - {endereco.cidade}/{endereco.uf}
                   </p>
-                  <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">CEP: {endereco.cep}</p>
+                  <p className="text-sm text-texto-secundario mt-1">CEP: {formatarCep(endereco.cep)}</p>
                 </div>
               ))}
             </div>
@@ -228,11 +228,11 @@ export const ClienteDetalhePage: React.FC = () => {
           <DetailsSection title="Vínculos" isEmpty={cliente.vinculos.length === 0} emptyState="Nenhum vínculo cadastrado.">
             <div className="flex flex-col gap-4">
               {cliente.vinculos.map((vinculo, index) => (
-                <div key={index} className="p-4 rounded-md bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700/50">
-                  <div className="flex items-center justify-between mb-3 border-b border-slate-200 dark:border-slate-700 pb-3">
+                <div key={index} className="p-4 rounded-md bg-fundo-aplicacao border border-borda">
+                  <div className="flex items-center justify-between mb-3 border-b border-borda pb-3">
                     <div>
-                      <p className="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">Matrícula</p>
-                      <p className="text-base font-semibold text-slate-900 dark:text-slate-50">{vinculo.matricula}</p>
+                      <p className="text-xs font-medium text-texto-secundario uppercase tracking-wider mb-1">Matrícula</p>
+                      <p className="text-base font-semibold text-texto-principal">{vinculo.matricula}</p>
                     </div>
                     <Badge variant={vinculo.ativo ? 'success' : 'neutral'}>{vinculo.ativo ? 'Ativo' : 'Inativo'}</Badge>
                   </div>
@@ -251,18 +251,18 @@ export const ClienteDetalhePage: React.FC = () => {
           <DetailsSection title="Dependentes" isEmpty={cliente.dependentes.length === 0} emptyState="Nenhum dependente cadastrado.">
             <div className="flex flex-col gap-4">
               {cliente.dependentes.map((dependente, index) => (
-                <div key={index} className="p-4 rounded-md bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700/50">
+                <div key={index} className="p-4 rounded-md bg-fundo-aplicacao border border-borda">
                   <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2">
                     <div>
-                      <p className="text-base font-medium text-slate-900 dark:text-slate-50">{dependente.nome}</p>
-                      <p className="text-sm text-slate-500 dark:text-slate-400">{dependente.tipoRelacao}</p>
+                      <p className="text-base font-medium text-texto-principal">{dependente.nome}</p>
+                      <p className="text-sm text-texto-secundario">{dependente.tipoRelacao}</p>
                     </div>
                     <div className="text-left sm:text-right">
-                      <p className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                      <p className="text-sm font-medium text-texto-principal">
                         {dependente.documentoMascarado || 'Documento não informado'}
                       </p>
                       {dependente.dataNascimento && (
-                        <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                        <p className="text-xs text-texto-secundario mt-0.5">
                           Nasc: {formatarDataOuVazio(dependente.dataNascimento)}
                         </p>
                       )}

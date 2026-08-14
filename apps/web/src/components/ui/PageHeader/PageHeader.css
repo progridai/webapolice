@@ -1,5 +1,5 @@
 .page-header {
-  margin-bottom: var(--espaco-6);
+  /* Margin é controlada pelo layout pai (gap) */
 }
 
 .page-header-breadcrumbs {
@@ -39,8 +39,16 @@
   flex-shrink: 0;
 }
 
+.page-header-title-wrapper {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--espaco-3);
+  margin-bottom: var(--espaco-1);
+}
+
 .page-header-title {
-  margin: 0 0 var(--espaco-1) 0;
+  margin: 0;
   font-size: var(--fonte-tamanho-2xl);
   font-weight: 700;
   color: var(--cor-texto-principal);

@@ -113,7 +113,7 @@ export const PerfilForm: React.FC<PerfilFormProps> = ({
       </FormSection>
 
       <FormSection title="Permissões" description="Selecione as permissões que este perfil terá.">
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-4">
+        <div className="bg-fundo-aplicacao border border-borda rounded-lg p-4">
           <Controller
             name="permissaoPublicIds"
             control={control}

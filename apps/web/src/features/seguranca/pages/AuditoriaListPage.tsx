@@ -16,7 +16,6 @@ import {
   Skeleton,
   Input,
 } from '../../../components/ui';
-import './Seguranca.css';
 import type { Column } from '../../../components/ui/DataTable/DataTable';
 import type { AuditoriaListDto, AuditoriaQuery } from '../types/seguranca.types';
 

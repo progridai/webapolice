@@ -22,7 +22,6 @@ import {
   EditIcon,
   Badge,
 } from '../../../components/ui';
-import './Seguranca.css';
 import type { Column } from '../../../components/ui/DataTable/DataTable';
 import type { PerfilDto } from '../types/seguranca.types';
 import { useAuthorization } from '../../../auth/AuthorizationProvider';
@@ -58,9 +57,8 @@ export const PerfisListPage: React.FC = () => {
       key: 'nome',
       label: 'Perfil',
       render: (p) => (
-        <div className="seguranca-flex-col">
-          <span className="seguranca-user-name">{p.nome}</span>
-          <span className="seguranca-user-username text-xs">{p.codigo}</span>
+        <div className="flex flex-col gap-1">
+          <span className="font-semibold text-texto-principal">{p.nome}</span>
         </div>
       ),
     },
@@ -123,7 +121,7 @@ export const PerfisListPage: React.FC = () => {
   ];
 
   return (
-    <main className="seguranca-page" tabIndex={-1}>
+    <main className="flex flex-col gap-6 w-full max-w-[1440px] mx-auto p-0 focus:outline-none" tabIndex={-1}>
       <PageHeader
         title="Perfis de Acesso"
         description="Gerencie os perfis e suas permissões no sistema."
@@ -145,10 +143,10 @@ export const PerfisListPage: React.FC = () => {
         }
       />
 
-      <section aria-label="Filtros de perfis">
+      <section aria-label="Filtros de perfis" style={{ position: 'relative', zIndex: 10 }}>
         <FilterBar>
           <div>
-            <label htmlFor="busca-perfil" className="block text-sm mb-1 font-medium text-slate-700 dark:text-slate-300">
+            <label htmlFor="busca-perfil" className="block text-sm mb-1 font-medium text-texto-secundario">
               Buscar perfil
             </label>
             <SearchField
@@ -161,7 +159,7 @@ export const PerfisListPage: React.FC = () => {
           </div>
 
           <div>
-            <label htmlFor="status-perfil" className="block text-sm mb-1 font-medium text-slate-700 dark:text-slate-300">
+            <label htmlFor="status-perfil" className="block text-sm mb-1 font-medium text-texto-secundario">
               Status
             </label>
             <Select
@@ -172,12 +170,11 @@ export const PerfisListPage: React.FC = () => {
                 setFilters({ ativo: v === '' ? '' : v === 'true' });
               }}
               disabled={isLoading && !data}
-              options={[
-                { label: 'Todos', value: '' },
-                { label: 'Ativo', value: 'true' },
-                { label: 'Inativo', value: 'false' },
-              ]}
-            />
+            >
+              <option value="">Todos</option>
+              <option value="true">Ativo</option>
+              <option value="false">Inativo</option>
+            </Select>
           </div>
 
           <div className="flex items-end">
@@ -193,7 +190,7 @@ export const PerfisListPage: React.FC = () => {
       </section>
 
       {error ? (
-        <div className="seguranca-error">
+        <div className="flex flex-col items-start gap-4">
           <Alert variant="error" title="Não foi possível carregar os perfis">
             {error.message}
           </Alert>
@@ -202,10 +199,10 @@ export const PerfisListPage: React.FC = () => {
           </Button>
         </div>
       ) : isLoading && !data && isMobile ? (
-        <div aria-busy="true" aria-live="polite" className="seguranca-skeletons">
-          <Skeleton className="seguranca-skeleton-row" />
-          <Skeleton className="seguranca-skeleton-row" />
-          <Skeleton className="seguranca-skeleton-row" />
+        <div aria-busy="true" aria-live="polite" className="flex flex-col gap-4">
+          <Skeleton className="w-full h-12 rounded-lg" />
+          <Skeleton className="w-full h-12 rounded-lg" />
+          <Skeleton className="w-full h-12 rounded-lg" />
         </div>
       ) : !hasData && !isLoading ? (
         <EmptyState
@@ -218,7 +215,7 @@ export const PerfisListPage: React.FC = () => {
           action={hasActiveFilters ? <Button onClick={clearFilters}>Limpar filtros</Button> : undefined}
         />
       ) : (
-        <div className="seguranca-content">
+        <div className="flex flex-col gap-3">
           {data && hasData && (
             <ResultsSummary
               currentPage={data.paginaAtual}

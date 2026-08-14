@@ -58,7 +58,7 @@ export const CadastrarPerfilPage: React.FC = () => {
   }
 
   return (
-    <main className="p-6 max-w-7xl mx-auto focus:outline-none flex flex-col gap-6">
+    <main className="flex flex-col gap-6 w-full max-w-[1440px] mx-auto p-0 focus:outline-none">
       <PageHeader
         title="Novo Perfil"
         description="Preencha os dados e selecione as permissões do novo perfil."
@@ -74,7 +74,7 @@ export const CadastrarPerfilPage: React.FC = () => {
         }
       />
 
-      <div className="max-w-4xl">
+      <div className="w-full max-w-[800px]">
         {error && (
           <div className="mb-4">
             <Alert variant="error" title="Erro no Cadastro">{error}</Alert>

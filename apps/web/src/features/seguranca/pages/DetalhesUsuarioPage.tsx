@@ -55,10 +55,10 @@ export const DetalhesUsuarioPage: React.FC = () => {
 
   if (isLoading) {
     return (
-      <main ref={mainRef} tabIndex={-1} className="p-6 max-w-7xl mx-auto focus:outline-none" aria-busy="true">
+      <main ref={mainRef} tabIndex={-1} className="flex flex-col gap-6 w-full max-w-[1440px] mx-auto p-0 focus:outline-none" aria-busy="true">
         <Skeleton className="w-32 h-10 mb-4" />
         <Skeleton className="w-full h-32 mb-4" />
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
           <Skeleton className="w-full h-48" />
           <Skeleton className="w-full h-48" />
         </div>
@@ -68,7 +68,7 @@ export const DetalhesUsuarioPage: React.FC = () => {
 
   if (error || !usuario) {
     return (
-      <main ref={mainRef} tabIndex={-1} className="p-6 max-w-7xl mx-auto focus:outline-none">
+      <main ref={mainRef} tabIndex={-1} className="flex flex-col gap-6 w-full max-w-[1440px] mx-auto p-0 focus:outline-none">
         <Button variant="ghost" onClick={() => navigate('/seguranca/usuarios')} className="mb-4">
           ← Voltar para usuários
         </Button>
@@ -81,9 +81,11 @@ export const DetalhesUsuarioPage: React.FC = () => {
   }
 
   return (
-    <main ref={mainRef} tabIndex={-1} className="p-6 max-w-7xl mx-auto focus:outline-none flex flex-col gap-6">
+    <main ref={mainRef} tabIndex={-1} className="flex flex-col gap-6 w-full max-w-[1440px] mx-auto p-0 focus:outline-none">
       <PageHeader
-        title={`Usuário: ${usuario.nome}`}
+        title={usuario.nome}
+        titleExtras={<StatusBadge status={usuario.ativo ? 'ativo' : 'inativo'} />}
+        description={usuario.username.toLowerCase() !== usuario.nome.toLowerCase() ? usuario.username : undefined}
         breadcrumbs={
           <Breadcrumbs
             items={[
@@ -95,8 +97,8 @@ export const DetalhesUsuarioPage: React.FC = () => {
           />
         }
         actions={
-          <div className="flex gap-2">
-            <Button variant="ghost" onClick={() => navigate('/seguranca/usuarios')}>
+          <div className="flex flex-wrap gap-2">
+            <Button variant="secondary" onClick={() => navigate('/seguranca/usuarios')}>
               Voltar
             </Button>
             {podeEditar && (
@@ -110,24 +112,20 @@ export const DetalhesUsuarioPage: React.FC = () => {
           </div>
         }
       />
-
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
         <DetailsSection title="Dados Gerais">
-          <DescriptionList columns={2}>
-            <DescriptionItem label="Username" value={usuario.username} />
-            <DescriptionItem label="Nome" value={usuario.nome} />
-            <DescriptionItem label="E-mail" value={usuario.email} />
-            <DescriptionItem
-              label="Status"
-              value={<StatusBadge status={usuario.ativo ? 'ativo' : 'inativo'} />}
-            />
+          <DescriptionList columns={1} density="compact">
             <DescriptionItem 
-              label="Último Login" 
-              value={usuario.ultimoLoginEm ? new Date(usuario.ultimoLoginEm).toLocaleString('pt-BR') : 'Nunca acessou'} 
+              label="E-mail" 
+              value={<a href={`mailto:${usuario.email}`}>{usuario.email}</a>} 
             />
             <DescriptionItem 
               label="Data de Cadastro" 
-              value={new Date(usuario.createdAt).toLocaleString('pt-BR')} 
+              value={new Intl.DateTimeFormat('pt-BR', { dateStyle: 'short', timeStyle: 'short' }).format(new Date(usuario.createdAt)).replace(',', ' às')} 
+            />
+            <DescriptionItem 
+              label="Último acesso" 
+              value={usuario.ultimoLoginEm ? new Intl.DateTimeFormat('pt-BR', { dateStyle: 'short', timeStyle: 'short' }).format(new Date(usuario.ultimoLoginEm)).replace(',', ' às') : <span className="desc-item-empty">Nunca acessou</span>} 
             />
           </DescriptionList>
         </DetailsSection>
@@ -139,13 +137,15 @@ export const DetalhesUsuarioPage: React.FC = () => {
         >
           <div className="flex flex-col gap-3">
             {usuario.perfisAtribuidos.map((perfil) => (
-              <div key={perfil.publicId} className="flex justify-between items-center p-3 rounded-md border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50">
+              <div key={perfil.publicId} className="flex justify-between items-center px-3 py-2 rounded-md border border-borda bg-fundo-aplicacao">
                 <div className="flex flex-col">
-                  <span className="font-medium text-sm text-slate-900 dark:text-slate-100">{perfil.nome}</span>
-                  <span className="text-xs text-slate-500 font-mono">{perfil.codigo}</span>
+                  <span className="font-medium text-sm text-texto-principal">{perfil.nome}</span>
+                  {perfil.codigo.toLowerCase() !== perfil.nome.toLowerCase() && (
+                    <span className="text-xs text-texto-secundario font-mono">{perfil.codigo}</span>
+                  )}
                 </div>
                 {perfil.perfilSistema && (
-                  <Badge variant="neutral" className="text-xs">Sistema</Badge>
+                  <Badge variant="neutral">Sistema</Badge>
                 )}
               </div>
             ))}

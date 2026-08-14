@@ -4,6 +4,7 @@
   font-family: var(--fonte-familia-principal);
   font-size: var(--fonte-tamanho-sm);
   padding: var(--espaco-2) var(--espaco-3);
+  padding-right: var(--espaco-8, 2rem);
   border-radius: var(--raio-pequeno);
   border: var(--borda-largura-padrao) solid var(--cor-borda-forte);
   background-color: var(--cor-fundo-superficie);
@@ -12,6 +13,7 @@
   width: 100%;
   cursor: pointer;
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  text-overflow: ellipsis;
 }
 
 .form-select:hover:not(:disabled) {

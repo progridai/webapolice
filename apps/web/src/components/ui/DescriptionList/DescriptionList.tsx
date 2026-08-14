@@ -1,4 +1,5 @@
 import React from 'react';
+import './DescriptionList.css';
 
 export interface DescriptionItemProps {
   label: string;
@@ -14,14 +15,14 @@ export const DescriptionItem: React.FC<DescriptionItemProps> = ({
   className = '',
 }) => {
   return (
-    <div className={`flex flex-col gap-1 ${className}`}>
-      <dt className="text-sm font-medium text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
-        {icon && <span className="text-slate-400 dark:text-slate-500">{icon}</span>}
-        {label}
+    <div className={`desc-item ${className}`}>
+      <dt className="desc-item-label">
+        {icon && <span className="desc-item-label-icon">{icon}</span>}
+        {label}{typeof label === 'string' && !label.endsWith(':') ? ':' : ''}
       </dt>
-      <dd className="text-base text-slate-900 dark:text-slate-50 break-words">
+      <dd className="desc-item-value">
         {value === null || value === undefined || value === '' ? (
-          <span className="text-slate-400 dark:text-slate-500 italic">Não informado</span>
+          <span className="desc-item-empty">Não informado</span>
         ) : (
           value
         )}
@@ -33,29 +34,31 @@ export const DescriptionItem: React.FC<DescriptionItemProps> = ({
 export interface DescriptionListProps {
   children: React.ReactNode;
   columns?: 1 | 2 | 3;
+  density?: 'compact' | 'comfortable';
   className?: string;
 }
 
 export const DescriptionList: React.FC<DescriptionListProps> = ({
   children,
   columns = 2,
+  density = 'compact',
   className = '',
 }) => {
-  const getGridCols = () => {
+  const getGridColsClass = () => {
     switch (columns) {
       case 1:
-        return 'grid-cols-1';
+        return 'desc-list-cols-1';
       case 2:
-        return 'grid-cols-1 sm:grid-cols-2';
+        return 'desc-list-cols-2';
       case 3:
-        return 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3';
+        return 'desc-list-cols-3';
       default:
-        return 'grid-cols-1 sm:grid-cols-2';
+        return 'desc-list-cols-2';
     }
   };
 
   return (
-    <dl className={`grid gap-6 ${getGridCols()} ${className}`}>
+    <dl className={`desc-list-grid ${getGridColsClass()} desc-list-density-${density} ${className}`}>
       {children}
     </dl>
   );

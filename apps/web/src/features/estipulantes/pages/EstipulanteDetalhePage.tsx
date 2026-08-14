@@ -7,7 +7,6 @@ import {
   EmptyState,
   Breadcrumbs,
   PageHeader,
-  EntitySummary,
   DetailsSection,
   DescriptionList,
   StatusBadge,
@@ -15,6 +14,7 @@ import {
 } from '../../../components/ui';
 import { DescriptionItem } from '../../../components/ui/DescriptionList';
 import { useEstipulanteDetalhe } from '../hooks/useEstipulanteDetalhe';
+import { formatarValorContato, formatarCep } from '../../../shared/utils/formatters';
 import { useAuthorization } from '../../../auth/AuthorizationProvider';
 
 // Data formatter helper inline for configuration
@@ -140,13 +140,14 @@ export const EstipulanteDetalhePage: React.FC = () => {
   };
 
   return (
-    <main ref={mainRef} tabIndex={-1} className="p-6 max-w-7xl mx-auto focus:outline-none flex flex-col gap-6">
+    <main ref={mainRef} tabIndex={-1} className="flex flex-col gap-6 w-full max-w-[1440px] mx-auto p-0 focus:outline-none">
       <PageHeader
-        title="Detalhes do Estipulante"
+        title={estipulante.razaoSocial}
+        titleExtras={<StatusBadge status={estipulante.ativo ? 'ativo' : 'inativo'} />}
         breadcrumbs={
           <Breadcrumbs
             items={[
-              { label: 'Estipulantes', href: '#' },
+              { label: 'Estipulantes', href: '/estipulantes' },
               { label: 'Detalhes' }
             ]}
           />
@@ -161,32 +162,14 @@ export const EstipulanteDetalhePage: React.FC = () => {
         }
       />
 
-      <EntitySummary
-        name={estipulante.razaoSocial}
-        documentInfo={formatCnpj(estipulante.cnpj)}
-        badges={<StatusBadge status={estipulante.ativo ? 'ativo' : 'inativo'} />}
-        secondaryInfo={
-          <div className="flex flex-wrap gap-6">
-            <div className="flex flex-col">
-              <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Código</span>
-              <span className="text-sm text-slate-900 dark:text-slate-50">{estipulante.codigo || 'Não informado'}</span>
-            </div>
-            {estipulante.nomeFantasia && (
-              <div className="flex flex-col">
-                <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Nome Fantasia</span>
-                <span className="text-sm text-slate-900 dark:text-slate-50">{estipulante.nomeFantasia}</span>
-              </div>
-            )}
-          </div>
-        }
-      />
-
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
         <div className="flex flex-col gap-6">
           <DetailsSection title="Dados principais">
-            <DescriptionList columns={2}>
+            <DescriptionList columns={2} density="compact">
               <DescriptionItem label="Razão Social" value={estipulante.razaoSocial} />
-              <DescriptionItem label="Nome Fantasia" value={estipulante.nomeFantasia || '-'} />
+              {estipulante.nomeFantasia && (
+                <DescriptionItem label="Nome Fantasia" value={estipulante.nomeFantasia} />
+              )}
               <DescriptionItem label="CNPJ" value={formatCnpj(estipulante.cnpj)} />
               <DescriptionItem label="Código" value={estipulante.codigo || '-'} />
               <DescriptionItem label="Observação" value={estipulante.observacao || '-'} />
@@ -195,7 +178,7 @@ export const EstipulanteDetalhePage: React.FC = () => {
 
           <DetailsSection title="Configuração Operacional" isEmpty={!configuracao} emptyState="Nenhuma configuração cadastrada.">
             {configuracao && (
-              <DescriptionList columns={2}>
+              <DescriptionList columns={2} density="compact">
                 <DescriptionItem label="Início da Vigência" value={formatDate(configuracao.dataInicioVigencia)} />
                 <DescriptionItem label="Fim da Vigência" value={formatDate(configuracao.dataFimVigencia)} />
               </DescriptionList>
@@ -206,30 +189,30 @@ export const EstipulanteDetalhePage: React.FC = () => {
         <div className="flex flex-col gap-6">
           <DetailsSection title="Endereço principal" isEmpty={!estipulante.endereco} emptyState="Nenhum endereço cadastrado.">
             {estipulante.endereco && (
-              <div className="flex flex-col p-4 rounded-md bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700/50">
-                <p className="text-sm text-slate-700 dark:text-slate-300">
+              <div className="p-4 rounded-md bg-fundo-aplicacao border border-borda">
+                <p className="text-sm text-texto-principal">
                   {estipulante.endereco.logradouro}, {estipulante.endereco.numero} {estipulante.endereco.complemento && `- ${estipulante.endereco.complemento}`}
                 </p>
-                <p className="text-sm text-slate-700 dark:text-slate-300">
+                <p className="text-sm text-texto-principal">
                   {estipulante.endereco.bairro} - {estipulante.endereco.cidadeNome || estipulante.endereco.cidadeId}/{estipulante.endereco.uf}
                 </p>
-                <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">CEP: {estipulante.endereco.cep}</p>
+                <p className="text-sm text-texto-secundario mt-1">CEP: {formatarCep(estipulante.endereco.cep)}</p>
               </div>
             )}
           </DetailsSection>
 
           <DetailsSection title="Contatos" isEmpty={contatosAtivos.length === 0} emptyState="Nenhum contato cadastrado.">
-            <div className="flex flex-col gap-4">
+            <div className="flex flex-col gap-6">
               {contatosAtivos.map((contato, index) => (
-                <div key={index} className="flex items-center justify-between p-3 rounded-md bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700/50">
+                <div key={index} className="p-4 rounded-md bg-fundo-aplicacao border border-borda flex items-center justify-between">
                   <div>
-                    <p className="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">
+                    <p className="text-xs font-medium text-texto-secundario uppercase tracking-[0.05em] mb-1">
                       {contato.tipoContato}
                     </p>
-                    <p className="text-base text-slate-900 dark:text-slate-50">{contato.valor}</p>
+                    <p className="text-base text-texto-principal">{formatarValorContato(contato.tipoContato, contato.valor)}</p>
                   </div>
                   {contato.principal && (
-                    <Badge variant="neutral" className="bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-800">
+                    <Badge variant="primary">
                       Principal
                     </Badge>
                   )}

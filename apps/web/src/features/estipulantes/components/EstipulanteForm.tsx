@@ -77,6 +77,7 @@ interface EstipulanteFormProps {
   isSubmitting?: boolean;
   onSubmit: (data: EstipulanteFormData) => void;
   onCancel: () => void;
+  onDelete?: () => void;
 }
 
 export const EstipulanteForm: React.FC<EstipulanteFormProps> = ({
@@ -85,6 +86,7 @@ export const EstipulanteForm: React.FC<EstipulanteFormProps> = ({
   isSubmitting = false,
   onSubmit,
   onCancel,
+  onDelete,
 }) => {
   const {
     register,
@@ -219,7 +221,7 @@ export const EstipulanteForm: React.FC<EstipulanteFormProps> = ({
   };
 
   return (
-    <form onSubmit={handleSubmit(handleFormSubmit)}>
+    <form onSubmit={handleSubmit(handleFormSubmit)} className="flex flex-col gap-6">
       <FormSection title="Dados Principais" icon={<BriefcaseIcon size={20} />}>
         <FormGrid>
           <div className="lg:col-span-12">
@@ -344,9 +346,9 @@ export const EstipulanteForm: React.FC<EstipulanteFormProps> = ({
       </FormSection>
 
       <FormSection title="Contatos" icon={<InfoIcon size={20} />}>
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-6">
           {contatoFields.map((field, index) => (
-            <div key={field.id} className="border border-gray-200 dark:border-gray-700 p-4 rounded-lg bg-gray-50 dark:bg-gray-800/30">
+            <div key={field.id} className="p-4 rounded-lg bg-fundo-aplicacao border border-borda">
               <FormGrid>
                 <div className="lg:col-span-3">
                   <FormField label="Tipo de Contato" required error={errors.contatos?.[index]?.tipoContato?.message}>
@@ -382,11 +384,11 @@ export const EstipulanteForm: React.FC<EstipulanteFormProps> = ({
                     )}
                   />
                 </div>
-                <div className="lg:col-span-1 flex items-center justify-end pt-5">
+                <div className="lg:col-span-1 flex items-center pt-6">
                   <Button
                     type="button"
                     variant="text"
-                    className="text-red-500 hover:text-red-700"
+                    className="!text-erro"
                     onClick={() => removeContato(index)}
                     disabled={contatoFields.length <= 1}
                   >
@@ -409,14 +411,14 @@ export const EstipulanteForm: React.FC<EstipulanteFormProps> = ({
       </FormSection>
 
       <FormSection title="Contatos Institucionais" icon={<BriefcaseIcon size={20} />}>
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-6">
           {contatoInstFields.map((field, index) => (
-            <div key={field.id} className="border border-gray-200 dark:border-gray-700 p-4 rounded-lg bg-gray-50 dark:bg-gray-800/30 relative">
+            <div key={field.id} className="p-4 rounded-lg bg-fundo-aplicacao border border-borda relative pt-8">
               <div className="absolute top-4 right-4">
                 <Button
                   type="button"
                   variant="text"
-                  className="text-red-500 hover:text-red-700 p-0"
+                  className="!text-erro"
                   onClick={() => removeContatoInst(index)}
                 >
                   Remover
@@ -479,6 +481,13 @@ export const EstipulanteForm: React.FC<EstipulanteFormProps> = ({
       </FormSection>
 
       <FormActions>
+        <div className="flex-grow flex justify-start">
+          {isEdit && onDelete && (
+            <Button type="button" variant="danger" onClick={onDelete} disabled={isSubmitting}>
+              Excluir
+            </Button>
+          )}
+        </div>
         <Button type="button" variant="text" onClick={onCancel} disabled={isSubmitting}>
           Cancelar
         </Button>

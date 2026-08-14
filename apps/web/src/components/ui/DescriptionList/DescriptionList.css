@@ -1,0 +1,129 @@
+/* DescriptionList.css */
+
+.desc-list-grid {
+  display: grid;
+}
+
+.desc-list-density-compact {
+  row-gap: var(--espaco-2);
+  column-gap: var(--espaco-6);
+}
+
+.desc-list-density-comfortable {
+  row-gap: var(--espaco-4);
+  column-gap: var(--espaco-6);
+}
+
+.desc-list-cols-1 {
+  grid-template-columns: 1fr;
+}
+
+.desc-list-cols-2 {
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 640px) {
+  .desc-list-cols-2 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.desc-list-cols-3 {
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 640px) {
+  .desc-list-cols-3 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .desc-list-cols-3 {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* Item Structure */
+.desc-item {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-1);
+}
+
+@media (min-width: 768px) {
+  .desc-item {
+    flex-direction: row;
+    align-items: baseline;
+    gap: var(--espaco-4);
+  }
+}
+
+/* Label (Identificador) */
+.desc-item-label {
+  font-size: var(--fonte-tamanho-sm, 0.875rem);
+  font-weight: var(--fonte-peso-seminegrito, 600);
+  color: var(--cor-texto-secundario);
+  display: flex;
+  align-items: center;
+  gap: var(--espaco-1);
+}
+
+@media (min-width: 768px) {
+  .desc-item-label {
+    flex: 0 0 125px; /* Largura ajustada para o tamanho exato dos labels */
+  }
+}
+
+.desc-item-label-icon {
+  color: var(--cor-texto-secundario);
+}
+
+/* Value (Valor normal de leitura) */
+.desc-item-value {
+  font-size: var(--fonte-tamanho-md, 1rem);
+  font-weight: var(--fonte-peso-normal, 400);
+  color: var(--cor-texto-principal);
+  word-break: break-word; /* Para suportar Long Values adequadamente */
+  line-height: var(--linha-altura-normal, 1.5);
+  flex-grow: 1;
+}
+
+/* Empty State */
+.desc-item-empty {
+  font-style: italic;
+  color: var(--cor-texto-secundario);
+}
+
+/* Metadata (Informações complementares) */
+.desc-item-metadata {
+  display: block;
+  font-size: var(--fonte-tamanho-xs, 0.75rem);
+  font-weight: var(--fonte-peso-normal, 400);
+  color: var(--cor-texto-secundario);
+  margin-top: 0.125rem;
+}
+
+/* Identificadores (Códigos, IDs) */
+.desc-item-code {
+  font-family: monospace;
+  font-size: var(--fonte-tamanho-sm, 0.875rem);
+  background-color: var(--cor-fundo-aplicacao);
+  padding: 0.125rem 0.25rem;
+  border-radius: 0.25rem;
+  color: var(--cor-texto-principal);
+}
+
+/* Links (E-mail, Telefone, URLs) */
+.desc-item-value a {
+  color: var(--cor-informacao);
+  text-decoration: none;
+  font-weight: var(--fonte-peso-medio, 500);
+  transition: color 0.2s ease, text-decoration 0.2s ease;
+}
+
+.desc-item-value a:hover,
+.desc-item-value a:focus {
+  color: var(--cor-marca-principal-hover);
+  text-decoration: underline;
+}

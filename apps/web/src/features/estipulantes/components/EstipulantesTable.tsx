@@ -77,24 +77,19 @@ export const EstipulantesTable: React.FC<EstipulantesTableProps> = ({
       label: 'Estipulante',
       sortable: true,
       render: (est) => (
-        <div style={{ display: 'flex', flexDirection: 'column' }}>
-          <span style={{ fontWeight: 500, color: 'var(--color-text-primary)' }}>{est.razaoSocial}</span>
-          {est.nomeFantasia && (
-            <span style={{ fontSize: '0.875rem', color: 'var(--color-text-tertiary)' }}>{est.nomeFantasia}</span>
-          )}
-        </div>
+        <span className="estipulantes-table-nome">{est.razaoSocial}</span>
       ),
     },
     {
       key: 'cnpj',
       label: 'CNPJ',
-      render: (est) => <span style={{ color: 'var(--color-text-secondary)' }}>{formatCnpj(est.cnpj)}</span>,
+      render: (est) => <span className="estipulantes-table-secundario">{formatCnpj(est.cnpj)}</span>,
     },
     {
       key: 'codigo',
       label: 'Código',
       sortable: true,
-      render: (est) => est.codigo ? <span style={{ color: 'var(--color-text-tertiary)' }}>{est.codigo}</span> : <span>&mdash;</span>,
+      render: (est) => est.codigo ? <span className="estipulantes-table-secundario">{est.codigo}</span> : <span>&mdash;</span>,
     },
     {
       key: 'grupo',
@@ -139,7 +134,7 @@ export const EstipulantesTable: React.FC<EstipulantesTableProps> = ({
         return (
           <RowActions
             primaryAction={onDetalhar ? {
-              label: 'Detalhes',
+              label: 'Visualizar',
               icon: <EyeIcon />,
               onClick: () => onDetalhar(est.publicId),
             } : undefined}

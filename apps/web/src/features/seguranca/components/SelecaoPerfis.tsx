@@ -33,14 +33,14 @@ export const SelecaoPerfis: React.FC<SelecaoPerfisProps> = ({
 
   if (perfis.length === 0) {
     return (
-      <p className="text-sm text-slate-500 dark:text-slate-400">
+      <p className="text-sm text-texto-secundario">
         Nenhum perfil disponível.
       </p>
     );
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+    <div className="flex flex-col gap-2">
       {perfis.map((perfil) => {
         const isSelecionado = selecionados.includes(perfil.publicId);
         const isDisabled = disabled || !perfil.ativo;
@@ -48,27 +48,13 @@ export const SelecaoPerfis: React.FC<SelecaoPerfisProps> = ({
         return (
           <div
             key={perfil.publicId}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              padding: '8px',
-              borderRadius: '6px',
-              border: '1px solid',
-              borderColor: isSelecionado ? 'var(--cor-marca-principal-borda)' : 'var(--cor-borda)',
-              backgroundColor: isSelecionado ? 'var(--cor-marca-principal-suave)' : 'transparent',
-              opacity: isDisabled ? 0.5 : 1,
-              transition: 'all 0.2s ease'
-            }}
+            className={`flex items-center justify-between p-2 rounded-md border transition-all ${isSelecionado ? 'border-primary-borda bg-primary-suave' : 'border-borda bg-transparent'} ${isDisabled ? 'opacity-50 pointer-events-none' : ''}`}
           >
             <Checkbox
               label={
-                <span style={{ display: 'flex', flexDirection: 'column', marginLeft: '4px' }}>
-                  <span style={{ fontSize: 'var(--fonte-tamanho-sm)', fontWeight: 500, color: 'var(--cor-texto-principal)' }}>
+                <span className="flex items-baseline gap-2">
+                  <span className="text-sm font-semibold text-texto-principal">
                     {perfil.nome}
-                  </span>
-                  <span style={{ fontSize: 'var(--fonte-tamanho-xs)', color: 'var(--cor-texto-secundario)', fontFamily: 'monospace' }}>
-                    {perfil.codigo}
                   </span>
                 </span>
               }

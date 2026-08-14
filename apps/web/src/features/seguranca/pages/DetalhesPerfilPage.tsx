@@ -65,10 +65,10 @@ export const DetalhesPerfilPage: React.FC = () => {
 
   if (isLoading) {
     return (
-      <main ref={mainRef} tabIndex={-1} className="p-6 max-w-7xl mx-auto focus:outline-none" aria-busy="true">
+      <main ref={mainRef} tabIndex={-1} className="flex flex-col gap-6 w-full max-w-[1440px] mx-auto p-0 focus:outline-none" aria-busy="true">
         <Skeleton className="w-32 h-10 mb-4" />
         <Skeleton className="w-full h-32 mb-4" />
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
           <Skeleton className="w-full h-48" />
           <Skeleton className="w-full h-48" />
         </div>
@@ -78,7 +78,7 @@ export const DetalhesPerfilPage: React.FC = () => {
 
   if (error || !perfil) {
     return (
-      <main ref={mainRef} tabIndex={-1} className="p-6 max-w-7xl mx-auto focus:outline-none">
+      <main ref={mainRef} tabIndex={-1} className="flex flex-col gap-6 w-full max-w-[1440px] mx-auto p-0 focus:outline-none">
         <Button variant="ghost" onClick={() => navigate('/seguranca/perfis')} className="mb-4">
           ← Voltar para perfis
         </Button>
@@ -94,9 +94,10 @@ export const DetalhesPerfilPage: React.FC = () => {
   const permSelecionadas = new Set(perfil.permissoesPublicIds);
 
   return (
-    <main ref={mainRef} tabIndex={-1} className="p-6 max-w-7xl mx-auto focus:outline-none flex flex-col gap-6">
+    <main ref={mainRef} tabIndex={-1} className="flex flex-col gap-6 w-full max-w-[1440px] mx-auto p-0 focus:outline-none">
       <PageHeader
-        title={`Perfil: ${perfil.nome}`}
+        title={perfil.nome}
+        titleExtras={<StatusBadge status={perfil.ativo ? 'ativo' : 'inativo'} />}
         breadcrumbs={
           <Breadcrumbs
             items={[
@@ -108,7 +109,7 @@ export const DetalhesPerfilPage: React.FC = () => {
           />
         }
         actions={
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
             <Button variant="ghost" onClick={() => navigate('/seguranca/perfis')}>
               Voltar
             </Button>
@@ -133,14 +134,12 @@ export const DetalhesPerfilPage: React.FC = () => {
 
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
         <DetailsSection title="Dados do Perfil">
-          <DescriptionList columns={2}>
-            <DescriptionItem label="Código" value={perfil.codigo} />
+          <DescriptionList columns={1} density="compact">
+            {perfil.codigo.toLowerCase() !== perfil.nome.toLowerCase() && (
+              <DescriptionItem label="Código" value={perfil.codigo} />
+            )}
             <DescriptionItem label="Nome" value={perfil.nome} />
             {perfil.descricao && <DescriptionItem label="Descrição" value={perfil.descricao} />}
-            <DescriptionItem
-              label="Status"
-              value={<StatusBadge status={perfil.ativo ? 'ativo' : 'inativo'} />}
-            />
             <DescriptionItem
               label="Tipo"
               value={
@@ -178,15 +177,17 @@ export const DetalhesPerfilPage: React.FC = () => {
                 if (recursosComPermissao.length === 0) return null;
 
                 return (
-                  <div key={modulo.publicId}>
-                    <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">
+                  <div key={modulo.publicId} className="mb-3">
+                    <p className="text-xs font-semibold text-texto-secundario uppercase tracking-[0.05em] mb-1">
                       {modulo.nome}
                     </p>
                     {recursosComPermissao.map((recurso) => (
                       <div key={recurso.publicId} className="pl-3 mb-2">
-                        <p className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
-                          {recurso.nome}
-                        </p>
+                        {recurso.nome.toLowerCase() !== modulo.nome.toLowerCase() && (
+                          <p className="text-sm font-medium text-texto-principal mb-1">
+                            {recurso.nome}
+                          </p>
+                        )}
                         <div className="flex flex-wrap gap-1 pl-3">
                           {recurso.permissoes
                             .filter((p) => permSelecionadas.has(p.publicId))

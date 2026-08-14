@@ -12,7 +12,6 @@ import {
 import { DescriptionItem } from '../../../components/ui/DescriptionList';
 import { useAuditoriaDetalhe } from '../hooks/useAuditoria';
 import { ROUTES } from '../../../app/routes/routePaths';
-import './Seguranca.css';
 
 function formatDate(iso: string): string {
   try {

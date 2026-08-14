@@ -12,7 +12,6 @@ import {
   Pagination, EmptyState, Alert, Button, Skeleton, ResultsSummary,
   PageHeader, Breadcrumbs, BriefcaseIcon, PlusIcon
 } from '../../../components/ui';
-import './EstipulantesListPage.css';
 
 export const EstipulantesListPage: React.FC = () => {
   const navigate = useNavigate();
@@ -80,11 +79,10 @@ export const EstipulantesListPage: React.FC = () => {
   const hasData = data && data.itens && data.itens.length > 0;
 
   return (
-    <main className="estipulantes-page" tabIndex={-1}>
+    <main className="flex flex-col gap-6 w-full max-w-[1440px] mx-auto p-0 focus:outline-none" tabIndex={-1}>
       <PageHeader
         title="Estipulantes"
         description="Gerencie as empresas e organizações estipulantes cadastradas no WebApólice."
-        icon={<BriefcaseIcon size={24} />}
         breadcrumbs={
           <Breadcrumbs
             items={[
@@ -102,7 +100,7 @@ export const EstipulantesListPage: React.FC = () => {
         }
       />
 
-      <section aria-label="Filtros de estipulantes">
+      <section aria-label="Filtros de estipulantes" style={{ position: 'relative', zIndex: 10 }}>
         <EstipulantesFilters
           filters={filters}
           onFilterChange={setFilters}
@@ -112,7 +110,7 @@ export const EstipulantesListPage: React.FC = () => {
       </section>
 
       {error ? (
-        <div className="estipulantes-error">
+        <div className="flex flex-col gap-4 items-start mt-4">
           <Alert variant="error" title="Não foi possível carregar os estipulantes">
             {error.message}
           </Alert>
@@ -121,10 +119,10 @@ export const EstipulantesListPage: React.FC = () => {
           </Button>
         </div>
       ) : isLoading && !data && isMobile ? (
-        <div className="estipulantes-skeletons" aria-busy="true" aria-live="polite">
-          <Skeleton className="estipulantes-skeleton-row" />
-          <Skeleton className="estipulantes-skeleton-row" />
-          <Skeleton className="estipulantes-skeleton-row" />
+        <div className="flex flex-col gap-4 mt-4" aria-busy="true" aria-live="polite">
+          <Skeleton className="h-[120px] rounded-lg" />
+          <Skeleton className="h-[120px] rounded-lg" />
+          <Skeleton className="h-[120px] rounded-lg" />
         </div>
       ) : !hasData && isMobile ? (
         <EmptyState
@@ -151,10 +149,6 @@ export const EstipulantesListPage: React.FC = () => {
               totalItems={data.totalItens}
             />
           )}
-
-          <div aria-live="polite" className="sr-only">
-            Exibindo {data?.itens.length || 0} estipulantes.
-          </div>
 
           {isMobile ? (
             <EstipulantesMobileList 
@@ -187,7 +181,7 @@ export const EstipulantesListPage: React.FC = () => {
           )}
 
           {data && data.totalPaginas > 1 && (
-            <div className="estipulantes-pagination">
+            <div className="flex justify-center md:justify-end mt-4 pt-4 border-t border-borda">
               <Pagination
                 currentPage={data.paginaAtual}
                 totalPages={data.totalPaginas}

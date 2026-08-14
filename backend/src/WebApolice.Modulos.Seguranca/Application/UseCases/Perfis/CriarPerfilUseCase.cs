@@ -70,7 +70,7 @@ public class CriarPerfilUseCase
             entidadeId: novoPerfil.Id,
             perfilId: novoPerfil.Id,
             usuarioExecutorId: executorId,
-            dadosNovos: JsonSerializer.Serialize(new { codigo, nome, descricao, ativo, permissoes = permissoesAtribuir.Select(p => p.Codigo) })
+            dadosNovos: JsonSerializer.SerializeToDocument(new { codigo, nome, descricao, ativo, permissoes = permissoesAtribuir.Select(p => p.Codigo) })
         );
         _dbContext.AuditoriaPermissoes.Add(auditoria);
 

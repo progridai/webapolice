@@ -1,4 +1,5 @@
 using System;
+using System.Text.Json;
 
 namespace WebApolice.Modulos.Seguranca.Domain.Auditoria;
 
@@ -13,8 +14,8 @@ public sealed class AuditoriaPermissao
     public long? UsuarioAfetadoId { get; private set; }
     public long? PerfilId { get; private set; }
     public long? PermissaoId { get; private set; }
-    public string? DadosAnteriores { get; private set; }
-    public string? DadosNovos { get; private set; }
+    public JsonDocument? DadosAnteriores { get; private set; }
+    public JsonDocument? DadosNovos { get; private set; }
     public string? Motivo { get; private set; }
     public string? IpOrigem { get; private set; }
     public string? UserAgent { get; private set; }
@@ -34,12 +35,13 @@ public sealed class AuditoriaPermissao
         long? usuarioAfetadoId = null,
         long? perfilId = null,
         long? permissaoId = null,
-        string? dadosAnteriores = null,
-        string? dadosNovos = null)
+        JsonDocument? dadosAnteriores = null,
+        JsonDocument? dadosNovos = null)
     {
         Acao = acao;
         EntidadeTipo = entidadeTipo;
         EntidadeId = entidadeId;
+        PublicId = Guid.NewGuid();
         UsuarioExecutorId = usuarioExecutorId;
         UsuarioAfetadoId = usuarioAfetadoId;
         PerfilId = perfilId;

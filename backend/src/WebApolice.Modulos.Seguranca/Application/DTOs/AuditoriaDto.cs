@@ -8,6 +8,6 @@ public sealed record AuditoriaDto(
     string EntidadeTipo,
     string EntidadeId,
     DateTime CreatedAt,
-    string? DadosAnteriores,
-    string? DadosNovos
+    System.Text.Json.JsonDocument? DadosAnteriores,
+    System.Text.Json.JsonDocument? DadosNovos
 );

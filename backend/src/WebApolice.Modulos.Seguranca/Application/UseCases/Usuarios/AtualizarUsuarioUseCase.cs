@@ -69,7 +69,7 @@ public class AtualizarUsuarioUseCase
         using var transaction = await _dbContext.Database.BeginTransactionAsync(cancellationToken);
         try
         {
-            var dadosAnteriores = JsonSerializer.Serialize(new { nome = usuario.Nome, email = usuario.Email, ativo = usuario.Ativo, perfis = usuario.Perfis.Select(p => p.Perfil.Codigo) });
+            var dadosAnteriores = JsonSerializer.SerializeToDocument(new { nome = usuario.Nome, email = usuario.Email, ativo = usuario.Ativo, perfis = usuario.Perfis.Select(p => p.Perfil.Codigo) });
 
             usuario.AtualizarAdmin(nome, email, ativo);
 
@@ -89,7 +89,7 @@ public class AtualizarUsuarioUseCase
                 ));
             }
 
-            var dadosNovos = JsonSerializer.Serialize(new { nome = usuario.Nome, email = usuario.Email, ativo = usuario.Ativo, perfis = perfisParaAtribuir.Select(p => p.Codigo) });
+            var dadosNovos = JsonSerializer.SerializeToDocument(new { nome = usuario.Nome, email = usuario.Email, ativo = usuario.Ativo, perfis = perfisParaAtribuir.Select(p => p.Codigo) });
 
             var auditoria = new WebApolice.Modulos.Seguranca.Domain.Auditoria.AuditoriaPermissao(
                 acao: "USUARIO_ALTERADO",

@@ -52,7 +52,7 @@ public class AtualizarPerfilUseCase
 
         using var transaction = await _dbContext.Database.BeginTransactionAsync(cancellationToken);
 
-        var dadosAnteriores = JsonSerializer.Serialize(new { nome = perfil.Nome, descricao = perfil.Descricao, ativo = perfil.Ativo, permissoes = perfil.Permissoes.Select(p => p.Permissao.Codigo) });
+        var dadosAnteriores = JsonSerializer.SerializeToDocument(new { nome = perfil.Nome, descricao = perfil.Descricao, ativo = perfil.Ativo, permissoes = perfil.Permissoes.Select(p => p.Permissao.Codigo) });
 
         perfil.Atualizar(nome, descricao, ativo);
 
@@ -72,16 +72,18 @@ public class AtualizarPerfilUseCase
             ));
         }
 
-        var dadosNovos = JsonSerializer.Serialize(new { nome = perfil.Nome, descricao = perfil.Descricao, ativo = perfil.Ativo, permissoes = perfil.Permissoes.Select(p => p.Permissao.Codigo) });
+        await _dbContext.SaveChangesAsync(cancellationToken);
+
+        var permissoesAtuais = perfil.Permissoes.Select(p => p.Permissao).ToList();
 
         var auditoria = new WebApolice.Modulos.Seguranca.Domain.Auditoria.AuditoriaPermissao(
             acao: "PERFIL_ALTERADO",
             entidadeTipo: "PERFIL",
             entidadeId: perfil.Id,
             perfilId: perfil.Id,
-            usuarioExecutorId: executorId,
+            usuarioExecutorId: executor?.Id,
             dadosAnteriores: dadosAnteriores,
-            dadosNovos: dadosNovos
+            dadosNovos: JsonSerializer.SerializeToDocument(new { perfil.Nome, perfil.Descricao, perfil.Ativo, Permissoes = permissoesAtuais.Select(p => p.Codigo) })
         );
         _dbContext.AuditoriaPermissoes.Add(auditoria);
 

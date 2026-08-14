@@ -60,7 +60,7 @@ public class AlterarHabilitacaoModuloUseCase
             entidadeTipo: "MODULO",
             entidadeId: modulo.Id,
             usuarioExecutorId: executor?.Id,
-            dadosNovos: JsonSerializer.Serialize(new { modulo.Codigo, modulo.Nome, modulo.Habilitado })
+            dadosNovos: JsonSerializer.SerializeToDocument(new { modulo.Codigo, modulo.Nome, modulo.Habilitado })
         );
         _dbContext.AuditoriaPermissoes.Add(auditoriaInterna);
 

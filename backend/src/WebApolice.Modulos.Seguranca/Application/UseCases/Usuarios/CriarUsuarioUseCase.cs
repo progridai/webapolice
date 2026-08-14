@@ -110,7 +110,7 @@ public class CriarUsuarioUseCase
                 entidadeId: novoUsuario.Id,
                 usuarioAfetadoId: novoUsuario.Id,
                 usuarioExecutorId: executorId,
-                dadosNovos: JsonSerializer.Serialize(new { username, nome, email, ativo, perfis = perfisParaAtribuir.Select(p => p.Codigo) })
+                dadosNovos: JsonSerializer.SerializeToDocument(new { username, nome, email, ativo, perfis = perfisParaAtribuir.Select(p => p.Codigo) })
             );
             _dbContext.AuditoriaPermissoes.Add(auditoria);
 

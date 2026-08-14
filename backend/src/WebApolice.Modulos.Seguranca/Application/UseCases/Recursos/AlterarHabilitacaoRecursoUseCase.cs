@@ -59,7 +59,7 @@ public class AlterarHabilitacaoRecursoUseCase
             entidadeTipo: "RECURSO",
             entidadeId: recurso.Id,
             usuarioExecutorId: executor?.Id,
-            dadosNovos: JsonSerializer.Serialize(new { recurso.Codigo, recurso.Nome, recurso.Habilitado, ModuloCodigo = recurso.Modulo.Codigo })
+            dadosNovos: JsonSerializer.SerializeToDocument(new { recurso.Codigo, recurso.Nome, recurso.Habilitado, ModuloCodigo = recurso.Modulo.Codigo })
         );
         _dbContext.AuditoriaPermissoes.Add(auditoriaInterna);
 

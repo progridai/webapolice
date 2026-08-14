@@ -2,11 +2,18 @@
   <Folder Name="/src/">
     <Project Path="src/WebApolice.Api/WebApolice.Api.csproj" />
     <Project Path="src/WebApolice.SharedKernel/WebApolice.SharedKernel.csproj" />
-    <Project Path="src/WebApolice.Modulos.Clientes/WebApolice.Modulos.Clientes.csproj" />
+    <Project Path="src/WebApolice.Modulos.Atendimento/WebApolice.Modulos.Atendimento.csproj" />
+    <Project Path="src/WebApolice.Modulos.Cadastro/WebApolice.Modulos.Cadastro.csproj" />
+    <Project Path="src/WebApolice.Modulos.Seguro/WebApolice.Modulos.Seguro.csproj" />
+    <Project Path="src/WebApolice.Modulos.Sinistros/WebApolice.Modulos.Sinistros.csproj" />
     <Project Path="src/WebApolice.Shared.Infrastructure/WebApolice.Shared.Infrastructure.csproj" />
     <Project Path="src/WebApolice.Auditoria/WebApolice.Auditoria.csproj" />
+    <Project Path="src/WebApolice.Modulos.Financeiro/WebApolice.Modulos.Financeiro.csproj" />
+    <Project Path="src/WebApolice.Modulos.Integracao/WebApolice.Modulos.Integracao.csproj" />
     <Project Path="src/WebApolice.Modulos.Seguranca/WebApolice.Modulos.Seguranca.csproj" />
-    <Project Path="src/WebApolice.Modulos.Estipulantes/WebApolice.Modulos.Estipulantes.csproj" />
+    <Project Path="src/WebApolice.Modulos.Comissao/WebApolice.Modulos.Comissao.csproj" />
+    <Project Path="src/WebApolice.Modulos.Convenio/WebApolice.Modulos.Convenio.csproj" />
+    <Project Path="src/WebApolice.Modulos.Documentos/WebApolice.Modulos.Documentos.csproj" />
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/WebApolice.Api.Tests/WebApolice.Api.Tests.csproj" />
@@ -14,6 +21,5 @@
     <Project Path="tests/WebApolice.Integration.Tests/WebApolice.Integration.Tests.csproj" />
     <Project Path="tests/WebApolice.Auditoria.UnitTests/WebApolice.Auditoria.UnitTests.csproj" />
     <Project Path="tests/WebApolice.Auditoria.IntegrationTests/WebApolice.Auditoria.IntegrationTests.csproj" />
-    <Project Path="tests/WebApolice.Modulos.Clientes.Tests/WebApolice.Modulos.Clientes.Tests.csproj" />
   </Folder>
 </Solution>

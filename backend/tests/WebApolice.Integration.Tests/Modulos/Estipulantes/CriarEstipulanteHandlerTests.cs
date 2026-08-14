@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
@@ -7,10 +7,10 @@ using Microsoft.EntityFrameworkCore.Storage;
 using Moq;
 using WebApolice.Auditoria.Contracts;
 using WebApolice.Auditoria.Domain;
-using WebApolice.Modulos.Estipulantes.Application.Ports;
-using WebApolice.Modulos.Estipulantes.Application.UseCases.CriarEstipulante;
-using WebApolice.Modulos.Estipulantes.Domain.Exceptions;
-using WebApolice.Modulos.Estipulantes.Infrastructure.Persistence.Models;
+using WebApolice.Modulos.Cadastro.Application.Ports;
+using WebApolice.Modulos.Cadastro.Application.UseCases.CriarEstipulante;
+using WebApolice.Modulos.Cadastro.Domain.Exceptions;
+using WebApolice.Modulos.Cadastro.Infrastructure.Persistence.Models;
 using Xunit;
 
 namespace WebApolice.Integration.Tests.Modulos.Estipulantes;
@@ -62,7 +62,16 @@ public class CriarEstipulanteHandlerTests
     public async Task DeveCriarEstipulante_ApenasCamposObrigatorios()
     {
         var command = new CriarEstipulanteCommand(
-            "Empresa Teste", null, "12345678000199", null, null, null, null, null, null,
+            "Empresa Teste", 
+            null, 
+            "12345678000199", 
+            null, 
+            null, 
+            null, 
+            null, 
+            null, 
+            null,
+            null,
             new CriarEstipulanteConfiguracaoCommand(DateOnly.FromDateTime(DateTime.UtcNow), null, null, null, null, null));
 
         var result = await _handler.Handle(command, CancellationToken.None);
@@ -80,7 +89,7 @@ public class CriarEstipulanteHandlerTests
         var command = CriarCommandValido() with { Cnpj = "123" };
         var act = () => _handler.Handle(command, CancellationToken.None);
 
-        await act.Should().ThrowAsync<EstipulanteInvalidoException>().WithMessage("CNPJ inválido.");
+        await act.Should().ThrowAsync<EstipulanteInvalidoException>().WithMessage("CNPJ invÃ¡lido.");
         _repositoryMock.Verify(r => r.AdicionarPessoa(It.IsAny<PessoaModel>()), Times.Never);
     }
 
@@ -92,7 +101,7 @@ public class CriarEstipulanteHandlerTests
 
         var act = () => _handler.Handle(command, CancellationToken.None);
 
-        await act.Should().ThrowAsync<EstipulanteInvalidoException>().WithMessage("Grupo informado não existe.");
+        await act.Should().ThrowAsync<EstipulanteInvalidoException>().WithMessage("Grupo informado nÃ£o existe.");
         _transactionMock.Verify(t => t.RollbackAsync(It.IsAny<CancellationToken>()), Times.Once);
     }
 
@@ -105,7 +114,7 @@ public class CriarEstipulanteHandlerTests
 
         var act = () => _handler.Handle(command, CancellationToken.None);
 
-        await act.Should().ThrowAsync<EstipulanteInvalidoException>().WithMessage("Seguradora informada não existe.");
+        await act.Should().ThrowAsync<EstipulanteInvalidoException>().WithMessage("Seguradora informada nÃ£o existe.");
         _transactionMock.Verify(t => t.RollbackAsync(It.IsAny<CancellationToken>()), Times.Once);
     }
 
@@ -117,7 +126,7 @@ public class CriarEstipulanteHandlerTests
 
         var act = () => _handler.Handle(command, CancellationToken.None);
 
-        await act.Should().ThrowAsync<EstipulanteInvalidoException>().WithMessage("A Cidade informada não existe.");
+        await act.Should().ThrowAsync<EstipulanteInvalidoException>().WithMessage("A Cidade informada nÃ£o existe.");
         _transactionMock.Verify(t => t.RollbackAsync(It.IsAny<CancellationToken>()), Times.Once);
     }
 
@@ -168,7 +177,7 @@ public class CriarEstipulanteHandlerTests
 
         var act = () => _handler.Handle(command, CancellationToken.None);
 
-        await act.Should().ThrowAsync<EstipulanteConflitoException>().WithMessage("Já existe um Estipulante ativo para o CNPJ informado.");
+        await act.Should().ThrowAsync<EstipulanteConflitoException>().WithMessage("JÃ¡ existe um Estipulante ativo para o CNPJ informado.");
         _transactionMock.Verify(t => t.RollbackAsync(It.IsAny<CancellationToken>()), Times.Once);
     }
 
@@ -176,14 +185,14 @@ public class CriarEstipulanteHandlerTests
     public async Task Conflito_DadosDivergentesPessoaExistente_Retorna409()
     {
         var command = CriarCommandValido();
-        var pessoaExistente = new PessoaModel { Id = 1, Nome = "Outra Razão Social", TipoPessoa = 2 };
+        var pessoaExistente = new PessoaModel { Id = 1, Nome = "Outra RazÃ£o Social", TipoPessoa = 2 };
         
         _repositoryMock.Setup(r => r.LocalizarPessoaPorDocumentoAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(pessoaExistente);
 
         var act = () => _handler.Handle(command, CancellationToken.None);
 
-        await act.Should().ThrowAsync<EstipulanteConflitoException>().WithMessage("O CNPJ informado já pertence a outra pessoa com Razão Social divergente no sistema.");
+        await act.Should().ThrowAsync<EstipulanteConflitoException>().WithMessage("O CNPJ informado jÃ¡ pertence a outra pessoa com RazÃ£o Social divergente no sistema.");
         _transactionMock.Verify(t => t.RollbackAsync(It.IsAny<CancellationToken>()), Times.Once);
     }
 
@@ -198,7 +207,8 @@ public class CriarEstipulanteHandlerTests
             null,
             "Obs",
             new CriarEstipulanteEnderecoCommand("00000000", "Rua", "123", "", "Bairro", 1, "RS"),
-            new CriarEstipulanteContatoCommand("teste@teste.com", "51999999999"),
+            new[] { new CriarEstipulanteContatoCommand("EMAIL", "teste@teste.com", true), new CriarEstipulanteContatoCommand("TELEFONE", "51999999999", false) },
+            null,
             new CriarEstipulanteConfiguracaoCommand(DateOnly.FromDateTime(DateTime.UtcNow), null, 0, "TESTE", "TESTE", "TESTE")
         );
     }

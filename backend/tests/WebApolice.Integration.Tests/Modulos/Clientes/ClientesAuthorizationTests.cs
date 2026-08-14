@@ -1,7 +1,7 @@
-using System.Linq;
+﻿using System.Linq;
 using System.Reflection;
 using Microsoft.AspNetCore.Authorization;
-using WebApolice.Modulos.Clientes.Api.Controllers;
+using WebApolice.Modulos.Cadastro.Api.Controllers;
 using WebApolice.Modulos.Seguranca.Infrastructure.Authorization;
 using Xunit;
 
@@ -17,7 +17,7 @@ public class ClientesAuthorizationTests
 
         foreach (var metodo in metodos)
         {
-            // Ignora propriedades que geram métodos get_UsuarioSub etc.
+            // Ignora propriedades que geram mÃ©todos get_UsuarioSub etc.
             if (metodo.IsSpecialName) continue;
 
             var attributes = metodo.GetCustomAttributes(true);
@@ -25,7 +25,7 @@ public class ClientesAuthorizationTests
             var authorizeAntigoComPolicy = attributes.OfType<AuthorizeAttribute>()
                 .Where(a => a.GetType() == typeof(AuthorizeAttribute) && !string.IsNullOrEmpty(a.Policy));
 
-            // Não deve ter [Authorize(Policy = "...")]
+            // NÃ£o deve ter [Authorize(Policy = "...")]
             Assert.Empty(authorizeAntigoComPolicy);
 
             var authorizePermissao = attributes.OfType<AuthorizePermissaoAttribute>().ToList();

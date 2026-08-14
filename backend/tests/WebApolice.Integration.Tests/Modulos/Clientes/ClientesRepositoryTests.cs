@@ -2,7 +2,8 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using FluentAssertions;
-using WebApolice.Modulos.Clientes.Infrastructure.Persistence;
+using WebApolice.Modulos.Cadastro.Infrastructure.Persistence;
+using WebApolice.Modulos.Cadastro.Infrastructure.Persistence.Repositories;
 using WebApolice.Integration.Tests.Setup;
 using Xunit;
 
@@ -20,9 +21,9 @@ public class ClientesRepositoryTests : IClassFixture<ClientesIntegrationTestFixt
     [Fact]
     public async Task ObterPorId_DeveRetornarNuloSeNaoEncontrar()
     {
-        var repository = new ClientesRepository(_fixture.DbContext);
+        var repository = new ClienteRepository(_fixture.DbContext);
         var idFake = Guid.NewGuid();
-        var result = await repository.ObterPorIdAsync(idFake, CancellationToken.None);
+        var result = await repository.ObterParaEdicaoPorPublicIdAsync(idFake, CancellationToken.None);
         result.Should().BeNull();
     }
 }

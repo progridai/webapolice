@@ -20,12 +20,12 @@ export const EditarEstipulantePage: React.FC = () => {
       try {
         const [estipulanteData, configData] = await Promise.all([
           obterEstipulante(publicId).catch((err) => {
-            if (err.response?.status === 404) throw new Error('NOT_FOUND');
+            if (err.status === 404) throw new Error('NOT_FOUND');
             throw err;
           }),
           obterConfiguracao(publicId).catch((err) => {
             // Se a configuração não existir (404), tratamos graciosamente
-            if (err.response?.status === 404) return null;
+            if (err.status === 404) return null;
             throw err;
           })
         ]);
@@ -114,12 +114,12 @@ export const EditarEstipulantePage: React.FC = () => {
     } catch (err: unknown) {
       console.error('Erro ao alterar estipulante:', err);
       
-      const errorResponse = err as { response?: { status?: number, data?: { message?: string } } };
+      const apiError = err as { status?: number, message?: string };
       
-      if (errorResponse.response?.status === 409) {
-        setError(errorResponse.response?.data?.message || 'A Razão Social informada diverge de uma Pessoa já compartilhada, impossibilitando a alteração global neste fluxo.');
+      if (apiError.status === 409) {
+        setError(apiError.message || 'A Razão Social informada diverge de uma Pessoa já compartilhada, impossibilitando a alteração global neste fluxo.');
       } else {
-        setError(errorResponse.response?.data?.message || 'Ocorreu um erro ao salvar o estipulante. Verifique os dados e tente novamente.');
+        setError(apiError.message || 'Ocorreu um erro ao salvar o estipulante. Verifique os dados e tente novamente.');
       }
     } finally {
       setIsSubmitting(false);

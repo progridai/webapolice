@@ -22,7 +22,7 @@ public class SegurancaDbContextFactory : IDesignTimeDbContextFactory<SegurancaDb
         var connectionString = configuration.GetConnectionString("PostgreSql");
 
         // Utilizando o UseSnakeCaseNamingConvention exigido pelas convenções do projeto
-        builder.UseNpgsql(connectionString)
+        builder.UseNpgsql(connectionString, x => x.MigrationsHistoryTable("__EFMigrationsHistory", "seguranca"))
                .UseSnakeCaseNamingConvention();
 
         return new SegurancaDbContext(builder.Options);

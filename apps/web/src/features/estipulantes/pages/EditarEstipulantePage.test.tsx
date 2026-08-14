@@ -9,7 +9,6 @@ vi.mock('../api/estipulantes.api', () => ({
   obterEstipulante: vi.fn(),
   obterConfiguracao: vi.fn(),
   alterarEstipulante: vi.fn(),
-  alterarConfiguracao: vi.fn(),
 }));
 
 vi.mock('../../clientes/api/localidadesApi', () => ({
@@ -71,7 +70,7 @@ describe('EditarEstipulantePage', () => {
 
   it('deve exibir EmptyState (404) quando estipulante não for encontrado', async () => {
     (api.obterEstipulante as ReturnType<typeof vi.fn>).mockRejectedValue({
-      response: { status: 404 }
+      status: 404
     });
     (api.obterConfiguracao as ReturnType<typeof vi.fn>).mockResolvedValue(mockConfiguracao);
 
@@ -90,7 +89,6 @@ describe('EditarEstipulantePage', () => {
     (api.obterEstipulante as ReturnType<typeof vi.fn>).mockResolvedValue(mockEstipulante);
     (api.obterConfiguracao as ReturnType<typeof vi.fn>).mockResolvedValue(mockConfiguracao);
     (api.alterarEstipulante as ReturnType<typeof vi.fn>).mockResolvedValue(undefined);
-    (api.alterarConfiguracao as ReturnType<typeof vi.fn>).mockResolvedValue(undefined);
 
     render(
       <BrowserRouter>
@@ -107,7 +105,6 @@ describe('EditarEstipulantePage', () => {
 
     await waitFor(() => {
       expect(api.alterarEstipulante).toHaveBeenCalledWith('estip-123', expect.any(Object));
-      expect(api.alterarConfiguracao).toHaveBeenCalledWith('estip-123', expect.any(Object));
     });
   });
 
@@ -117,10 +114,8 @@ describe('EditarEstipulantePage', () => {
     
     // Forçar erro na primeira promise (alterarEstipulante)
     (api.alterarEstipulante as ReturnType<typeof vi.fn>).mockRejectedValue({
-      response: {
-        status: 409,
-        data: { message: 'Conflito com Pessoa existente.' }
-      }
+      status: 409,
+      message: 'Conflito com Pessoa existente.'
     });
 
     render(
@@ -138,8 +133,5 @@ describe('EditarEstipulantePage', () => {
     await waitFor(() => {
       expect(screen.getByText('Conflito com Pessoa existente.')).toBeTruthy();
     });
-    
-    // A configuração não deve ter sido chamada devido ao erro do primeiro step
-    expect(api.alterarConfiguracao).not.toHaveBeenCalled();
   });
 });

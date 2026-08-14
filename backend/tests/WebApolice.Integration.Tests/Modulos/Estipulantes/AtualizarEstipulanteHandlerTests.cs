@@ -5,10 +5,11 @@ using FluentAssertions;
 using Microsoft.EntityFrameworkCore.Storage;
 using Moq;
 using WebApolice.Auditoria.Contracts;
-using WebApolice.Modulos.Estipulantes.Application.Ports;
-using WebApolice.Modulos.Estipulantes.Application.UseCases.AtualizarEstipulante;
-using WebApolice.Modulos.Estipulantes.Domain.Exceptions;
-using WebApolice.Modulos.Estipulantes.Infrastructure.Persistence.Models;
+using WebApolice.Modulos.Cadastro.Application.Ports;
+using WebApolice.Modulos.Cadastro.Application.UseCases.AtualizarEstipulante;
+using WebApolice.Modulos.Cadastro.Domain.Exceptions;
+using WebApolice.Modulos.Cadastro.Infrastructure.Persistence.Models;
+using WebApolice.Modulos.Cadastro.Infrastructure.Persistence.Models.Vinculos;
 using Xunit;
 
 namespace WebApolice.Integration.Tests.Modulos.Estipulantes;
@@ -29,6 +30,12 @@ public class AtualizarEstipulanteHandlerTests
         _repositoryMock.Setup(r => r.BeginTransactionAsync(It.IsAny<CancellationToken>()))
             .ReturnsAsync(_transactionMock.Object);
 
+        _repositoryMock.Setup(r => r.ObterContatosAtivosAsync(It.IsAny<long>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new System.Collections.Generic.List<PessoaContatoModel>());
+            
+        _repositoryMock.Setup(r => r.ObterContatosInstitucionaisAtivosAsync(It.IsAny<long>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new System.Collections.Generic.List<PessoaContatoInstitucionalModel>());
+
         _handler = new AtualizarEstipulanteHandler(_repositoryMock.Object, _auditoriaMock.Object);
     }
 
@@ -36,7 +43,18 @@ public class AtualizarEstipulanteHandlerTests
     public async Task NaoDeveAlterarRazaoSocialSePessoaCompartilhada()
     {
         var publicId = Guid.NewGuid();
-        var command = new AtualizarEstipulanteCommand(publicId, "Nova Razao", "Novo Fantasia", null, null, null, null, null, null);
+        var command = new AtualizarEstipulanteCommand(
+            publicId, 
+            "Nova Razao", 
+            "Novo Fantasia", 
+            null, 
+            null, 
+            null, 
+            null, 
+            null, 
+            null, 
+            null,
+            new AtualizarEstipulanteConfiguracaoCommand(DateOnly.FromDateTime(DateTime.UtcNow), null, null, null, null, null));
 
         var estipulante = new EstipulanteModel { Id = 1, PessoaId = 1, Ativo = true };
         var pessoa = new PessoaModel { Id = 1, Nome = "Razao Antiga" };
@@ -55,7 +73,18 @@ public class AtualizarEstipulanteHandlerTests
     public async Task DeveAlterarFantasiaMesmoComPessoaCompartilhada()
     {
         var publicId = Guid.NewGuid();
-        var command = new AtualizarEstipulanteCommand(publicId, "Razao Antiga", "Novo Fantasia", null, null, null, null, null, null);
+        var command = new AtualizarEstipulanteCommand(
+            publicId, 
+            "Razao Antiga", 
+            "Novo Fantasia", 
+            null, 
+            null, 
+            null, 
+            null, 
+            null, 
+            null, 
+            null,
+            new AtualizarEstipulanteConfiguracaoCommand(DateOnly.FromDateTime(DateTime.UtcNow), null, null, null, null, null));
 
         var estipulante = new EstipulanteModel { Id = 1, PessoaId = 1, Ativo = true };
         var pessoa = new PessoaModel { Id = 1, Nome = "Razao Antiga" };
@@ -66,7 +95,7 @@ public class AtualizarEstipulanteHandlerTests
 
         await _handler.Handle(command, CancellationToken.None);
 
-        estipulante.Nome.Should().Be("Novo Fantasia");
+        estipulante.NomeFormatado.Should().Be("Novo Fantasia");
         _transactionMock.Verify(t => t.CommitAsync(It.IsAny<CancellationToken>()), Times.Once);
     }
 }

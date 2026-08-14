@@ -1,0 +1,49 @@
+﻿using System;
+using System.Threading;
+using System.Threading.Tasks;
+using WebApolice.Modulos.Cadastro.Application.Ports;
+using WebApolice.Modulos.Cadastro.Domain.Exceptions;
+
+using WebApolice.Auditoria.Contracts;
+using WebApolice.Auditoria.Domain;
+
+namespace WebApolice.Modulos.Cadastro.Application.UseCases.AtivarCliente;
+
+public sealed record AtivarClienteResult(Guid Id, string Status, DateTime UpdatedAt);
+
+public sealed class AtivarClienteHandler
+{
+    private readonly IClienteRepository _repository;
+    private readonly IRegistradorAuditoria _auditoria;
+
+    public AtivarClienteHandler(IClienteRepository repository, IRegistradorAuditoria auditoria)
+    {
+        _repository = repository;
+        _auditoria = auditoria;
+    }
+
+    public async Task<AtivarClienteResult> Handle(AtivarClienteCommand command, CancellationToken cancellationToken)
+    {
+        var cliente = await _repository.ObterParaEdicaoPorPublicIdAsync(command.Id, cancellationToken);
+        if (cliente == null)
+            throw new ClienteNaoEncontradoException("Cliente nÃ£o encontrado ou excluÃ­do.");
+
+        var statusAtivo = await _repository.ObterStatusPorCodigoAsync(WebApolice.Modulos.Cadastro.Domain.ClienteStatusCodigos.Ativo, cancellationToken)
+            ?? throw new ClienteInvalidoException($"Status '{WebApolice.Modulos.Cadastro.Domain.ClienteStatusCodigos.Ativo}' nÃ£o encontrado no catÃ¡logo.");
+
+        cliente.Ativar(statusAtivo.Id);
+
+        await _repository.SalvarAlteracoesAsync(cancellationToken);
+
+        await _auditoria.RegistrarAsync(new RegistroAuditoria
+        {
+            Acao = "CLIENTE_ATIVADO",
+            Modulo = "Clientes",
+            Recurso = "cliente",
+            RecursoId = cliente.PublicId.ToString(),
+            Resultado = ResultadoAuditoria.Sucesso
+        }, cancellationToken);
+
+        return new AtivarClienteResult(cliente.PublicId, statusAtivo.Nome, cliente.UpdatedAt);
+    }
+}

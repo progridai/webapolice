@@ -69,7 +69,7 @@ public class PermissaoAuthorizationHandlerTests : IClassFixture<SegurancaIntegra
         _contextoMock.Setup(c => c.KeycloakSub).Returns("123");
 
         _permissoesServiceMock.Setup(p => p.CalcularPermissoesAsync("123", It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new PermissoesEfetivasUsuario(false, false, false, false, new HashSet<string>(), new HashSet<string>()));
+            .ReturnsAsync(new PermissoesEfetivasUsuario(false, false, false, false, new HashSet<string>(), new HashSet<string>(), new HashSet<string>()));
         
         var requirement = new PermissaoRequirement("clientes.visualizar");
         var context = new AuthorizationHandlerContext(new[] { requirement }, new ClaimsPrincipal(), null);
@@ -86,7 +86,7 @@ public class PermissaoAuthorizationHandlerTests : IClassFixture<SegurancaIntegra
         _contextoMock.Setup(c => c.KeycloakSub).Returns("123");
 
         _permissoesServiceMock.Setup(p => p.CalcularPermissoesAsync("123", It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new PermissoesEfetivasUsuario(true, false, false, false, new HashSet<string> { "CLIENTES" }, new HashSet<string> { "clientes.visualizar" }));
+            .ReturnsAsync(new PermissoesEfetivasUsuario(true, false, false, false, new HashSet<string> { "CLIENTES" }, new HashSet<string>(), new HashSet<string> { "clientes.visualizar" }));
         
         var requirement = new PermissaoRequirement("clientes.visualizar");
         var context = new AuthorizationHandlerContext(new[] { requirement }, new ClaimsPrincipal(), null);
@@ -103,7 +103,7 @@ public class PermissaoAuthorizationHandlerTests : IClassFixture<SegurancaIntegra
         _contextoMock.Setup(c => c.KeycloakSub).Returns("123");
 
         _permissoesServiceMock.Setup(p => p.CalcularPermissoesAsync("123", It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new PermissoesEfetivasUsuario(true, true, false, false, new HashSet<string> { "CLIENTES" }, new HashSet<string> { "clientes.alterar" }));
+            .ReturnsAsync(new PermissoesEfetivasUsuario(true, true, false, false, new HashSet<string> { "CLIENTES" }, new HashSet<string>(), new HashSet<string> { "clientes.alterar" }));
         
         var requirement = new PermissaoRequirement("clientes.visualizar"); // Similar mas diferente
         var context = new AuthorizationHandlerContext(new[] { requirement }, new ClaimsPrincipal(), null);
@@ -120,7 +120,7 @@ public class PermissaoAuthorizationHandlerTests : IClassFixture<SegurancaIntegra
         _contextoMock.Setup(c => c.KeycloakSub).Returns("123");
 
         _permissoesServiceMock.Setup(p => p.CalcularPermissoesAsync("123", It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new PermissoesEfetivasUsuario(true, true, false, false, new HashSet<string> { "CLIENTES" }, new HashSet<string> { "clientes.visualizar" }));
+            .ReturnsAsync(new PermissoesEfetivasUsuario(true, true, false, false, new HashSet<string> { "CLIENTES" }, new HashSet<string>(), new HashSet<string> { "clientes.visualizar" }));
         
         var requirement = new PermissaoRequirement("clientes.visualizar");
         var context = new AuthorizationHandlerContext(new[] { requirement }, new ClaimsPrincipal(), null);
@@ -137,7 +137,7 @@ public class PermissaoAuthorizationHandlerTests : IClassFixture<SegurancaIntegra
         _contextoMock.Setup(c => c.KeycloakSub).Returns("123");
 
         _permissoesServiceMock.Setup(p => p.CalcularPermissoesAsync("123", It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new PermissoesEfetivasUsuario(true, true, true, false, new HashSet<string>(), new HashSet<string>()));
+            .ReturnsAsync(new PermissoesEfetivasUsuario(true, true, true, false, new HashSet<string>(), new HashSet<string>(), new HashSet<string>()));
         
         var requirement = new PermissaoRequirement("qualquer.permissao");
         var context = new AuthorizationHandlerContext(new[] { requirement }, new ClaimsPrincipal(), null);

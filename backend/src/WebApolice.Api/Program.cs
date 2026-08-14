@@ -9,8 +9,7 @@ using WebApolice.Api.Autenticacao;
 using WebApolice.Shared.Infrastructure.Security;
 using WebApolice.Api.Infrastructure.Errors;
 using WebApolice.Shared.Infrastructure.Persistence;
-using WebApolice.Modulos.Clientes;
-using WebApolice.Modulos.Estipulantes;
+using WebApolice.Modulos.Cadastro;
 using WebApolice.Modulos.Seguranca;
 using WebApolice.Modulos.Seguranca.Infrastructure.Authentication;
 using Scalar.AspNetCore;
@@ -204,8 +203,7 @@ builder.Services.AddHealthChecks()
 
 // Módulo Clientes
 builder.Services.AddModuloSeguranca(builder.Configuration);
-builder.Services.AddClientesModule(builder.Configuration);
-builder.Services.AddEstipulantesModule(builder.Configuration);
+builder.Services.AddCadastroModule(builder.Configuration);
 
 // =============================================================================
 // OPENAPI & CONTROLLERS

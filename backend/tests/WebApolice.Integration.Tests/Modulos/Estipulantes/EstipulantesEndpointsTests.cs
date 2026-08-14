@@ -1,8 +1,8 @@
-using System.Linq;
+﻿using System.Linq;
 using System.Reflection;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using WebApolice.Modulos.Estipulantes.Api.Controllers;
+using WebApolice.Modulos.Cadastro.Api.Controllers;
 using WebApolice.Modulos.Seguranca.Infrastructure.Authorization;
 using Xunit;
 
@@ -33,7 +33,7 @@ public class EstipulantesEndpointsTests
             var auth = method.GetCustomAttribute<AuthorizePermissaoAttribute>();
             Assert.NotNull(auth);
             
-            // Tratamento especial pois no Estipulantes temos dois POSTs além do inserção genérica:
+            // Tratamento especial pois no Estipulantes temos dois POSTs alÃ©m do inserÃ§Ã£o genÃ©rica:
             var httpPost = method.GetCustomAttribute<HttpPostAttribute>();
             if (httpPost?.Template == "{publicId:guid}/inativar")
                 Assert.Equal("Permissao:estipulantes.inativar", auth.Policy);
@@ -48,7 +48,7 @@ public class EstipulantesEndpointsTests
         {
             var auth = method.GetCustomAttribute<AuthorizePermissaoAttribute>();
             Assert.NotNull(auth);
-            // Todos os PUTs (Estipulante e Configuracao) exigem a mesma permissão: alterar
+            // Todos os PUTs (Estipulante e Configuracao) exigem a mesma permissÃ£o: alterar
             Assert.Equal("Permissao:estipulantes.alterar", auth.Policy);
         }
     }

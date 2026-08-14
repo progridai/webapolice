@@ -1,10 +1,10 @@
-using System.Data.Common;
+﻿using System.Data.Common;
 using System.IO;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
 using Testcontainers.PostgreSql;
-using WebApolice.Modulos.Clientes.Infrastructure.Persistence;
+using WebApolice.Modulos.Cadastro.Infrastructure.Persistence;
 using Xunit;
 
 namespace WebApolice.Integration.Tests.Setup;
@@ -15,7 +15,7 @@ public class ClientesIntegrationTestFixture : IAsyncLifetime
         .WithImage("postgres:16")
         .Build();
 
-    public ClientesDbContext DbContext { get; private set; } = default!;
+    public CadastroDbContext DbContext { get; private set; } = default!;
 
     public async Task InitializeAsync()
     {
@@ -23,7 +23,7 @@ public class ClientesIntegrationTestFixture : IAsyncLifetime
 
         var connectionString = _postgreSqlContainer.GetConnectionString();
 
-        // 1. Conectar e rodar o script canônico
+        // 1. Conectar e rodar o script canÃ´nico
         await using var connection = new NpgsqlConnection(connectionString);
         await connection.OpenAsync();
 
@@ -34,12 +34,12 @@ public class ClientesIntegrationTestFixture : IAsyncLifetime
         await command.ExecuteNonQueryAsync();
 
         // 2. Configurar o DbContext
-        var options = new DbContextOptionsBuilder<ClientesDbContext>()
+        var options = new DbContextOptionsBuilder<CadastroDbContext>()
             .UseNpgsql(connectionString)
             .UseSnakeCaseNamingConvention()
             .Options;
 
-        DbContext = new ClientesDbContext(options);
+        DbContext = new CadastroDbContext(options);
     }
 
     public async Task DisposeAsync()

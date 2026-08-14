@@ -1,14 +1,14 @@
-using System;
+﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore.Storage;
 using Moq;
 using WebApolice.Auditoria.Contracts;
-using WebApolice.Modulos.Estipulantes.Application.Ports;
-using WebApolice.Modulos.Estipulantes.Application.UseCases.InativarEstipulante;
-using WebApolice.Modulos.Estipulantes.Application.UseCases.ReativarEstipulante;
-using WebApolice.Modulos.Estipulantes.Infrastructure.Persistence.Models;
+using WebApolice.Modulos.Cadastro.Application.Ports;
+using WebApolice.Modulos.Cadastro.Application.UseCases.InativarEstipulante;
+using WebApolice.Modulos.Cadastro.Application.UseCases.ReativarEstipulante;
+using WebApolice.Modulos.Cadastro.Infrastructure.Persistence.Models;
 using Xunit;
 
 namespace WebApolice.Integration.Tests.Modulos.Estipulantes;

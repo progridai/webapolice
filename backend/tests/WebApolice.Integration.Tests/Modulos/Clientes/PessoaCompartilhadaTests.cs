@@ -2,10 +2,10 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using FluentAssertions;
-using WebApolice.Modulos.Clientes.Infrastructure.Persistence.Models.Vinculos;
-using WebApolice.Modulos.Clientes.Infrastructure.Persistence.Models;
-using WebApolice.Modulos.Clientes.Domain;
-using WebApolice.Modulos.Clientes.Infrastructure.Persistence.Repositories;
+using WebApolice.Modulos.Cadastro.Infrastructure.Persistence.Models.Vinculos;
+using WebApolice.Modulos.Cadastro.Infrastructure.Persistence.Models;
+using WebApolice.Modulos.Cadastro.Domain;
+using WebApolice.Modulos.Cadastro.Infrastructure.Persistence.Repositories;
 using WebApolice.Integration.Tests.Setup;
 using Xunit;
 
@@ -29,7 +29,7 @@ public class PessoaCompartilhadaTests : IClassFixture<ClientesIntegrationTestFix
             documentoPrincipal: id.ToString(),
             documentoPrincipalLimpo: id.ToString(),
             documentoValido: true,
-            dataNascimento: new DateOnly(1990, 1, 1),
+            dataNascimento: new DateTime(1990, 1, 1),
             sexo: 1,
             observacao: null
         );
@@ -66,7 +66,7 @@ public class PessoaCompartilhadaTests : IClassFixture<ClientesIntegrationTestFix
         var corretora = new CorretoraModel();
         typeof(CorretoraModel).GetProperty("Id")?.SetValue(corretora, DateTime.Now.Ticks);
         typeof(CorretoraModel).GetProperty("PessoaId")?.SetValue(corretora, pessoaId);
-        typeof(CorretoraModel).GetProperty("DeletedAt")?.SetValue(corretora, DateTime.UtcNow); // Excluído logicamente
+        typeof(CorretoraModel).GetProperty("DeletedAt")?.SetValue(corretora, DateTime.UtcNow); // ExcluÃ­do logicamente
         
         _fixture.DbContext.Corretoras.Add(corretora);
         await _fixture.DbContext.SaveChangesAsync();

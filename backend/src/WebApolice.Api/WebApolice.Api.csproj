@@ -29,9 +29,16 @@
     <ProjectReference Include="..\WebApolice.SharedKernel\WebApolice.SharedKernel.csproj" />
     <ProjectReference Include="..\WebApolice.Shared.Infrastructure\WebApolice.Shared.Infrastructure.csproj" />
     <ProjectReference Include="..\WebApolice.Auditoria\WebApolice.Auditoria.csproj" />
-    <ProjectReference Include="..\WebApolice.Modulos.Clientes\WebApolice.Modulos.Clientes.csproj" />
-    <ProjectReference Include="..\WebApolice.Modulos.Estipulantes\WebApolice.Modulos.Estipulantes.csproj" />
     <ProjectReference Include="..\WebApolice.Modulos.Seguranca\WebApolice.Modulos.Seguranca.csproj" />
+    <ProjectReference Include="..\WebApolice.Modulos.Cadastro\WebApolice.Modulos.Cadastro.csproj" />
+    <ProjectReference Include="..\WebApolice.Modulos.Sinistros\WebApolice.Modulos.Sinistros.csproj" />
+    <ProjectReference Include="..\WebApolice.Modulos.Financeiro\WebApolice.Modulos.Financeiro.csproj" />
+    <ProjectReference Include="..\WebApolice.Modulos.Documentos\WebApolice.Modulos.Documentos.csproj" />
+    <ProjectReference Include="..\WebApolice.Modulos.Comissao\WebApolice.Modulos.Comissao.csproj" />
+    <ProjectReference Include="..\WebApolice.Modulos.Integracao\WebApolice.Modulos.Integracao.csproj" />
+    <ProjectReference Include="..\WebApolice.Modulos.Atendimento\WebApolice.Modulos.Atendimento.csproj" />
+    <ProjectReference Include="..\WebApolice.Modulos.Convenio\WebApolice.Modulos.Convenio.csproj" />
+    <ProjectReference Include="..\WebApolice.Modulos.Seguro\WebApolice.Modulos.Seguro.csproj" />
   </ItemGroup>
 
 

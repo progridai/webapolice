@@ -38,7 +38,7 @@ export function useEstipulanteDetalhe(publicId: string | undefined): UseEstipula
         const [estipulanteResult, configResult] = await Promise.all([
           obterEstipulante(publicId),
           obterConfiguracao(publicId).catch(err => {
-            if (err.response?.status === 404) return null;
+            if (err.status === 404) return null;
             throw err;
           })
         ]);

@@ -75,7 +75,7 @@ export const EstipulanteDetalhePage: React.FC = () => {
 
   if (error) {
     const errorResponse = error as any;
-    if (errorResponse?.response?.status === 404) {
+    if (errorResponse?.status === 404) {
       return (
         <main ref={mainRef} tabIndex={-1} className="p-6 max-w-7xl mx-auto focus:outline-none">
           <Button variant="ghost" onClick={handleVoltar} className="mb-4" aria-label="Voltar para listagem">
@@ -89,7 +89,7 @@ export const EstipulanteDetalhePage: React.FC = () => {
       );
     }
     
-    if (errorResponse?.response?.status === 403) {
+    if (errorResponse?.status === 403) {
       return (
         <main ref={mainRef} tabIndex={-1} className="p-6 max-w-7xl mx-auto focus:outline-none">
           <Button variant="ghost" onClick={handleVoltar} className="mb-4" aria-label="Voltar para listagem">

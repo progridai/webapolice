@@ -162,8 +162,8 @@ export const EstipulanteDetalhePage: React.FC = () => {
         }
       />
 
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-        <div className="flex flex-col gap-6">
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-3">
+        <div className="flex flex-col gap-3">
           <DetailsSection title="Dados principais">
             <DescriptionList columns={2} density="compact">
               <DescriptionItem label="Razão Social" value={estipulante.razaoSocial} />
@@ -172,7 +172,9 @@ export const EstipulanteDetalhePage: React.FC = () => {
               )}
               <DescriptionItem label="CNPJ" value={formatCnpj(estipulante.cnpj)} />
               <DescriptionItem label="Código" value={estipulante.codigo || '-'} />
-              <DescriptionItem label="Observação" value={estipulante.observacao || '-'} />
+              <DescriptionItem label="Grupo" value={estipulante.grupoPublicId || 'Não vinculado'} />
+              <DescriptionItem label="Seguradora" value={estipulante.seguradoraPublicId || 'Não vinculada'} />
+              <DescriptionItem label="Observação" value={estipulante.observacao || '-'} className="sm:col-span-2" />
             </DescriptionList>
           </DetailsSection>
 
@@ -186,39 +188,55 @@ export const EstipulanteDetalhePage: React.FC = () => {
           </DetailsSection>
         </div>
 
-        <div className="flex flex-col gap-6">
+        <div className="flex flex-col gap-3">
           <DetailsSection title="Endereço principal" isEmpty={!estipulante.endereco} emptyState="Nenhum endereço cadastrado.">
             {estipulante.endereco && (
-              <div className="p-4 rounded-md bg-fundo-aplicacao border border-borda">
-                <p className="text-sm text-texto-principal">
-                  {estipulante.endereco.logradouro}, {estipulante.endereco.numero} {estipulante.endereco.complemento && `- ${estipulante.endereco.complemento}`}
-                </p>
-                <p className="text-sm text-texto-principal">
-                  {estipulante.endereco.bairro} - {estipulante.endereco.cidadeNome || estipulante.endereco.cidadeId}/{estipulante.endereco.uf}
-                </p>
-                <p className="text-sm text-texto-secundario mt-1">CEP: {formatarCep(estipulante.endereco.cep)}</p>
-              </div>
+              <DescriptionList columns={4} density="compact">
+                <DescriptionItem label="Logradouro" value={`${estipulante.endereco.logradouro}, ${estipulante.endereco.numero}`} className="sm:col-span-2 lg:col-span-3" />
+                {estipulante.endereco.complemento && (
+                  <DescriptionItem label="Complemento" value={estipulante.endereco.complemento} className="sm:col-span-1" />
+                )}
+                <DescriptionItem label="Bairro" value={estipulante.endereco.bairro} className="sm:col-span-1 lg:col-span-1" />
+                <DescriptionItem label="Cidade / UF" value={`${estipulante.endereco.cidadeNome || estipulante.endereco.cidadeId} / ${estipulante.endereco.uf}`} className="sm:col-span-1 lg:col-span-2" />
+                <DescriptionItem label="CEP" value={formatarCep(estipulante.endereco.cep)} className="sm:col-span-1" />
+              </DescriptionList>
             )}
           </DetailsSection>
 
           <DetailsSection title="Contatos" isEmpty={contatosAtivos.length === 0} emptyState="Nenhum contato cadastrado.">
-            <div className="flex flex-col gap-6">
+            <DescriptionList columns={2} density="compact">
               {contatosAtivos.map((contato, index) => (
-                <div key={index} className="p-4 rounded-md bg-fundo-aplicacao border border-borda flex items-center justify-between">
-                  <div>
-                    <p className="text-xs font-medium text-texto-secundario uppercase tracking-[0.05em] mb-1">
+                <DescriptionItem 
+                  key={index} 
+                  label={
+                    <span className="flex items-center gap-2">
                       {contato.tipoContato}
-                    </p>
-                    <p className="text-base text-texto-principal">{formatarValorContato(contato.tipoContato, contato.valor)}</p>
-                  </div>
-                  {contato.principal && (
-                    <Badge variant="primary">
-                      Principal
-                    </Badge>
-                  )}
-                </div>
+                      {contato.principal && <span className="bg-marca-principal/10 text-marca-principal px-1 rounded text-[9px] font-bold">PRINCIPAL</span>}
+                    </span>
+                  } 
+                  value={formatarValorContato(contato.tipoContato, contato.valor)} 
+                  className={contato.tipoContato.toUpperCase() === 'EMAIL' ? 'sm:col-span-2' : 'sm:col-span-1'}
+                />
               ))}
-            </div>
+            </DescriptionList>
+          </DetailsSection>
+
+          <DetailsSection title="Contatos Institucionais" isEmpty={!estipulante.contatosInstitucionais || estipulante.contatosInstitucionais.length === 0} emptyState="Nenhum contato institucional cadastrado.">
+            {estipulante.contatosInstitucionais && estipulante.contatosInstitucionais.length > 0 && (
+              <DescriptionList columns={2} density="compact">
+                {estipulante.contatosInstitucionais.map((contato, index) => (
+                  <React.Fragment key={index}>
+                    <DescriptionItem label="Nome / Departamento" value={`${contato.nome} - ${contato.departamento}`} className="sm:col-span-2" />
+                    <DescriptionItem label="E-mail" value={contato.email || '-'} className="sm:col-span-2" />
+                    <DescriptionItem label="Telefone" value={contato.telefone || '-'} className="sm:col-span-1" />
+                    <DescriptionItem label="Ramal" value={contato.ramal || '-'} className="sm:col-span-1" />
+                    {index < estipulante.contatosInstitucionais!.length - 1 && (
+                      <div className="sm:col-span-2 border-b border-borda my-1" />
+                    )}
+                  </React.Fragment>
+                ))}
+              </DescriptionList>
+            )}
           </DetailsSection>
         </div>
       </div>

@@ -33,7 +33,7 @@ export const DescriptionItem: React.FC<DescriptionItemProps> = ({
 
 export interface DescriptionListProps {
   children: React.ReactNode;
-  columns?: 1 | 2 | 3;
+  columns?: 1 | 2 | 3 | 4;
   density?: 'compact' | 'comfortable';
   className?: string;
 }
@@ -52,6 +52,8 @@ export const DescriptionList: React.FC<DescriptionListProps> = ({
         return 'desc-list-cols-2';
       case 3:
         return 'desc-list-cols-3';
+      case 4:
+        return 'desc-list-cols-4';
       default:
         return 'desc-list-cols-2';
     }

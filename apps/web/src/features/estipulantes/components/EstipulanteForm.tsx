@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useForm, useWatch, useFieldArray, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { FormField, Input, Select, Textarea, Button, FormSection, FormGrid, FormActions, HomeIcon, InfoIcon, BriefcaseIcon, ReadOnlyField, Checkbox } from '../../../components/ui';
+import { FormField, Input, Select, Textarea, Button, FormSection, FormGrid, FormActions, HomeIcon, InfoIcon, BriefcaseIcon, ReadOnlyField, Checkbox, PlusIcon } from '../../../components/ui';
 import { buscarCidadesPorUf, type CidadeResponse } from '../../clientes/api/localidadesApi';
 
 const ESTADOS_BRASILEIROS = [
@@ -346,9 +346,9 @@ export const EstipulanteForm: React.FC<EstipulanteFormProps> = ({
       </FormSection>
 
       <FormSection title="Contatos" icon={<InfoIcon size={20} />}>
-        <div className="flex flex-col gap-6">
+        <div className="flex flex-col gap-2">
           {contatoFields.map((field, index) => (
-            <div key={field.id} className="p-4 rounded-lg bg-fundo-aplicacao border border-borda">
+            <div key={field.id} className="p-3 rounded-lg bg-fundo-aplicacao border border-borda">
               <FormGrid>
                 <div className="lg:col-span-3">
                   <FormField label="Tipo de Contato" required error={errors.contatos?.[index]?.tipoContato?.message}>
@@ -404,16 +404,17 @@ export const EstipulanteForm: React.FC<EstipulanteFormProps> = ({
               variant="outline"
               onClick={() => appendContato({ tipoContato: 'EMAIL', valor: '', principal: false })}
             >
-              + Adicionar Contato
+              <PlusIcon size={16} className="mr-2" />
+              Adicionar Contato
             </Button>
           </div>
         </div>
       </FormSection>
 
       <FormSection title="Contatos Institucionais" icon={<BriefcaseIcon size={20} />}>
-        <div className="flex flex-col gap-6">
+        <div className="flex flex-col gap-2">
           {contatoInstFields.map((field, index) => (
-            <div key={field.id} className="p-4 rounded-lg bg-fundo-aplicacao border border-borda relative pt-8">
+            <div key={field.id} className="p-3 pt-8 rounded-lg bg-fundo-aplicacao border border-borda relative">
               <div className="absolute top-4 right-4">
                 <Button
                   type="button"
@@ -459,7 +460,8 @@ export const EstipulanteForm: React.FC<EstipulanteFormProps> = ({
               variant="outline"
               onClick={() => appendContatoInst({ nome: '', departamento: '', email: '', telefone: '', ramal: '' })}
             >
-              + Adicionar Contato Institucional
+              <PlusIcon size={16} className="mr-2" />
+              Adicionar Contato Institucional
             </Button>
           </div>
         </div>

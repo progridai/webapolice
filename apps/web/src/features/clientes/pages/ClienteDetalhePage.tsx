@@ -163,7 +163,7 @@ export const ClienteDetalhePage: React.FC = () => {
 
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-3">
         <div className="flex flex-col gap-3">
-          <DetailsSection title="Dados pessoais" className="!p-4 !gap-2 [&>div:first-child]:mb-0">
+          <DetailsSection title="Dados pessoais">
             <DescriptionList columns={3}>
               <DescriptionItem label="Nome Completo" value={cliente.nome} className="sm:col-span-3" />
               <DescriptionItem label="Tipo de Pessoa" value={cliente.tipoPessoa === 2 || cliente.documento?.replace(/\D/g, '').length === 14 ? 'Pessoa Jurídica' : 'Pessoa Física'} />
@@ -176,7 +176,7 @@ export const ClienteDetalhePage: React.FC = () => {
             </DescriptionList>
           </DetailsSection>
 
-          <DetailsSection title="Contatos" isEmpty={contatosAtivos.length === 0} emptyState="Nenhum contato cadastrado." className="!p-4 !gap-2 [&>div:first-child]:mb-0">
+          <DetailsSection title="Contatos" isEmpty={contatosAtivos.length === 0} emptyState="Nenhum contato cadastrado.">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               {contatosAtivos.map((contato, index) => (
                 <div 
@@ -201,7 +201,7 @@ export const ClienteDetalhePage: React.FC = () => {
             </div>
           </DetailsSection>
 
-          <DetailsSection title="Endereços" isEmpty={enderecosAtivos.length === 0} emptyState="Nenhum endereço cadastrado." className="!p-4 !gap-2 [&>div:first-child]:mb-0">
+          <DetailsSection title="Endereços" isEmpty={enderecosAtivos.length === 0} emptyState="Nenhum endereço cadastrado.">
             <div className="flex flex-col gap-2">
               {enderecosAtivos.map((endereco, index) => (
                 <div key={index} className="flex flex-col gap-2">

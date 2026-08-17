@@ -39,22 +39,24 @@ Para renderizar pares de `Label` e `Valor` (como Nome, CPF, Telefone), utilize o
 - **Formato Visual:** Um bloco delimitado por borda discreta, fundo cinza (`bg-fundo-aplicacao`), com o label no topo (fonte menor, maiúscula, `text-[10px]`) e o conteúdo de leitura destacado logo abaixo.
 - **Densidade:** Utilize `density="compact"` para telas administrativas para manter o gap (espaçamento) reduzido entre os blocos (apenas `8px` ou `gap-2`).
 - **Inteligência de Layout e Espaço:** NUNCA desperdice espaço vertical. A inteligência na montagem do layout é fundamental:
-  - **Dados Grandes (Nome, Endereço Inteiro):** Devem ocupar a linha inteira (`col-span-2` ou `col-span-3`).
-  - **Dados Curtos (Data, Telefone, CPF, CEP):** Devem ser dispostos lado a lado, em quebras de 2, 3 ou até 4 colunas abaixo dos blocos principais.
-  - Para formulários grandes ou seções longas, utilize **obrigatoriamente** `columns={2}` ou `columns={3}` na `DescriptionList` e passe a classe `className="sm:col-span-2"` (ou similar) no `DescriptionItem` quando precisar que ele ocupe múltiplas colunas na grade.
+  - O componente `DescriptionList` agora suporta até **4 colunas** (`columns={4}`) para layouts hiper-compactos (como agrupamentos de Endereços).
+  - **Dados Grandes (Nome, Endereço Inteiro):** Devem ocupar a linha inteira (ex: `col-span-2` em grades de 2, ou `col-span-4` em grades de 4).
+  - **Endereços (Padrão Ouro):** Utilize `columns={4}`. Logradouro deve ocupar 3 ou 2 frações (`sm:col-span-2 lg:col-span-3`). Dados pequenos como CEP, Número e Complemento ocupam apenas 1 fração (`sm:col-span-1`).
+  - **Contatos (Padrão Ouro):** E-mails são longos e devem **obrigatoriamente ocupar a linha inteira** (`className={tipo === 'EMAIL' ? 'sm:col-span-2' : 'sm:col-span-1'}`). Telefones e Celulares devem dividir a linha abaixo.
 
-### C. Agrupamento Semântico
+### C. Agrupamento Semântico e Espaçamento
 - Divida a página em blocos lógicos usando o componente `DetailsSection`.
 - *Exemplos:* "Dados Gerais", "Endereço", "Contatos", "Perfis Atribuídos". 
+- **Distanciamento de Seções (Layout):** A grade ou coluna que agrupa múltiplos `DetailsSection` (ex: `<div className="flex flex-col gap-3">`) deve utilizar obrigatoriamente **`gap-3` (12px)**, abandonando o padrão clássico `gap-6`. Isso mantém as áreas da tela unidas e coesas, minimizando buracos brancos mortos.
 
 ### D. Redundância de Informação (Regra de Ouro)
 > A interface deve informar, não repetir.
 - Se o **Nome** e o **Código** (ou Username) de uma entidade forem textualmente idênticos na prática (ex: Perfil "Administrador" e Código "ADMINISTRADOR"), a interface deve programaticamente **ocultar o código** (comparando `toLowerCase()`). 
 - **Exceção para Listagens (Grids)**: Nas listagens, exiba **somente o Nome completo**. Não exiba "Códigos" ou "Usernames" como subtítulos para manter a tabela limpa.
 
-### E. Paridade de Campos entre View e Edit (Regra de Ouro)
-> A tela de visualização (Detalhes) deve exibir **todos os campos** que o formulário de edição permite alterar.
-- Todo campo presente no formulário de edição deve ter um equivalente visual na tela de detalhes, agrupado na mesma seção semântica (ex: o campo "Sexo" do formulário aparece em "Dados Pessoais" na view; a seção "Informações Adicionais" do formulário deve existir na view com os mesmos campos: `falecido`, `dataObito`, `observacao`).
+### E. Paridade de Campos entre View e Edit (Regra Estrita)
+> A tela de visualização (Detalhes) deve exibir **TODOS os campos** que o formulário de edição permite alterar.
+- Todo campo presente no formulário de edição deve ter um equivalente visual na tela de detalhes, agrupado na mesma seção semântica. Se no formulário existe "Grupo", "Seguradora" ou "Contatos Institucionais", eles **têm que aparecer** na visualização.
 - Campos condicionais (ex: `dataObito` só aparece se `falecido = true`) devem seguir a mesma lógica condicional tanto no formulário quanto na view.
 - Ao adicionar um novo campo ao formulário de edição, adicione **obrigatoriamente** o campo correspondente à tela de detalhes na mesma PR/commit.
 

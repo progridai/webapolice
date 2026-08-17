@@ -23,8 +23,8 @@ export const DetailsSection: React.FC<DetailsSectionProps> = ({
   className = '',
 }) => {
   return (
-    <Card className={`p-6 flex flex-col gap-4 ${className}`}>
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-2">
+    <Card className={`p-4 flex flex-col gap-2 ${className}`}>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
         <div className="flex items-start gap-3">
           {icon && (
             <div className="mt-1 text-texto-secundario">

@@ -1,13 +1,19 @@
 import React, { forwardRef } from 'react';
 import './Select.css';
 
+export interface OptionItem {
+  label: string;
+  value: string | number;
+}
+
 export interface SelectProps extends React.SelectHTMLAttributes<HTMLSelectElement> {
   error?: boolean;
   placeholder?: string;
+  options?: OptionItem[];
 }
 
 export const Select = forwardRef<HTMLSelectElement, SelectProps>(
-  ({ children, className = '', error = false, placeholder, ...props }, ref) => {
+  ({ children, className = '', error = false, placeholder, options, ...props }, ref) => {
     return (
       <select
         ref={ref}
@@ -19,7 +25,13 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
             {placeholder}
           </option>
         )}
-        {children}
+        {options
+          ? options.map((opt) => (
+              <option key={opt.value} value={opt.value}>
+                {opt.label}
+              </option>
+            ))
+          : children}
       </select>
     );
   }

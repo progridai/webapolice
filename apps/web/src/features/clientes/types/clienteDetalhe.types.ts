@@ -49,7 +49,9 @@ export interface ClienteDetalheResponse {
   status: ClienteStatusResponse;
   dataNascimento?: string;
   sexo?: number;
+  tipoPessoa?: number;
   re?: string;
+  observacao?: string;
   falecido: boolean;
   dataObito?: string;
   contatos: ClienteContatoResponse[];

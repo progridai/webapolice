@@ -146,23 +146,18 @@ export const ClienteDetalhePage: React.FC = () => {
 
       <EntitySummary
         name={cliente.nome}
-        documentInfo={cliente.documentoMascarado || 'Documento não informado'}
         badges={<StatusBadge status={cliente.status.codigo} />}
         secondaryInfo={
-          <div className="flex flex-wrap gap-6">
-            <div className="flex flex-col">
-              <span className="text-xs font-semibold text-texto-secundario uppercase tracking-wider">Nascimento</span>
-              <span className="text-sm text-texto-principal">{formatarDataOuVazio(cliente.dataNascimento)}</span>
-            </div>
-            {cliente.falecido && (
+          cliente.falecido ? (
+            <div className="flex flex-wrap gap-6">
               <div className="flex flex-col">
                 <span className="text-xs font-semibold text-erro uppercase tracking-wider">Falecido</span>
                 <span className="text-sm text-texto-principal">
                   Sim {cliente.dataObito ? `(${formatarDataOuVazio(cliente.dataObito)})` : ''}
                 </span>
               </div>
-            )}
-          </div>
+            </div>
+          ) : undefined
         }
       />
 
@@ -170,12 +165,33 @@ export const ClienteDetalhePage: React.FC = () => {
         <div className="flex flex-col gap-6">
           <DetailsSection title="Dados pessoais">
             <DescriptionList columns={2}>
-              <DescriptionItem label="Nome completo" value={cliente.nome} />
+              <DescriptionItem
+                label="Tipo de Pessoa"
+                value={
+                  cliente.tipoPessoa === 2
+                    ? 'Pessoa Jurídica'
+                    : cliente.documento?.replace(/\D/g, '').length === 14
+                    ? 'Pessoa Jurídica'
+                    : 'Pessoa Física'
+                }
+              />
               <DescriptionItem label="Documento principal" value={cliente.documentoMascarado} />
+              <DescriptionItem label="Nome completo" value={cliente.nome} />
+              <DescriptionItem
+                label="Sexo"
+                value={
+                  cliente.sexo === 1 ? 'Masculino'
+                  : cliente.sexo === 2 ? 'Feminino'
+                  : 'Não informado'
+                }
+              />
+              <DescriptionItem
+                label="Data de Nascimento"
+                value={formatarDataOuVazio(cliente.dataNascimento)}
+              />
               {possuiRecurso('RE') && (
                 <DescriptionItem label="RE" value={cliente.re || 'Não informado'} />
               )}
-              {/* Mais dados poderiam ser exibidos aqui */}
             </DescriptionList>
           </DetailsSection>
 
@@ -221,6 +237,26 @@ export const ClienteDetalhePage: React.FC = () => {
                 </div>
               ))}
             </div>
+          </DetailsSection>
+
+          <DetailsSection title="Informações Adicionais">
+            <DescriptionList columns={2}>
+              <DescriptionItem
+                label="Cliente Falecido/Extinto"
+                value={cliente.falecido ? 'Sim' : 'Não'}
+              />
+              {cliente.falecido && (
+                <DescriptionItem
+                  label="Data de Óbito"
+                  value={formatarDataOuVazio(cliente.dataObito)}
+                />
+              )}
+              <DescriptionItem
+                label="Observações"
+                value={cliente.observacao || '—'}
+                className="col-span-2"
+              />
+            </DescriptionList>
           </DetailsSection>
         </div>
 

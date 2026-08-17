@@ -50,6 +50,12 @@ Para renderizar pares de `Label` e `Valor`, sempre utilize o componente genéric
 - Se o **Nome** e o **Código** (ou Username) de uma entidade forem textualmente idênticos na prática (ex: Perfil "Administrador" e Código "ADMINISTRADOR"), a interface deve programaticamente **ocultar o código** (comparando `toLowerCase()`). 
 - **Exceção para Listagens (Grids)**: Nas listagens, exiba **somente o Nome completo**. Não exiba "Códigos" ou "Usernames" como subtítulos para manter a tabela limpa.
 
+### E. Paridade de Campos entre View e Edit (Regra de Ouro)
+> A tela de visualização (Detalhes) deve exibir **todos os campos** que o formulário de edição permite alterar.
+- Todo campo presente no formulário de edição deve ter um equivalente visual na tela de detalhes, agrupado na mesma seção semântica (ex: o campo "Sexo" do formulário aparece em "Dados Pessoais" na view; a seção "Informações Adicionais" do formulário deve existir na view com os mesmos campos: `falecido`, `dataObito`, `observacao`).
+- Campos condicionais (ex: `dataObito` só aparece se `falecido = true`) devem seguir a mesma lógica condicional tanto no formulário quanto na view.
+- Ao adicionar um novo campo ao formulário de edição, adicione **obrigatoriamente** o campo correspondente à tela de detalhes na mesma PR/commit.
+
 ---
 
 ## 3. Composição de Formulários e Telas de Edição
@@ -59,13 +65,24 @@ Para renderizar pares de `Label` e `Valor`, sempre utilize o componente genéric
 - **Ações Secundárias:** Botões como "Voltar" ou "Cancelar" devem receber `variant="secondary"` ou `variant="ghost"`.
 
 ### B. Uso do Componente Select (Combobox)
-- Sempre passe as opções como `children` utilizando as tags nativas `<option>`, por exemplo:
-  ```tsx
-  <Select>
-    <option value="1">Opção 1</option>
-    <option value="2">Opção 2</option>
-  </Select>
-  ```
+- O componente aceita duas formas de uso equivalentes:
+  - **Via prop `options`** (preferida para listas simples e estáticas):
+    ```tsx
+    <Select
+      options={[
+        { label: 'Todos', value: '' },
+        { label: 'Ativo', value: '1' },
+        { label: 'Inativo', value: '2' },
+      ]}
+    />
+    ```
+  - **Via `children`** (use quando precisar de lógica condicional ou iterar dinamicamente):
+    ```tsx
+    <Select>
+      <option value="1">Opção 1</option>
+      <option value="2">Opção 2</option>
+    </Select>
+    ```
 
 ### C. Layout Estrutural de Formulários
 - Utilize o componente `FormGrid` nativo para estruturar as colunas dos formulários (baseado em grid de 12 colunas).

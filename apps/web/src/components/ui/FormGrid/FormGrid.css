@@ -1,7 +1,7 @@
 .form-grid {
   display: grid;
   grid-template-columns: repeat(12, 1fr);
-  gap: var(--espaco-4) var(--espaco-5);
+  gap: var(--espaco-3) var(--espaco-4);
 }
 
 .form-grid > * {

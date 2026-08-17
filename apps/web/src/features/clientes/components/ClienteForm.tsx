@@ -8,7 +8,7 @@ import { Select } from '../../../components/ui/Select';
 import { Textarea } from '../../../components/ui/Textarea';
 import { Checkbox } from '../../../components/ui/Checkbox';
 import { Button } from '../../../components/ui/Button';
-import { FormSection, FormGrid, FormActions, ReadOnlyField, UsersIcon, HomeIcon, InfoIcon } from '../../../components/ui';
+import { FormSection, FormGrid, FormActions, ReadOnlyField, UsersIcon, HomeIcon, InfoIcon, PlusIcon } from '../../../components/ui';
 import { buscarCidadesPorUf, type CidadeResponse } from '../api/localidadesApi';
 import { useAuthorization } from '../../../auth/AuthorizationProvider';
 
@@ -116,7 +116,7 @@ const EnderecoRow: React.FC<EnderecoRowProps> = ({
   }, [ufSelecionada]);
 
   return (
-    <div className="border border-borda p-4 rounded-lg bg-fundo-aplicacao mb-4">
+    <div className="border border-borda p-3 rounded-lg bg-fundo-aplicacao">
       <FormGrid>
         <div className="lg:col-span-3">
           <FormField label="Tipo de Endereço" required error={errors?.tipoEndereco?.message}>
@@ -390,9 +390,9 @@ export const ClienteForm: React.FC<ClienteFormProps> = ({
       </FormSection>
 
       <FormSection title="Contatos" icon={<InfoIcon size={20} />}>
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-2">
           {contatoFields.map((field, index) => (
-            <div key={field.id} className="border border-borda p-4 rounded-lg bg-fundo-aplicacao">
+            <div key={field.id} className="border border-borda p-3 rounded-lg bg-fundo-aplicacao">
               <FormGrid>
                 <div className="lg:col-span-3">
                   <FormField label="Tipo de Contato" required error={errors.contatos?.[index]?.tipoContato?.message}>
@@ -448,6 +448,7 @@ export const ClienteForm: React.FC<ClienteFormProps> = ({
               variant="outline"
               onClick={() => appendContato({ tipoContato: 'EMAIL', valor: '', principal: false })}
             >
+              <PlusIcon size={16} className="mr-2" />
               Adicionar Contato
             </Button>
           </div>
@@ -455,7 +456,7 @@ export const ClienteForm: React.FC<ClienteFormProps> = ({
       </FormSection>
 
       <FormSection title="Endereços" icon={<HomeIcon size={20} />}>
-        <div className="flex flex-col">
+        <div className="flex flex-col gap-2">
           {enderecoFields.map((field, index) => (
             <EnderecoRow
               key={field.id}
@@ -474,6 +475,7 @@ export const ClienteForm: React.FC<ClienteFormProps> = ({
               variant="outline"
               onClick={() => appendEndereco({ tipoEndereco: 'RESIDENCIAL', cep: '', logradouro: '', numero: '', complemento: '', bairro: '', cidadeId: undefined, uf: '', principal: false })}
             >
+              <PlusIcon size={16} className="mr-2" />
               Adicionar Endereço
             </Button>
           </div>

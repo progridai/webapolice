@@ -8,7 +8,7 @@
 }
 
 .form-label {
-  font-size: var(--fonte-tamanho-sm);
+  font-size: var(--fonte-tamanho-xs);
   font-weight: var(--fonte-peso-seminegrito);
   color: var(--cor-texto-principal);
   user-select: none;

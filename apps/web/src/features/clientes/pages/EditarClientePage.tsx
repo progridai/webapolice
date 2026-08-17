@@ -135,15 +135,14 @@ export const EditarClientePage: React.FC = () => {
   ];
 
   return (
-    <div className="clientes-page" role="main">
+    <main className="flex flex-col gap-6 p-6 max-w-4xl mx-auto focus:outline-none" role="main" tabIndex={-1}>
       <PageHeader 
         title="Editar Cliente"
-        description="Atualize os dados do cliente."
         icon={<UsersIcon size={24} />}
         breadcrumbs={<Breadcrumbs items={breadcrumbItems} />}
       />
 
-      <div className="page-content" style={{ maxWidth: '800px' }}>
+      <div className="w-full">
         {error && (
           <div className="mb-4">
             <Alert variant="error" title="Erro ao Salvar">{error}</Alert>
@@ -160,7 +159,7 @@ export const EditarClientePage: React.FC = () => {
           />
         )}
       </div>
-    </div>
+    </main>
   );
 };
 

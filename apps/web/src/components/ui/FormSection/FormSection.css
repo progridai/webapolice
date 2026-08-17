@@ -47,7 +47,7 @@
 }
 
 .form-section-content {
-  padding: var(--espaco-5);
+  padding: var(--espaco-4);
 }
 
 @media (max-width: 640px) {

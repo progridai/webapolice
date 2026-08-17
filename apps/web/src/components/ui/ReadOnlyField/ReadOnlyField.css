@@ -7,11 +7,11 @@
 
 .readonly-field-input {
   width: 100%;
-  height: 40px; /* Match Input height */
-  padding: 0 var(--espaco-7) 0 var(--espaco-3);
+  height: 32px; /* Match Input height */
+  padding: 0 var(--espaco-8) 0 var(--espaco-3);
   background-color: var(--cor-fundo-aplicacao);
   border: var(--borda-largura-padrao) solid var(--cor-borda);
-  border-radius: var(--raio-medio);
+  border-radius: var(--raio-pequeno);
   color: var(--cor-texto-principal);
   font-size: var(--fonte-tamanho-sm);
   font-weight: 500;

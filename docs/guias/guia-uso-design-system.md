@@ -34,12 +34,14 @@ Sistemas administrativos lidam com volume intenso de dados. Telas de detalhes n�
   - Ancore as badges de status na propriedade `titleExtras`. Elas aparecerão perfeitamente alinhadas ao lado do título.
   - Utilize a propriedade `description` para exibir um subtítulo discreto (ex: o identificador interno ou e-mail), se estritamente necessário.
 
-### B. Densidade e Escalabilidade (DescriptionList)
-Para renderizar pares de `Label` e `Valor`, sempre utilize o componente genérico `DescriptionList` e siga estas regras:
-1. **Densidade:** Utilize o padrão `density="compact"` para todas as telas administrativas. Ele reduz o espaçamento vertical entre os campos (para `8px`), permitindo acomodar 20 campos na tela sem forçar rolagem excessiva.
-2. **Escalonamento Horizontal (Colunas):** 
-   - Para agrupamentos pequenos (3 ou 4 campos), utilize `columns={1}`.
-   - Para formulários grandes (como dados completos de Seguradoras ou Estipulantes), utilize **obrigatoriamente** `columns={2}` no desktop (o componente lida com o mobile).
+### B. Densidade e Escalabilidade (O Padrão "Info Box" com DescriptionList)
+Para renderizar pares de `Label` e `Valor` (como Nome, CPF, Telefone), utilize o componente genérico `DescriptionList` junto com `DescriptionItem`. Eles foram atualizados para renderizar automaticamente o padrão de "Info Box":
+- **Formato Visual:** Um bloco delimitado por borda discreta, fundo cinza (`bg-fundo-aplicacao`), com o label no topo (fonte menor, maiúscula, `text-[10px]`) e o conteúdo de leitura destacado logo abaixo.
+- **Densidade:** Utilize `density="compact"` para telas administrativas para manter o gap (espaçamento) reduzido entre os blocos (apenas `8px` ou `gap-2`).
+- **Inteligência de Layout e Espaço:** NUNCA desperdice espaço vertical. A inteligência na montagem do layout é fundamental:
+  - **Dados Grandes (Nome, Endereço Inteiro):** Devem ocupar a linha inteira (`col-span-2` ou `col-span-3`).
+  - **Dados Curtos (Data, Telefone, CPF, CEP):** Devem ser dispostos lado a lado, em quebras de 2, 3 ou até 4 colunas abaixo dos blocos principais.
+  - Para formulários grandes ou seções longas, utilize **obrigatoriamente** `columns={2}` ou `columns={3}` na `DescriptionList` e passe a classe `className="sm:col-span-2"` (ou similar) no `DescriptionItem` quando precisar que ele ocupe múltiplas colunas na grade.
 
 ### C. Agrupamento Semântico
 - Divida a página em blocos lógicos usando o componente `DetailsSection`.
@@ -84,11 +86,22 @@ Para renderizar pares de `Label` e `Valor`, sempre utilize o componente genéric
     </Select>
     ```
 
-### C. Layout Estrutural de Formulários
-- Utilize o componente `FormGrid` nativo para estruturar as colunas dos formulários (baseado em grid de 12 colunas).
-- Envolva as páginas com tags principais estilizadas via Tailwind: `<main className="flex flex-col gap-6 w-full max-w-[1440px] mx-auto p-0 focus:outline-none">` para garantir um padrão único em toda a aplicação.
+### C. Layout Estrutural de Formulários (Padrão Alta Densidade)
+Para que o sistema mantenha o aspecto hiper-profissional de um ERP de alta densidade, todas as telas de edição ou cadastro devem seguir **estritamente** estas métricas:
+- **Wrapper da Página:** A página inteira deve ser envelopada pelo layout: 
+  `<main className="flex flex-col gap-6 p-6 max-w-4xl mx-auto focus:outline-none" role="main" tabIndex={-1}>`
+  Isso garante `gap-6` (24px) de distanciamento entre o PageHeader e os conteúdos principais. Não utilize wrappers `.page-content` ou `.clientes-page` fixos do CSS antigo.
+- **Espaçamento da Grade (FormGrid):** O `FormGrid` foi calibrado para ser compacto: 12px de distância vertical (`var(--espaco-3)`) entre as linhas e 16px (`var(--espaco-4)`) nas colunas. Isso previne rolagem excessiva em telas com dezenas de campos.
+- **Tamanho dos Campos (Input, Select, ReadOnlyField):** Todos possuem **altura estrita de 32px**. O padding horizontal é de 12px (`var(--espaco-3)`) para garantir que o texto não cole nas bordas. Nunca adicione paddings verticais extras para não inflar a altura. A label do `FormField` usa o tamanho proporcional `xs` (12px).
+- **Preenchimento das Seções (FormSection):** O padding interno foi reduzido de 20px para `16px` (`var(--espaco-4)`).
 
-### D. Ações Destrutivas (Regra do Botão Excluir)
+### D. Arrays Dinâmicos (Contatos, Endereços, etc.)
+Em listas dinâmicas geradas no formulário de edição, aplique regras agressivas de compactação:
+- **Espaço entre Itens:** Utilize `<div className="flex flex-col gap-2">` no container pai para garantir que um item não fique tão distante do outro.
+- **Box Interno:** O quadro de cada item deve ter apenas padding-3 (12px): `className="border border-borda p-3 rounded-lg bg-fundo-aplicacao"`. NUNCA use margens vazadas (como `mb-4`) caso o container pai já faça o gap.
+- **Botão Adicionar:** Todo botão que adiciona novos itens a uma lista ("Adicionar Endereço") deve utilizar o ícone de mais (`<PlusIcon size={16} className="mr-2" />`) importado do pacote do UI Kit (`../../../components/ui`), antes do texto, para rápida identificação visual.
+
+### E. Ações Destrutivas (Regra do Botão Excluir)
 - Ações destrutivas (como "Excluir") devem ser renderizadas no **rodapé do formulário** (`FormActions`), na lateral **esquerda** (opostas ao botão primário "Salvar"). Isso minimiza toques acidentais e padroniza o fluxo visual da tela. 
 - Para botões destrutivos textuais ou secundários, use as cores do design system (ex: `text-erro hover:text-erro/80`), não cores hardcoded (ex: `text-red-500`).
 

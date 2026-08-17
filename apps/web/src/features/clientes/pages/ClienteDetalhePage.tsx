@@ -123,7 +123,7 @@ export const ClienteDetalhePage: React.FC = () => {
   const enderecosAtivos = cliente.enderecos.filter((e) => e.ativo).sort((a, b) => (a.principal === b.principal ? 0 : a.principal ? -1 : 1));
 
   return (
-    <main ref={mainRef} tabIndex={-1} className="p-6 max-w-7xl mx-auto focus:outline-none flex flex-col gap-6">
+    <main ref={mainRef} tabIndex={-1} className="p-6 max-w-7xl mx-auto focus:outline-none flex flex-col gap-3">
       <PageHeader
         title="Detalhes do Cliente"
         breadcrumbs={
@@ -161,46 +161,32 @@ export const ClienteDetalhePage: React.FC = () => {
         }
       />
 
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-        <div className="flex flex-col gap-6">
-          <DetailsSection title="Dados pessoais">
-            <DescriptionList columns={2}>
-              <DescriptionItem
-                label="Tipo de Pessoa"
-                value={
-                  cliente.tipoPessoa === 2
-                    ? 'Pessoa Jurídica'
-                    : cliente.documento?.replace(/\D/g, '').length === 14
-                    ? 'Pessoa Jurídica'
-                    : 'Pessoa Física'
-                }
-              />
-              <DescriptionItem label="Documento principal" value={cliente.documentoMascarado} />
-              <DescriptionItem label="Nome completo" value={cliente.nome} />
-              <DescriptionItem
-                label="Sexo"
-                value={
-                  cliente.sexo === 1 ? 'Masculino'
-                  : cliente.sexo === 2 ? 'Feminino'
-                  : 'Não informado'
-                }
-              />
-              <DescriptionItem
-                label="Data de Nascimento"
-                value={formatarDataOuVazio(cliente.dataNascimento)}
-              />
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-3">
+        <div className="flex flex-col gap-3">
+          <DetailsSection title="Dados pessoais" className="!p-4 !gap-2 [&>div:first-child]:mb-0">
+            <DescriptionList columns={3}>
+              <DescriptionItem label="Nome Completo" value={cliente.nome} className="sm:col-span-3" />
+              <DescriptionItem label="Tipo de Pessoa" value={cliente.tipoPessoa === 2 || cliente.documento?.replace(/\D/g, '').length === 14 ? 'Pessoa Jurídica' : 'Pessoa Física'} />
+              <DescriptionItem label="Documento Principal" value={cliente.documentoMascarado || '—'} />
+              <DescriptionItem label="Sexo" value={cliente.sexo === 1 ? 'Masculino' : cliente.sexo === 2 ? 'Feminino' : '—'} />
+              <DescriptionItem label="Data de Nascimento" value={formatarDataOuVazio(cliente.dataNascimento)} />
               {possuiRecurso('RE') && (
-                <DescriptionItem label="RE" value={cliente.re || 'Não informado'} />
+                <DescriptionItem label="RE" value={cliente.re || '—'} />
               )}
             </DescriptionList>
           </DetailsSection>
 
-          <DetailsSection title="Contatos" isEmpty={contatosAtivos.length === 0} emptyState="Nenhum contato cadastrado.">
-            <div className="flex flex-col gap-4">
+          <DetailsSection title="Contatos" isEmpty={contatosAtivos.length === 0} emptyState="Nenhum contato cadastrado." className="!p-4 !gap-2 [&>div:first-child]:mb-0">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               {contatosAtivos.map((contato, index) => (
-                <div key={index} className="flex items-center justify-between p-3 rounded-md bg-fundo-aplicacao border border-borda">
+                <div 
+                  key={index} 
+                  className={`flex items-center justify-between p-3 rounded-md bg-fundo-aplicacao border border-borda ${
+                    contato.tipo.toUpperCase() === 'EMAIL' ? 'sm:col-span-2' : ''
+                  }`}
+                >
                   <div>
-                    <p className="text-xs font-medium text-texto-secundario uppercase tracking-wider mb-1">
+                    <p className="text-[10px] font-medium text-texto-secundario uppercase tracking-wider mb-0.5">
                       {contato.tipo}
                     </p>
                     <p className="text-base text-texto-principal">{formatarValorContato(contato.tipo, contato.valor)}</p>
@@ -215,94 +201,126 @@ export const ClienteDetalhePage: React.FC = () => {
             </div>
           </DetailsSection>
 
-          <DetailsSection title="Endereços" isEmpty={enderecosAtivos.length === 0} emptyState="Nenhum endereço cadastrado.">
-            <div className="flex flex-col gap-4">
+          <DetailsSection title="Endereços" isEmpty={enderecosAtivos.length === 0} emptyState="Nenhum endereço cadastrado." className="!p-4 !gap-2 [&>div:first-child]:mb-0">
+            <div className="flex flex-col gap-2">
               {enderecosAtivos.map((endereco, index) => (
-                <div key={index} className="flex flex-col p-4 rounded-md bg-fundo-aplicacao border border-borda">
-                  <div className="flex items-center gap-2 mb-2">
-                    <p className="text-sm font-semibold text-texto-principal">{endereco.tipo}</p>
+                <div key={index} className="flex flex-col gap-2">
+                  <div className="flex items-center gap-2 pl-1">
+                    <span className="text-[10px] font-medium text-texto-secundario uppercase tracking-wider">{endereco.tipo}</span>
                     {endereco.principal && (
                       <Badge variant="neutral" className="bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-800">
                         Principal
                       </Badge>
                     )}
                   </div>
-                  <p className="text-sm text-texto-secundario">
-                    {endereco.logradouro}, {endereco.numero} {endereco.complemento && `- ${endereco.complemento}`}
-                  </p>
-                  <p className="text-sm text-texto-secundario">
-                    {endereco.bairro} - {endereco.cidade}/{endereco.uf}
-                  </p>
-                  <p className="text-sm text-texto-secundario mt-1">CEP: {formatarCep(endereco.cep)}</p>
+                  <div className="grid grid-cols-3 gap-2">
+                    <div className="col-span-3 flex flex-col p-3 rounded-md bg-fundo-aplicacao border border-borda">
+                      <span className="text-[10px] font-medium text-texto-secundario uppercase tracking-wider mb-0.5">Endereço</span>
+                      <span className="text-base text-texto-principal">
+                        {endereco.logradouro}{endereco.numero ? `, ${endereco.numero}` : ''}{endereco.complemento ? ` - ${endereco.complemento}` : ''}
+                      </span>
+                    </div>
+                    <div className="flex flex-col p-3 rounded-md bg-fundo-aplicacao border border-borda">
+                      <span className="text-[10px] font-medium text-texto-secundario uppercase tracking-wider mb-0.5">Bairro</span>
+                      <span className="text-base text-texto-principal">{endereco.bairro || '—'}</span>
+                    </div>
+                    <div className="flex flex-col p-3 rounded-md bg-fundo-aplicacao border border-borda">
+                      <span className="text-[10px] font-medium text-texto-secundario uppercase tracking-wider mb-0.5">Cidade / UF</span>
+                      <span className="text-base text-texto-principal">{[endereco.cidade, endereco.uf].filter(Boolean).join(' / ') || '—'}</span>
+                    </div>
+                    <div className="flex flex-col p-3 rounded-md bg-fundo-aplicacao border border-borda">
+                      <span className="text-[10px] font-medium text-texto-secundario uppercase tracking-wider mb-0.5">CEP</span>
+                      <span className="text-base text-texto-principal">{formatarCep(endereco.cep)}</span>
+                    </div>
+                  </div>
                 </div>
               ))}
             </div>
           </DetailsSection>
 
-          <DetailsSection title="Informações Adicionais">
-            <DescriptionList columns={2}>
-              <DescriptionItem
-                label="Cliente Falecido/Extinto"
-                value={cliente.falecido ? 'Sim' : 'Não'}
-              />
+          <DetailsSection title="Informações Adicionais" className="!p-4 !gap-2 [&>div:first-child]:mb-0">
+            <DescriptionList columns={3}>
+              <DescriptionItem label="Cliente Falecido/Extinto" value={cliente.falecido ? 'Sim' : 'Não'} />
               {cliente.falecido && (
-                <DescriptionItem
-                  label="Data de Óbito"
-                  value={formatarDataOuVazio(cliente.dataObito)}
-                />
+                <DescriptionItem label="Data de Óbito" value={formatarDataOuVazio(cliente.dataObito)} />
               )}
-              <DescriptionItem
-                label="Observações"
-                value={cliente.observacao || '—'}
-                className="col-span-2"
-              />
+              <DescriptionItem label="Observações" value={cliente.observacao || '—'} className="sm:col-span-2" />
             </DescriptionList>
           </DetailsSection>
         </div>
 
-        <div className="flex flex-col gap-6">
-          <DetailsSection title="Vínculos" isEmpty={cliente.vinculos.length === 0} emptyState="Nenhum vínculo cadastrado.">
-            <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-3">
+          <DetailsSection title="Vínculos" isEmpty={cliente.vinculos.length === 0} emptyState="Nenhum vínculo cadastrado." className="!p-4 !gap-2 [&>div:first-child]:mb-0">
+            <div className="flex flex-col gap-2">
               {cliente.vinculos.map((vinculo, index) => (
-                <div key={index} className="p-4 rounded-md bg-fundo-aplicacao border border-borda">
-                  <div className="flex items-center justify-between mb-3 border-b border-borda pb-3">
+                <div key={index} className="p-3 rounded-md bg-fundo-aplicacao border border-borda">
+                  <div className="flex items-center justify-between mb-2 border-b border-borda pb-2">
                     <div>
-                      <p className="text-xs font-medium text-texto-secundario uppercase tracking-wider mb-1">Matrícula</p>
-                      <p className="text-base font-semibold text-texto-principal">{vinculo.matricula}</p>
+                      <span className="text-[10px] font-medium text-texto-secundario uppercase tracking-wider mb-0.5 block">Matrícula</span>
+                      <span className="text-base text-texto-principal">{vinculo.matricula}</span>
                     </div>
                     <Badge variant={vinculo.ativo ? 'success' : 'neutral'}>{vinculo.ativo ? 'Ativo' : 'Inativo'}</Badge>
                   </div>
-                  <DescriptionList columns={2} className="!gap-4">
-                    {vinculo.estipulante && <DescriptionItem label="Estipulante" value={vinculo.estipulante} />}
-                    {vinculo.subestipulante && <DescriptionItem label="Subestipulante" value={vinculo.subestipulante} />}
-                    {vinculo.grupo && <DescriptionItem label="Grupo" value={vinculo.grupo} />}
-                    {vinculo.subgrupo && <DescriptionItem label="Subgrupo" value={vinculo.subgrupo} />}
-                    {vinculo.lotacao && <DescriptionItem label="Lotação" value={vinculo.lotacao} />}
-                  </DescriptionList>
+                  <div className="grid grid-cols-2 gap-2">
+                    {vinculo.estipulante && (
+                      <div className="flex flex-col">
+                        <span className="text-[10px] font-medium text-texto-secundario uppercase tracking-wider mb-0.5">Estipulante</span>
+                        <span className="text-base text-texto-principal">{vinculo.estipulante}</span>
+                      </div>
+                    )}
+                    {vinculo.subestipulante && (
+                      <div className="flex flex-col">
+                        <span className="text-[10px] font-medium text-texto-secundario uppercase tracking-wider mb-0.5">Subestipulante</span>
+                        <span className="text-base text-texto-principal">{vinculo.subestipulante}</span>
+                      </div>
+                    )}
+                    {vinculo.grupo && (
+                      <div className="flex flex-col">
+                        <span className="text-[10px] font-medium text-texto-secundario uppercase tracking-wider mb-0.5">Grupo</span>
+                        <span className="text-base text-texto-principal">{vinculo.grupo}</span>
+                      </div>
+                    )}
+                    {vinculo.subgrupo && (
+                      <div className="flex flex-col">
+                        <span className="text-[10px] font-medium text-texto-secundario uppercase tracking-wider mb-0.5">Subgrupo</span>
+                        <span className="text-base text-texto-principal">{vinculo.subgrupo}</span>
+                      </div>
+                    )}
+                    {vinculo.lotacao && (
+                      <div className="flex flex-col">
+                        <span className="text-[10px] font-medium text-texto-secundario uppercase tracking-wider mb-0.5">Lotação</span>
+                        <span className="text-base text-texto-principal">{vinculo.lotacao}</span>
+                      </div>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>
           </DetailsSection>
 
-          <DetailsSection title="Dependentes" isEmpty={cliente.dependentes.length === 0} emptyState="Nenhum dependente cadastrado.">
-            <div className="flex flex-col gap-4">
+          <DetailsSection title="Dependentes" isEmpty={cliente.dependentes.length === 0} emptyState="Nenhum dependente cadastrado." className="!p-4 !gap-2 [&>div:first-child]:mb-0">
+            <div className="flex flex-col gap-2">
               {cliente.dependentes.map((dependente, index) => (
-                <div key={index} className="p-4 rounded-md bg-fundo-aplicacao border border-borda">
-                  <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2">
-                    <div>
-                      <p className="text-base font-medium text-texto-principal">{dependente.nome}</p>
-                      <p className="text-sm text-texto-secundario">{dependente.tipoRelacao}</p>
+                <div key={index} className="p-3 rounded-md bg-fundo-aplicacao border border-borda">
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="col-span-2 flex flex-col">
+                      <span className="text-[10px] font-medium text-texto-secundario uppercase tracking-wider mb-0.5">Nome</span>
+                      <span className="text-base text-texto-principal">{dependente.nome}</span>
                     </div>
-                    <div className="text-left sm:text-right">
-                      <p className="text-sm font-medium text-texto-principal">
-                        {dependente.documentoMascarado || 'Documento não informado'}
-                      </p>
-                      {dependente.dataNascimento && (
-                        <p className="text-xs text-texto-secundario mt-0.5">
-                          Nasc: {formatarDataOuVazio(dependente.dataNascimento)}
-                        </p>
-                      )}
+                    <div className="flex flex-col">
+                      <span className="text-[10px] font-medium text-texto-secundario uppercase tracking-wider mb-0.5">Tipo de Relação</span>
+                      <span className="text-base text-texto-principal">{dependente.tipoRelacao}</span>
                     </div>
+                    <div className="flex flex-col">
+                      <span className="text-[10px] font-medium text-texto-secundario uppercase tracking-wider mb-0.5">Documento</span>
+                      <span className="text-base text-texto-principal">{dependente.documentoMascarado || '—'}</span>
+                    </div>
+                    {dependente.dataNascimento && (
+                      <div className="flex flex-col">
+                        <span className="text-[10px] font-medium text-texto-secundario uppercase tracking-wider mb-0.5">Data de Nascimento</span>
+                        <span className="text-base text-texto-principal">{formatarDataOuVazio(dependente.dataNascimento)}</span>
+                      </div>
+                    )}
                   </div>
                 </div>
               ))}

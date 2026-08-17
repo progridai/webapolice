@@ -112,7 +112,7 @@ export const DetalhesUsuarioPage: React.FC = () => {
           </div>
         }
       />
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-3">
         <DetailsSection title="Dados Gerais">
           <DescriptionList columns={1} density="compact">
             <DescriptionItem 
@@ -135,9 +135,9 @@ export const DetalhesUsuarioPage: React.FC = () => {
           isEmpty={usuario.perfisAtribuidos.length === 0}
           emptyState="Nenhum perfil atribuído a este usuário."
         >
-          <div className="flex flex-col gap-3">
+          <div className="flex flex-col gap-2">
             {usuario.perfisAtribuidos.map((perfil) => (
-              <div key={perfil.publicId} className="flex justify-between items-center px-3 py-2 rounded-md border border-borda bg-fundo-aplicacao">
+              <div key={perfil.publicId} className="flex justify-between items-center p-3 rounded-lg border border-borda bg-fundo-aplicacao">
                 <div className="flex flex-col">
                   <span className="font-medium text-sm text-texto-principal">{perfil.nome}</span>
                   {perfil.codigo.toLowerCase() !== perfil.nome.toLowerCase() && (

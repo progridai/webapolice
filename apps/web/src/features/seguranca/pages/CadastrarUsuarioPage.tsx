@@ -61,7 +61,7 @@ export const CadastrarUsuarioPage: React.FC = () => {
   }
 
   return (
-    <main className="flex flex-col gap-6 w-full max-w-[1440px] mx-auto p-0 focus:outline-none">
+    <main className="flex flex-col gap-6 p-6 max-w-4xl mx-auto focus:outline-none" role="main" tabIndex={-1}>
       <PageHeader
         title="Novo Usuário"
         description="Crie um novo usuário para acesso à plataforma."
@@ -77,7 +77,7 @@ export const CadastrarUsuarioPage: React.FC = () => {
         }
       />
 
-      <div className="w-full max-w-[800px]">
+      <div className="w-full">
         {error && (
           <div className="mb-4">
             <Alert variant="error" title="Erro no Cadastro">{error}</Alert>

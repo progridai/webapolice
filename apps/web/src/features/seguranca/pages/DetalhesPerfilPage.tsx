@@ -132,7 +132,7 @@ export const DetalhesPerfilPage: React.FC = () => {
         </Alert>
       )}
 
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-3">
         <DetailsSection title="Dados do Perfil">
           <DescriptionList columns={1} density="compact">
             {perfil.codigo.toLowerCase() !== perfil.nome.toLowerCase() && (

@@ -75,7 +75,7 @@ export const EditarUsuarioPage: React.FC = () => {
 
   if (error && !initialData) {
     return (
-      <main className="flex flex-col gap-6 w-full max-w-[1440px] mx-auto p-0 focus:outline-none">
+      <main className="flex flex-col gap-6 p-6 max-w-4xl mx-auto focus:outline-none" role="main" tabIndex={-1}>
         <Alert variant="error" title="Erro">{error}</Alert>
         <Button className="mt-4" onClick={() => navigate('/seguranca/usuarios')}>
           Voltar
@@ -85,7 +85,7 @@ export const EditarUsuarioPage: React.FC = () => {
   }
 
   return (
-    <main className="flex flex-col gap-6 w-full max-w-[1440px] mx-auto p-0 focus:outline-none" tabIndex={-1}>
+    <main className="flex flex-col gap-6 p-6 max-w-4xl mx-auto focus:outline-none" role="main" tabIndex={-1}>
       <PageHeader
         title="Editar Usuário"
         description="Atualize as informações e os acessos deste usuário."
@@ -101,7 +101,7 @@ export const EditarUsuarioPage: React.FC = () => {
         }
       />
 
-      <div className="w-full max-w-[800px]">
+      <div className="w-full">
         {error && (
           <div className="mb-4">
             <Alert variant="error" title="Erro ao Salvar">{error}</Alert>

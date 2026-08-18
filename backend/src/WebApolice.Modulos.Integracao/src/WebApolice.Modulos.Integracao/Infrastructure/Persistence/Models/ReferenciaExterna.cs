@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
 namespace WebApolice.Modulos.Integracao.src.WebApolice.Modulos.Integracao.Infrastructure.Persistence.Models;

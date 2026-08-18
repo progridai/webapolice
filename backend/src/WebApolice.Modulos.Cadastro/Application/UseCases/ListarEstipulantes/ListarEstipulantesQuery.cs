@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 
 namespace WebApolice.Modulos.Cadastro.Application.UseCases.ListarEstipulantes;
 

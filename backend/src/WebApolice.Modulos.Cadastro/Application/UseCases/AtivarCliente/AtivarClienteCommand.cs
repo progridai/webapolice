@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 namespace WebApolice.Modulos.Cadastro.Application.UseCases.AtivarCliente;
 

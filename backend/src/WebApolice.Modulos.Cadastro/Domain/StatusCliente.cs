@@ -1,4 +1,4 @@
-﻿namespace WebApolice.Modulos.Cadastro.Domain;
+namespace WebApolice.Modulos.Cadastro.Domain;
 
 public enum StatusCliente
 {

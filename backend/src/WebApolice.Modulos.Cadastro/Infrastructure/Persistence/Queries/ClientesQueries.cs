@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -52,7 +52,7 @@ internal sealed class ClientesQueries : IClientesQueries
             query = query.Where(x => x.c.StatusId == statusId.Value);
         }
 
-        // OrdenaÃƒÂ§ÃƒÂ£o
+        // OrdenaÃ§Ã£o
         var desc = direcao?.Equals("desc", StringComparison.OrdinalIgnoreCase) == true;
         
         query = ordenarPor?.ToLowerInvariant() switch
@@ -81,7 +81,7 @@ internal sealed class ClientesQueries : IClientesQueries
             })
             .ToArrayAsync(cancellationToken);
 
-        // Mascaramento em memÃƒÂ³ria
+        // Mascaramento em memÃ³ria
         var itens = resultadosBrutos.Select(r => new ClienteListagemItemResult(
             r.Id,
             r.Nome,
@@ -95,11 +95,11 @@ internal sealed class ClientesQueries : IClientesQueries
 
     private static string MascararDocumento(string? documento, short tipoPessoa)
     {
-        if (string.IsNullOrWhiteSpace(documento)) return "NÃƒÂ£o informado";
+        if (string.IsNullOrWhiteSpace(documento)) return "NÃ£o informado";
         
         var limpo = new string(documento.Where(char.IsDigit).ToArray());
         
-        // 1 = Pessoa FÃƒÂ­sica (CPF), 2 = Pessoa JurÃƒÂ­dica (CNPJ)
+        // 1 = Pessoa FÃ­sica (CPF), 2 = Pessoa JurÃ­dica (CNPJ)
         if (tipoPessoa == 1 && limpo.Length == 11)
         {
             return $"{limpo.Substring(0, 3)}.{limpo.Substring(3, 3)}.{limpo.Substring(6, 3)}-{limpo.Substring(9, 2)}";
@@ -139,7 +139,7 @@ internal sealed class ClientesQueries : IClientesQueries
             c.TipoContato, c.Valor, c.Principal, c.Ativo
         )).ToList();
 
-        // 3. EndereÃƒÂ§os
+        // 3. EndereÃ§os
         var enderecosRaw = await _dbContext.Enderecos.AsNoTracking()
             .Where(x => x.PessoaId == pessoaId && x.Ativo)
             .OrderByDescending(x => x.Principal)
@@ -150,7 +150,7 @@ internal sealed class ClientesQueries : IClientesQueries
             e.TipoEndereco, e.Cep ?? "", e.Logradouro ?? "", e.Numero ?? "", e.Complemento ?? "", e.Bairro ?? "", "", e.CidadeId, e.Uf ?? "", e.Principal, e.Ativo
         )).ToList();
 
-        // 4. VÃƒÂ­nculos Resolvendo Nomes
+        // 4. VÃ­nculos Resolvendo Nomes
         var vinculosRaw = await (
             from v in _dbContext.Vinculos.AsNoTracking()
             where v.ClienteId == clienteId && v.Ativo

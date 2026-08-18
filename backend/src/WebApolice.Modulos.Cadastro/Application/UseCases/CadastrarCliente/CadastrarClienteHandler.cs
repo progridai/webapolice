@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -42,36 +42,36 @@ public sealed class CadastrarClienteHandler
 
             if (recursoRe == null || !recursoRe.Habilitado || !recursoRe.Ativo || !recursoRe.Modulo.Habilitado || !recursoRe.Modulo.Ativo)
             {
-                throw new ClienteInvalidoException("O campo RE nÃƒÂ£o estÃƒÂ¡ habilitado no sistema.");
+                throw new ClienteInvalidoException("O campo RE nÃ£o estÃ¡ habilitado no sistema.");
             }
         }
 
         if (string.IsNullOrWhiteSpace(command.Nome))
-            throw new ClienteInvalidoException("O nome ÃƒÂ© obrigatÃƒÂ³rio.");
+            throw new ClienteInvalidoException("O nome Ã© obrigatÃ³rio.");
 
         var documentoLimpo = LimparDocumento(command.Documento);
         if (string.IsNullOrWhiteSpace(documentoLimpo))
-            throw new ClienteInvalidoException("Documento ÃƒÂ© obrigatÃƒÂ³rio.");
+            throw new ClienteInvalidoException("Documento Ã© obrigatÃ³rio.");
 
         if (!command.DataNascimento.HasValue)
-            throw new ClienteInvalidoException("A data de nascimento ÃƒÂ© obrigatÃƒÂ³ria.");
+            throw new ClienteInvalidoException("A data de nascimento Ã© obrigatÃ³ria.");
 
         var documentoValido = ValidarDocumento(documentoLimpo, command.TipoPessoa);
         if (!documentoValido)
-            throw new ClienteInvalidoException("Documento invÃƒÂ¡lido.");
+            throw new ClienteInvalidoException("Documento invÃ¡lido.");
 
         if (command.Falecido && !command.DataObito.HasValue)
-            throw new ClienteInvalidoException("Data de ÃƒÂ³bito ÃƒÂ© obrigatÃƒÂ³ria para clientes falecidos.");
+            throw new ClienteInvalidoException("Data de Ã³bito Ã© obrigatÃ³ria para clientes falecidos.");
 
         await using var transaction = await _dbContext.BeginTransactionAsync(cancellationToken);
 
         try
         {
             var statusAtivo = await _repository.ObterStatusPorCodigoAsync(ClienteStatusCodigos.Ativo, cancellationToken)
-                ?? throw new ClienteInvalidoException($"Status '{ClienteStatusCodigos.Ativo}' nÃƒÂ£o encontrado no catÃƒÂ¡logo.");
+                ?? throw new ClienteInvalidoException($"Status '{ClienteStatusCodigos.Ativo}' nÃ£o encontrado no catÃ¡logo.");
 
             var statusInativo = await _repository.ObterStatusPorCodigoAsync(ClienteStatusCodigos.Inativo, cancellationToken)
-                ?? throw new ClienteInvalidoException($"Status '{ClienteStatusCodigos.Inativo}' nÃƒÂ£o encontrado no catÃƒÂ¡logo.");
+                ?? throw new ClienteInvalidoException($"Status '{ClienteStatusCodigos.Inativo}' nÃ£o encontrado no catÃ¡logo.");
 
             var pessoa = await _repository.LocalizarPessoaPorDocumentoAsync(documentoLimpo, cancellationToken);
             DateTime? dataNascimentoDt = command.DataNascimento.HasValue ? command.DataNascimento.Value.ToDateTime(TimeOnly.MinValue) : null;
@@ -82,10 +82,10 @@ public sealed class CadastrarClienteHandler
                 var clienteExistente = await _repository.LocalizarClientePorPessoaIdAsync(pessoa.Id, cancellationToken);
                 if (clienteExistente != null && clienteExistente.StatusId == statusAtivo.Id)
                 {
-                    throw new ClienteJaCadastradoException($"JÃƒÂ¡ existe um cliente ativo para o documento informado.");
+                    throw new ClienteJaCadastradoException($"JÃ¡ existe um cliente ativo para o documento informado.");
                 }
 
-                // Verificar divergÃƒÂªncia
+                // Verificar divergÃªncia
                 
                 bool divergente = false;
                 if (!string.Equals(pessoa.Nome, command.Nome, StringComparison.OrdinalIgnoreCase)) divergente = true;
@@ -93,7 +93,7 @@ public sealed class CadastrarClienteHandler
                 if (pessoa.DataNascimento != dataNascimentoDt) divergente = true;
 
                 if (divergente)
-                    throw new ClienteJaCadastradoException("O documento informado jÃƒÂ¡ pertence a outra pessoa com dados divergentes no sistema.");
+                    throw new ClienteJaCadastradoException("O documento informado jÃ¡ pertence a outra pessoa com dados divergentes no sistema.");
 
                 pessoaId = pessoa.Id;
             }
@@ -135,7 +135,7 @@ public sealed class CadastrarClienteHandler
                 }
             }
 
-            // EndereÃƒÂ§os
+            // EndereÃ§os
             if (command.Enderecos != null)
             {
                 foreach (var end in command.Enderecos)

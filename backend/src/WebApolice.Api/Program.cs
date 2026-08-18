@@ -11,6 +11,7 @@ using WebApolice.Api.Infrastructure.Errors;
 using WebApolice.Shared.Infrastructure.Persistence;
 using WebApolice.Modulos.Cadastro;
 using WebApolice.Modulos.Seguranca;
+using WebApolice.Modulos.Seguro;
 using WebApolice.Modulos.Seguranca.Infrastructure.Authentication;
 using Scalar.AspNetCore;
 var builder = WebApplication.CreateBuilder(args);
@@ -201,9 +202,10 @@ builder.Services.AddScoped<WebApolice.Auditoria.Contracts.IRegistradorAuditoria,
 builder.Services.AddHealthChecks()
     .AddDbContextCheck<InfraestruturaDbContext>("postgresql");
 
-// Módulo Clientes
+// Módulo Clientes e Seguros
 builder.Services.AddModuloSeguranca(builder.Configuration);
 builder.Services.AddCadastroModule(builder.Configuration);
+builder.Services.AddSeguroModule(builder.Configuration);
 
 // =============================================================================
 // OPENAPI & CONTROLLERS

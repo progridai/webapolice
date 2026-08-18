@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
 namespace WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models;
@@ -16,6 +16,10 @@ public partial class Propostum
     public long ClienteVinculoId { get; set; }
 
     public long EstipulanteId { get; set; }
+
+    public long? ApoliceId { get; set; }
+
+    public long? ApoliceVidaId { get; set; }
 
     public long? SubestipulanteId { get; set; }
 
@@ -126,4 +130,8 @@ public partial class Propostum
     public virtual Propostum? PropostaOrigem { get; set; }
 
     public virtual PropostaStatus Status { get; set; } = null!;
+
+    public virtual ApoliceModel? Apolice { get; set; }
+    
+    public virtual ApoliceVidaModel? ApoliceVida { get; set; }
 }

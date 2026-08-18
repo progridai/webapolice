@@ -1,4 +1,4 @@
-﻿using System.Threading;
+using System.Threading;
 using System.Threading.Tasks;
 using WebApolice.Modulos.Cadastro.Application.Ports;
 using WebApolice.Modulos.Cadastro.Domain.Exceptions;
@@ -23,7 +23,7 @@ public sealed class ConsultarClientePorIdHandler
     {
         var result = await _queries.ObterDetalheAsync(query.Id, cancellationToken);
         if (result == null)
-            throw new ClienteNaoEncontradoException("Cliente nÃ£o encontrado.");
+            throw new ClienteNaoEncontradoException("Cliente não encontrado.");
 
         var recursoRe = await _segurancaDbContext.Recursos
             .Include(r => r.Modulo)

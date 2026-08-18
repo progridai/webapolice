@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
@@ -30,7 +30,7 @@ public sealed class ExcluirEstipulanteHandler
         {
             var estipulante = await _repository.ObterParaEdicaoPorPublicIdAsync(command.PublicId, cancellationToken);
             if (estipulante == null || estipulante.DeletedAt != null)
-                throw new EstipulanteInvalidoException("Estipulante nÃ£o encontrado ou jÃ¡ excluÃ­do.");
+                throw new EstipulanteInvalidoException("Estipulante não encontrado ou já excluído.");
 
             estipulante.DeletedAt = DateTimeOffset.UtcNow;
             estipulante.Ativo = false;

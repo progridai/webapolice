@@ -1,4 +1,4 @@
-﻿using System.Threading;
+using System.Threading;
 using System.Threading.Tasks;
 using WebApolice.Modulos.Cadastro.Application.Ports;
 using WebApolice.Modulos.Cadastro.Application.UseCases.ConsultarEstipulante;

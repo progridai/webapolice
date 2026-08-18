@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using System.Text.Json;
 using System.Threading;
@@ -26,17 +26,17 @@ public sealed class CriarEstipulanteHandler
     public async Task<CriarEstipulanteResult> Handle(CriarEstipulanteCommand command, CancellationToken cancellationToken)
     {
         if (string.IsNullOrWhiteSpace(command.RazaoSocial))
-            throw new EstipulanteInvalidoException("A RazÃ£o Social Ã© obrigatÃ³ria.");
+            throw new EstipulanteInvalidoException("A Razão Social é obrigatória.");
 
         var cnpjLimpo = LimparDocumento(command.Cnpj);
         if (string.IsNullOrWhiteSpace(cnpjLimpo))
-            throw new EstipulanteInvalidoException("CNPJ Ã© obrigatÃ³rio.");
+            throw new EstipulanteInvalidoException("CNPJ é obrigatório.");
 
         if (!ValidarCnpj(cnpjLimpo))
-            throw new EstipulanteInvalidoException("CNPJ invÃ¡lido.");
+            throw new EstipulanteInvalidoException("CNPJ inválido.");
 
         if (command.Configuracao.DataFimVigencia.HasValue && command.Configuracao.DataFimVigencia < command.Configuracao.DataInicioVigencia)
-            throw new EstipulanteInvalidoException("A data de fim de vigÃªncia nÃ£o pode ser menor que a data de inÃ­cio.");
+            throw new EstipulanteInvalidoException("A data de fim de vigência não pode ser menor que a data de início.");
 
         await using var transaction = await _repository.BeginTransactionAsync(cancellationToken);
 
@@ -46,7 +46,7 @@ public sealed class CriarEstipulanteHandler
             if (command.GrupoId.HasValue)
             {
                 var grupoExiste = await _repository.GrupoExisteAsync(command.GrupoId.Value, cancellationToken);
-                if (!grupoExiste) throw new EstipulanteInvalidoException("Grupo informado nÃ£o existe.");
+                if (!grupoExiste) throw new EstipulanteInvalidoException("Grupo informado não existe.");
             }
 
             // Valida Seguradora
@@ -54,10 +54,10 @@ public sealed class CriarEstipulanteHandler
             if (command.SeguradoraPublicId.HasValue)
             {
                 seguradoraId = await _repository.ObterSeguradoraIdPorPublicIdAsync(command.SeguradoraPublicId.Value, cancellationToken);
-                if (seguradoraId == null) throw new EstipulanteInvalidoException("Seguradora informada nÃ£o existe.");
+                if (seguradoraId == null) throw new EstipulanteInvalidoException("Seguradora informada não existe.");
             }
 
-            // Valida Pessoa e ConcorrÃªncia
+            // Valida Pessoa e Concorrência
             var pessoa = await _repository.LocalizarPessoaPorDocumentoAsync(cnpjLimpo, cancellationToken);
             long pessoaId;
 
@@ -66,15 +66,15 @@ public sealed class CriarEstipulanteHandler
                 var estipulanteExistente = await _repository.LocalizarEstipulantePorPessoaIdAsync(pessoa.Id, cancellationToken);
                 if (estipulanteExistente != null && estipulanteExistente.Ativo)
                 {
-                    throw new EstipulanteConflitoException("JÃ¡ existe um Estipulante ativo para o CNPJ informado.");
+                    throw new EstipulanteConflitoException("Já existe um Estipulante ativo para o CNPJ informado.");
                 }
 
-                // Verifica divergÃªncia de dados
+                // Verifica divergência de dados
                 if (!string.Equals(pessoa.Nome, command.RazaoSocial, StringComparison.OrdinalIgnoreCase))
-                    throw new EstipulanteConflitoException("O CNPJ informado jÃ¡ pertence a outra pessoa com RazÃ£o Social divergente no sistema.");
+                    throw new EstipulanteConflitoException("O CNPJ informado já pertence a outra pessoa com Razão Social divergente no sistema.");
 
                 if (pessoa.TipoPessoa != 2) // 2 = PJ
-                    throw new EstipulanteConflitoException("O documento informado jÃ¡ estÃ¡ associado a uma Pessoa FÃ­sica.");
+                    throw new EstipulanteConflitoException("O documento informado já está associado a uma Pessoa Física.");
 
                 pessoaId = pessoa.Id;
             }
@@ -159,7 +159,7 @@ public sealed class CriarEstipulanteHandler
             }
 
 
-            // EndereÃ§o
+            // Endereço
             if (command.Endereco != null)
             {
                 var end = command.Endereco;
@@ -168,7 +168,7 @@ public sealed class CriarEstipulanteHandler
                     if (end.CidadeId.HasValue)
                     {
                         var cidadeExiste = await _repository.CidadeExisteAsync(end.CidadeId.Value, cancellationToken);
-                        if (!cidadeExiste) throw new EstipulanteInvalidoException("A Cidade informada nÃ£o existe.");
+                        if (!cidadeExiste) throw new EstipulanteInvalidoException("A Cidade informada não existe.");
                     }
 
                     _repository.AdicionarEndereco(new PessoaEnderecoModel
@@ -187,7 +187,7 @@ public sealed class CriarEstipulanteHandler
                 }
             }
 
-            // ConfiguraÃ§Ã£o
+            // Configuração
             var configuracao = new EstipulanteConfiguracaoModel
             {
                 Estipulante = estipulante,

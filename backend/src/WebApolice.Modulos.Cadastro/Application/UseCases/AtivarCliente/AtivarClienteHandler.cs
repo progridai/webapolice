@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 using WebApolice.Modulos.Cadastro.Application.Ports;
@@ -26,10 +26,10 @@ public sealed class AtivarClienteHandler
     {
         var cliente = await _repository.ObterParaEdicaoPorPublicIdAsync(command.Id, cancellationToken);
         if (cliente == null)
-            throw new ClienteNaoEncontradoException("Cliente nÃ£o encontrado ou excluÃ­do.");
+            throw new ClienteNaoEncontradoException("Cliente não encontrado ou excluído.");
 
         var statusAtivo = await _repository.ObterStatusPorCodigoAsync(WebApolice.Modulos.Cadastro.Domain.ClienteStatusCodigos.Ativo, cancellationToken)
-            ?? throw new ClienteInvalidoException($"Status '{WebApolice.Modulos.Cadastro.Domain.ClienteStatusCodigos.Ativo}' nÃ£o encontrado no catÃ¡logo.");
+            ?? throw new ClienteInvalidoException($"Status '{WebApolice.Modulos.Cadastro.Domain.ClienteStatusCodigos.Ativo}' não encontrado no catálogo.");
 
         cliente.Ativar(statusAtivo.Id);
 

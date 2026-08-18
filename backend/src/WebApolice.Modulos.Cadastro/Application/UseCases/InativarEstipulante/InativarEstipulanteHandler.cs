@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
@@ -30,11 +30,11 @@ public sealed class InativarEstipulanteHandler
         {
             var estipulante = await _repository.ObterParaEdicaoPorPublicIdAsync(command.PublicId, cancellationToken);
             if (estipulante == null)
-                throw new EstipulanteInvalidoException("Estipulante nÃ£o encontrado ou excluÃ­do.");
+                throw new EstipulanteInvalidoException("Estipulante não encontrado ou excluído.");
 
             if (!estipulante.Ativo)
             {
-                // IdempotÃªncia
+                // Idempotência
                 return;
             }
 

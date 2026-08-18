@@ -1,7 +1,7 @@
-﻿namespace WebApolice.Modulos.Cadastro.Infrastructure.Persistence.Models;
+namespace WebApolice.Modulos.Cadastro.Infrastructure.Persistence.Models;
 
 /// <summary>
-/// Modelo de persistÃªncia para leitura da tabela cadastro.cliente_status.
+/// Modelo de persistência para leitura da tabela cadastro.cliente_status.
 /// Mapeamento parcial fiel aos tipos da base oficial.
 /// </summary>
 public sealed class ClienteStatusModel

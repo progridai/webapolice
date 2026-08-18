@@ -1,9 +1,9 @@
-﻿using System;
+using System;
 
 namespace WebApolice.Modulos.Cadastro.Infrastructure.Persistence.Models;
 
 /// <summary>
-/// Modelo de persistÃªncia para leitura parcial da tabela cadastro.cliente_dependente.
+/// Modelo de persistência para leitura parcial da tabela cadastro.cliente_dependente.
 /// </summary>
 public sealed class ClienteDependenteModel
 {

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 using WebApolice.Modulos.Cadastro.Application.Ports;
@@ -26,10 +26,10 @@ public sealed class InativarClienteHandler
     {
         var cliente = await _repository.ObterParaEdicaoPorPublicIdAsync(command.Id, cancellationToken);
         if (cliente == null)
-            throw new ClienteNaoEncontradoException("Cliente nÃ£o encontrado ou excluÃ­do.");
+            throw new ClienteNaoEncontradoException("Cliente não encontrado ou excluído.");
 
         var statusInativo = await _repository.ObterStatusPorCodigoAsync(WebApolice.Modulos.Cadastro.Domain.ClienteStatusCodigos.Inativo, cancellationToken)
-            ?? throw new ClienteInvalidoException($"Status '{WebApolice.Modulos.Cadastro.Domain.ClienteStatusCodigos.Inativo}' nÃ£o encontrado no catÃ¡logo.");
+            ?? throw new ClienteInvalidoException($"Status '{WebApolice.Modulos.Cadastro.Domain.ClienteStatusCodigos.Inativo}' não encontrado no catálogo.");
 
         cliente.Inativar(statusInativo.Id);
 

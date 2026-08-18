@@ -1,12 +1,12 @@
-﻿using System;
+using System;
 using WebApolice.Modulos.Cadastro.Domain.Exceptions;
 
 namespace WebApolice.Modulos.Cadastro.Domain;
 
 /// <summary>
-/// Raiz de agregaÃ§Ã£o do mÃ³dulo de Clientes.
+/// Raiz de agregação do módulo de Clientes.
 /// Mapeada para a tabela oficial 'cadastro.cliente'.
-/// Dados pessoais residem em core.pessoa e nÃ£o pertencem a este agregado diretamente.
+/// Dados pessoais residem em core.pessoa e não pertencem a este agregado diretamente.
 /// </summary>
 public sealed class Cliente
 {

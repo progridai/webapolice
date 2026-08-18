@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Diagnostics;
+using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using WebApolice.Modulos.Cadastro.Domain.Exceptions;
 using WebApolice.Modulos.Seguranca.Domain.Exceptions;
@@ -20,7 +20,7 @@ public class GlobalExceptionHandler : IExceptionHandler
     {
         if (exception is OperationCanceledException)
         {
-            _logger.LogInformation("OperaÃ§Ã£o cancelada pelo cliente. TraceId: {TraceId}", httpContext.TraceIdentifier);
+            _logger.LogInformation("Operação cancelada pelo cliente. TraceId: {TraceId}", httpContext.TraceIdentifier);
             httpContext.Response.StatusCode = 499; // Client Closed Request
             return true;
         }
@@ -45,7 +45,7 @@ public class GlobalExceptionHandler : IExceptionHandler
             DemoRecursoNaoEncontradoException => new ProblemDetails
             {
                 Type = "https://webapolice/errors/recurso-nao-encontrado",
-                Title = "Recurso nÃ£o encontrado",
+                Title = "Recurso não encontrado",
                 Status = StatusCodes.Status404NotFound,
                 Detail = exception.Message,
                 Instance = context.Request.Path
@@ -61,7 +61,7 @@ public class GlobalExceptionHandler : IExceptionHandler
             DemoRegraDeNegocioException => new ProblemDetails
             {
                 Type = "https://webapolice/errors/regra-de-negocio",
-                Title = "Regra de negÃ³cio violada",
+                Title = "Regra de negócio violada",
                 Status = StatusCodes.Status422UnprocessableEntity,
                 Detail = exception.Message,
                 Instance = context.Request.Path
@@ -69,7 +69,7 @@ public class GlobalExceptionHandler : IExceptionHandler
             ClienteNaoEncontradoException => new ProblemDetails
             {
                 Type = "https://webapolice/errors/recurso-nao-encontrado",
-                Title = "Recurso nÃ£o encontrado",
+                Title = "Recurso não encontrado",
                 Status = StatusCodes.Status404NotFound,
                 Detail = exception.Message,
                 Instance = context.Request.Path
@@ -85,7 +85,7 @@ public class GlobalExceptionHandler : IExceptionHandler
             ClienteInvalidoException => new ProblemDetails
             {
                 Type = "https://webapolice/errors/regra-de-negocio",
-                Title = "Regra de negÃ³cio violada",
+                Title = "Regra de negócio violada",
                 Status = StatusCodes.Status422UnprocessableEntity,
                 Detail = exception.Message,
                 Instance = context.Request.Path
@@ -93,7 +93,7 @@ public class GlobalExceptionHandler : IExceptionHandler
             UsuarioInvalidoException => new ProblemDetails
             {
                 Type = "https://webapolice/errors/regra-de-negocio",
-                Title = "Regra de negÃ³cio violada",
+                Title = "Regra de negócio violada",
                 Status = StatusCodes.Status422UnprocessableEntity,
                 Detail = exception.Message,
                 Instance = context.Request.Path

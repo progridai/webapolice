@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -43,18 +43,18 @@ public sealed class AlterarClienteHandler
 
             if (recursoRe == null || !recursoRe.Habilitado || !recursoRe.Ativo || !recursoRe.Modulo.Habilitado || !recursoRe.Modulo.Ativo)
             {
-                throw new ClienteInvalidoException("O campo RE nÃ£o estÃ¡ habilitado no sistema.");
+                throw new ClienteInvalidoException("O campo RE não está habilitado no sistema.");
             }
         }
 
         if (string.IsNullOrWhiteSpace(command.Nome))
-            throw new ClienteInvalidoException("O nome Ã© obrigatÃ³rio.");
+            throw new ClienteInvalidoException("O nome é obrigatório.");
 
         if (!(command.DataNascimento.HasValue ? command.DataNascimento.Value.ToDateTime(TimeOnly.MinValue) : (DateTime?)null).HasValue)
-            throw new ClienteInvalidoException("A data de nascimento Ã© obrigatÃ³ria.");
+            throw new ClienteInvalidoException("A data de nascimento é obrigatória.");
 
         if (command.Falecido && !command.DataObito.HasValue)
-            throw new ClienteInvalidoException("Data de Ã³bito Ã© obrigatÃ³ria para clientes falecidos.");
+            throw new ClienteInvalidoException("Data de óbito é obrigatória para clientes falecidos.");
 
         await using var transaction = await _dbContext.BeginTransactionAsync(cancellationToken);
 
@@ -62,16 +62,16 @@ public sealed class AlterarClienteHandler
         {
             var cliente = await _repository.ObterParaEdicaoPorPublicIdAsync(command.Id, cancellationToken);
             if (cliente == null)
-                throw new ClienteNaoEncontradoException("Cliente nÃ£o encontrado ou excluÃ­do.");
+                throw new ClienteNaoEncontradoException("Cliente não encontrado ou excluído.");
 
             var pessoa = await _repository.LocalizarPessoaPorIdAsync(cliente.PessoaId, cancellationToken);
             if (pessoa == null)
-                throw new ClienteNaoEncontradoException("Pessoa associada nÃ£o encontrada.");
+                throw new ClienteNaoEncontradoException("Pessoa associada não encontrada.");
 
-            // Verifica se a pessoa estÃ¡ compartilhada com outros papÃ©is
+            // Verifica se a pessoa está compartilhada com outros papéis
             var compartilhada = await _repository.VerificarPessoaCompartilhadaAsync(pessoa.Id, cliente.Id, cancellationToken);
             if (compartilhada)
-                throw new ClienteInvalidoException("Os dados dessa pessoa sÃ£o compartilhados com outros papÃ©is no sistema e nÃ£o podem ser alterados diretamente por aqui.");
+                throw new ClienteInvalidoException("Os dados dessa pessoa são compartilhados com outros papéis no sistema e não podem ser alterados diretamente por aqui.");
 
             // Atualiza Dados Pessoais e Cliente
             pessoa.AtualizarDadosPessoais(command.Nome, (command.DataNascimento.HasValue ? command.DataNascimento.Value.ToDateTime(TimeOnly.MinValue) : (DateTime?)null), command.Sexo, command.Observacao);
@@ -80,7 +80,7 @@ public sealed class AlterarClienteHandler
                 var documentoLimpo = LimparDocumento(command.Documento);
                 var documentoValido = ValidarDocumento(documentoLimpo, pessoa.TipoPessoa);
                 if (!documentoValido)
-                    throw new ClienteInvalidoException("Documento invÃ¡lido.");
+                    throw new ClienteInvalidoException("Documento inválido.");
                 pessoa.AtualizarDocumento(command.Documento, documentoLimpo);
             }
 
@@ -133,7 +133,7 @@ public sealed class AlterarClienteHandler
                 }
             }
 
-            // EndereÃ§os
+            // Endereços
             var enderecosAtuais = await _dbContext.Enderecos
                 .Where(x => x.PessoaId == pessoa.Id && x.Ativo)
                 .ToListAsync(cancellationToken);

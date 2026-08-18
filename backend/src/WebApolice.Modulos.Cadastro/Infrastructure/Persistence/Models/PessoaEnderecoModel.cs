@@ -1,9 +1,9 @@
-﻿using System;
+using System;
 
 namespace WebApolice.Modulos.Cadastro.Infrastructure.Persistence.Models;
 
 /// <summary>
-/// Modelo de persistÃªncia para leitura da tabela core.pessoa_endereco.
+/// Modelo de persistência para leitura da tabela core.pessoa_endereco.
 /// Mapeamento parcial fiel aos tipos da base oficial.
 /// </summary>
 public sealed class PessoaEnderecoModel

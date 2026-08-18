@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using WebApolice.Modulos.Cadastro.Domain;
 using WebApolice.Modulos.Cadastro.Infrastructure.Persistence.Configurations;
 using WebApolice.Modulos.Cadastro.Infrastructure.Persistence.Models;
@@ -25,6 +25,7 @@ public class CadastroDbContext : DbContext
     public DbSet<EstipulanteModel> Estipulantes => Set<EstipulanteModel>();
     public DbSet<EstipulanteConfiguracaoModel> EstipulanteConfiguracoes => Set<EstipulanteConfiguracaoModel>();
     public DbSet<SubestipulanteModel> Subestipulantes => Set<SubestipulanteModel>();
+    public DbSet<ModuloModel> Modulos => Set<ModuloModel>();
     public DbSet<CorretoraModel> Corretoras => Set<CorretoraModel>();
     public DbSet<SeguradoraModel> Seguradoras => Set<SeguradoraModel>();
     public DbSet<AgenciadorModel> Agenciadores => Set<AgenciadorModel>();

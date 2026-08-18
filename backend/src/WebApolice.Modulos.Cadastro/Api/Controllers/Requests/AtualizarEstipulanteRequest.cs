@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 namespace WebApolice.Modulos.Cadastro.Api.Controllers.Requests;
 

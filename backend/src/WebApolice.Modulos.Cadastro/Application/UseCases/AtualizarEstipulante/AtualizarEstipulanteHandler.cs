@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
@@ -25,10 +25,10 @@ public sealed class AtualizarEstipulanteHandler
     public async Task Handle(AtualizarEstipulanteCommand command, CancellationToken cancellationToken)
     {
         if (command.Configuracao.DataFimVigencia.HasValue && command.Configuracao.DataFimVigencia.Value < command.Configuracao.DataInicioVigencia)
-            throw new EstipulanteInvalidoException("A data de fim de vigÃªncia nÃ£o pode ser menor que a data de inÃ­cio.");
+            throw new EstipulanteInvalidoException("A data de fim de vigência não pode ser menor que a data de início.");
 
         if (command.Configuracao.Carencia.HasValue && command.Configuracao.Carencia.Value < 0)
-            throw new EstipulanteInvalidoException("A carÃªncia nÃ£o pode ser negativa.");
+            throw new EstipulanteInvalidoException("A carência não pode ser negativa.");
 
         await using var transaction = await _repository.BeginTransactionAsync(cancellationToken);
 
@@ -36,27 +36,27 @@ public sealed class AtualizarEstipulanteHandler
         {
             var estipulante = await _repository.ObterParaEdicaoPorPublicIdAsync(command.PublicId, cancellationToken);
             if (estipulante == null)
-                throw new EstipulanteInvalidoException("Estipulante nÃ£o encontrado ou inativo.");
+                throw new EstipulanteInvalidoException("Estipulante não encontrado ou inativo.");
 
             if (estipulante.PessoaId == null)
-                throw new EstipulanteInvalidoException("Estipulante nÃ£o possui pessoa associada.");
+                throw new EstipulanteInvalidoException("Estipulante não possui pessoa associada.");
 
             var pessoa = await _repository.LocalizarPessoaPorIdAsync(estipulante.PessoaId.Value, cancellationToken);
             if (pessoa == null)
-                throw new EstipulanteInvalidoException("Pessoa do estipulante nÃ£o encontrada.");
+                throw new EstipulanteInvalidoException("Pessoa do estipulante não encontrada.");
 
             var pessoaCompartilhada = await _repository.VerificarPessoaCompartilhadaAsync(pessoa.Id, estipulante.Id, cancellationToken);
 
             if (pessoaCompartilhada && pessoa.Nome != command.RazaoSocial)
             {
-                throw new EstipulanteConflitoException("Os dados centrais dessa pessoa (RazÃ£o Social) sÃ£o compartilhados com outros papÃ©is no sistema e nÃ£o podem ser alterados por este fluxo.");
+                throw new EstipulanteConflitoException("Os dados centrais dessa pessoa (Razão Social) são compartilhados com outros papéis no sistema e não podem ser alterados por este fluxo.");
             }
 
             if (command.GrupoId.HasValue)
             {
                 var grupoExiste = await _repository.GrupoExisteAsync(command.GrupoId.Value, cancellationToken);
                 if (!grupoExiste)
-                    throw new EstipulanteInvalidoException("O Grupo informado nÃ£o existe.");
+                    throw new EstipulanteInvalidoException("O Grupo informado não existe.");
                 estipulante.GrupoId = command.GrupoId.Value;
             }
             else
@@ -68,7 +68,7 @@ public sealed class AtualizarEstipulanteHandler
             {
                 var seguradoraId = await _repository.ObterSeguradoraIdPorPublicIdAsync(command.SeguradoraPublicId.Value, cancellationToken);
                 if (!seguradoraId.HasValue)
-                    throw new EstipulanteInvalidoException("A Seguradora informada nÃ£o existe.");
+                    throw new EstipulanteInvalidoException("A Seguradora informada não existe.");
                 estipulante.SeguradoraId = seguradoraId.Value;
             }
             else
@@ -76,7 +76,7 @@ public sealed class AtualizarEstipulanteHandler
                 estipulante.SeguradoraId = null;
             }
 
-            // Atualiza Dados Pessoais apenas se for alterado e permitido (validaÃ§Ã£o de compartilhada acima jÃ¡ cuida disso)
+            // Atualiza Dados Pessoais apenas se for alterado e permitido (validação de compartilhada acima já cuida disso)
             if (!pessoaCompartilhada)
             {
                 pessoa.Nome = command.RazaoSocial;
@@ -87,11 +87,11 @@ public sealed class AtualizarEstipulanteHandler
             estipulante.Codigo = command.Codigo;
             estipulante.Observacao = command.Observacao;
 
-            // AtualizaÃ§Ã£o de EndereÃ§o (Inativa o atual se houver mudanÃ§a e cria um novo)
+            // Atualização de Endereço (Inativa o atual se houver mudança e cria um novo)
             if (command.Endereco != null)
             {
                 if (command.Endereco.CidadeId > 0 && !await _repository.CidadeExisteAsync(command.Endereco.CidadeId.Value, cancellationToken))
-                    throw new EstipulanteInvalidoException("A Cidade informada nÃ£o existe.");
+                    throw new EstipulanteInvalidoException("A Cidade informada não existe.");
 
                 var enderecoAtual = await _repository.ObterEnderecoPrincipalAsync(pessoa.Id, cancellationToken);
                 bool precisaNovoEndereco = true;
@@ -135,7 +135,7 @@ public sealed class AtualizarEstipulanteHandler
                 }
             }
 
-            // AtualizaÃ§Ã£o de Contatos
+            // Atualização de Contatos
             var contatosAtuais = await _repository.ObterContatosAtivosAsync(pessoa.Id, cancellationToken);
             var contatosManter = new System.Collections.Generic.HashSet<long>();
 
@@ -182,7 +182,7 @@ public sealed class AtualizarEstipulanteHandler
                 }
             }
 
-            // AtualizaÃ§Ã£o de Contatos Institucionais
+            // Atualização de Contatos Institucionais
             var contatosInstAtuais = await _repository.ObterContatosInstitucionaisAtivosAsync(pessoa.Id, cancellationToken);
             var contatosInstManter = new System.Collections.Generic.HashSet<long>();
 

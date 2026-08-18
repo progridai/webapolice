@@ -1,4 +1,4 @@
-﻿namespace WebApolice.Modulos.Seguranca;
+namespace WebApolice.Modulos.Seguranca;
 
 public class Class1
 {

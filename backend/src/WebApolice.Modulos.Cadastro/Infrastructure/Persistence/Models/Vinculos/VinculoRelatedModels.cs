@@ -27,14 +27,6 @@ public sealed class SeguradoraModel
     public DateTimeOffset? DeletedAt { get; private set; }
 }
 
-public sealed class AgenciadorModel
-{
-    public long Id { get; private set; }
-    public Guid PublicId { get; private set; }
-    public long? PessoaId { get; private set; }
-    public DateTimeOffset? DeletedAt { get; private set; }
-}
-
 public sealed class GrupoModel
 {
     public long Id { get; private set; }

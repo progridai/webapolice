@@ -39,6 +39,25 @@ public class PessoaContatoConfiguration : IEntityTypeConfiguration<PessoaContato
     }
 }
 
+public class PessoaDocumentoConfiguration : IEntityTypeConfiguration<PessoaDocumentoModel>
+{
+    public void Configure(EntityTypeBuilder<PessoaDocumentoModel> builder)
+    {
+        builder.ToTable("pessoa_documento", "core", t => t.ExcludeFromMigrations());
+        builder.HasKey(x => x.Id);
+        
+        builder.Property(x => x.Id).HasColumnName("id");
+        builder.Property(x => x.PessoaId).HasColumnName("pessoa_id");
+        builder.Property(x => x.TipoDocumento).HasColumnName("tipo_documento");
+        builder.Property(x => x.Numero).HasColumnName("numero");
+        builder.Property(x => x.NumeroLimpo).HasColumnName("numero_limpo");
+        builder.Property(x => x.OrgaoEmissor).HasColumnName("orgao_emissor");
+        builder.Property(x => x.DataEmissao).HasColumnName("data_emissao");
+        builder.Property(x => x.Principal).HasColumnName("principal");
+        builder.Property(x => x.CreatedAt).HasColumnName("created_at");
+    }
+}
+
 public class PessoaContatoInstitucionalConfiguration : IEntityTypeConfiguration<PessoaContatoInstitucionalModel>
 {
     public void Configure(EntityTypeBuilder<PessoaContatoInstitucionalModel> builder)
@@ -129,11 +148,3 @@ public class CorretoraConfiguration : IEntityTypeConfiguration<CorretoraModel>
     }
 }
 
-public class AgenciadorConfiguration : IEntityTypeConfiguration<AgenciadorModel>
-{
-    public void Configure(EntityTypeBuilder<AgenciadorModel> builder)
-    {
-        builder.ToTable("agenciador", "cadastro", t => t.ExcludeFromMigrations());
-        builder.HasKey(x => x.Id);
-    }
-}

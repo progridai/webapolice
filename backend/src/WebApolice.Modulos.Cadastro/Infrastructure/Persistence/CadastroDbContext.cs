@@ -17,6 +17,7 @@ public class CadastroDbContext : DbContext
     public DbSet<PessoaModel> Pessoas => Set<PessoaModel>();
     public DbSet<PessoaContatoModel> Contatos => Set<PessoaContatoModel>();
     public DbSet<PessoaEnderecoModel> Enderecos => Set<PessoaEnderecoModel>();
+    public DbSet<PessoaDocumentoModel> Documentos => Set<PessoaDocumentoModel>();
     public DbSet<PessoaContatoInstitucionalModel> ContatosInstitucionais => Set<PessoaContatoInstitucionalModel>();
     public DbSet<ClienteStatusModel> Status => Set<ClienteStatusModel>();
     public DbSet<ClienteVinculoModel> Vinculos => Set<ClienteVinculoModel>();
@@ -28,7 +29,7 @@ public class CadastroDbContext : DbContext
     public DbSet<ModuloModel> Modulos => Set<ModuloModel>();
     public DbSet<CorretoraModel> Corretoras => Set<CorretoraModel>();
     public DbSet<SeguradoraModel> Seguradoras => Set<SeguradoraModel>();
-    public DbSet<AgenciadorModel> Agenciadores => Set<AgenciadorModel>();
+    public DbSet<Agenciador> Agenciadores => Set<Agenciador>();
     public DbSet<GrupoModel> Grupos => Set<GrupoModel>();
     public DbSet<SubgrupoModel> Subgrupos => Set<SubgrupoModel>();
     public DbSet<LotacaoModel> Lotacoes => Set<LotacaoModel>();

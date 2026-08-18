@@ -31,6 +31,12 @@ export const ROUTES = {
   /** Módulo de Clientes — Editar */
   CLIENTE_EDITAR: '/clientes/:id/editar',
 
+  /** Módulo de Cooperados / Coordenadores */
+  COOPERADOS: '/cooperados',
+  COOPERADOS_NOVO: '/cooperados/novo',
+  COOPERADOS_DETALHES: '/cooperados/:id',
+  COOPERADOS_EDITAR: '/cooperados/:id/editar',
+
   /** Módulo de Estipulantes */
   ESTIPULANTES: '/estipulantes',
   ESTIPULANTE_NOVO: '/estipulantes/novo',

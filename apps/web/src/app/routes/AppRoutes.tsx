@@ -43,6 +43,7 @@ import { PageLoading } from '../../components/application/PageLoading';
 
 // Módulos
 import { ClientesRoutes } from '../../features/clientes/routes/clientes.routes';
+import { CooperadosRoutes } from '../../features/cooperados/routes/cooperados.routes';
 import { EstipulantesRoutes } from '../../features/estipulantes/routes/estipulantes.routes';
 import { SegurancaRoutes } from '../../features/seguranca/routes/seguranca.routes';
 
@@ -77,6 +78,7 @@ export const AppRoutes: React.FC = () => {
 
       {/* ── Módulos de Funcionalidade ── */}
       {ClientesRoutes}
+      {CooperadosRoutes}
       {EstipulantesRoutes}
       {SegurancaRoutes}
 

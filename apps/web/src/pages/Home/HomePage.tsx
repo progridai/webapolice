@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../auth/useAuth';
+import { useAuthorization } from '../../auth/AuthorizationProvider';
 import { APP_ROLES } from '../../auth/roles';
 import { ENV } from '../../app/config/env';
 import { ROUTES } from '../../app/routes/routePaths';
@@ -24,6 +25,8 @@ export const HomePage: React.FC = () => {
     APP_ROLES.GESTOR,
     APP_ROLES.OPERADOR,
   ]);
+  const { possuiPermissao } = useAuthorization();
+  const canAccessCooperados = possuiPermissao('cooperados.visualizar');
 
   useEffect(() => {
     document.title = 'Início | WebApólice';
@@ -55,6 +58,25 @@ export const HomePage: React.FC = () => {
               <CardFooter>
                 <Button variant="primary" onClick={() => navigate(ROUTES.CLIENTES)}>
                   Acessar clientes
+                </Button>
+              </CardFooter>
+            </Card>
+          )}
+
+          {canAccessCooperados && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Cooperados</CardTitle>
+                <CardDescription>
+                  Consulte e gerencie os cooperados e coordenadores do sistema.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <p>Acesse a listagem de cooperados, gerencie cadastros e visualize informações de coordenadores.</p>
+              </CardContent>
+              <CardFooter>
+                <Button variant="primary" onClick={() => navigate(ROUTES.COOPERADOS)}>
+                  Acessar cooperados
                 </Button>
               </CardFooter>
             </Card>

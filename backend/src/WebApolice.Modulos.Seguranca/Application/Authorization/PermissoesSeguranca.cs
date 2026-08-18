@@ -22,4 +22,13 @@ public static class PermissoesSeguranca
         public const string Inativar = "estipulantes.inativar";
         public const string Reativar = "estipulantes.reativar";
     }
+
+    public static class Cooperados
+    {
+        public const string Visualizar = "cooperados.visualizar";
+        public const string Inserir = "cooperados.inserir";
+        public const string Alterar = "cooperados.alterar";
+        public const string Inativar = "cooperados.inativar";
+        public const string Reativar = "cooperados.reativar";
+    }
 }

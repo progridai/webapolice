@@ -38,6 +38,8 @@ public static class CadastroModuleExtensions
         // Ports / Repositories
         services.AddScoped<IClienteRepository, ClienteRepository>();
         services.AddScoped<IClientesQueries, ClientesQueries>();
+        services.AddScoped<ICooperadoRepository, CooperadoRepository>();
+        services.AddScoped<ICooperadosQueries, CooperadosQueries>();
         services.AddScoped<ICadastroTransactionManager, CadastroTransactionManager>();
         
         services.AddScoped<IEstipulantesQueries, EstipulantesQueries>();
@@ -50,6 +52,14 @@ public static class CadastroModuleExtensions
         services.AddScoped<ListarClientesHandler>();
         services.AddScoped<AtivarClienteHandler>();
         services.AddScoped<InativarClienteHandler>();
+        
+        // Cooperados Handlers
+        services.AddScoped<WebApolice.Modulos.Cadastro.Application.UseCases.CadastrarCooperado.CadastrarCooperadoHandler>();
+        services.AddScoped<WebApolice.Modulos.Cadastro.Application.UseCases.AlterarCooperado.AlterarCooperadoHandler>();
+        services.AddScoped<WebApolice.Modulos.Cadastro.Application.UseCases.ConsultarCooperado.ConsultarCooperadoHandler>();
+        services.AddScoped<WebApolice.Modulos.Cadastro.Application.UseCases.ListarCooperados.ListarCooperadosHandler>();
+        services.AddScoped<WebApolice.Modulos.Cadastro.Application.UseCases.AtivarCooperado.AtivarCooperadoHandler>();
+        services.AddScoped<WebApolice.Modulos.Cadastro.Application.UseCases.InativarCooperado.InativarCooperadoHandler>();
         
         // Estipulantes Handlers
         services.AddScoped<CriarEstipulanteHandler>();

@@ -45,6 +45,13 @@ const NAV_ITEMS: NavItem[] = [
     permissaoCodigo: 'estipulantes.visualizar',
   },
   {
+    label: 'Cooperados',
+    path: ROUTES.COOPERADOS,
+    icon: UsersIcon,
+    moduloCodigo: 'COOPERADOS',
+    permissaoCodigo: 'cooperados.visualizar',
+  },
+  {
     label: 'Usuários',
     path: ROUTES.SEGURANCA_USUARIOS,
     icon: UserIcon,

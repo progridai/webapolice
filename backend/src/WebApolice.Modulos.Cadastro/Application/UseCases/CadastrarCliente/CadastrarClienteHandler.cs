@@ -74,7 +74,9 @@ public sealed class CadastrarClienteHandler
                 ?? throw new ClienteInvalidoException($"Status '{ClienteStatusCodigos.Inativo}' nÃ£o encontrado no catÃ¡logo.");
 
             var pessoa = await _repository.LocalizarPessoaPorDocumentoAsync(documentoLimpo, cancellationToken);
-            DateTime? dataNascimentoDt = command.DataNascimento.HasValue ? command.DataNascimento.Value.ToDateTime(TimeOnly.MinValue) : null;
+            DateTime? dataNascimentoDt = command.DataNascimento.HasValue 
+                ? DateTime.SpecifyKind(command.DataNascimento.Value.ToDateTime(TimeOnly.MinValue), DateTimeKind.Utc) 
+                : null;
             long pessoaId;
 
             if (pessoa != null)

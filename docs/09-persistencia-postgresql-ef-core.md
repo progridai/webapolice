@@ -53,6 +53,13 @@ Para gerar o script SQL:
 dotnet ef migrations script --idempotent --project src/WebApolice.Shared.Infrastructure --startup-project src/WebApolice.Api --context InfraestruturaDbContext
 ```
 
+### Regra de Imutabilidade das Migrations
+
+> [!CAUTION]
+> **Migration consolidada/aplicada é IMUTÁVEL**. Correções posteriores DEVEM ser feitas através de nova migration corretiva.
+>
+> **Exceção controlada:** Uma migration histórica só poderá ser alterada retroativamente caso possua um bug estrutural que **impeça completamente a reconstrução determinística do banco vazio** (ex: o EF Core falha ao gerar o SQL e interrompe a execução, impossibilitando que uma migration corretiva posterior seja sequer alcançada). Nessas raras exceções, a alteração retroativa é permitida para restaurar a cadeia de execução, mantendo estritamente o identificador funcional, namespace e intenção originais.
+
 ## Health Checks e Resiliência
 
 - A comunicação com o PostgreSQL está configurada para suportar falhas transientes por meio da configuração de **Retry** nativa do Entity Framework. A configuração exata é:

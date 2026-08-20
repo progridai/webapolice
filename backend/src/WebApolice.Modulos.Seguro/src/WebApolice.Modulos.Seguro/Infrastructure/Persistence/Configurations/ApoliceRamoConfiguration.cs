@@ -14,8 +14,8 @@ public class ApoliceRamoConfiguration : IEntityTypeConfiguration<ApoliceRamoMode
         
         builder.Property(x => x.Id).HasColumnName("id");
         builder.Property(x => x.ApoliceId).HasColumnName("apolice_id").IsRequired();
+        builder.Property(x => x.RamoId).HasColumnName("ramo_id").IsRequired();
         
-        builder.Property(x => x.TipoRamo).HasColumnName("tipo_ramo").HasMaxLength(40).IsRequired();
         builder.Property(x => x.NumeroApolice).HasColumnName("numero_apolice").HasMaxLength(80);
         builder.Property(x => x.IofPercentual).HasColumnName("iof_percentual").HasPrecision(18, 4);
         
@@ -27,9 +27,9 @@ public class ApoliceRamoConfiguration : IEntityTypeConfiguration<ApoliceRamoMode
 
         // Relacionamentos e índices
         builder.HasIndex(x => x.ApoliceId).HasDatabaseName("ix_apolice_ramo_apolice");
-        builder.HasIndex(x => x.TipoRamo).HasDatabaseName("ix_apolice_ramo_tipo_ramo");
+        builder.HasIndex(x => x.RamoId).HasDatabaseName("ix_apolice_ramo_ramo");
         
-        builder.HasIndex(x => new { x.ApoliceId, x.TipoRamo })
+        builder.HasIndex(x => new { x.ApoliceId, x.RamoId })
             .HasDatabaseName("ux_apolice_ramo_ativo")
             .IsUnique()
             .HasFilter("ativo = true");
@@ -38,5 +38,11 @@ public class ApoliceRamoConfiguration : IEntityTypeConfiguration<ApoliceRamoMode
             .WithMany(x => x.Ramos)
             .HasForeignKey(x => x.ApoliceId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        builder.HasOne(x => x.Ramo)
+            .WithMany()
+            .HasForeignKey(x => x.RamoId)
+            .OnDelete(DeleteBehavior.Restrict);
     }
 }
+

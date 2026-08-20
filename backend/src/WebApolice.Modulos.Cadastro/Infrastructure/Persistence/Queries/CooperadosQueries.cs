@@ -42,7 +42,7 @@ public sealed class CooperadosQueries : ICooperadosQueries
 
         var itens = await query
             .OrderByDescending(x => x.a.CreatedAt)
-            .Skip((pagina - 1) * tamanhoPagina)
+            .Skip((System.Math.Max(1, pagina) - 1) * tamanhoPagina)
             .Take(tamanhoPagina)
             .Select(x => new CooperadoListDto(
                 x.a.PublicId,

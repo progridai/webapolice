@@ -23,60 +23,41 @@ namespace WebApolice.Modulos.Seguranca.Infrastructure.Migrations
 
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            // Modulo
-            migrationBuilder.InsertData(
-                schema: "seguranca",
-                table: "modulo",
-                columns: new[] { "id", "nome", "codigo", "ativo", "habilitado", "ordem" },
-                values: new object[] { ModuloId, "Cooperados", "COOPERADOS", true, true, 15 }
-            );
+            migrationBuilder.Sql($@"
+DO $$
+DECLARE
+    v_modulo_id bigint;
+    v_recurso_id bigint;
+BEGIN
+    INSERT INTO seguranca.modulo (public_id, nome, codigo, ativo, habilitado, ordem)
+    VALUES ('{ModuloId}', 'Cooperados', 'COOPERADOS', true, true, 15)
+    ON CONFLICT (codigo) DO UPDATE SET nome = EXCLUDED.nome
+    RETURNING id INTO v_modulo_id;
 
-            // Recurso
-            migrationBuilder.InsertData(
-                schema: "seguranca",
-                table: "recurso",
-                columns: new[] { "id", "modulo_id", "nome", "codigo", "ativo" },
-                values: new object[] { RecursoId, ModuloId, "Cooperados", "COOPERADOS", true }
-            );
+    INSERT INTO seguranca.recurso (public_id, modulo_id, nome, codigo, ativo)
+    VALUES ('{RecursoId}', v_modulo_id, 'Cooperados', 'COOPERADOS', true)
+    ON CONFLICT (modulo_id, codigo) DO UPDATE SET nome = EXCLUDED.nome
+    RETURNING id INTO v_recurso_id;
 
-            // Permissoes
-            migrationBuilder.InsertData(
-                schema: "seguranca",
-                table: "permissao",
-                columns: new[] { "id", "recurso_id", "nome", "codigo", "ativo" },
-                values: new object[,]
-                {
-                    { PermVisId, RecursoId, "Visualizar", "cooperados.visualizar", true },
-                    { PermInsId, RecursoId, "Inserir", "cooperados.inserir", true },
-                    { PermAltId, RecursoId, "Alterar", "cooperados.alterar", true },
-                    { PermInaId, RecursoId, "Inativar", "cooperados.inativar", true },
-                    { PermReaId, RecursoId, "Reativar", "cooperados.reativar", true }
-                }
-            );
+    INSERT INTO seguranca.permissao (public_id, recurso_id, nome, codigo, ativo)
+    VALUES 
+        ('{PermVisId}', v_recurso_id, 'Visualizar', 'cooperados.visualizar', true),
+        ('{PermInsId}', v_recurso_id, 'Inserir', 'cooperados.inserir', true),
+        ('{PermAltId}', v_recurso_id, 'Alterar', 'cooperados.alterar', true),
+        ('{PermInaId}', v_recurso_id, 'Inativar', 'cooperados.inativar', true),
+        ('{PermReaId}', v_recurso_id, 'Reativar', 'cooperados.reativar', true)
+    ON CONFLICT (codigo) DO UPDATE SET nome = EXCLUDED.nome;
+END $$;
+            ");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DeleteData(
-                schema: "seguranca",
-                table: "permissao",
-                keyColumn: "id",
-                keyValues: new object[] { PermVisId, PermInsId, PermAltId, PermInaId, PermReaId }
-            );
-
-            migrationBuilder.DeleteData(
-                schema: "seguranca",
-                table: "recurso",
-                keyColumn: "id",
-                keyValue: RecursoId
-            );
-
-            migrationBuilder.DeleteData(
-                schema: "seguranca",
-                table: "modulo",
-                keyColumn: "id",
-                keyValue: ModuloId
-            );
+            migrationBuilder.Sql($@"
+DELETE FROM seguranca.permissao WHERE public_id IN ('{PermVisId}', '{PermInsId}', '{PermAltId}', '{PermInaId}', '{PermReaId}');
+DELETE FROM seguranca.recurso WHERE public_id = '{RecursoId}';
+DELETE FROM seguranca.modulo WHERE public_id = '{ModuloId}';
+            ");
         }
     }
 }

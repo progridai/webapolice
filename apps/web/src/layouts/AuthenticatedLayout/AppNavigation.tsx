@@ -45,6 +45,38 @@ const NAV_ITEMS: NavItem[] = [
     permissaoCodigo: 'estipulantes.visualizar',
   },
   {
+    label: 'Apólices',
+    path: ROUTES.APOLICES,
+    icon: ClipboardListIcon,
+    moduloCodigo: 'APOLICES',
+    permissaoCodigo: 'apolices.visualizar',
+  },
+  {
+    label: 'Ramos',
+    path: ROUTES.RAMOS,
+    icon: BriefcaseIcon,
+    moduloCodigo: 'APOLICES',
+    permissaoCodigo: 'ramos.visualizar',
+  },
+  {
+    label: 'Seguradoras',
+    path: ROUTES.SEGURADORAS,
+    icon: BriefcaseIcon,
+    permissaoCodigo: 'seguradoras.visualizar',
+  },
+  {
+    label: 'Subestipulantes',
+    path: ROUTES.SUBESTIPULANTES,
+    icon: BriefcaseIcon,
+    permissaoCodigo: 'subestipulantes.visualizar',
+  },
+  {
+    label: 'Corretoras',
+    path: ROUTES.CORRETORAS,
+    icon: BriefcaseIcon,
+    permissaoCodigo: 'corretoras.visualizar',
+  },
+  {
     label: 'Cooperados',
     path: ROUTES.COOPERADOS,
     icon: UsersIcon,
@@ -105,7 +137,7 @@ export const AppNavigation: React.FC<AppNavigationProps> = ({ onNavigate }) => {
   const visibleItems = NAV_ITEMS.filter((item) => {
     if (item.requiresEnvFlag && !ENV.ENABLE_DESIGN_SYSTEM) return false;
     if (item.somenteOperador && !ehOperadorSistema()) return false;
-    if (item.moduloCodigo && !possuiModulo(item.moduloCodigo)) return false;
+    if (item.moduloCodigo && !possuiAcessoTotal() && !possuiModulo(item.moduloCodigo)) return false;
     if (item.permissaoCodigo && !possuiAcessoTotal() && !possuiPermissao(item.permissaoCodigo)) return false;
     return true;
   });

@@ -46,6 +46,12 @@ import { ClientesRoutes } from '../../features/clientes/routes/clientes.routes';
 import { CooperadosRoutes } from '../../features/cooperados/routes/cooperados.routes';
 import { EstipulantesRoutes } from '../../features/estipulantes/routes/estipulantes.routes';
 import { SegurancaRoutes } from '../../features/seguranca/routes/seguranca.routes';
+import { ApolicesRoutes } from '../../features/apolices/routes/apolices.routes';
+
+import { RamosRoutes } from '../../features/ramos/routes/ramos.routes';
+import { SeguradorasRoutes } from '../../features/seguradoras/routes/seguradoras.routes';
+import { CorretorasRoutes } from '../../features/corretoras/routes/corretoras.routes';
+import { SubestipulantesRoutes } from '../../features/subestipulantes/routes/subestipulantes.routes';
 
 export const AppRoutes: React.FC = () => {
   return (
@@ -80,7 +86,17 @@ export const AppRoutes: React.FC = () => {
       {ClientesRoutes}
       {CooperadosRoutes}
       {EstipulantesRoutes}
+      {ApolicesRoutes}
       {SegurancaRoutes}
+      {RamosRoutes}
+      {/* Cadastro: Seguradoras */}
+      {SeguradorasRoutes}
+
+      {/* Cadastro: Corretoras */}
+      {CorretorasRoutes}
+
+      {/* Cadastro: Subestipulantes */}
+      {SubestipulantesRoutes}
 
       {/* ── Design System (autenticado + operador de sistema) ── */}
       {ENV.ENABLE_DESIGN_SYSTEM && (

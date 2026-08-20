@@ -6,8 +6,8 @@ public class ApoliceRamoModel
 {
     public long Id { get; set; }
     public long ApoliceId { get; set; }
+    public long RamoId { get; set; }
     
-    public string TipoRamo { get; set; } = string.Empty;
     public string? NumeroApolice { get; set; }
     public decimal? IofPercentual { get; set; }
     
@@ -19,4 +19,5 @@ public class ApoliceRamoModel
 
     // Propriedades de Navegação (EF)
     public ApoliceModel? Apolice { get; set; }
+    public RamoModel? Ramo { get; set; }
 }

@@ -112,14 +112,7 @@ public class BancoConfiguration : IEntityTypeConfiguration<BancoModel>
     }
 }
 
-public class SeguradoraConfiguration : IEntityTypeConfiguration<SeguradoraModel>
-{
-    public void Configure(EntityTypeBuilder<SeguradoraModel> builder)
-    {
-        builder.ToTable("seguradora", "cadastro", t => t.ExcludeFromMigrations());
-        builder.HasKey(x => x.Id);
-    }
-}
+
 
 public class CidadeConfiguration : IEntityTypeConfiguration<CidadeModel>
 {
@@ -129,22 +122,3 @@ public class CidadeConfiguration : IEntityTypeConfiguration<CidadeModel>
         builder.HasKey(x => x.Id);
     }
 }
-
-public class SubestipulanteConfiguration : IEntityTypeConfiguration<SubestipulanteModel>
-{
-    public void Configure(EntityTypeBuilder<SubestipulanteModel> builder)
-    {
-        builder.ToTable("subestipulante", "cadastro", t => t.ExcludeFromMigrations());
-        builder.HasKey(x => x.Id);
-    }
-}
-
-public class CorretoraConfiguration : IEntityTypeConfiguration<CorretoraModel>
-{
-    public void Configure(EntityTypeBuilder<CorretoraModel> builder)
-    {
-        builder.ToTable("corretora", "cadastro", t => t.ExcludeFromMigrations());
-        builder.HasKey(x => x.Id);
-    }
-}
-

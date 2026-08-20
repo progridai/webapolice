@@ -77,7 +77,7 @@ export function AuthorizationProvider({ children }: { children: ReactNode }) {
     permissoes: data?.permissoes ?? [],
     possuiModulo: (codigo: string) => data?.modulosHabilitados.includes(codigo) ?? false,
     possuiRecurso: (codigo: string) => data?.recursosHabilitados.includes(codigo) ?? false,
-    possuiPermissao: (codigo: string) => data?.permissoes.includes(codigo) ?? false,
+    possuiPermissao: (codigo: string) => data?.acessoTotal === true || (data?.permissoes.includes(codigo) ?? false),
     possuiAcessoTotal: () => data?.acessoTotal ?? false,
     ehOperadorSistema: () => data?.operadorSistema ?? false,
     refresh: loadData,

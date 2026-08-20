@@ -130,9 +130,13 @@ CREATE TABLE cadastro.estipulante (
 CREATE TABLE cadastro.subestipulante (
     id bigint NOT NULL PRIMARY KEY,
     public_id uuid DEFAULT gen_random_uuid() NOT NULL,
-    pessoa_id bigint,
-    estipulante_id bigint,
-    nome character varying(150) NOT NULL,
+    pessoa_id bigint NOT NULL,
+    codigo character varying(80),
+    ativo boolean DEFAULT true NOT NULL,
+    observacao text,
+    legado_id integer,
+    created_at timestamp with time zone DEFAULT now() NOT NULL,
+    updated_at timestamp with time zone DEFAULT now() NOT NULL,
     deleted_at timestamp with time zone
 );
 

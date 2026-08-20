@@ -457,11 +457,9 @@ namespace WebApolice.Modulos.Seguro.Infrastructure.Migrations
                         .HasColumnType("character varying(80)")
                         .HasColumnName("numero_apolice");
 
-                    b.Property<string>("TipoRamo")
-                        .IsRequired()
-                        .HasMaxLength(40)
-                        .HasColumnType("character varying(40)")
-                        .HasColumnName("tipo_ramo");
+                    b.Property<long>("RamoId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("ramo_id");
 
                     b.Property<DateTimeOffset>("UpdatedAt")
                         .ValueGeneratedOnAdd()
@@ -475,10 +473,10 @@ namespace WebApolice.Modulos.Seguro.Infrastructure.Migrations
                     b.HasIndex("ApoliceId")
                         .HasDatabaseName("ix_apolice_ramo_apolice");
 
-                    b.HasIndex("TipoRamo")
-                        .HasDatabaseName("ix_apolice_ramo_tipo_ramo");
+                    b.HasIndex("RamoId")
+                        .HasDatabaseName("ix_apolice_ramo_ramo");
 
-                    b.HasIndex("ApoliceId", "TipoRamo")
+                    b.HasIndex("ApoliceId", "RamoId")
                         .IsUnique()
                         .HasDatabaseName("ux_apolice_ramo_ativo")
                         .HasFilter("ativo = true");
@@ -1986,6 +1984,62 @@ namespace WebApolice.Modulos.Seguro.Infrastructure.Migrations
                     b.ToTable("proposta", "seguro");
                 });
 
+            modelBuilder.Entity("WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models.RamoModel", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<bool>("Ativo")
+                        .HasColumnType("boolean")
+                        .HasColumnName("ativo");
+
+                    b.Property<string>("Codigo")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("codigo");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("Descricao")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("descricao");
+
+                    b.Property<string>("Nome")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("character varying(150)")
+                        .HasColumnName("nome");
+
+                    b.Property<Guid>("PublicId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("public_id");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("Id")
+                        .HasName("pk_ramo");
+
+                    b.HasIndex("Codigo")
+                        .IsUnique()
+                        .HasDatabaseName("ux_ramo_codigo");
+
+                    b.HasIndex("PublicId")
+                        .IsUnique()
+                        .HasDatabaseName("ux_ramo_public_id");
+
+                    b.ToTable("ramo", "seguro");
+                });
+
             modelBuilder.Entity("WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models.TabelaPreco", b =>
                 {
                     b.Property<long>("Id")
@@ -2204,7 +2258,16 @@ namespace WebApolice.Modulos.Seguro.Infrastructure.Migrations
                         .IsRequired()
                         .HasConstraintName("fk_apolice_ramo_apolice_apolice_id");
 
+                    b.HasOne("WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models.RamoModel", "Ramo")
+                        .WithMany()
+                        .HasForeignKey("RamoId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_apolice_ramo_ramo_ramo_id");
+
                     b.Navigation("Apolice");
+
+                    b.Navigation("Ramo");
                 });
 
             modelBuilder.Entity("WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models.ApoliceSubestipulanteModel", b =>

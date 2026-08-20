@@ -43,6 +43,32 @@ export const ROUTES = {
   ESTIPULANTE_DETALHES: '/estipulantes/:publicId',
   ESTIPULANTE_EDITAR: '/estipulantes/:publicId/editar',
 
+  /** Módulo de Apólices */
+  APOLICES: '/apolices',
+  APOLICE_NOVA: '/apolices/nova',
+  APOLICE_DETALHES: '/apolices/:publicId',
+  APOLICE_EDITAR: '/apolices/:publicId/editar',
+
+  /** Módulo de Ramos */
+  RAMOS: '/ramos',
+  RAMOS_NOVO: '/ramos/novo',
+  RAMOS_EDITAR: '/ramos/:publicId/editar',
+
+  /** Módulo de Seguradoras */
+  SEGURADORAS: '/seguradoras',
+  SEGURADORA_NOVA: '/seguradoras/nova',
+  SEGURADORA_EDITAR: '/seguradoras/:publicId/editar',
+
+  /** Módulo de Subestipulantes */
+  SUBESTIPULANTES: '/subestipulantes',
+  SUBESTIPULANTE_NOVO: '/subestipulantes/novo',
+  SUBESTIPULANTE_EDITAR: '/subestipulantes/:publicId/editar',
+
+  /** Módulo de Corretoras */
+  CORRETORAS: '/corretoras',
+  CORRETORA_NOVA: '/corretoras/nova',
+  CORRETORA_EDITAR: '/corretoras/:publicId/editar',
+
   /** Módulo de Segurança — Usuários */
   SEGURANCA_USUARIOS: '/seguranca/usuarios',
   SEGURANCA_USUARIO_NOVO: '/seguranca/usuarios/novo',

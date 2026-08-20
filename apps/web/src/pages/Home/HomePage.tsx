@@ -14,6 +14,7 @@ import {
   CardFooter,
 } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
+import { BriefcaseIcon } from '../../components/ui/Icons';
 import './HomePage.css';
 
 export const HomePage: React.FC = () => {
@@ -26,6 +27,10 @@ export const HomePage: React.FC = () => {
     APP_ROLES.OPERADOR,
   ]);
   const { possuiPermissao } = useAuthorization();
+  const canAccessApolices = possuiPermissao('apolices.visualizar');
+  const canAccessRamos = possuiPermissao('ramos.visualizar');
+  const canAccessSeguradoras = possuiPermissao('seguradoras.visualizar');
+  const canAccessCorretoras = possuiPermissao('corretoras.visualizar');
   const canAccessCooperados = possuiPermissao('cooperados.visualizar');
 
   useEffect(() => {
@@ -58,6 +63,40 @@ export const HomePage: React.FC = () => {
               <CardFooter>
                 <Button variant="primary" onClick={() => navigate(ROUTES.CLIENTES)}>
                   Acessar clientes
+                </Button>
+              </CardFooter>
+            </Card>
+          )}
+
+          {canAccessSeguradoras && (
+            <Card>
+              <CardHeader className="flex flex-row items-center gap-3">
+                <BriefcaseIcon size={24} className="text-brand-primaria" />
+                <CardTitle>Seguradoras</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p>Acesse o catálogo mestre de seguradoras, realize novos cadastros e consulte os registros.</p>
+              </CardContent>
+              <CardFooter>
+                <Button variant="primary" onClick={() => navigate(ROUTES.SEGURADORAS)}>
+                  Acessar seguradoras
+                </Button>
+              </CardFooter>
+            </Card>
+          )}
+
+          {canAccessCorretoras && (
+            <Card>
+              <CardHeader className="flex flex-row items-center gap-3">
+                <BriefcaseIcon size={24} className="text-brand-primaria" />
+                <CardTitle>Corretoras</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p>Consulte e gerencie as corretoras parceiras cadastradas no sistema.</p>
+              </CardContent>
+              <CardFooter>
+                <Button variant="primary" onClick={() => navigate(ROUTES.CORRETORAS)}>
+                  Acessar corretoras
                 </Button>
               </CardFooter>
             </Card>

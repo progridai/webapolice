@@ -44,6 +44,14 @@ public static class CadastroModuleExtensions
         
         services.AddScoped<IEstipulantesQueries, EstipulantesQueries>();
         services.AddScoped<IEstipulanteRepository, EstipulanteRepository>();
+        services.AddScoped<ISeguradorasQueries, SeguradorasQueries>();
+        services.AddScoped<ISeguradoraRepository, SeguradoraRepository>();
+        
+        services.AddScoped<ICorretorasQueries, CorretorasQueries>();
+        services.AddScoped<ICorretoraRepository, CorretoraRepository>();
+
+        services.AddScoped<ISubestipulantesQueries, SubestipulantesQueries>();
+        services.AddScoped<ISubestipulanteRepository, SubestipulanteRepository>();
 
         // Clientes Handlers
         services.AddScoped<CadastrarClienteHandler>();
@@ -70,6 +78,28 @@ public static class CadastroModuleExtensions
         services.AddScoped<ListarEstipulantesHandler>();
         services.AddScoped<ConsultarEstipulantePorIdHandler>();
         services.AddScoped<ConsultarEstipulanteConfiguracaoHandler>();
+
+        // Seguradoras Handlers
+        services.AddScoped<WebApolice.Modulos.Cadastro.Application.UseCases.CriarSeguradora.CriarSeguradoraHandler>();
+        services.AddScoped<WebApolice.Modulos.Cadastro.Application.UseCases.AlterarSeguradora.AlterarSeguradoraHandler>();
+        services.AddScoped<WebApolice.Modulos.Cadastro.Application.UseCases.InativarSeguradora.InativarSeguradoraHandler>();
+        services.AddScoped<WebApolice.Modulos.Cadastro.Application.UseCases.ReativarSeguradora.ReativarSeguradoraHandler>();
+        services.AddScoped<WebApolice.Modulos.Cadastro.Application.UseCases.ListarSeguradoras.ListarSeguradorasHandler>();
+        services.AddScoped<WebApolice.Modulos.Cadastro.Application.UseCases.ConsultarSeguradora.ConsultarSeguradoraPorIdHandler>();
+
+        // Corretoras Handlers
+        services.AddScoped<WebApolice.Modulos.Cadastro.Application.UseCases.CriarCorretora.CriarCorretoraHandler>();
+        services.AddScoped<WebApolice.Modulos.Cadastro.Application.UseCases.AlterarCorretora.AlterarCorretoraHandler>();
+        services.AddScoped<WebApolice.Modulos.Cadastro.Application.UseCases.InativarCorretora.InativarCorretoraHandler>();
+        services.AddScoped<WebApolice.Modulos.Cadastro.Application.UseCases.ReativarCorretora.ReativarCorretoraHandler>();
+
+        // Subestipulantes Handlers
+        services.AddScoped<WebApolice.Modulos.Cadastro.Application.UseCases.CriarSubestipulante.CriarSubestipulanteHandler>();
+        services.AddScoped<WebApolice.Modulos.Cadastro.Application.UseCases.AlterarSubestipulante.AlterarSubestipulanteHandler>();
+        services.AddScoped<WebApolice.Modulos.Cadastro.Application.UseCases.InativarSubestipulante.InativarSubestipulanteHandler>();
+        services.AddScoped<WebApolice.Modulos.Cadastro.Application.UseCases.ReativarSubestipulante.ReativarSubestipulanteHandler>();
+        services.AddScoped<WebApolice.Modulos.Cadastro.Application.UseCases.ListarSubestipulantes.ListarSubestipulantesHandler>();
+        services.AddScoped<WebApolice.Modulos.Cadastro.Application.UseCases.ConsultarSubestipulante.ConsultarSubestipulantePorIdHandler>();
 
         return services;
     }

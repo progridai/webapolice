@@ -4,28 +4,26 @@ namespace WebApolice.Modulos.Cadastro.Infrastructure.Persistence.Models.Vinculos
 
 public sealed class SubestipulanteModel
 {
-    public long Id { get; private set; }
-    public Guid PublicId { get; private set; }
-    public long? PessoaId { get; private set; }
-    public string Nome { get; private set; } = null!;
-    public DateTimeOffset? DeletedAt { get; private set; }
+    public long Id { get; set; }
+    public Guid PublicId { get; set; }
+    public long PessoaId { get; set; }
+
+    public string? Codigo { get; set; }
+    public bool Ativo { get; set; } = true;
+    public string? Observacao { get; set; }
+    public int? LegadoId { get; set; }
+
+    public DateTimeOffset CreatedAt { get; set; }
+    public DateTimeOffset UpdatedAt { get; set; }
+    public DateTimeOffset? DeletedAt { get; set; }
+
+    // Navigation property (cross-module read, ExcludeFromMigrations em core.pessoa)
+    public PessoaModel? Pessoa { get; set; }
 }
 
-public sealed class CorretoraModel
-{
-    public long Id { get; private set; }
-    public Guid PublicId { get; private set; }
-    public long? PessoaId { get; private set; }
-    public DateTimeOffset? DeletedAt { get; private set; }
-}
 
-public sealed class SeguradoraModel
-{
-    public long Id { get; private set; }
-    public Guid PublicId { get; private set; }
-    public long? PessoaId { get; private set; }
-    public DateTimeOffset? DeletedAt { get; private set; }
-}
+
+
 
 public sealed class GrupoModel
 {

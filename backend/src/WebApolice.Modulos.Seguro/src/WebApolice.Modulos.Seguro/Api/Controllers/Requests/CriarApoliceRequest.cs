@@ -15,15 +15,7 @@ public class CriarApoliceRequest
     public DateOnly? DataFimVigencia { get; set; }
     public DateOnly? DataAniversario { get; set; }
 
-    public List<CriarApoliceRamoRequest>? Ramos { get; set; }
     public List<long>? SubestipulantesIds { get; set; }
 
     public string? Observacao { get; set; }
-}
-
-public class CriarApoliceRamoRequest
-{
-    public string TipoRamo { get; set; } = null!;
-    public string? NumeroApolice { get; set; }
-    public decimal? IofPercentual { get; set; }
 }

@@ -107,14 +107,27 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
     async function initKeycloak() {
       try {
-        const authenticated = await initKeycloakOnce({
-          onLoad: 'check-sso',
-          silentCheckSsoRedirectUri: window.location.origin + '/silent-check-sso.html',
-          pkceMethod: 'S256',
-          checkLoginIframe: false,
-          redirectUri: getOidcRedirectUri(), // Previne que Keycloak adicione queries no meio do hash (HashRouter)
-          responseMode: 'query', // Isola os parâmetros do Keycloak na querystring, deixando o HashRouter intacto
+        // Race entre a inicialização do Keycloak e um timeout de 8 segundos.
+        // O silent SSO cross-origin pode travar indefinidamente quando o browser
+        // bloqueia o postMessage do iframe por política CORS/SameSite.
+        const timeoutPromise = new Promise<boolean>((resolve) => {
+          setTimeout(() => {
+            console.warn('[AuthProvider] Keycloak init timeout — continuando como não autenticado.');
+            resolve(false);
+          }, 8000);
         });
+
+        const authenticated = await Promise.race([
+          initKeycloakOnce({
+            onLoad: 'check-sso',
+            silentCheckSsoRedirectUri: window.location.origin + '/silent-check-sso.html',
+            pkceMethod: 'S256',
+            checkLoginIframe: false,
+            redirectUri: getOidcRedirectUri(),
+            responseMode: 'query',
+          }),
+          timeoutPromise,
+        ]);
 
         if (!mounted) return;
 

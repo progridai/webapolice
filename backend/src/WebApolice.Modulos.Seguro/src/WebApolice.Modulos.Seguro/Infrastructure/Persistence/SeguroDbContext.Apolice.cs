@@ -20,6 +20,7 @@ public partial class SeguroDbContext
 
     partial void OnModelCreatingPartial(ModelBuilder modelBuilder)
     {
+        modelBuilder.ApplyConfiguration(new RamoConfiguration());
         modelBuilder.ApplyConfiguration(new ApoliceConfiguration());
         modelBuilder.ApplyConfiguration(new ApoliceConfiguracaoConfiguration());
         modelBuilder.ApplyConfiguration(new ApoliceHistoricoConfiguration());

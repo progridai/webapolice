@@ -23,19 +23,19 @@ export const PermissionProtectedRoute: React.FC<PermissionProtectedRouteProps> =
   }
 
   if (error || !usuarioEncontrado || !usuarioAtivo) {
-    return <Navigate to="/erro-acesso" state={{ from: location }} replace />;
+    return <Navigate to="/unauthorized" state={{ from: location }} replace />;
   }
 
   if (somenteOperador && !ehOperadorSistema()) {
-    return <Navigate to="/acesso-negado" state={{ from: location }} replace />;
+    return <Navigate to="/forbidden" state={{ from: location }} replace />;
   }
 
   if (moduloCodigo && !possuiModulo(moduloCodigo)) {
-    return <Navigate to="/acesso-negado" state={{ from: location }} replace />;
+    return <Navigate to="/forbidden" state={{ from: location }} replace />;
   }
 
   if (permissaoCodigo && !possuiAcessoTotal() && !possuiPermissao(permissaoCodigo)) {
-    return <Navigate to="/acesso-negado" state={{ from: location }} replace />;
+    return <Navigate to="/forbidden" state={{ from: location }} replace />;
   }
 
   return <>{children}</>;

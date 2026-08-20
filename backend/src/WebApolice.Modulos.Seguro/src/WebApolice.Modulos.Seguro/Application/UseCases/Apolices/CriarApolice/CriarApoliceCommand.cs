@@ -11,15 +11,8 @@ public sealed record CriarApoliceCommand(
     DateOnly DataInicioVigencia,
     DateOnly? DataFimVigencia,
     DateOnly? DataAniversario,
-    IReadOnlyList<CriarApoliceRamoCommand>? Ramos,
     IReadOnlyList<long>? SubestipulantesIds,
     string? Observacao
-);
-
-public sealed record CriarApoliceRamoCommand(
-    string TipoRamo,
-    string? NumeroApolice,
-    decimal? IofPercentual
 );
 
 public sealed record CriarApoliceResult(

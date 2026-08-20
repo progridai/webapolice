@@ -8,6 +8,7 @@
     <ProjectReference Include="..\WebApolice.SharedKernel\WebApolice.SharedKernel.csproj" />
     <ProjectReference Include="..\WebApolice.Shared.Infrastructure\WebApolice.Shared.Infrastructure.csproj" />
     <ProjectReference Include="..\WebApolice.Auditoria\WebApolice.Auditoria.csproj" />
+    <ProjectReference Include="..\WebApolice.Modulos.Seguranca\WebApolice.Modulos.Seguranca.csproj" />
   </ItemGroup>
 
   <ItemGroup>

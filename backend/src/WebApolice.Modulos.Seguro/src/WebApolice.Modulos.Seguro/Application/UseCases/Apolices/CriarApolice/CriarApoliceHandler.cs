@@ -51,25 +51,6 @@ public sealed class CriarApoliceHandler
                 UpdatedAt = DateTimeOffset.UtcNow
             };
 
-            // Processar Ramos
-            if (command.Ramos != null && command.Ramos.Any())
-            {
-                foreach (var ramoCmd in command.Ramos)
-                {
-                    if (string.IsNullOrWhiteSpace(ramoCmd.TipoRamo)) continue;
-
-                    apolice.Ramos.Add(new ApoliceRamoModel
-                    {
-                        TipoRamo = ramoCmd.TipoRamo.ToUpperInvariant(),
-                        NumeroApolice = ramoCmd.NumeroApolice,
-                        IofPercentual = ramoCmd.IofPercentual,
-                        Ativo = true,
-                        CreatedAt = DateTimeOffset.UtcNow,
-                        UpdatedAt = DateTimeOffset.UtcNow
-                    });
-                }
-            }
-
             // Processar Subestipulantes (vinculo inicial)
             if (command.SubestipulantesIds != null && command.SubestipulantesIds.Any())
             {

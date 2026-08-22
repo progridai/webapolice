@@ -153,3 +153,72 @@ export async function inativarRamoApolice(
 ): Promise<void> {
   await httpClient.patch(`/api/apolices/${apolicePublicId}/ramos/${ramoPublicId}/inativar`);
 }
+
+export interface VincularSubestipulanteApoliceRequest {
+  subestipulantePublicId: string;
+  dataInicio?: string;
+  dataFim?: string;
+}
+
+export async function vincularSubestipulanteApolice(
+  apolicePublicId: string,
+  payload: VincularSubestipulanteApoliceRequest
+): Promise<void> {
+  await httpClient.post(`/api/apolices/${apolicePublicId}/subestipulantes`, payload);
+}
+
+export interface AtualizarSubestipulanteApoliceRequest {
+  dataInicio?: string;
+  dataFim?: string;
+}
+
+export async function atualizarSubestipulanteApolice(
+  apolicePublicId: string,
+  subestipulantePublicId: string,
+  payload: AtualizarSubestipulanteApoliceRequest
+): Promise<void> {
+  await httpClient.put(`/api/apolices/${apolicePublicId}/subestipulantes/${subestipulantePublicId}`, payload);
+}
+
+export async function inativarSubestipulanteApolice(
+  apolicePublicId: string,
+  subestipulantePublicId: string
+): Promise<void> {
+  await httpClient.patch(`/api/apolices/${apolicePublicId}/subestipulantes/${subestipulantePublicId}/inativar`);
+}
+
+export interface VincularModuloSubestipulanteApoliceRequest {
+  moduloPublicId: string;
+  dataInicio?: string;
+  dataFim?: string;
+}
+
+export async function vincularModuloSubestipulanteApolice(
+  apolicePublicId: string,
+  subestipulantePublicId: string,
+  payload: VincularModuloSubestipulanteApoliceRequest
+): Promise<void> {
+  await httpClient.post(`/api/apolices/${apolicePublicId}/subestipulantes/${subestipulantePublicId}/modulos`, payload);
+}
+
+export interface AtualizarModuloSubestipulanteApoliceRequest {
+  dataInicio?: string;
+  dataFim?: string;
+}
+
+export async function atualizarModuloSubestipulanteApolice(
+  apolicePublicId: string,
+  subestipulantePublicId: string,
+  moduloPublicId: string,
+  payload: AtualizarModuloSubestipulanteApoliceRequest
+): Promise<void> {
+  await httpClient.put(`/api/apolices/${apolicePublicId}/subestipulantes/${subestipulantePublicId}/modulos/${moduloPublicId}`, payload);
+}
+
+export async function inativarModuloSubestipulanteApolice(
+  apolicePublicId: string,
+  subestipulantePublicId: string,
+  moduloPublicId: string
+): Promise<void> {
+  await httpClient.patch(`/api/apolices/${apolicePublicId}/subestipulantes/${subestipulantePublicId}/modulos/${moduloPublicId}/inativar`);
+}

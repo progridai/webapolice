@@ -46,6 +46,20 @@ public static class PermissoesSeguranca
         public const string Inativar = "apolices.ramos.inativar";
     }
 
+    public static class ApolicesSubestipulantes
+    {
+        public const string Inserir = "apolices.subestipulantes.inserir";
+        public const string Alterar = "apolices.subestipulantes.alterar";
+        public const string Inativar = "apolices.subestipulantes.inativar";
+    }
+
+    public static class ApolicesSubestipulantesModulos
+    {
+        public const string Inserir = "apolices.subestipulantes.modulos.inserir";
+        public const string Alterar = "apolices.subestipulantes.modulos.alterar";
+        public const string Inativar = "apolices.subestipulantes.modulos.inativar";
+    }
+
     public static class Ramos
     {
         public const string Visualizar = "ramos.visualizar";

@@ -41,6 +41,15 @@ public static class SeguroModuleExtensions
         services.AddScoped<WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Application.UseCases.Apolices.AtualizarRamo.AtualizarRamoApoliceHandler>();
         services.AddScoped<WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Application.UseCases.Apolices.InativarRamo.InativarRamoApoliceHandler>();
 
+        services.AddScoped<WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Application.UseCases.Apolices.VincularSubestipulante.VincularSubestipulanteApoliceHandler>();
+        services.AddScoped<WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Application.UseCases.Apolices.AtualizarSubestipulante.AtualizarSubestipulanteApoliceHandler>();
+        services.AddScoped<WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Application.UseCases.Apolices.InativarSubestipulante.InativarSubestipulanteApoliceHandler>();
+
+        services.AddScoped<WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Application.UseCases.Apolices.VincularModulo.VincularModuloApoliceHandler>();
+        services.AddScoped<WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Application.UseCases.Apolices.AtualizarModulo.AtualizarModuloApoliceHandler>();
+        services.AddScoped<WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Application.UseCases.Apolices.InativarModulo.InativarModuloApoliceHandler>();
+        services.AddScoped<WebApolice.Modulos.Seguro.Application.UseCases.Apolices.ListarModulos.ListarModulosDoSubestipulanteHandler>();
+
         // Handlers - Ramo
         services.AddScoped<WebApolice.Modulos.Seguro.Application.UseCases.Ramos.ListarRamos.ListarRamosHandler>();
         services.AddScoped<WebApolice.Modulos.Seguro.Application.UseCases.Ramos.ObterRamo.ObterRamoHandler>();

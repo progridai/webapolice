@@ -1,6 +1,6 @@
-import React, { ReactNode } from 'react';
+import React, { ReactNode, useState } from 'react';
 import { Table, TableHeader, TableBody, TableRow, TableCell } from '../Table';
-import { SortIcon } from '../Icons';
+import { SortIcon, ChevronRightIcon } from '../Icons';
 import { Skeleton } from '../Skeleton';
 import { EmptyState } from '../EmptyState';
 import './DataTable.css';
@@ -24,6 +24,7 @@ export interface DataTableProps<T> {
   sortBy?: string;
   direction?: 'asc' | 'desc';
   onSort?: (columnKey: string) => void;
+  renderExpandedRow?: (item: T) => ReactNode;
   'aria-label'?: string;
 }
 
@@ -38,8 +39,17 @@ export function DataTable<T>({
   sortBy,
   direction,
   onSort,
+  renderExpandedRow,
   'aria-label': ariaLabel = 'Tabela de dados',
 }: DataTableProps<T>) {
+  const [expandedKeys, setExpandedKeys] = useState<Set<string | number>>(new Set());
+
+  const toggleRow = (key: string | number) => {
+    const next = new Set(expandedKeys);
+    if (next.has(key)) next.delete(key);
+    else next.add(key);
+    setExpandedKeys(next);
+  };
   
   if (isLoading && data.length === 0) {
     return (
@@ -88,6 +98,7 @@ export function DataTable<T>({
       <Table aria-label={ariaLabel}>
         <TableHeader>
           <TableRow>
+            {renderExpandedRow && <TableCell header align="center" style={{ width: '48px' }} />}
             {columns.map((col) => (
               <TableCell key={col.key} header align={col.align}>
                 {renderSortHeader(col)}
@@ -96,15 +107,46 @@ export function DataTable<T>({
           </TableRow>
         </TableHeader>
         <TableBody>
-          {data.map((item) => (
-            <TableRow key={keyExtractor(item)}>
-              {columns.map((col) => (
-                <TableCell key={col.key} align={col.align}>
-                  {col.render ? col.render(item) : String((item as Record<string, unknown>)[col.key] ?? '')}
-                </TableCell>
-              ))}
-            </TableRow>
-          ))}
+          {data.map((item) => {
+            const key = keyExtractor(item);
+            const isExpanded = expandedKeys.has(key);
+            return (
+              <React.Fragment key={key}>
+                <TableRow className={isExpanded ? 'bg-slate-50' : ''}>
+                  {renderExpandedRow && (
+                    <TableCell align="center" style={{ width: '48px' }}>
+                      <button 
+                        type="button" 
+                        onClick={() => toggleRow(key)}
+                        className="p-1 rounded hover:bg-slate-200 transition-colors"
+                        aria-expanded={isExpanded}
+                      >
+                        <ChevronRightIcon 
+                          size={16} 
+                          className="text-slate-500 transition-transform duration-200" 
+                          style={{ transform: isExpanded ? 'rotate(90deg)' : 'none' }}
+                        />
+                      </button>
+                    </TableCell>
+                  )}
+                  {columns.map((col) => (
+                    <TableCell key={col.key} align={col.align}>
+                      {col.render ? col.render(item) : String((item as Record<string, unknown>)[col.key] ?? '')}
+                    </TableCell>
+                  ))}
+                </TableRow>
+                {isExpanded && renderExpandedRow && (
+                  <TableRow className="bg-slate-50/50">
+                    <TableCell colSpan={columns.length + 1} className="p-0 border-t-0">
+                      <div className="p-4 border-l-2 border-primary">
+                        {renderExpandedRow(item)}
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                )}
+              </React.Fragment>
+            );
+          })}
         </TableBody>
       </Table>
     </div>

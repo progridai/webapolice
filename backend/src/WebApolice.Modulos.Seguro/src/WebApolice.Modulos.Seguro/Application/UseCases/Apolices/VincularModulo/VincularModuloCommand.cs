@@ -3,10 +3,16 @@ using MediatR;
 
 namespace WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Application.UseCases.Apolices.VincularModulo;
 
-public class VincularModuloCommand : IRequest<long>
+/// <summary>
+/// Command para vincular um Módulo Global a um Subestipulante no contexto de uma Apólice.
+/// Identificação externa via PublicIds — nenhum ID interno (bigint) é exposto.
+/// </summary>
+public class VincularModuloApoliceCommand : IRequest<long>
 {
-    public long ApoliceId { get; set; }
-    public long ApoliceSubestipulanteId { get; set; }
-    public long ModuloId { get; set; } // O ID real do Módulo global
+    public Guid ApolicePublicId { get; set; }
+    public Guid SubestipulantePublicId { get; set; }
+    public Guid ModuloPublicId { get; set; }
+    public DateOnly? DataInicio { get; set; }
+    public DateOnly? DataFim { get; set; }
     public Guid UsuarioPublicId { get; set; }
 }

@@ -43,4 +43,9 @@ public interface IApolicesQueries
         int pagina,
         int tamanhoPagina,
         CancellationToken cancellationToken);
+
+    Task<System.Collections.Generic.List<WebApolice.Modulos.Seguro.Application.UseCases.Apolices.ListarModulos.ModuloDoSubestipulanteResult>> ListarModulosDoSubestipulanteAsync(
+        Guid apolicePublicId,
+        Guid subestipulantePublicId,
+        CancellationToken cancellationToken);
 }

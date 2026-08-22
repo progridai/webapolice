@@ -156,7 +156,7 @@ export const ApoliceDetalhesPage: React.FC = () => {
           {activeTab === 'resumo' && <ResumoTab apolice={data} />}
           {activeTab === 'ramos' && <RamosTab apolice={data} onMutateSucesso={retry} />}
           {activeTab === 'configuracoes' && <ConfiguracoesTab apolice={data} />}
-          {activeTab === 'subestipulantes' && <SubestipulantesTab />}
+          {activeTab === 'subestipulantes' && <SubestipulantesTab publicId={data.publicId} />}
           {activeTab === 'vidas' && <VidasTab publicId={data.publicId} />}
           {activeTab === 'universo' && <UniversoPermitidoTab />}
           {activeTab === 'historico' && <HistoricoTab />}

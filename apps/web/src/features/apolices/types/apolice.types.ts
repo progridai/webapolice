@@ -80,14 +80,20 @@ export interface ApoliceVidaListItem {
 }
 
 export interface ApoliceSubestipulanteModuloResult {
-  moduloIdInternal: number;
+  moduloPublicId: string;
+  moduloNome: string;
+  moduloDescricao?: string;
+  moduloAtivoGlobal: boolean;
+  vinculoAtivo: boolean;
   dataInicio?: string;
   dataFim?: string;
-  ativo: boolean;
 }
 
 export interface ApoliceSubestipulanteResult {
-  subestipulanteIdInternal: number;
+  subestipulantePublicId: string;
+  nome: string;
+  documento?: string;
+  codigo?: string;
   dataInicio?: string;
   dataFim?: string;
   ativo: boolean;

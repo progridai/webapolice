@@ -1,24 +1,31 @@
-using System;
+﻿using System;
 
 namespace WebApolice.Modulos.Seguro.Application.UseCases.Apolices.ListarVidas;
 
 public sealed record ListarApoliceVidasQuery(
     Guid ApolicePublicId,
     int Pagina,
-    int TamanhoPagina
+    int TamanhoPagina,
+    string? BuscaCliente = null,
+    string? Status = null,
+    Guid? SubestipulantePublicId = null,
+    Guid? ModuloPublicId = null,
+    DateOnly? VigenciaDataReferencia = null
 );
 
 public sealed record ApoliceVidaResult(
-    Guid PublicId,
-    long ClienteIdInternal, // Temporarily exposing internal ID due to lack of JOIN, or string
+    Guid ApoliceVidaPublicId,
+    Guid ClientePublicId,
     string ClienteNome,
-    string Cpf,
-    long? SubestipulanteIdInternal,
+    string ClienteDocumentoMascarado,
+    string Contexto,             // "direto" | "subestipulante" | "modulo"
+    Guid? SubestipulantePublicId,
     string? SubestipulanteNome,
-    long? ModuloIdInternal,
+    Guid? ModuloPublicId,
     string? ModuloNome,
     DateOnly? DataInicioVigencia,
     DateOnly? DataFimVigencia,
     string Status,
-    bool Ativo
+    bool Ativo,
+    string? Observacao
 );

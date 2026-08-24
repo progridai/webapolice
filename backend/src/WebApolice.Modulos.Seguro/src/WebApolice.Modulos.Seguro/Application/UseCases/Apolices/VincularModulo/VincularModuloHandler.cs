@@ -75,7 +75,7 @@ public class VincularModuloApoliceHandler : IRequestHandler<VincularModuloApolic
 
         // 6. Resolver Módulo Global (cross-module via SQL parametrizado — padrão vigente)
         var modulo = await _dbContext.Database
-            .SqlQuery<ModuloGlobalDto>($"SELECT id AS \"Id\", nome AS \"Nome\", descricao AS \"Descricao\", ativo AS \"Ativo\" FROM cadastro.modulo WHERE public_id = {request.ModuloPublicId} AND deleted_at IS NULL")
+            .SqlQuery<ModuloGlobalDto>($"SELECT id, nome, descricao, ativo FROM cadastro.modulo WHERE public_id = {request.ModuloPublicId} AND deleted_at IS NULL")
             .FirstOrDefaultAsync(cancellationToken);
 
         if (modulo == null)

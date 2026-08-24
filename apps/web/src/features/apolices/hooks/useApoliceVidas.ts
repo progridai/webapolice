@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { listarApoliceVidas } from '../api/apolices.api';
 import type { PagedResult, ApoliceVidaListItem } from '../types/apolice.types';
 
-export function useApoliceVidas(publicId: string | undefined, page: number = 1, pageSize: number = 20) {
+export function useApoliceVidas(publicId: string | undefined, query: import('../types/apolice.types').ApoliceVidaQuery) {
   const [data, setData] = useState<PagedResult<ApoliceVidaListItem> | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
@@ -13,7 +13,7 @@ export function useApoliceVidas(publicId: string | undefined, page: number = 1, 
     setIsLoading(true);
     setError(null);
     try {
-      const result = await listarApoliceVidas(publicId, page, pageSize, abortSignal);
+      const result = await listarApoliceVidas(publicId, query, abortSignal);
       setData(result);
     } catch (err: any) {
       if (err.name !== 'AbortError' && err.name !== 'CanceledError') {
@@ -22,7 +22,7 @@ export function useApoliceVidas(publicId: string | undefined, page: number = 1, 
     } finally {
       setIsLoading(false);
     }
-  }, [publicId, page, pageSize]);
+  }, [publicId, query.page, query.pageSize, query.busca, query.status, query.subestipulantePublicId, query.moduloPublicId]);
 
   useEffect(() => {
     const controller = new AbortController();

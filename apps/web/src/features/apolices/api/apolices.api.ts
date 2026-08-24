@@ -68,17 +68,56 @@ export async function alterarApolice(publicId: string, data: import('../schemas/
 
 export async function listarApoliceVidas(
   publicId: string,
-  page: number = 1,
-  pageSize: number = 20,
+  query: import('../types/apolice.types').ApoliceVidaQuery,
   signal?: AbortSignal
 ): Promise<PagedResult<ApoliceVidaListItem>> {
-  const params = new URLSearchParams({
-    pagina: page.toString(),
-    tamanhoPagina: pageSize.toString()
-  });
+  const params = new URLSearchParams();
+
+  if (query.page) params.append('pagina', query.page.toString());
+  if (query.pageSize) params.append('tamanhoPagina', query.pageSize.toString());
+  if (query.busca) params.append('busca', query.busca);
+  if (query.status) params.append('status', query.status.toString());
+  if (query.subestipulantePublicId) params.append('subestipulantePublicId', query.subestipulantePublicId);
+  if (query.moduloPublicId) params.append('moduloPublicId', query.moduloPublicId);
+  if (query.vigenciaDataReferencia) params.append('vigenciaDataReferencia', query.vigenciaDataReferencia);
+
+  const queryString = params.toString();
+  const url = queryString ? `/api/apolices/${publicId}/vidas?${queryString}` : `/api/apolices/${publicId}/vidas`;
   
-  const response = await httpClient.get<PagedResult<ApoliceVidaListItem>>(`/api/apolices/${publicId}/vidas?${params.toString()}`, { signal });
+  const response = await httpClient.get<PagedResult<ApoliceVidaListItem>>(url, { signal });
   return response.data;
+}
+
+export async function obterApoliceVida(
+  apolicePublicId: string,
+  vidaPublicId: string,
+  signal?: AbortSignal
+): Promise<ApoliceVidaListItem> {
+  const response = await httpClient.get<ApoliceVidaListItem>(`/api/apolices/${apolicePublicId}/vidas/${vidaPublicId}`, { signal });
+  return response.data;
+}
+
+export async function criarApoliceVida(
+  apolicePublicId: string,
+  payload: import('../types/apolice.types').CriarApoliceVidaRequest
+): Promise<{ publicId: string }> {
+  const response = await httpClient.post<{ publicId: string }>(`/api/apolices/${apolicePublicId}/vidas`, payload);
+  return response.data;
+}
+
+export async function atualizarApoliceVida(
+  apolicePublicId: string,
+  vidaPublicId: string,
+  payload: import('../types/apolice.types').AlterarApoliceVidaRequest
+): Promise<void> {
+  await httpClient.put(`/api/apolices/${apolicePublicId}/vidas/${vidaPublicId}`, payload);
+}
+
+export async function inativarApoliceVida(
+  apolicePublicId: string,
+  vidaPublicId: string
+): Promise<void> {
+  await httpClient.patch(`/api/apolices/${apolicePublicId}/vidas/${vidaPublicId}/inativar`);
 }
 
 export async function listarApoliceSubestipulantes(

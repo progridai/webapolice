@@ -13,12 +13,9 @@ namespace WebApolice.Modulos.Cadastro.Application.UseCases.Modulos.CriarModulo;
 public class CriarModuloHandler : IRequestHandler<CriarModuloCommand, ModuloDto>
 {
     private readonly CadastroDbContext _dbContext;
-    private readonly IUsuarioCorrente _usuarioCorrente;
-
-    public CriarModuloHandler(CadastroDbContext dbContext, IUsuarioCorrente usuarioCorrente)
+    public CriarModuloHandler(CadastroDbContext dbContext)
     {
         _dbContext = dbContext;
-        _usuarioCorrente = usuarioCorrente;
     }
 
     public async Task<ModuloDto> Handle(CriarModuloCommand request, CancellationToken cancellationToken)

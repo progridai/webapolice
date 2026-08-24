@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
 using WebApolice.Modulos.Seguro.Application.UseCases.Apolices.ListarApolices;
@@ -23,13 +23,23 @@ public interface IApolicesQueries
     Task<WebApolice.Modulos.Seguro.Application.UseCases.Apolices.ObterApolice.ApoliceDetalheResult?> ObterDetalhePorPublicIdAsync(
         Guid publicId, 
         CancellationToken cancellationToken);
-        
+
     Task<PagedResult<WebApolice.Modulos.Seguro.Application.UseCases.Apolices.ListarVidas.ApoliceVidaResult>> ListarVidasPaginadoAsync(
         Guid apolicePublicId,
         int pagina,
         int tamanhoPagina,
+        string? buscaCliente,
+        string? status,
+        Guid? subestipulantePublicId,
+        Guid? moduloPublicId,
+        DateOnly? vigenciaDataReferencia,
         CancellationToken cancellationToken);
-        
+
+    Task<WebApolice.Modulos.Seguro.Application.UseCases.Apolices.ListarVidas.ApoliceVidaResult?> ObterApoliceVidaPorPublicIdAsync(
+        Guid apolicePublicId,
+        Guid apoliceVidaPublicId,
+        CancellationToken cancellationToken);
+
     Task<System.Collections.Generic.List<WebApolice.Modulos.Seguro.Application.UseCases.Apolices.ListarSubestipulantes.ApoliceSubestipulanteResult>> ListarSubestipulantesAsync(
         Guid apolicePublicId,
         CancellationToken cancellationToken);

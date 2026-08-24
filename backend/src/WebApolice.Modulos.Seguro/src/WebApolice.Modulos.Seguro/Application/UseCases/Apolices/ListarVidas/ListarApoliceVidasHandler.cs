@@ -1,3 +1,4 @@
+﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
 using WebApolice.Modulos.Seguro.Application.Ports;
@@ -24,6 +25,11 @@ public sealed class ListarApoliceVidasHandler
             query.ApolicePublicId,
             pagina,
             tamanhoPagina,
+            query.BuscaCliente,
+            query.Status,
+            query.SubestipulantePublicId,
+            query.ModuloPublicId,
+            query.VigenciaDataReferencia,
             cancellationToken);
     }
 }

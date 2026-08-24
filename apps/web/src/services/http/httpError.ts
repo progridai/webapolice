@@ -105,9 +105,9 @@ export async function normalizeError(
 
   // Suporte a ProblemDetails do ASP.NET Core
   const message =
-    (body['title'] as string) ??
-    (body['message'] as string) ??
     (body['detail'] as string) ??
+    (body['message'] as string) ??
+    (body['title'] as string) ??
     HTTP_MESSAGES[response.status] ??
     `Erro HTTP ${response.status}`;
 

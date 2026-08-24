@@ -9,7 +9,7 @@ export type StatusClienteEnum = 1 | 2;
 export type ClienteStatus = 'ativo' | 'inativo';
 
 export interface ClienteListItem {
-  id: number;
+  id: string;
   nome: string;
   documentoMascarado: string;
   status: ClienteStatus;

@@ -69,14 +69,45 @@ export interface ApoliceDetalheResponse {
 }
 
 export interface ApoliceVidaListItem {
-  publicId: string;
+  apoliceVidaPublicId: string;
+  clientePublicId: string;
   clienteNome: string;
+  clienteDocumentoMascarado?: string;
+  contexto: 'direto' | 'subestipulante' | 'modulo';
+  subestipulantePublicId?: string;
   subestipulanteNome?: string;
+  moduloPublicId?: string;
   moduloNome?: string;
   dataInicioVigencia?: string;
   dataFimVigencia?: string;
   ativo: boolean;
   status: string;
+  observacao?: string;
+}
+
+export interface ApoliceVidaQuery {
+  page?: number;
+  pageSize?: number;
+  busca?: string;
+  status?: string;
+  subestipulantePublicId?: string;
+  moduloPublicId?: string;
+  vigenciaDataReferencia?: string;
+}
+
+export interface CriarApoliceVidaRequest {
+  clientePublicId: string;
+  subestipulantePublicId?: string | null;
+  moduloPublicId?: string | null;
+  dataInicioVigencia?: string | null;
+  dataFimVigencia?: string | null;
+  observacao?: string | null;
+}
+
+export interface AlterarApoliceVidaRequest {
+  dataInicioVigencia?: string | null;
+  dataFimVigencia?: string | null;
+  observacao?: string | null;
 }
 
 export interface ApoliceSubestipulanteModuloResult {

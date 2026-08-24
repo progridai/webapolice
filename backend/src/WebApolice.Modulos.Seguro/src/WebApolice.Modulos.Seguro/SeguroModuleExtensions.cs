@@ -50,6 +50,12 @@ public static class SeguroModuleExtensions
         services.AddScoped<WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Application.UseCases.Apolices.InativarModulo.InativarModuloApoliceHandler>();
         services.AddScoped<WebApolice.Modulos.Seguro.Application.UseCases.Apolices.ListarModulos.ListarModulosDoSubestipulanteHandler>();
 
+        // Handlers - ApoliceVida (Etapa 1: Backend)
+        services.AddScoped<WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Application.UseCases.Apolices.CriarApoliceVida.CriarApoliceVidaHandler>();
+        services.AddScoped<WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Application.UseCases.Apolices.AlterarApoliceVida.AlterarApoliceVidaHandler>();
+        services.AddScoped<WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Application.UseCases.Apolices.InativarApoliceVida.InativarApoliceVidaHandler>();
+        services.AddScoped<WebApolice.Modulos.Seguro.Application.UseCases.Apolices.ObterApoliceVida.ObterApoliceVidaHandler>();
+
         // Handlers - Ramo
         services.AddScoped<WebApolice.Modulos.Seguro.Application.UseCases.Ramos.ListarRamos.ListarRamosHandler>();
         services.AddScoped<WebApolice.Modulos.Seguro.Application.UseCases.Ramos.ObterRamo.ObterRamoHandler>();

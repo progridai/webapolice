@@ -1,35 +1,33 @@
-using Npgsql;
 using System;
+using Npgsql;
 
-class Program
+namespace SqlRunner
 {
-    static void Main()
+    class Program
     {
-        var connString = "Host=painel.bravida.com.br;Port=5432;Database=webapolice_teste;Username=bravito;Password=Bravida@2023!;";
-        using var conn = new NpgsqlConnection(connString);
-        conn.Open();
+        static void Main(string[] args)
+        {
+            string connectionString = "Host=painel.bravida.com.br;Database=webapolice_teste;Username=bravito;Password=Bravida@2023!";
 
-        var sql = @"
-            CREATE TABLE IF NOT EXISTS seguro.apolice_subestipulante_modulo (
-                id bigint GENERATED ALWAYS AS IDENTITY,
-                apolice_subestipulante_id bigint NOT NULL,
-                modulo_id bigint NOT NULL,
-                data_inicio date,
-                data_fim date,
-                ativo boolean NOT NULL DEFAULT TRUE,
-                created_at timestamp with time zone NOT NULL DEFAULT (now()),
-                updated_at timestamp with time zone NOT NULL DEFAULT (now()),
-                deleted_at timestamp with time zone,
-                CONSTRAINT pk_apolice_subestipulante_modulo PRIMARY KEY (id),
-                CONSTRAINT fk_apolice_subestipulante_modulo_apolice_subestipulante_apolic FOREIGN KEY (apolice_subestipulante_id) REFERENCES seguro.apolice_subestipulante (id) ON DELETE RESTRICT
-            );
+            using var connection = new NpgsqlConnection(connectionString);
+            connection.Open();
 
-            CREATE INDEX IF NOT EXISTS ix_apolice_subestipulante_modulo_apolice_subestipulante_id ON seguro.apolice_subestipulante_modulo (apolice_subestipulante_id);
-            CREATE UNIQUE INDEX IF NOT EXISTS ix_apolice_subestipulante_modulo_apolice_subestipulante_id_mod ON seguro.apolice_subestipulante_modulo (apolice_subestipulante_id, modulo_id) WHERE deleted_at IS NULL;
-        ";
+            using var command = new NpgsqlCommand(@"
+                ALTER TABLE seguro.apolice_vida 
+                ADD COLUMN IF NOT EXISTS apolice_subestipulante_modulo_id bigint;
 
-        using var cmd = new NpgsqlCommand(sql, conn);
-        cmd.ExecuteNonQuery();
-        Console.WriteLine("Table created successfully!");
+                ALTER TABLE seguro.apolice_vida
+                DROP CONSTRAINT IF EXISTS fk_av_apolice_subestipulante_modulo;
+
+                ALTER TABLE seguro.apolice_vida
+                ADD CONSTRAINT fk_av_apolice_subestipulante_modulo 
+                FOREIGN KEY (apolice_subestipulante_modulo_id) 
+                REFERENCES seguro.apolice_subestipulante_modulo (id) ON DELETE SET NULL;
+            ", connection);
+            
+            command.ExecuteNonQuery();
+
+            Console.WriteLine("Coluna apolice_subestipulante_modulo_id adicionada com sucesso!");
+        }
     }
 }

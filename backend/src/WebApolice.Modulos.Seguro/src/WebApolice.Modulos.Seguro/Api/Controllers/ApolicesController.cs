@@ -111,19 +111,6 @@ public class ApolicesController : ControllerBase
         return Ok(result);
     }
 
-    [HttpGet("{publicId}/vidas")]
-    [AuthorizePermissao(PermissoesSeguranca.Apolices.Visualizar)]
-    public async Task<IActionResult> GetVidas(
-        Guid publicId,
-        [FromQuery] int pagina,
-        [FromQuery] int tamanhoPagina,
-        [FromServices] WebApolice.Modulos.Seguro.Application.UseCases.Apolices.ListarVidas.ListarApoliceVidasHandler handler,
-        CancellationToken cancellationToken)
-    {
-        var query = new WebApolice.Modulos.Seguro.Application.UseCases.Apolices.ListarVidas.ListarApoliceVidasQuery(publicId, pagina, tamanhoPagina);
-        var result = await handler.Handle(query, cancellationToken);
-        return Ok(result);
-    }
 
     [HttpGet("{publicId}/subestipulantes")]
     [AuthorizePermissao(PermissoesSeguranca.Apolices.Visualizar)]
@@ -362,6 +349,113 @@ public class ApolicesController : ControllerBase
             ApolicePublicId = publicId,
             SubestipulantePublicId = subestipulantePublicId,
             ModuloPublicId = moduloPublicId,
+            UsuarioPublicId = Guid.Parse(userContext.KeycloakSub ?? Guid.Empty.ToString())
+        };
+        await handler.Handle(command, cancellationToken);
+        return NoContent();
+    }
+    [HttpGet("{publicId}/vidas")]
+    [AuthorizePermissao(PermissoesSeguranca.Apolices.Visualizar)]
+    public async Task<IActionResult> GetVidas(
+        Guid publicId,
+        [FromQuery] int pagina,
+        [FromQuery] int tamanhoPagina,
+        [FromQuery] string? busca,
+        [FromQuery] string? status,
+        [FromQuery] Guid? subestipulantePublicId,
+        [FromQuery] Guid? moduloPublicId,
+        [FromQuery] DateOnly? vigenciaDataReferencia,
+        [FromServices] WebApolice.Modulos.Seguro.Application.UseCases.Apolices.ListarVidas.ListarApoliceVidasHandler handler,
+        CancellationToken cancellationToken)
+    {
+        var query = new WebApolice.Modulos.Seguro.Application.UseCases.Apolices.ListarVidas.ListarApoliceVidasQuery(
+            publicId,
+            pagina,
+            tamanhoPagina,
+            busca,
+            status,
+            subestipulantePublicId,
+            moduloPublicId,
+            vigenciaDataReferencia);
+        var result = await handler.Handle(query, cancellationToken);
+        return Ok(result);
+    }
+
+    [HttpGet("{publicId}/vidas/{vidaPublicId:guid}")]
+    [AuthorizePermissao(PermissoesSeguranca.Apolices.Visualizar)]
+    public async Task<IActionResult> GetVidaById(
+        Guid publicId,
+        Guid vidaPublicId,
+        [FromServices] WebApolice.Modulos.Seguro.Application.UseCases.Apolices.ObterApoliceVida.ObterApoliceVidaHandler handler,
+        CancellationToken cancellationToken)
+    {
+        var result = await handler.Handle(
+            new WebApolice.Modulos.Seguro.Application.UseCases.Apolices.ObterApoliceVida.ObterApoliceVidaQuery(publicId, vidaPublicId),
+            cancellationToken);
+        if (result == null) return NotFound();
+        return Ok(result);
+    }
+
+    [HttpPost("{publicId}/vidas")]
+    [AuthorizePermissao(PermissoesSeguranca.ApolicesVidas.Inserir)]
+    public async Task<IActionResult> PostVida(
+        Guid publicId,
+        [FromBody] CriarApoliceVidaRequest request,
+        [FromServices] WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Application.UseCases.Apolices.CriarApoliceVida.CriarApoliceVidaHandler handler,
+        [FromServices] WebApolice.Modulos.Seguranca.Application.Ports.IContextoUsuarioAutenticado userContext,
+        CancellationToken cancellationToken)
+    {
+        var command = new WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Application.UseCases.Apolices.CriarApoliceVida.CriarApoliceVidaCommand
+        {
+            ApolicePublicId = publicId,
+            ClientePublicId = request.ClientePublicId,
+            SubestipulantePublicId = request.SubestipulantePublicId,
+            ModuloPublicId = request.ModuloPublicId,
+            DataInicioVigencia = request.DataInicioVigencia,
+            DataFimVigencia = request.DataFimVigencia,
+            Observacao = request.Observacao,
+            UsuarioPublicId = Guid.Parse(userContext.KeycloakSub ?? Guid.Empty.ToString())
+        };
+        var vidaPublicId = await handler.Handle(command, cancellationToken);
+        return CreatedAtAction("GetVidaById", new { publicId, vidaPublicId }, new { publicId = vidaPublicId });
+    }
+
+    [HttpPut("{publicId}/vidas/{vidaPublicId:guid}")]
+    [AuthorizePermissao(PermissoesSeguranca.ApolicesVidas.Alterar)]
+    public async Task<IActionResult> PutVida(
+        Guid publicId,
+        Guid vidaPublicId,
+        [FromBody] AlterarApoliceVidaRequest request,
+        [FromServices] WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Application.UseCases.Apolices.AlterarApoliceVida.AlterarApoliceVidaHandler handler,
+        [FromServices] WebApolice.Modulos.Seguranca.Application.Ports.IContextoUsuarioAutenticado userContext,
+        CancellationToken cancellationToken)
+    {
+        var command = new WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Application.UseCases.Apolices.AlterarApoliceVida.AlterarApoliceVidaCommand
+        {
+            ApolicePublicId = publicId,
+            ApoliceVidaPublicId = vidaPublicId,
+            DataInicioVigencia = request.DataInicioVigencia,
+            DataFimVigencia = request.DataFimVigencia,
+            Observacao = request.Observacao,
+            UsuarioPublicId = Guid.Parse(userContext.KeycloakSub ?? Guid.Empty.ToString())
+        };
+        await handler.Handle(command, cancellationToken);
+        return NoContent();
+    }
+
+    [HttpPatch("{publicId}/vidas/{vidaPublicId:guid}/inativar")]
+    [AuthorizePermissao(PermissoesSeguranca.ApolicesVidas.Inativar)]
+    public async Task<IActionResult> PatchInativarVida(
+        Guid publicId,
+        Guid vidaPublicId,
+        [FromServices] WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Application.UseCases.Apolices.InativarApoliceVida.InativarApoliceVidaHandler handler,
+        [FromServices] WebApolice.Modulos.Seguranca.Application.Ports.IContextoUsuarioAutenticado userContext,
+        CancellationToken cancellationToken)
+    {
+        var command = new WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Application.UseCases.Apolices.InativarApoliceVida.InativarApoliceVidaCommand
+        {
+            ApolicePublicId = publicId,
+            ApoliceVidaPublicId = vidaPublicId,
             UsuarioPublicId = Guid.Parse(userContext.KeycloakSub ?? Guid.Empty.ToString())
         };
         await handler.Handle(command, cancellationToken);

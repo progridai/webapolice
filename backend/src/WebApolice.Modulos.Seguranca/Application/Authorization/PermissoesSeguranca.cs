@@ -60,6 +60,13 @@ public static class PermissoesSeguranca
         public const string Inativar = "apolices.subestipulantes.modulos.inativar";
     }
 
+    public static class ApolicesVidas
+    {
+        public const string Inserir = "apolices.vidas.inserir";
+        public const string Alterar = "apolices.vidas.alterar";
+        public const string Inativar = "apolices.vidas.inativar";
+    }
+
     public static class Ramos
     {
         public const string Visualizar = "ramos.visualizar";

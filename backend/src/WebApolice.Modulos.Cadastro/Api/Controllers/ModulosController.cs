@@ -16,24 +16,23 @@ namespace WebApolice.Modulos.Cadastro.Api.Controllers;
 [Authorize]
 public class ModulosController : ControllerBase
 {
-    private readonly IMediator _mediator;
-
-    public ModulosController(IMediator mediator)
-    {
-        _mediator = mediator;
-    }
-
     [HttpGet]
     [ProducesResponseType(typeof(PagedResult<ModuloListDto>), StatusCodes.Status200OK)]
-    public async Task<IActionResult> Listar([FromQuery] ListarModulosQuery query)
+    public async Task<IActionResult> Listar(
+        [FromQuery] ListarModulosQuery query,
+        [FromServices] ListarModulosHandler handler,
+        CancellationToken cancellationToken)
     {
-        var result = await _mediator.Send(query);
+        var result = await handler.Handle(query, cancellationToken);
         return Ok(result);
     }
 
     [HttpPost]
     [ProducesResponseType(typeof(ModuloDto), StatusCodes.Status201Created)]
-    public async Task<IActionResult> Criar([FromBody] CriarModuloRequest request)
+    public async Task<IActionResult> Criar(
+        [FromBody] CriarModuloRequest request,
+        [FromServices] CriarModuloHandler handler,
+        CancellationToken cancellationToken)
     {
         var command = new CriarModuloCommand
         {
@@ -41,13 +40,17 @@ public class ModulosController : ControllerBase
             Descricao = request.Descricao
         };
 
-        var result = await _mediator.Send(command);
+        var result = await handler.Handle(command, cancellationToken);
         return Created($"/api/modulos/{result.PublicId}", result);
     }
 
     [HttpPut("{publicId:guid}")]
     [ProducesResponseType(typeof(ModuloDto), StatusCodes.Status200OK)]
-    public async Task<IActionResult> Atualizar([FromRoute] Guid publicId, [FromBody] AtualizarModuloRequest request)
+    public async Task<IActionResult> Atualizar(
+        [FromRoute] Guid publicId, 
+        [FromBody] AtualizarModuloRequest request,
+        [FromServices] WebApolice.Modulos.Cadastro.Application.UseCases.Modulos.AtualizarModulo.AtualizarModuloHandler handler,
+        CancellationToken cancellationToken)
     {
         var command = new WebApolice.Modulos.Cadastro.Application.UseCases.Modulos.AtualizarModulo.AtualizarModuloCommand
         {
@@ -57,20 +60,23 @@ public class ModulosController : ControllerBase
             Ativo = request.Ativo
         };
 
-        var result = await _mediator.Send(command);
+        var result = await handler.Handle(command, cancellationToken);
         return Ok(result);
     }
 
     [HttpDelete("{publicId:guid}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
-    public async Task<IActionResult> Inativar([FromRoute] Guid publicId)
+    public async Task<IActionResult> Inativar(
+        [FromRoute] Guid publicId,
+        [FromServices] WebApolice.Modulos.Cadastro.Application.UseCases.Modulos.InativarModulo.InativarModuloHandler handler,
+        CancellationToken cancellationToken)
     {
         var command = new WebApolice.Modulos.Cadastro.Application.UseCases.Modulos.InativarModulo.InativarModuloCommand
         {
             PublicId = publicId
         };
 
-        await _mediator.Send(command);
+        await handler.Handle(command, cancellationToken);
         return NoContent();
     }
 }

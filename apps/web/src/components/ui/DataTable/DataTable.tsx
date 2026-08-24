@@ -112,19 +112,23 @@ export function DataTable<T>({
             const isExpanded = expandedKeys.has(key);
             return (
               <React.Fragment key={key}>
-                <TableRow className={isExpanded ? 'bg-slate-50' : ''}>
+                <TableRow className={isExpanded ? 'data-table-expanded-row' : ''}>
                   {renderExpandedRow && (
                     <TableCell align="center" style={{ width: '48px' }}>
                       <button 
                         type="button" 
                         onClick={() => toggleRow(key)}
-                        className="p-1 rounded hover:bg-slate-200 transition-colors"
+                        className="p-1 rounded transition-colors"
+                        style={{ backgroundColor: isExpanded ? 'var(--cor-fundo-aplicacao)' : 'transparent' }}
                         aria-expanded={isExpanded}
                       >
                         <ChevronRightIcon 
                           size={16} 
-                          className="text-slate-500 transition-transform duration-200" 
-                          style={{ transform: isExpanded ? 'rotate(90deg)' : 'none' }}
+                          className="transition-transform duration-200" 
+                          style={{ 
+                            transform: isExpanded ? 'rotate(90deg)' : 'none',
+                            color: 'var(--cor-texto-secundario)'
+                          }}
                         />
                       </button>
                     </TableCell>
@@ -136,9 +140,9 @@ export function DataTable<T>({
                   ))}
                 </TableRow>
                 {isExpanded && renderExpandedRow && (
-                  <TableRow className="bg-slate-50/50">
+                  <TableRow className="data-table-expanded-content">
                     <TableCell colSpan={columns.length + 1} className="p-0 border-t-0">
-                      <div className="p-4 border-l-2 border-primary">
+                      <div className="p-4" style={{ borderLeft: '2px solid var(--cor-marca-principal)' }}>
                         {renderExpandedRow(item)}
                       </div>
                     </TableCell>

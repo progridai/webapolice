@@ -71,7 +71,7 @@ export const ModuloSubestipulanteApoliceModal: React.FC<ModuloSubestipulanteApol
     try {
       setCarregandoCatalogo(true);
       const res = await modulosGlobaisApi.listar({ ativo: true, tamanhoPagina: 100 });
-      setCatalogoModulos(res.itens);
+      setCatalogoModulos(res.items || []);
     } catch (error) {
       console.error('Erro ao carregar catálogo de módulos globais:', error);
     } finally {
@@ -106,7 +106,7 @@ export const ModuloSubestipulanteApoliceModal: React.FC<ModuloSubestipulanteApol
       onSucesso();
       onClose();
     } catch (error: any) {
-      setErrorFeedback(error.response?.data?.message || 'Ocorreu um erro ao salvar o módulo.');
+      setErrorFeedback(error.message || 'Ocorreu um erro ao salvar o módulo.');
     } finally {
       setSubmitting(false);
     }

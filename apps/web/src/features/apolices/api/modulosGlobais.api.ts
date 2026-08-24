@@ -15,10 +15,10 @@ export interface ListarModulosGlobaisQuery {
 }
 
 export interface PagedResult<T> {
-  itens: T[];
-  totalItens: number;
-  pagina: number;
-  tamanhoPagina: number;
+  items: T[];
+  totalCount: number;
+  page: number;
+  pageSize: number;
 }
 
 export const modulosGlobaisApi = {

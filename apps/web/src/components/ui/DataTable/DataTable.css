@@ -34,3 +34,11 @@
   height: 48px;
   width: 100%;
 }
+
+.data-table-expanded-row td {
+  background-color: var(--cor-fundo-aplicacao) !important;
+}
+
+.data-table-expanded-content td {
+  background-color: var(--cor-fundo-secundario) !important;
+}

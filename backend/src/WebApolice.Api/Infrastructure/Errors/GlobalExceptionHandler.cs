@@ -98,6 +98,14 @@ public class GlobalExceptionHandler : IExceptionHandler
                 Detail = exception.Message,
                 Instance = context.Request.Path
             },
+            WebApolice.SharedKernel.Application.Exceptions.ValidacaoException => new ProblemDetails
+            {
+                Type = "https://webapolice/errors/regra-de-negocio",
+                Title = "Regra de negócio violada",
+                Status = StatusCodes.Status422UnprocessableEntity,
+                Detail = exception.Message,
+                Instance = context.Request.Path
+            },
             _ => new ProblemDetails
             {
                 Type = "https://webapolice/errors/erro-interno",

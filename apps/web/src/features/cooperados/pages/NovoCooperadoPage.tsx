@@ -19,7 +19,13 @@ export const NovoCooperadoPage: React.FC = () => {
       navigate(ROUTES.COOPERADOS);
     } catch (err: any) {
       console.error(err);
-      setError(err?.response?.data?.message || 'Ocorreu um erro ao cadastrar o cooperado/coordenador.');
+      if (typeof err.isValidationError === 'function' && err.isValidationError()) {
+        const validationErrors = err.getValidationErrors();
+        const flat = Object.entries(validationErrors).map(([field, msgs]) => `${field}: ${(msgs as string[])[0]}`).join(' | ');
+        setError(`Erro de validação: ${flat || err.message}`);
+      } else {
+        setError(err?.message || 'Ocorreu um erro ao cadastrar o cooperado/coordenador.');
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -30,7 +36,7 @@ export const NovoCooperadoPage: React.FC = () => {
   };
 
   return (
-    <main className="cooperado-page" tabIndex={-1}>
+    <main className="flex flex-col gap-6 p-6 max-w-4xl mx-auto focus:outline-none" role="main" tabIndex={-1}>
       <PageHeader
         title="Novo Cooperado"
         description="Cadastre um novo cooperado ou coordenador no sistema."
@@ -51,7 +57,7 @@ export const NovoCooperadoPage: React.FC = () => {
         </Alert>
       )}
 
-      <div className="cooperado-form-container mt-6">
+      <div className="w-full">
         <CooperadoForm
           onSubmit={handleSubmit}
           onCancel={handleCancel}

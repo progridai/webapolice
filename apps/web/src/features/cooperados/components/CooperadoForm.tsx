@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { FormField, Input, Textarea, Checkbox, FormSection, FormGrid, FormActions, Button } from '../../../components/ui';
+import { FormField, Input, Textarea, Checkbox, FormSection, FormGrid, FormActions, Button, Select } from '../../../components/ui';
 import { buscarCidadesPorUf, type CidadeResponse } from '../../clientes/api/localidadesApi';
 import { listarCoordenadoresAtivos } from '../api/cooperadosApi';
 import type { CooperadoFormData, CooperadoListDto } from '../types/cooperados.types';
@@ -120,7 +120,22 @@ export const CooperadoForm: React.FC<CooperadoFormProps> = ({
   }, []);
 
   const handleFormSubmit = async (data: FormSchemaType) => {
-    await onSubmit(data as unknown as CooperadoFormData);
+    const payload: any = { ...data };
+    
+    // Remove empty fields to avoid ASP.NET Core binding errors (especially with DateOnly? and long?)
+    Object.keys(payload).forEach(key => {
+      if (payload[key] === '' || payload[key] === null || payload[key] === undefined) {
+        delete payload[key];
+      }
+    });
+
+    // Ensure 0 is not sent for IDs that should be null
+    if (payload.cidadeId === 0) delete payload.cidadeId;
+    if (payload.coordenadorId === 0) delete payload.coordenadorId;
+    if (payload.bancoId === 0) delete payload.bancoId;
+    if (payload.numeroDependentes === 0) delete payload.numeroDependentes;
+    
+    await onSubmit(payload as CooperadoFormData);
   };
 
   return (
@@ -128,10 +143,10 @@ export const CooperadoForm: React.FC<CooperadoFormProps> = ({
       <FormSection title="Identificação" description="Dados principais do cooperado ou coordenador.">
         <FormGrid>
           <FormField label="Tipo" required error={errors.tipo?.message}>
-            <select {...register('tipo')} className="form-select">
+            <Select {...register('tipo')}>
               <option value="1">Cooperado</option>
               <option value="2">Coordenador</option>
-            </select>
+            </Select>
           </FormField>
           
           <FormField label="Código" error={errors.codigo?.message}>
@@ -152,12 +167,12 @@ export const CooperadoForm: React.FC<CooperadoFormProps> = ({
 
           {tipoSelecionado === 1 && (
             <FormField label="Coordenador responsável" required error={errors.coordenadorId?.message} className="md:col-span-2">
-              <select {...register('coordenadorId')} className="form-select">
+              <Select {...register('coordenadorId')}>
                 <option value="">Selecione um coordenador...</option>
                 {coordenadores.map(c => (
                   <option key={c.publicId} value={c.publicId}>{c.nome}</option>
                 ))}
-              </select>
+              </Select>
             </FormField>
           )}
         </FormGrid>
@@ -215,20 +230,20 @@ export const CooperadoForm: React.FC<CooperadoFormProps> = ({
             <Input {...register('bairro')} placeholder="Bairro" />
           </FormField>
           <FormField label="Estado (UF)" error={errors.uf?.message}>
-            <select {...register('uf')} className="form-select">
+            <Select {...register('uf')}>
               <option value="">Selecione...</option>
               {ESTADOS_BRASILEIROS.map(estado => (
                 <option key={estado} value={estado}>{estado}</option>
               ))}
-            </select>
+            </Select>
           </FormField>
           <FormField label="Cidade" error={errors.cidadeId?.message} className="md:col-span-2">
-            <select {...register('cidadeId')} className="form-select" disabled={loadingCidades || !ufSelecionada}>
+            <Select {...register('cidadeId')} disabled={loadingCidades || !ufSelecionada}>
               <option value="">{loadingCidades ? 'Carregando...' : 'Selecione uma cidade...'}</option>
               {cidades.map(c => (
                 <option key={c.id} value={c.id}>{c.nome}</option>
               ))}
-            </select>
+            </Select>
           </FormField>
         </FormGrid>
       </FormSection>
@@ -249,7 +264,7 @@ export const CooperadoForm: React.FC<CooperadoFormProps> = ({
                 <Checkbox
                   id="credenciado"
                   checked={field.value}
-                  onCheckedChange={field.onChange}
+                  onChange={field.onChange}
                   label="Cooperado Credenciado"
                 />
               )}
@@ -279,7 +294,7 @@ export const CooperadoForm: React.FC<CooperadoFormProps> = ({
       </FormSection>
 
       <FormActions>
-        <Button type="button" variant="outline" onClick={onCancel} disabled={isLoading}>
+        <Button type="button" variant="secondary" onClick={onCancel} disabled={isLoading}>
           Cancelar
         </Button>
         <Button type="submit" variant="primary" disabled={isLoading}>

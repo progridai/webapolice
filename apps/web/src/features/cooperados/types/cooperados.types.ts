@@ -9,18 +9,17 @@ export interface CooperadoListDto {
   email?: string;
   telefone?: string;
   tipo: TipoCooperado;
-  statusId: StatusCooperado;
+  statusId?: StatusCooperado;
+  desativado: boolean;
   dataCadastroUtc: string;
 }
 
 export interface ListagemPaginadaResult<T> {
   itens: T[];
-  totalGeral: number;
+  totalItens: number;
   totalPaginas: number;
   paginaAtual: number;
   tamanhoPagina: number;
-  temPaginaAnterior: boolean;
-  temPaginaProxima: boolean;
 }
 
 export interface CooperadosFiltersState {

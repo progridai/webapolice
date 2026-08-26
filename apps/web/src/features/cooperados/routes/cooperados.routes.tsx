@@ -12,6 +12,9 @@ const NovoCooperadoPage = lazy(() =>
 const EditarCooperadoPage = lazy(() =>
   import('../pages/EditarCooperadoPage').then((m) => ({ default: m.EditarCooperadoPage }))
 );
+const CooperadoDetalhePage = lazy(() =>
+  import('../pages/CooperadoDetalhePage').then((m) => ({ default: m.CooperadoDetalhePage }))
+);
 
 export const CooperadosRoutes = (
   <Route path={ROUTES.COOPERADOS}>
@@ -28,6 +31,14 @@ export const CooperadosRoutes = (
       element={
         <PermissionProtectedRoute permissao="cooperados.inserir">
           <NovoCooperadoPage />
+        </PermissionProtectedRoute>
+      }
+    />
+    <Route
+      path=":id"
+      element={
+        <PermissionProtectedRoute permissao="cooperados.visualizar">
+          <CooperadoDetalhePage />
         </PermissionProtectedRoute>
       }
     />

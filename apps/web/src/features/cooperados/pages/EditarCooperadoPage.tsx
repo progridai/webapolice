@@ -71,7 +71,11 @@ export const EditarCooperadoPage: React.FC = () => {
       navigate(ROUTES.COOPERADOS);
     } catch (err: any) {
       console.error(err);
-      setError(err?.response?.data?.message || 'Ocorreu um erro ao alterar o cooperado/coordenador.');
+      if (err.name === 'HttpApiError' && err.message) {
+        setError(err.message);
+      } else {
+        setError(err?.response?.data?.message || 'Ocorreu um erro ao alterar o cooperado/coordenador.');
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -82,7 +86,7 @@ export const EditarCooperadoPage: React.FC = () => {
   };
 
   return (
-    <main className="cooperado-page" tabIndex={-1}>
+    <main className="flex flex-col gap-6 p-6 max-w-4xl mx-auto w-full focus:outline-none" role="main" tabIndex={-1}>
       <PageHeader
         title="Editar Cooperado"
         description="Altere os dados do cooperado ou coordenador no sistema."
@@ -103,7 +107,7 @@ export const EditarCooperadoPage: React.FC = () => {
         </Alert>
       )}
 
-      <div className="cooperado-form-container mt-6">
+      <div className="w-full">
         {isLoadingData ? (
           <div className="space-y-4">
             <Skeleton className="h-20" />

@@ -81,10 +81,10 @@ export const CooperadosTable: React.FC<CooperadosTableProps> = ({
       ),
     },
     {
-      key: 'statusId',
+      key: 'status',
       label: 'Status',
       sortable: true,
-      render: (item) => <StatusBadge status={item.statusId} />,
+      render: (item) => <StatusBadge status={item.desativado ? 'inativo' : 'ativo'} />,
     },
     {
       key: 'acoes',

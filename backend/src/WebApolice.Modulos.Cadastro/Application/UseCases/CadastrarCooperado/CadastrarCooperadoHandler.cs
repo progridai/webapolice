@@ -55,7 +55,7 @@ public sealed class CadastrarCooperadoHandler
         try
         {
             var pessoa = await _repository.LocalizarPessoaPorCpfAsync(documentoLimpo, cancellationToken);
-            DateTime? dataNascimentoDt = command.DataNascimento.Value.ToDateTime(TimeOnly.MinValue);
+            DateTime? dataNascimentoDt = DateTime.SpecifyKind(command.DataNascimento.Value.ToDateTime(TimeOnly.MinValue), DateTimeKind.Utc);
             long pessoaId;
 
             if (pessoa != null)
@@ -144,7 +144,7 @@ public sealed class CadastrarCooperadoHandler
             {
                 var rgLimpo = new string(command.Rg.Where(char.IsLetterOrDigit).ToArray());
                 var docRg = await _repository.ObterDocumentoPrincipalAsync(pessoaId, "RG", cancellationToken);
-                var dtEmissaoRg = command.DataEmissaoRg.HasValue ? command.DataEmissaoRg.Value.ToDateTime(TimeOnly.MinValue) : (DateTime?)null;
+                var dtEmissaoRg = command.DataEmissaoRg.HasValue ? DateTime.SpecifyKind(command.DataEmissaoRg.Value.ToDateTime(TimeOnly.MinValue), DateTimeKind.Utc) : (DateTime?)null;
                 
                 if (docRg == null)
                 {

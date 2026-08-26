@@ -86,7 +86,7 @@ public sealed class AlterarCooperadoHandler
                 ?? throw new CooperadoInvalidoException("Dados de pessoa do Cooperado não encontrados.");
 
             // Atualizar Pessoa
-            DateTime? dataNascimentoDt = command.DataNascimento.Value.ToDateTime(TimeOnly.MinValue);
+            DateTime? dataNascimentoDt = DateTime.SpecifyKind(command.DataNascimento.Value.ToDateTime(TimeOnly.MinValue), DateTimeKind.Utc);
             pessoa.AtualizarDadosPessoais(command.Nome, dataNascimentoDt, null, null);
 
             // Atualizar Contatos
@@ -132,7 +132,7 @@ public sealed class AlterarCooperadoHandler
             {
                 var rgLimpo = new string(command.Rg.Where(char.IsLetterOrDigit).ToArray());
                 var docRg = await _repository.ObterDocumentoPrincipalAsync(pessoa.Id, "RG", cancellationToken);
-                var dtEmissaoRg = command.DataEmissaoRg.HasValue ? command.DataEmissaoRg.Value.ToDateTime(TimeOnly.MinValue) : (DateTime?)null;
+                var dtEmissaoRg = command.DataEmissaoRg.HasValue ? DateTime.SpecifyKind(command.DataEmissaoRg.Value.ToDateTime(TimeOnly.MinValue), DateTimeKind.Utc) : (DateTime?)null;
 
                 if (docRg == null)
                 {

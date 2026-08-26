@@ -136,7 +136,7 @@ export const CooperadosListPage: React.FC = () => {
           {hasData && data && (
             <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-2">
               <ResultsSummary
-                total={data.totalGeral}
+                total={data.totalItens}
                 currentPage={data.paginaAtual}
                 pageSize={data.tamanhoPagina}
                 itemName="cooperado"

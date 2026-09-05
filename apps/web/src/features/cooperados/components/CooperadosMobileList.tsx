@@ -44,7 +44,7 @@ export const CooperadosMobileList: React.FC<CooperadosMobileListProps> = ({ coop
                 {item.cpfMascarado}
               </p>
             </div>
-            <StatusBadge status={item.statusId} />
+            <StatusBadge status={item.desativado ? 'inativo' : 'ativo'} />
           </CardHeader>
           <CardContent className="pt-0">
             <div className="flex flex-col mt-2 mb-4 text-sm text-texto-secundario gap-1">

@@ -5,10 +5,16 @@ O **WebApolice** é a nova versão web e responsiva do sistema de ERP, concebida
 
 ## Requisitos Locais e Padronização de Versões
 
+Para configurar sua máquina rapidamente, utilize os comandos recomendados abaixo.
+
 ### Node.js (Frontend)
 * **Versão Oficial**: Node.js **24 LTS** e npm **11**. Novas versões major precisam ser validadas formalmente antes da adoção.
+* **Instalação (Winget)**:
+  ```powershell
+  winget install OpenJS.NodeJS.LTS
+  ```
 * **Controle de Versão**:
-  * Os arquivos [.nvmrc](file:///c:/PROJETOS/Rsul%20Automacoes/Projetos/webapolice/.nvmrc) e [.node-version](file:///c:/PROJETOS/Rsul%20Automacoes/Projetos/webapolice/.node-version) na raiz especificam a versão major `24`.
+  * Os arquivos `.nvmrc` e `.node-version` na raiz especificam a versão major `24`.
   * Ferramentas de gerenciamento de versão de Node (como `nvm` ou `fnm`) detectam automaticamente esses arquivos para alternar para a versão oficial local.
 * **Comando de Verificação**:
   ```bash
@@ -16,10 +22,13 @@ O **WebApolice** é a nova versão web e responsiva do sistema de ERP, concebida
   ```
 
 ### .NET SDK (Backend)
-* **Versão Oficial**: .NET SDK **10.0.301** (ou superior da mesma versão major).
+* **Versão Oficial**: .NET SDK **10.0.400** (ou superior da mesma versão major).
+* **Instalação (Winget)** *(abra o PowerShell como Administrador)*:
+  ```powershell
+  winget install Microsoft.DotNet.SDK.10
+  ```
 * **Pino de SDK (global.json)**:
-  * O arquivo [global.json](file:///c:/PROJETOS/Rsul%20Automacoes/Projetos/webapolice/global.json) na raiz garante que toda a equipe de engenharia e os pipelines de integração contínua (CI) utilizem a mesma versão base do SDK .NET 10.
-  * A política de `rollForward` está definida para `latestPatch`, aceitando atualizações corretivas e patches compatíveis de segurança, sem permitir a alteração silenciosa de versão major ou minor.
+  * O arquivo `global.json` na raiz garante que toda a equipe e os pipelines de CI utilizem a versão correta do SDK.
 * **Comando de Verificação**:
   ```bash
   dotnet --version
@@ -116,24 +125,30 @@ cd apps/web
 
 **Executar o backend localmente**
 
-Para iniciar a API e carregar as configurações de ambiente automaticamente de forma segura:
+Para iniciar a API corretamente, o projeto exige a configuração das variáveis de ambiente com foco no isolamento das bases de testes e produção.
 
-1. Acesse a pasta do projeto e execute:
+1. Crie o arquivo `backend/.env.local` e configure as seguintes chaves (substitua as senhas/hosts pelos valores fornecidos pela equipe de infraestrutura):
+   ```env
+   ASPNETCORE_ENVIRONMENT=Development
+   ConnectionStrings__PostgreSqlProducao=Host=<host>;Port=5432;Database=webapolice;Username=<user>;Password=<senha>
+   ConnectionStrings__PostgreSql=Host=<host>;Port=5432;Database=webapolice_teste;Username=<user>;Password=<senha>
+   ConnectionStrings__PostgreSqlTestes=Host=<host>;Port=5432;Database=webapolice_teste;Username=<user>;Password=<senha>
+   KeycloakAdmin__BaseUrl=https://auth.bravida.com.br/
+   KeycloakAdmin__Realm=webapolice
+   KeycloakAdmin__ClientId=webapolice-backend-admin
+   KeycloakAdmin__ClientSecret=<seu_client_secret>
+   Testes__PermitirBancoCompartilhado=true
+   ```
+2. Acesse a pasta do projeto e execute:
    ```cmd
    backend\run-api-local.bat
    ```
-2. Na **primeira execução**, o inicializador solicitará as variáveis sensíveis:
-   - *Connection string do PostgreSQL*
-   - *Client Secret do Keycloak* (será digitado de forma invisível/mascarada)
-3. Aguarde a inicialização automática da API.
-4. Nas **próximas execuções**, execute apenas o mesmo `.bat` (a API iniciará diretamente sem novas perguntas).
+3. O script lerá automaticamente as credenciais e iniciará a API em segundo plano.
 
 **Sobre o gerenciamento de configurações locais:**
-* O script salvará suas respostas no arquivo `backend/.env.local`.
-* Este arquivo funciona como a fonte local das variáveis de ambiente e **nunca deve ser commitado** (já está configurado no `.gitignore`).
-* O inicializador carrega essas variáveis somente no processo da API em execução (não polui as variáveis do Windows).
-* O "Client Secret" solicitado **não é um token** e não deve ser confundido com um; o token administrativo real é obtido automaticamente pela própria API usando o fluxo `client_credentials`.
-* Cada computador da equipe terá o seu próprio arquivo `.env.local` único. Em ambientes de servidor ou containers, estas mesmas chaves serão passadas nativamente pelas variáveis de ambiente da infraestrutura.
+* O arquivo `backend/.env.local` é pessoal e **nunca deve ser commitado** (já configurado no `.gitignore`).
+* As chaves com `__` são mapeadas automaticamente para as configurações aninhadas no .NET.
+* A separação das connection strings (`PostgreSqlProducao`, `PostgreSql` e `PostgreSqlTestes`) garante segurança contra execução acidental de comandos nocivos no banco de produção por scripts locais.
 
 **Outros comandos úteis (Diretório `backend/`):**
 

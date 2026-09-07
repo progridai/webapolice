@@ -3,8 +3,11 @@ import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { FormField, Input, Textarea, Checkbox, FormSection, FormGrid, FormActions, Button, Select } from '../../../components/ui';
+import { CpfInput, PhoneInput, CepInput, DateInput, EmailInput } from '../../../components/fields';
 import { buscarCidadesPorUf, type CidadeResponse } from '../../clientes/api/localidadesApi';
 import { listarCoordenadoresAtivos } from '../api/cooperadosApi';
+import { isValidCpf, isValidPhone, isValidCep } from '../../../shared/utils/validators';
+import { toCadastrarCooperadoRequest } from '../utils/cooperados.mappers';
 import type { CooperadoFormData, CooperadoListDto } from '../types/cooperados.types';
 
 const ESTADOS_BRASILEIROS = [
@@ -15,22 +18,22 @@ const ESTADOS_BRASILEIROS = [
 const formSchema = z.object({
   tipo: z.coerce.number().min(1).max(2),
   nome: z.string().min(3, 'Nome é obrigatório e deve ter no mínimo 3 caracteres'),
-  cpf: z.string().min(11, 'CPF inválido'),
+  cpf: z.string().refine(isValidCpf, 'CPF inválido'),
   dataNascimento: z.string().optional().or(z.literal('')),
   codigo: z.string().optional().or(z.literal('')),
   coordenadorId: z.coerce.number().optional().or(z.literal(0)),
   
-  rg: z.string().optional().or(z.literal('')),
-  orgaoEmissor: z.string().optional().or(z.literal('')),
+  rg: z.string().trim().max(20, 'Máximo 20 caracteres').regex(/^[a-zA-Z0-9- ]*$/, 'Apenas letras, números, espaços e hífen').optional().or(z.literal('')),
+  orgaoEmissor: z.string().trim().max(10, 'Máximo 10 caracteres').optional().or(z.literal('')),
   dataEmissaoRg: z.string().optional().or(z.literal('')),
   susep: z.string().optional().or(z.literal('')),
   inss: z.string().optional().or(z.literal('')),
   issqn: z.string().optional().or(z.literal('')),
   
-  telefone: z.string().optional().or(z.literal('')),
-  email: z.string().email('E-mail inválido').optional().or(z.literal('')),
+  telefone: z.string().optional().or(z.literal('')).refine(val => !val || isValidPhone(val), 'Telefone inválido'),
+  email: z.string().trim().email('E-mail inválido').optional().or(z.literal('')),
   
-  cep: z.string().optional().or(z.literal('')),
+  cep: z.string().optional().or(z.literal('')).refine(val => !val || isValidCep(val), 'CEP inválido'),
   logradouro: z.string().optional().or(z.literal('')),
   numero: z.string().optional().or(z.literal('')),
   complemento: z.string().optional().or(z.literal('')),
@@ -43,8 +46,8 @@ const formSchema = z.object({
   credenciado: z.boolean().default(false),
   
   bancoId: z.coerce.number().optional().or(z.literal(0)),
-  agencia: z.string().optional().or(z.literal('')),
-  contaCorrente: z.string().optional().or(z.literal('')),
+  agencia: z.string().trim().max(10, 'Máximo 10 caracteres').regex(/^[a-zA-Z0-9-]*$/, 'Formato inválido').optional().or(z.literal('')),
+  contaCorrente: z.string().trim().max(20, 'Máximo 20 caracteres').regex(/^[a-zA-Z0-9-]*$/, 'Formato inválido').optional().or(z.literal('')),
   
   observacao: z.string().optional().or(z.literal('')),
 }).superRefine((data, ctx) => {
@@ -120,21 +123,7 @@ export const CooperadoForm: React.FC<CooperadoFormProps> = ({
   }, []);
 
   const handleFormSubmit = async (data: FormSchemaType) => {
-    const payload: any = { ...data };
-    
-    // Remove empty fields to avoid ASP.NET Core binding errors (especially with DateOnly? and long?)
-    Object.keys(payload).forEach(key => {
-      if (payload[key] === '' || payload[key] === null || payload[key] === undefined) {
-        delete payload[key];
-      }
-    });
-
-    // Ensure 0 is not sent for IDs that should be null
-    if (payload.cidadeId === 0) delete payload.cidadeId;
-    if (payload.coordenadorId === 0) delete payload.coordenadorId;
-    if (payload.bancoId === 0) delete payload.bancoId;
-    if (payload.numeroDependentes === 0) delete payload.numeroDependentes;
-    
+    const payload = toCadastrarCooperadoRequest(data);
     await onSubmit(payload as CooperadoFormData);
   };
 
@@ -158,11 +147,11 @@ export const CooperadoForm: React.FC<CooperadoFormProps> = ({
           </FormField>
 
           <FormField label="CPF" required error={errors.cpf?.message}>
-            <Input {...register('cpf')} placeholder="000.000.000-00" />
+            <CpfInput {...register('cpf')} placeholder="000.000.000-00" />
           </FormField>
 
           <FormField label="Data de Nascimento" error={errors.dataNascimento?.message}>
-            <Input type="date" {...register('dataNascimento')} />
+            <DateInput {...register('dataNascimento')} />
           </FormField>
 
           {tipoSelecionado === 1 && (
@@ -187,7 +176,7 @@ export const CooperadoForm: React.FC<CooperadoFormProps> = ({
             <Input {...register('orgaoEmissor')} placeholder="Ex: SSP" />
           </FormField>
           <FormField label="Data de Emissão" error={errors.dataEmissaoRg?.message}>
-            <Input type="date" {...register('dataEmissaoRg')} />
+            <DateInput {...register('dataEmissaoRg')} />
           </FormField>
           <FormField label="SUSEP" error={errors.susep?.message}>
             <Input {...register('susep')} placeholder="Registro SUSEP" />
@@ -204,10 +193,10 @@ export const CooperadoForm: React.FC<CooperadoFormProps> = ({
       <FormSection title="Contato" description="Telefone e E-mail principais.">
         <FormGrid>
           <FormField label="Telefone" error={errors.telefone?.message}>
-            <Input {...register('telefone')} placeholder="(00) 00000-0000" />
+            <PhoneInput {...register('telefone')} placeholder="(00) 00000-0000" />
           </FormField>
           <FormField label="E-mail" error={errors.email?.message}>
-            <Input type="email" {...register('email')} placeholder="email@exemplo.com" />
+            <EmailInput {...register('email')} placeholder="email@exemplo.com" />
           </FormField>
         </FormGrid>
       </FormSection>
@@ -215,7 +204,7 @@ export const CooperadoForm: React.FC<CooperadoFormProps> = ({
       <FormSection title="Endereço" description="Endereço residencial ou comercial.">
         <FormGrid>
           <FormField label="CEP" error={errors.cep?.message}>
-            <Input {...register('cep')} placeholder="00000-000" />
+            <CepInput {...register('cep')} placeholder="00000-000" />
           </FormField>
           <FormField label="Logradouro" className="md:col-span-2" error={errors.logradouro?.message}>
             <Input {...register('logradouro')} placeholder="Rua, Avenida, etc." />
@@ -254,7 +243,7 @@ export const CooperadoForm: React.FC<CooperadoFormProps> = ({
             <Input type="number" {...register('numeroDependentes')} />
           </FormField>
           <FormField label="Data de Inscrição" error={errors.dataInscricao?.message}>
-            <Input type="date" {...register('dataInscricao')} />
+            <DateInput {...register('dataInscricao')} />
           </FormField>
           <div className="md:col-span-2 flex items-center h-full pt-6">
             <Controller

@@ -11,6 +11,7 @@ using WebApolice.Modulos.Cadastro.Infrastructure.Persistence;
 using WebApolice.Modulos.Cadastro.Infrastructure.Persistence.Models;
 using WebApolice.Auditoria.Contracts;
 using WebApolice.Auditoria.Domain;
+using WebApolice.Modulos.Cadastro.Domain.Validators;
 
 namespace WebApolice.Modulos.Cadastro.Application.UseCases.CadastrarCooperado;
 
@@ -32,16 +33,23 @@ public sealed class CadastrarCooperadoHandler
         if (string.IsNullOrWhiteSpace(command.Nome))
             throw new CooperadoInvalidoException("O nome é obrigatório.");
 
-        var documentoLimpo = LimparDocumento(command.Cpf);
+        if (!string.IsNullOrWhiteSpace(command.Cpf) && Regex.IsMatch(command.Cpf, @"[a-zA-Z]")) 
+            throw new CooperadoInvalidoException("CPF contém caracteres incompatíveis.");
+
+        var documentoLimpo = string.IsNullOrWhiteSpace(command.Cpf) ? string.Empty : Regex.Replace(command.Cpf, "[^0-9]", "");
         if (string.IsNullOrWhiteSpace(documentoLimpo))
             throw new CooperadoInvalidoException("CPF é obrigatório.");
 
         if (!command.DataNascimento.HasValue)
             throw new CooperadoInvalidoException("A data de nascimento é obrigatória.");
 
-        var documentoValido = ValidarCpf(documentoLimpo);
+        var documentoValido = DocumentoValidator.IsValidCpf(documentoLimpo);
         if (!documentoValido)
             throw new CooperadoInvalidoException("CPF inválido.");
+            
+        RegrasCadastraisValidator.ValidarRg(command.Rg);
+        RegrasCadastraisValidator.ValidarAgencia(command.Agencia);
+        RegrasCadastraisValidator.ValidarContaCorrente(command.ContaCorrente);
 
         if (command.Tipo == TipoAgenciador.Cooperado && command.CoordenadorId.HasValue)
         {
@@ -216,18 +224,5 @@ public sealed class CadastrarCooperadoHandler
             await transaction.RollbackAsync(cancellationToken);
             throw;
         }
-    }
-
-    private string LimparDocumento(string? doc)
-    {
-        if (string.IsNullOrWhiteSpace(doc)) return string.Empty;
-        return Regex.Replace(doc, "[^0-9]", "");
-    }
-
-    private bool ValidarCpf(string cpf)
-    {
-        if (cpf.Length != 11) return false;
-        if (cpf.All(c => c == cpf[0])) return false;
-        return true; // Simple mock for length. Project already assumed valid via frontend or full algorithm, keeping it simple.
     }
 }

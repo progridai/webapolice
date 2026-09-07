@@ -11,6 +11,7 @@ using WebApolice.Modulos.Cadastro.Infrastructure.Persistence;
 using WebApolice.Modulos.Cadastro.Infrastructure.Persistence.Models;
 using WebApolice.Auditoria.Contracts;
 using WebApolice.Auditoria.Domain;
+using WebApolice.Modulos.Cadastro.Domain.Validators;
 
 namespace WebApolice.Modulos.Cadastro.Application.UseCases.AlterarCooperado;
 
@@ -64,6 +65,10 @@ public sealed class AlterarCooperadoHandler
 
         if (!command.DataNascimento.HasValue)
             throw new CooperadoInvalidoException("A data de nascimento é obrigatória.");
+            
+        RegrasCadastraisValidator.ValidarRg(command.Rg);
+        RegrasCadastraisValidator.ValidarAgencia(command.Agencia);
+        RegrasCadastraisValidator.ValidarContaCorrente(command.ContaCorrente);
 
         await using var transaction = await _dbContext.BeginTransactionAsync(cancellationToken);
 

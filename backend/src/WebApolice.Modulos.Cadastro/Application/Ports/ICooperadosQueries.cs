@@ -18,5 +18,5 @@ public sealed record CooperadoListDto(
 
 public interface ICooperadosQueries
 {
-    Task<WebApolice.Modulos.Cadastro.Application.UseCases.ListarClientes.ListagemPaginadaResult<CooperadoListDto>> ListarAsync(int pagina, int tamanhoPagina, string? termoBusca, short? tipo, CancellationToken cancellationToken);
+    Task<WebApolice.Modulos.Cadastro.Application.UseCases.ListarClientes.ListagemPaginadaResult<CooperadoListDto>> ListarAsync(int pagina, int tamanhoPagina, string? termoBusca, short? tipo, short? status, CancellationToken cancellationToken);
 }

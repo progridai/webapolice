@@ -38,7 +38,7 @@ public sealed record AlterarCooperadoCommand(
     int? NumeroDependentes,
     DateOnly? DataInscricao,
     bool? Credenciado,
-    long? CoordenadorId,
+    Guid? CoordenadorId,
     long? BancoId,
     string? Agencia,
     string? ContaCorrente,
@@ -80,11 +80,13 @@ public sealed class AlterarCooperadoHandler
             if (!agenciador.PessoaId.HasValue)
                 throw new CooperadoInvalidoException("Dados pessoais do Cooperado não encontrados.");
 
+            long? coordenadorInternoId = null;
             if (agenciador.Tipo == TipoAgenciador.Cooperado && command.CoordenadorId.HasValue)
             {
-                var coordExiste = await _repository.CoordenadorAtivoExisteAsync(command.CoordenadorId.Value, cancellationToken);
-                if (!coordExiste)
+                var coord = await _repository.ObterPorPublicIdAsync(command.CoordenadorId.Value, cancellationToken);
+                if (coord == null || coord.Desativado)
                     throw new CooperadoInvalidoException("Coordenador selecionado é inválido, inexistente ou inativo.");
+                coordenadorInternoId = coord.Id;
             }
 
             var pessoa = await _repository.LocalizarPessoaPorIdAsync(agenciador.PessoaId.Value, cancellationToken)
@@ -166,7 +168,7 @@ public sealed class AlterarCooperadoHandler
                 command.NumeroDependentes,
                 command.DataInscricao,
                 command.Credenciado,
-                command.CoordenadorId,
+                coordenadorInternoId,
                 command.BancoId,
                 command.Agencia,
                 command.ContaCorrente,

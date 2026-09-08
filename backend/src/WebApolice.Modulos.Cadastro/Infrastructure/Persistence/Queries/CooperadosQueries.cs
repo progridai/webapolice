@@ -16,7 +16,7 @@ public sealed class CooperadosQueries : ICooperadosQueries
         _dbContext = dbContext;
     }
 
-    public async Task<WebApolice.Modulos.Cadastro.Application.UseCases.ListarClientes.ListagemPaginadaResult<CooperadoListDto>> ListarAsync(int pagina, int tamanhoPagina, string? termoBusca, short? tipo, CancellationToken cancellationToken)
+    public async Task<WebApolice.Modulos.Cadastro.Application.UseCases.ListarClientes.ListagemPaginadaResult<CooperadoListDto>> ListarAsync(int pagina, int tamanhoPagina, string? termoBusca, short? tipo, short? status, CancellationToken cancellationToken)
     {
         var query = from a in _dbContext.Agenciadores
                     join p in _dbContext.Pessoas on a.PessoaId equals p.Id
@@ -26,6 +26,14 @@ public sealed class CooperadosQueries : ICooperadosQueries
         if (tipo.HasValue)
         {
             query = query.Where(x => (short)x.a.Tipo == tipo.Value);
+        }
+
+        if (status.HasValue)
+        {
+            if (status.Value == 1)
+                query = query.Where(x => !x.a.Desativado);
+            else if (status.Value == 2)
+                query = query.Where(x => x.a.Desativado);
         }
 
         if (!string.IsNullOrWhiteSpace(termoBusca))

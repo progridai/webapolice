@@ -57,7 +57,7 @@ export interface CooperadoDetalheDto {
   numeroDependentes?: number;
   dataInscricao?: string;
   credenciado?: boolean;
-  coordenadorId?: number;
+  coordenadorId?: string;
   bancoId?: number;
   agencia?: string;
   contaCorrente?: string;
@@ -90,7 +90,7 @@ export interface CooperadoFormData {
   numeroDependentes?: number;
   dataInscricao?: string;
   credenciado?: boolean;
-  coordenadorId?: number;
+  coordenadorId?: string;
   bancoId?: number;
   agencia?: string;
   contaCorrente?: string;

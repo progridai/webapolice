@@ -51,11 +51,13 @@ public sealed class CadastrarCooperadoHandler
         RegrasCadastraisValidator.ValidarAgencia(command.Agencia);
         RegrasCadastraisValidator.ValidarContaCorrente(command.ContaCorrente);
 
+        long? coordenadorInternoId = null;
         if (command.Tipo == TipoAgenciador.Cooperado && command.CoordenadorId.HasValue)
         {
-            var coordExiste = await _repository.CoordenadorAtivoExisteAsync(command.CoordenadorId.Value, cancellationToken);
-            if (!coordExiste)
+            var coord = await _repository.ObterPorPublicIdAsync(command.CoordenadorId.Value, cancellationToken);
+            if (coord == null || coord.Desativado)
                 throw new CooperadoInvalidoException("Coordenador selecionado é inválido, inexistente ou inativo.");
+            coordenadorInternoId = coord.Id;
         }
 
         await using var transaction = await _dbContext.BeginTransactionAsync(cancellationToken);
@@ -182,7 +184,7 @@ public sealed class CadastrarCooperadoHandler
                 command.NumeroDependentes,
                 command.DataInscricao,
                 command.Credenciado,
-                command.CoordenadorId,
+                coordenadorInternoId,
                 command.BancoId,
                 command.Agencia,
                 command.ContaCorrente,

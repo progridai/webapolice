@@ -17,7 +17,6 @@ export function toCadastrarCooperadoRequest(data: CooperadoFormData): any {
 
   // Zero IDs to null
   if (payload.cidadeId === 0) delete payload.cidadeId;
-  if (payload.coordenadorId === 0) delete payload.coordenadorId;
   if (payload.bancoId === 0) delete payload.bancoId;
   if (payload.numeroDependentes === 0) delete payload.numeroDependentes;
 

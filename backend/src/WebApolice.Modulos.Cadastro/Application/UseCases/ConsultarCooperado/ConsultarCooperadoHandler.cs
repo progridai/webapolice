@@ -33,7 +33,7 @@ public sealed record CooperadoDetalheDto(
     int? NumeroDependentes,
     DateOnly? DataInscricao,
     bool? Credenciado,
-    long? CoordenadorId,
+    Guid? CoordenadorId,
     long? BancoId,
     string? Agencia,
     string? ContaCorrente,
@@ -65,6 +65,13 @@ public sealed class ConsultarCooperadoHandler
         var endereco = await _repository.ObterEnderecoPrincipalAsync(pessoa.Id, cancellationToken);
         var docRg = await _repository.ObterDocumentoPrincipalAsync(pessoa.Id, "RG", cancellationToken);
 
+        Guid? coordenadorPublicId = null;
+        if (agenciador.CoordenadorId.HasValue)
+        {
+            var coord = await _repository.ObterPorIdAsync(agenciador.CoordenadorId.Value, cancellationToken);
+            coordenadorPublicId = coord?.PublicId;
+        }
+
         return new CooperadoDetalheDto(
             agenciador.PublicId,
             pessoa.Nome,
@@ -90,7 +97,7 @@ public sealed class ConsultarCooperadoHandler
             agenciador.NumeroDependentes,
             agenciador.DataInscricao,
             agenciador.Credenciado,
-            agenciador.CoordenadorId,
+            coordenadorPublicId,
             agenciador.BancoId,
             agenciador.Agencia,
             agenciador.ContaCorrente,

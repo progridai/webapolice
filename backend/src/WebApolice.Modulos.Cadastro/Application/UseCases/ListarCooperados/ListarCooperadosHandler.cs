@@ -9,7 +9,8 @@ public sealed record ListarCooperadosQuery(
     int Pagina = 1,
     int TamanhoPagina = 10,
     string? TermoBusca = null,
-    short? Tipo = null
+    short? Tipo = null,
+    short? Status = null
 );
 
 public sealed class ListarCooperadosHandler
@@ -28,6 +29,7 @@ public sealed class ListarCooperadosHandler
             query.TamanhoPagina,
             query.TermoBusca,
             query.Tipo,
+            query.Status,
             cancellationToken
         );
     }

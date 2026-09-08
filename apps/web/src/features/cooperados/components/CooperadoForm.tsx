@@ -21,7 +21,7 @@ const formSchema = z.object({
   cpf: z.string().refine(isValidCpf, 'CPF inválido'),
   dataNascimento: z.string().optional().or(z.literal('')),
   codigo: z.string().optional().or(z.literal('')),
-  coordenadorId: z.coerce.number().optional().or(z.literal(0)),
+  coordenadorId: z.string().optional().or(z.literal('')),
   
   rg: z.string().trim().max(20, 'Máximo 20 caracteres').regex(/^[a-zA-Z0-9- ]*$/, 'Apenas letras, números, espaços e hífen').optional().or(z.literal('')),
   orgaoEmissor: z.string().trim().max(10, 'Máximo 10 caracteres').optional().or(z.literal('')),

@@ -31,7 +31,7 @@ public sealed record CadastrarCooperadoCommand(
     int? NumeroDependentes,
     DateOnly? DataInscricao,
     bool? Credenciado,
-    long? CoordenadorId,
+    Guid? CoordenadorId,
     long? BancoId,
     string? Agencia,
     string? ContaCorrente,

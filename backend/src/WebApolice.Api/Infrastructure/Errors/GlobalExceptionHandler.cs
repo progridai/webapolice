@@ -66,7 +66,7 @@ public class GlobalExceptionHandler : IExceptionHandler
                 Detail = exception.Message,
                 Instance = context.Request.Path
             },
-            ClienteNaoEncontradoException => new ProblemDetails
+            ClienteNaoEncontradoException or CooperadoNaoEncontradoException => new ProblemDetails
             {
                 Type = "https://webapolice/errors/recurso-nao-encontrado",
                 Title = "Recurso não encontrado",
@@ -74,7 +74,7 @@ public class GlobalExceptionHandler : IExceptionHandler
                 Detail = exception.Message,
                 Instance = context.Request.Path
             },
-            ClienteJaCadastradoException => new ProblemDetails
+            ClienteJaCadastradoException or CooperadoJaCadastradoException or EstipulanteConflitoException => new ProblemDetails
             {
                 Type = "https://webapolice/errors/conflito",
                 Title = "Conflito",
@@ -82,7 +82,7 @@ public class GlobalExceptionHandler : IExceptionHandler
                 Detail = exception.Message,
                 Instance = context.Request.Path
             },
-            ClienteInvalidoException => new ProblemDetails
+            ClienteInvalidoException or CooperadoInvalidoException or EstipulanteInvalidoException or EstipulanteDominioException => new ProblemDetails
             {
                 Type = "https://webapolice/errors/regra-de-negocio",
                 Title = "Regra de negócio violada",

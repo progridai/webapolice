@@ -30,13 +30,14 @@ public sealed class CooperadosController : ControllerBase
         [FromQuery] int tamanho_pagina,
         [FromQuery] string? nome,
         [FromQuery] string? cpf,
+        [FromQuery] short? tipo,
         [FromQuery] short? status,
         [FromQuery] string? ordenar_por,
         [FromQuery] string? direcao,
         [FromServices] ListarCooperadosHandler handler,
         CancellationToken cancellationToken)
     {
-        var query = new ListarCooperadosQuery(pagina, tamanho_pagina, nome ?? cpf, status);
+        var query = new ListarCooperadosQuery(pagina, tamanho_pagina, nome ?? cpf, tipo, status);
         var result = await handler.Handle(query, cancellationToken);
         return Ok(result);
     }

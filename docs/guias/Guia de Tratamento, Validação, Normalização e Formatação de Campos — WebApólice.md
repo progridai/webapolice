@@ -268,6 +268,8 @@ A identificação deverá considerar a quantidade de dígitos e o tipo de pessoa
 
 ## CEP
 
+O CEP no sistema possui um fluxo integrado de auto-preenchimento e validação assíncrona, tendo como referência arquitetural o módulo de Cooperados.
+
 Entrada:
 
 `00000-000`
@@ -283,6 +285,36 @@ Validação:
 Exibição:
 
 `00000-000`
+
+### Regras de Integração de Endereço
+
+O preenchimento automático de endereço via CEP deve seguir **rigorosamente** as seguintes diretrizes em todos os formulários da aplicação:
+
+1. **Endpoint Global:**
+   - Todo módulo deve utilizar o serviço global `GET /api/enderecos/cep/{cep}` fornecido pelo backend (camada SharedKernel / Shared Infrastructure) para consultar os dados.
+   - O Frontend não deve conectar diretamente a provedores externos (ex: ViaCEP).
+
+2. **Gatilhos da Consulta:**
+   - A consulta ocorre **somente** quando o usuário informa 8 dígitos numéricos válidos.
+   - O `CepInput` atua exclusivamente como componente de interface visual, não contendo lógica de requisição acoplada. A requisição deve pertencer ao nível do formulário/feature.
+   - A consulta é disparada apenas mediante alteração explícita pelo usuário. Evite disparos silenciosos automáticos apenas porque os dados iniciais (`initialData`) foram carregados na tela.
+
+3. **Controle e Cancelamento de Requisições:**
+   - O uso de `AbortController` é **obrigatório**. Caso o usuário altere a digitação antes da resposta finalizar, a requisição anterior deve ser cancelada para evitar preenchimentos fora de ordem ou sobrescritas tardias.
+
+4. **Tratamento de Estado na UI:**
+   - **Loading:** O campo `CepInput` **NÃO deve ser desabilitado** (`disabled`) durante a busca, mantendo a digitação livre. Utilize indicadores visuais textuais (ex: alterando o Label para `CEP (Buscando...)`).
+   - **Limpeza Reativa:** Se um CEP válido for apagado ou modificado para um valor inválido/incompleto, os campos originados pela busca (Logradouro, Bairro, UF e CidadeId) devem ser **limpos**.
+   - **Blindagem de Dados do Usuário:** O Número e o Complemento devem ser totalmente blindados e **nunca** sobrescritos ou limpos pelas rotinas de busca.
+
+5. **Sincronia Assíncrona de Cidades (UF):**
+   - Ao preencher automaticamente a UF retornada pelo CEP, o frontend fará o disparo para carregamento das cidades correspondentes (API `/api/localidades/cidades`).
+   - O campo `cidadeId` retornado pelo serviço de CEP deve ser atribuído determinísticamente (ex: utilizando estado como `pendingCidadeId`), garantindo que ele só seja selecionado **após** a lista de cidades terminar de carregar no componente select.
+
+6. **Falhas e Contingências:**
+   - **Não encontrado (404):** Usar o sistema de erros do próprio validador do formulário (ex: `setError` do *react-hook-form*) para notificar `CEP não encontrado` sob o campo.
+   - **Erro no serviço (500/502/etc):** Informar "Serviço indisponível. Preencha manualmente".
+   - Falhas no CEP ou instabilidades externas nunca devem travar o sistema ou impedir o usuário de realizar o preenchimento manual do endereço e prosseguir com a operação.
 
 ---
 

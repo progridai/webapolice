@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -6,6 +6,7 @@ import { FormField, Input, Textarea, Checkbox, FormSection, FormGrid, FormAction
 import { CpfInput, PhoneInput, CepInput, DateInput, EmailInput } from '../../../components/fields';
 import { buscarCidadesPorUf, type CidadeResponse } from '../../clientes/api/localidadesApi';
 import { listarCoordenadoresAtivos } from '../api/cooperadosApi';
+import { consultarCep } from '../api/enderecosApi';
 import { isValidCpf, isValidPhone, isValidCep } from '../../../shared/utils/validators';
 import { toCadastrarCooperadoRequest } from '../utils/cooperados.mappers';
 import type { CooperadoFormData, CooperadoListDto } from '../types/cooperados.types';
@@ -51,6 +52,7 @@ const formSchema = z.object({
   
   observacao: z.string().optional().or(z.literal('')),
 }).superRefine((data, ctx) => {
+  console.log('Zod superRefine payload:', data);
   if (data.tipo === 1 && !data.coordenadorId) {
     ctx.addIssue({
       path: ['coordenadorId'],
@@ -79,7 +81,11 @@ export const CooperadoForm: React.FC<CooperadoFormProps> = ({
   const [loadingCidades, setLoadingCidades] = useState(false);
   const [coordenadores, setCoordenadores] = useState<CooperadoListDto[]>([]);
 
-  const { register, control, handleSubmit, formState: { errors }, watch } = useForm<FormSchemaType>({
+  const [isBuscandoCep, setIsBuscandoCep] = useState(false);
+  const [pendingCidadeId, setPendingCidadeId] = useState<number | null>(null);
+  const lastFetchedCepRef = useRef<string | null>(initialData?.cep || null);
+
+  const { register, control, handleSubmit, formState: { errors }, watch, setValue, setError, clearErrors } = useForm<FormSchemaType>({
     resolver: zodResolver(formSchema),
     defaultValues: initialData || {
       tipo: 1,
@@ -88,7 +94,7 @@ export const CooperadoForm: React.FC<CooperadoFormProps> = ({
   });
 
   const ufSelecionada = watch('uf');
-  const tipoSelecionado = watch('tipo');
+  const tipoSelecionado = Number(watch('tipo'));
 
   useEffect(() => {
     async function carregarCidades() {
@@ -100,6 +106,14 @@ export const CooperadoForm: React.FC<CooperadoFormProps> = ({
       try {
         const data = await buscarCidadesPorUf(ufSelecionada);
         setCidades(data);
+
+        if (pendingCidadeId) {
+          const cidadeExiste = data.some(c => c.id === pendingCidadeId);
+          if (cidadeExiste) {
+            setValue('cidadeId', pendingCidadeId);
+          }
+          setPendingCidadeId(null);
+        }
       } catch (err) {
         console.error('Erro ao carregar cidades', err);
         setCidades([]);
@@ -108,7 +122,72 @@ export const CooperadoForm: React.FC<CooperadoFormProps> = ({
       }
     }
     carregarCidades();
-  }, [ufSelecionada]);
+  }, [ufSelecionada, pendingCidadeId, setValue]);
+
+  const cepValue = watch('cep');
+
+  useEffect(() => {
+    const cepClean = cepValue?.replace(/\D/g, '') || '';
+    
+    if (cepClean.length !== 8) {
+      if (lastFetchedCepRef.current && lastFetchedCepRef.current !== cepValue) {
+        setValue('logradouro', '');
+        setValue('bairro', '');
+        setValue('uf', '');
+        setValue('cidadeId', 0);
+        lastFetchedCepRef.current = null;
+      }
+      return;
+    }
+
+    if (cepValue === lastFetchedCepRef.current) {
+      return;
+    }
+
+    const abortController = new AbortController();
+
+    async function fetchCep() {
+      setIsBuscandoCep(true);
+      clearErrors('cep');
+      
+      try {
+        const result = await consultarCep(cepClean, abortController.signal);
+        
+        lastFetchedCepRef.current = cepValue!;
+        setValue('logradouro', result.logradouro || '');
+        setValue('bairro', result.bairro || '');
+        setValue('uf', result.uf);
+        
+        if (result.cidadeId) {
+          setPendingCidadeId(result.cidadeId);
+        } else {
+          setValue('cidadeId', 0);
+        }
+      } catch (err: any) {
+        if (err.name === 'CanceledError' || err.code === 'ERR_CANCELED') return;
+        
+        lastFetchedCepRef.current = cepValue!;
+        setValue('logradouro', '');
+        setValue('bairro', '');
+        setValue('uf', '');
+        setValue('cidadeId', 0);
+
+        if (err.response?.status === 404) {
+          setError('cep', { type: 'manual', message: 'CEP não encontrado' });
+        } else {
+          setError('cep', { type: 'manual', message: 'Serviço indisponível. Preencha manualmente.' });
+        }
+      } finally {
+        setIsBuscandoCep(false);
+      }
+    }
+
+    fetchCep();
+
+    return () => {
+      abortController.abort();
+    };
+  }, [cepValue, setValue, clearErrors, setError]);
 
   useEffect(() => {
     async function carregarCoordenadores() {
@@ -128,7 +207,7 @@ export const CooperadoForm: React.FC<CooperadoFormProps> = ({
   };
 
   return (
-    <form onSubmit={handleSubmit(handleFormSubmit)} noValidate>
+    <form onSubmit={handleSubmit(handleFormSubmit, (errors) => console.error('Form Validation Errors:', errors))} noValidate>
       <FormSection title="Identificação" description="Dados principais do cooperado ou coordenador.">
         <FormGrid>
           <FormField label="Tipo" required error={errors.tipo?.message}>
@@ -203,7 +282,7 @@ export const CooperadoForm: React.FC<CooperadoFormProps> = ({
 
       <FormSection title="Endereço" description="Endereço residencial ou comercial.">
         <FormGrid>
-          <FormField label="CEP" error={errors.cep?.message}>
+          <FormField label={`CEP${isBuscandoCep ? ' (Buscando...)' : ''}`} error={errors.cep?.message}>
             <CepInput {...register('cep')} placeholder="00000-000" />
           </FormField>
           <FormField label="Logradouro" className="md:col-span-2" error={errors.logradouro?.message}>

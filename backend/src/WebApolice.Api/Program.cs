@@ -13,6 +13,8 @@ using WebApolice.Modulos.Cadastro;
 using WebApolice.Modulos.Seguranca;
 using WebApolice.Modulos.Seguro;
 using WebApolice.Modulos.Seguranca.Infrastructure.Authentication;
+using WebApolice.SharedKernel.Application.Ports;
+using WebApolice.Shared.Infrastructure.Providers;
 using Scalar.AspNetCore;
 var builder = WebApplication.CreateBuilder(args);
 
@@ -206,6 +208,12 @@ builder.Services.AddHealthChecks()
 builder.Services.AddModuloSeguranca(builder.Configuration);
 builder.Services.AddCadastroModule(builder.Configuration);
 builder.Services.AddSeguroModule(builder.Configuration);
+
+// =============================================================================
+// SERVIÇOS GLOBAIS COMPARTILHADOS
+// =============================================================================
+builder.Services.AddHttpClient<ICEPProvider, ViaCepProvider>();
+builder.Services.AddScoped<ILocalidadeResolver, LocalidadeResolver>();
 
 // =============================================================================
 // OPENAPI & CONTROLLERS

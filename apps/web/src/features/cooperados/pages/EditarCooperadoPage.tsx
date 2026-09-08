@@ -45,7 +45,7 @@ export const EditarCooperadoPage: React.FC = () => {
           numeroDependentes: dto.numeroDependentes,
           dataInscricao: dto.dataInscricao || '',
           credenciado: dto.credenciado || false,
-          coordenadorId: dto.coordenadorId || 0,
+          coordenadorId: dto.coordenadorId || '',
           bancoId: dto.bancoId || 0,
           agencia: dto.agencia || '',
           contaCorrente: dto.contaCorrente || '',

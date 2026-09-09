@@ -1021,7 +1021,16 @@ Ao criar ou modificar qualquer formulário, página de detalhes, grid ou filtro 
 
 ---
 
-# 32. Critério de Aderência para conclusão de um módulo
+# 32. Refatoração de Telas Existentes vs. Novas Telas
+
+Ao modernizar módulos que já foram construídos previamente, a abordagem deve ser **pragmática e simplificada**, focando em não desestabilizar o código profundo que já existe:
+
+- **Telas Já Construídas (Refatoração Simplificada):** A adequação a este guia deve se concentrar prioritariamente no Frontend, ajustando a camada de entrada de dados, regras de validação visual (Zod, Validators, Componentes de Fields semânticos) e normalização antes do envio (submit). **Não** se deve refatorar o backend, os mapeamentos de domínio ou os contratos de DTO profundamente nessas telas, a não ser que seja estritamente necessário. O objetivo é preservar a estabilidade da infraestrutura e do domínio já homologados.
+- **Novas Telas e Módulos:** Toda a profundidade arquitetural descrita neste guia é mandatória. A implementação deve nascer 100% aderente a todas as camadas: Front, Mappers, DTOs, Handlers, Validação Defensiva no Backend e Persistência, utilizando a referência arquitetural estabelecida.
+
+---
+
+# 33. Critério de Aderência para conclusão de um módulo
 
 Uma tela ou módulo não deve ser considerada concluída apenas porque consegue salvar dados.
 Para ser declarada padronizada e aderente a este guia, a implementação deve abranger e respeitar explicitamente todas as etapas do ciclo de vida da informação:
@@ -1037,7 +1046,7 @@ Para ser declarada padronizada e aderente a este guia, a implementação deve ab
 
 ---
 
-# 33. Implementação de Referência — Módulo Cooperados
+# 34. Implementação de Referência — Módulo Cooperados
 
 O módulo **Cooperados** foi homologado como a primeira implementação de referência do *Guia de Tratamento, Validação, Normalização e Formatação de Campos*. Qualquer desenvolvedor ou a própria MIA deve utilizá-lo como inspiração arquitetural sobre como isolar regras, normalizar dados e validar defensivamente.
 
@@ -1056,7 +1065,7 @@ O módulo **Cooperados** foi homologado como a primeira implementação de refer
 
 ---
 
-# 34. Testes mínimos
+# 35. Testes mínimos
 
 Componentes e utilitários compartilhados devem possuir testes para:
 - valor válido, inválido, vazio, valor parcial, limite máximo, caracteres indevidos;
@@ -1067,7 +1076,7 @@ CPF e CNPJ devem possuir testes específicos dos algoritmos de validação.
 
 ---
 
-# 35. Antipadrões proibidos
+# 36. Antipadrões proibidos
 
 Não fazer: `<Input name="cpf" />` sem tratamento semântico.
 Não repetir lógicas de substituição (ex: `.replace(/\D/g, '')`) em dezenas de componentes.
@@ -1077,7 +1086,7 @@ Não armazenar um valor inválido simplesmente porque possui o número correto d
 
 ---
 
-# 36. Princípio final
+# 37. Princípio final
 
 O WebApólice deve possuir uma única definição para cada tipo recorrente de dado.
 A regra deve ser: **definir uma vez → implementar uma vez → reutilizar em todos os módulos.**

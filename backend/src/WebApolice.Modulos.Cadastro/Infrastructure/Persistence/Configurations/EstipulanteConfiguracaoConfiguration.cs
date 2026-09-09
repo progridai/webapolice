@@ -31,13 +31,11 @@ public class EstipulanteConfiguracaoConfiguration : IEntityTypeConfiguration<Est
         builder.Property(x => x.FaixaEtariaFim).HasColumnName("faixa_etaria_fim");
         builder.Property(x => x.CancelaEstipulanteId).HasColumnName("cancela_estipulante_id");
         
-        // Campos com DEFAULT no banco
+        // Campos booleanos obrigatórios
         builder.Property(x => x.DesconsiderarPropostaAtiva)
-            .HasColumnName("desconsiderar_proposta_ativa")
-            .HasDefaultValue(false);
+            .HasColumnName("desconsiderar_proposta_ativa");
         builder.Property(x => x.PermitirProtocoloDuplicado)
-            .HasColumnName("permitir_protocolo_duplicado")
-            .HasDefaultValue(false);
+            .HasColumnName("permitir_protocolo_duplicado");
         builder.Property(x => x.CreatedAt)
             .HasColumnName("created_at");
         builder.Property(x => x.UpdatedAt)

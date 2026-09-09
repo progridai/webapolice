@@ -1,8 +1,16 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useForm, useWatch, useFieldArray, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { FormField, Input, Select, Textarea, Button, FormSection, FormGrid, FormActions, HomeIcon, InfoIcon, BriefcaseIcon, ReadOnlyField, Checkbox, PlusIcon } from '../../../components/ui';
+import { CnpjInput } from '../../../components/fields/CnpjInput';
+import { CepInput } from '../../../components/fields/CepInput';
+import { PhoneInput } from '../../../components/fields/PhoneInput';
+import { EmailInput } from '../../../components/fields/EmailInput';
+import { DateInput } from '../../../components/fields/DateInput';
+import { consultarCep } from '../../../shared/api/enderecosApi';
+import { isValidCnpj, isValidPhone } from '../../../shared/utils/validators';
+import { normalizeCnpj, normalizeCep, normalizePhone } from '../../../shared/utils/normalizers';
 import { buscarCidadesPorUf, type CidadeResponse } from '../../clientes/api/localidadesApi';
 
 const ESTADOS_BRASILEIROS = [
@@ -14,31 +22,33 @@ const contatoSchema = z.object({
   tipoContato: z.string().min(1, 'Selecione o tipo de contato'),
   valor: z.string().optional().or(z.literal('')),
   principal: z.boolean().default(false),
-}).refine(data => {
-  if (data.valor && data.valor.trim().length > 0) {
-    return data.valor.trim().length >= 3;
+}).superRefine((data, ctx) => {
+  if (!data.valor || data.valor.trim() === '') return;
+  const val = data.valor.trim();
+  if (data.tipoContato === 'EMAIL' && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)) {
+    ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'E-mail inválido', path: ['valor'] });
+  } else if ((data.tipoContato === 'TELEFONE' || data.tipoContato === 'CELULAR') && !isValidPhone(val)) {
+    ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'Telefone/Celular inválido', path: ['valor'] });
+  } else if (val.length < 3) {
+    ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'O contato deve ter no mínimo 3 caracteres', path: ['valor'] });
   }
-  return true;
-}, {
-  message: 'O contato deve ter no mínimo 3 caracteres',
-  path: ['valor']
 });
 
 const estipulanteSchema = z.object({
-  razaoSocial: z.string().trim().min(3, 'A Razão Social deve ter no mínimo 3 caracteres'),
-  nomeFantasia: z.string().trim().optional(),
-  cnpj: z.string().min(14, 'CNPJ inválido').transform(val => val.replace(/\D/g, '')),
-  codigo: z.string().trim().optional(),
+  razaoSocial: z.string().trim().min(3, 'A Razão Social deve ter no mínimo 3 caracteres').max(150, 'Máximo de 150 caracteres'),
+  nomeFantasia: z.string().trim().max(100, 'Máximo de 100 caracteres').optional(),
+  cnpj: z.string().min(14, 'CNPJ inválido').refine(isValidCnpj, 'CNPJ inválido'),
+  codigo: z.string().trim().max(50, 'Máximo de 50 caracteres').optional(),
   grupoPublicId: z.string().optional(),
   seguradoraPublicId: z.string().optional(),
-  observacao: z.string().trim().optional(),
+  observacao: z.string().trim().max(1000, 'Máximo de 1000 caracteres').optional(),
   
   endereco: z.object({
     cep: z.string().optional().or(z.literal('')),
-    logradouro: z.string().optional().or(z.literal('')),
-    numero: z.string().optional().or(z.literal('')),
-    complemento: z.string().optional().or(z.literal('')),
-    bairro: z.string().optional().or(z.literal('')),
+    logradouro: z.string().max(100, 'Máximo de 100 caracteres').optional().or(z.literal('')),
+    numero: z.string().max(20, 'Máximo de 20 caracteres').optional().or(z.literal('')),
+    complemento: z.string().max(100, 'Máximo de 100 caracteres').optional().or(z.literal('')),
+    bairro: z.string().max(100, 'Máximo de 100 caracteres').optional().or(z.literal('')),
     uf: z.string().max(2).optional().or(z.literal('')),
     cidadeId: z.coerce.number().optional().or(z.literal(0)),
   }).optional(),
@@ -46,11 +56,11 @@ const estipulanteSchema = z.object({
   contatos: z.array(contatoSchema),
   
   contatosInstitucionais: z.array(z.object({
-    nome: z.string().min(1, 'O Nome é obrigatório'),
-    departamento: z.string().min(1, 'O Departamento é obrigatório'),
+    nome: z.string().min(1, 'O Nome é obrigatório').max(100, 'Máximo de 100 caracteres'),
+    departamento: z.string().min(1, 'O Departamento é obrigatório').max(50, 'Máximo de 50 caracteres'),
     email: z.string().email('E-mail inválido').optional().or(z.literal('')),
-    telefone: z.string().optional().or(z.literal('')),
-    ramal: z.string().optional().or(z.literal('')),
+    telefone: z.string().optional().or(z.literal('')).refine(val => !val || isValidPhone(val), 'Telefone inválido'),
+    ramal: z.string().max(20, 'Máximo de 20 caracteres').optional().or(z.literal('')),
   })).optional(),
   
   configuracao: z.object({
@@ -93,6 +103,7 @@ export const EstipulanteForm: React.FC<EstipulanteFormProps> = ({
     handleSubmit,
     control,
     reset,
+    setValue,
     formState: { errors },
   } = useForm<EstipulanteFormData>({
     resolver: zodResolver(estipulanteSchema),
@@ -167,11 +178,8 @@ export const EstipulanteForm: React.FC<EstipulanteFormProps> = ({
   const handleMakeContatoPrincipal = (index: number) => {
     const values = control._formValues;
     if (values.contatos) {
-      values.contatos.forEach((_: any, idx: number) => {
-        control._subjects.values.next({
-          name: `contatos.${idx}.principal`,
-          value: idx === index
-        });
+      values.contatos.forEach((_: unknown, idx: number) => {
+        setValue(`contatos.${idx}.principal`, idx === index);
       });
     }
   };
@@ -183,6 +191,50 @@ export const EstipulanteForm: React.FC<EstipulanteFormProps> = ({
     control,
     name: 'endereco.uf',
   });
+
+  const cepSelecionado = useWatch({
+    control,
+    name: 'endereco.cep',
+  });
+
+  const watchedContatos = useWatch({
+    control,
+    name: 'contatos',
+  });
+
+  const lastFetchedCep = useRef(initialData?.endereco?.cep ? normalizeCep(initialData.endereco.cep) : '');
+
+  // Gatilho CEP
+  useEffect(() => {
+    const rawCep = normalizeCep(cepSelecionado || '');
+    if (rawCep.length !== 8) return;
+    if (rawCep === lastFetchedCep.current) return;
+
+    const controller = new AbortController();
+
+    async function fetchCep() {
+      try {
+        const enderecoCompleto = await consultarCep(rawCep, controller.signal);
+        
+        setValue('endereco.logradouro', enderecoCompleto.logradouro || '', { shouldValidate: true });
+        setValue('endereco.bairro', enderecoCompleto.bairro || '', { shouldValidate: true });
+        setValue('endereco.uf', enderecoCompleto.uf || '', { shouldValidate: true });
+        
+        if (enderecoCompleto.cidadeId) {
+          setValue('endereco.cidadeId', enderecoCompleto.cidadeId, { shouldValidate: true });
+        }
+        
+        lastFetchedCep.current = rawCep;
+      } catch (err: unknown) {
+        if (err instanceof Error && err.name !== 'AbortError') {
+          console.error('Erro ao buscar CEP:', err);
+        }
+      }
+    }
+
+    fetchCep();
+    return () => controller.abort();
+  }, [cepSelecionado, setValue]);
 
   useEffect(() => {
     async function carregarCidades() {
@@ -209,12 +261,29 @@ export const EstipulanteForm: React.FC<EstipulanteFormProps> = ({
     const hasEndereco = data.endereco && (
       data.endereco.cep || data.endereco.logradouro || data.endereco.cidadeId || data.endereco.uf
     );
-    const contatosFiltrados = data.contatos.filter(c => c.valor && c.valor.trim() !== '');
-    const contatosInstFiltrados = data.contatosInstitucionais?.filter(c => c.nome.trim() !== '' && c.departamento.trim() !== '');
+    const contatosFiltrados = data.contatos
+      .filter(c => c.valor && c.valor.trim() !== '')
+      .map(c => ({
+        ...c,
+        valor: (c.tipoContato === 'TELEFONE' || c.tipoContato === 'CELULAR') 
+          ? normalizePhone(c.valor!) 
+          : c.valor
+      }));
+      
+    const contatosInstFiltrados = data.contatosInstitucionais
+      ?.filter(c => c.nome.trim() !== '' && c.departamento.trim() !== '')
+      .map(c => ({
+        ...c,
+        telefone: c.telefone ? normalizePhone(c.telefone) : c.telefone
+      }));
 
     onSubmit({
       ...data,
-      endereco: hasEndereco ? data.endereco : undefined,
+      cnpj: normalizeCnpj(data.cnpj),
+      endereco: hasEndereco ? {
+        ...data.endereco,
+        cep: normalizeCep(data.endereco!.cep || '')
+      } : undefined,
       contatos: contatosFiltrados,
       contatosInstitucionais: contatosInstFiltrados,
     });
@@ -241,7 +310,7 @@ export const EstipulanteForm: React.FC<EstipulanteFormProps> = ({
               {isEdit ? (
                 <ReadOnlyField value={initialData?.cnpj ? initialData.cnpj.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, '$1.$2.$3/$4-$5') : ''} />
               ) : (
-                <Input 
+                <CnpjInput 
                   {...register('cnpj')} 
                   placeholder="00.000.000/0000-00" 
                 />
@@ -283,7 +352,17 @@ export const EstipulanteForm: React.FC<EstipulanteFormProps> = ({
         <FormGrid>
           <div className="lg:col-span-3">
             <FormField label="CEP" error={errors.endereco?.cep?.message}>
-              <Input {...register('endereco.cep')} placeholder="00000-000" />
+              <Controller
+                name="endereco.cep"
+                control={control}
+                render={({ field }) => (
+                  <CepInput
+                    {...field}
+                    value={field.value || ''}
+                    placeholder="00000-000"
+                  />
+                )}
+              />
             </FormField>
           </div>
 
@@ -361,7 +440,27 @@ export const EstipulanteForm: React.FC<EstipulanteFormProps> = ({
                 </div>
                 <div className="lg:col-span-6">
                   <FormField label="Contato" error={errors.contatos?.[index]?.valor?.message}>
-                    <Input {...register(`contatos.${index}.valor`)} placeholder="Digite o e-mail ou número" />
+                    {(() => {
+                      const type = watchedContatos?.[index]?.tipoContato || field.tipoContato;
+                      if (type === 'EMAIL') {
+                        return <EmailInput {...register(`contatos.${index}.valor`)} placeholder="Digite o e-mail" />;
+                      } else if (type === 'TELEFONE' || type === 'CELULAR') {
+                        return (
+                          <Controller
+                            name={`contatos.${index}.valor`}
+                            control={control}
+                            render={({ field: phoneField }) => (
+                              <PhoneInput 
+                                {...phoneField} 
+                                value={phoneField.value || ''} 
+                                placeholder="Digite o número" 
+                              />
+                            )}
+                          />
+                        );
+                      }
+                      return <Input {...register(`contatos.${index}.valor`)} placeholder="Digite o valor" />;
+                    })()}
                   </FormField>
                 </div>
                 <div className="lg:col-span-2 flex items-center pt-6">
@@ -438,12 +537,22 @@ export const EstipulanteForm: React.FC<EstipulanteFormProps> = ({
                 </div>
                 <div className="lg:col-span-6">
                   <FormField label="E-mail" error={errors.contatosInstitucionais?.[index]?.email?.message}>
-                    <Input type="email" {...register(`contatosInstitucionais.${index}.email` as const)} placeholder="email@empresa.com" />
+                    <EmailInput {...register(`contatosInstitucionais.${index}.email` as const)} placeholder="email@empresa.com" />
                   </FormField>
                 </div>
                 <div className="lg:col-span-3">
                   <FormField label="Telefone" error={errors.contatosInstitucionais?.[index]?.telefone?.message}>
-                    <Input {...register(`contatosInstitucionais.${index}.telefone` as const)} placeholder="(00) 0000-0000" />
+                    <Controller
+                      name={`contatosInstitucionais.${index}.telefone`}
+                      control={control}
+                      render={({ field: phoneInstField }) => (
+                        <PhoneInput 
+                          {...phoneInstField} 
+                          value={phoneInstField.value || ''} 
+                          placeholder="(00) 0000-0000" 
+                        />
+                      )}
+                    />
                   </FormField>
                 </div>
                 <div className="lg:col-span-3">
@@ -471,12 +580,32 @@ export const EstipulanteForm: React.FC<EstipulanteFormProps> = ({
         <FormGrid>
           <div className="lg:col-span-6">
             <FormField label="Início de Vigência" required error={errors.configuracao?.dataInicioVigencia?.message}>
-              <Input type="date" {...register('configuracao.dataInicioVigencia')} />
+              <Controller
+                name="configuracao.dataInicioVigencia"
+                control={control}
+                render={({ field: dateInitField }) => (
+                  <DateInput 
+                    {...dateInitField} 
+                    value={dateInitField.value || ''} 
+                    placeholder="DD/MM/YYYY" 
+                  />
+                )}
+              />
             </FormField>
           </div>
           <div className="lg:col-span-6">
             <FormField label="Fim de Vigência" error={errors.configuracao?.dataFimVigencia?.message}>
-              <Input type="date" {...register('configuracao.dataFimVigencia')} />
+              <Controller
+                name="configuracao.dataFimVigencia"
+                control={control}
+                render={({ field: dateFimField }) => (
+                  <DateInput 
+                    {...dateFimField} 
+                    value={dateFimField.value || ''} 
+                    placeholder="DD/MM/YYYY" 
+                  />
+                )}
+              />
             </FormField>
           </div>
         </FormGrid>

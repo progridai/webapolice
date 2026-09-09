@@ -42,36 +42,36 @@ public sealed class CadastrarClienteHandler
 
             if (recursoRe == null || !recursoRe.Habilitado || !recursoRe.Ativo || !recursoRe.Modulo.Habilitado || !recursoRe.Modulo.Ativo)
             {
-                throw new ClienteInvalidoException("O campo RE nÃ£o estÃ¡ habilitado no sistema.");
+                throw new ClienteInvalidoException("O campo RE não está habilitado no sistema.");
             }
         }
 
         if (string.IsNullOrWhiteSpace(command.Nome))
-            throw new ClienteInvalidoException("O nome Ã© obrigatÃ³rio.");
+            throw new ClienteInvalidoException("O nome é obrigatório.");
 
         var documentoLimpo = LimparDocumento(command.Documento);
         if (string.IsNullOrWhiteSpace(documentoLimpo))
-            throw new ClienteInvalidoException("Documento Ã© obrigatÃ³rio.");
+            throw new ClienteInvalidoException("Documento é obrigatório.");
 
         if (!command.DataNascimento.HasValue)
-            throw new ClienteInvalidoException("A data de nascimento Ã© obrigatÃ³ria.");
+            throw new ClienteInvalidoException("A data de nascimento é obrigatória.");
 
         var documentoValido = ValidarDocumento(documentoLimpo, command.TipoPessoa);
         if (!documentoValido)
-            throw new ClienteInvalidoException("Documento invÃ¡lido.");
+            throw new ClienteInvalidoException("Documento inválido.");
 
         if (command.Falecido && !command.DataObito.HasValue)
-            throw new ClienteInvalidoException("Data de Ã³bito Ã© obrigatÃ³ria para clientes falecidos.");
+            throw new ClienteInvalidoException("Data de óbito é obrigatória para clientes falecidos.");
 
         await using var transaction = await _dbContext.BeginTransactionAsync(cancellationToken);
 
         try
         {
             var statusAtivo = await _repository.ObterStatusPorCodigoAsync(ClienteStatusCodigos.Ativo, cancellationToken)
-                ?? throw new ClienteInvalidoException($"Status '{ClienteStatusCodigos.Ativo}' nÃ£o encontrado no catÃ¡logo.");
+                ?? throw new ClienteInvalidoException($"Status '{ClienteStatusCodigos.Ativo}' não encontrado no catálogo.");
 
             var statusInativo = await _repository.ObterStatusPorCodigoAsync(ClienteStatusCodigos.Inativo, cancellationToken)
-                ?? throw new ClienteInvalidoException($"Status '{ClienteStatusCodigos.Inativo}' nÃ£o encontrado no catÃ¡logo.");
+                ?? throw new ClienteInvalidoException($"Status '{ClienteStatusCodigos.Inativo}' não encontrado no catálogo.");
 
             var pessoa = await _repository.LocalizarPessoaPorDocumentoAsync(documentoLimpo, cancellationToken);
             DateTime? dataNascimentoDt = command.DataNascimento.HasValue 
@@ -84,10 +84,10 @@ public sealed class CadastrarClienteHandler
                 var clienteExistente = await _repository.LocalizarClientePorPessoaIdAsync(pessoa.Id, cancellationToken);
                 if (clienteExistente != null && clienteExistente.StatusId == statusAtivo.Id)
                 {
-                    throw new ClienteJaCadastradoException($"JÃ¡ existe um cliente ativo para o documento informado.");
+                    throw new ClienteJaCadastradoException($"Já existe um cliente ativo para o documento informado.");
                 }
 
-                // Verificar divergÃªncia
+                // Verificar divergência
                 
                 bool divergente = false;
                 if (!string.Equals(pessoa.Nome, command.Nome, StringComparison.OrdinalIgnoreCase)) divergente = true;
@@ -95,7 +95,7 @@ public sealed class CadastrarClienteHandler
                 if (pessoa.DataNascimento != dataNascimentoDt) divergente = true;
 
                 if (divergente)
-                    throw new ClienteJaCadastradoException("O documento informado jÃ¡ pertence a outra pessoa com dados divergentes no sistema.");
+                    throw new ClienteJaCadastradoException("O documento informado já pertence a outra pessoa com dados divergentes no sistema.");
 
                 pessoaId = pessoa.Id;
             }
@@ -137,7 +137,7 @@ public sealed class CadastrarClienteHandler
                 }
             }
 
-            // EndereÃ§os
+            // Endereços
             if (command.Enderecos != null)
             {
                 foreach (var end in command.Enderecos)

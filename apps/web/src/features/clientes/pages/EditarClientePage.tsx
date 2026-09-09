@@ -7,6 +7,8 @@ import { Alert } from '../../../components/ui/Alert';
 import { Spinner } from '../../../components/ui/Spinner';
 import { PageHeader, Breadcrumbs, UsersIcon, HomeIcon } from '../../../components/ui';
 
+import { HttpApiError } from '../../../services/http/HttpError';
+
 export const EditarClientePage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -95,12 +97,13 @@ export const EditarClientePage: React.FC = () => {
       navigate(`/clientes/${id}`);
     } catch (err: unknown) {
       console.error('Erro ao alterar cliente:', err);
-      const errorResponse = err as { response?: { status?: number, data?: { message?: string } } };
       
-      if (errorResponse.response?.status === 409) {
-        setError(errorResponse.response?.data?.message || 'A Pessoa deste Cliente está compartilhada com outros papéis e não pode ser alterada.');
+      if (err instanceof HttpApiError) {
+        setError(err.message);
+      } else if (err instanceof Error) {
+        setError(err.message);
       } else {
-        setError(errorResponse.response?.data?.message || 'Ocorreu um erro ao salvar o cliente. Verifique os dados e tente novamente.');
+        setError('Ocorreu um erro ao salvar o cliente. Verifique os dados e tente novamente.');
       }
     } finally {
       setIsSubmitting(false);

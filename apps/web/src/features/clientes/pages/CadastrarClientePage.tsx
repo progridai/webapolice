@@ -5,6 +5,8 @@ import { cadastrarCliente } from '../api/clienteWriteApi';
 import { Alert } from '../../../components/ui/Alert';
 import { PageHeader, Breadcrumbs, UsersIcon, HomeIcon } from '../../../components/ui';
 
+import { HttpApiError } from '../../../services/http/HttpError';
+
 export const CadastrarClientePage: React.FC = () => {
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -44,12 +46,13 @@ export const CadastrarClientePage: React.FC = () => {
       navigate(`/clientes/${response.id}`);
     } catch (err: unknown) {
       console.error('Erro ao cadastrar cliente:', err);
-      const errorResponse = err as { response?: { status?: number, data?: { message?: string } } };
       
-      if (errorResponse.response?.status === 409) {
-        setError(errorResponse.response?.data?.message || 'A Pessoa deste Cliente está compartilhada com outros papéis e não pode ser cadastrada como cliente novamente.');
+      if (err instanceof HttpApiError) {
+        setError(err.message);
+      } else if (err instanceof Error) {
+        setError(err.message);
       } else {
-        setError(errorResponse.response?.data?.message || 'Ocorreu um erro ao cadastrar o cliente. Verifique os dados e tente novamente.');
+        setError('Ocorreu um erro ao cadastrar o cliente. Verifique os dados e tente novamente.');
       }
     } finally {
       setIsSubmitting(false);

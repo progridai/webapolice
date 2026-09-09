@@ -6,7 +6,7 @@ import { FormField, Input, Textarea, Checkbox, FormSection, FormGrid, FormAction
 import { CpfInput, PhoneInput, CepInput, DateInput, EmailInput } from '../../../components/fields';
 import { buscarCidadesPorUf, type CidadeResponse } from '../../clientes/api/localidadesApi';
 import { listarCoordenadoresAtivos } from '../api/cooperadosApi';
-import { consultarCep } from '../api/enderecosApi';
+import { consultarCep } from '../../../shared/api/enderecosApi';
 import { isValidCpf, isValidPhone, isValidCep } from '../../../shared/utils/validators';
 import { toCadastrarCooperadoRequest } from '../utils/cooperados.mappers';
 import type { CooperadoFormData, CooperadoListDto } from '../types/cooperados.types';

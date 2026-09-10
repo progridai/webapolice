@@ -2,6 +2,7 @@ import React, { lazy } from 'react';
 import { Route } from 'react-router-dom';
 import { ROUTES } from '../../../app/routes/routePaths';
 import { PermissionProtectedRoute } from '../../../app/routes/PermissionProtectedRoute';
+import { AuthenticatedLayout } from '../../../layouts/AuthenticatedLayout';
 
 const CooperadosListPage = lazy(() =>
   import('../pages/CooperadosListPage').then((m) => ({ default: m.CooperadosListPage }))
@@ -17,7 +18,7 @@ const CooperadoDetalhePage = lazy(() =>
 );
 
 export const CooperadosRoutes = (
-  <Route path={ROUTES.COOPERADOS}>
+  <Route path={ROUTES.COOPERADOS} element={<AuthenticatedLayout />}>
     <Route
       index
       element={

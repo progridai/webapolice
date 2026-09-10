@@ -66,3 +66,15 @@ export function formatarCep(valor?: string | null): string {
   }
   return valor;
 }
+
+/**
+ * Formata um CNPJ (ex: 61198164000160 -> 61.198.164/0001-60)
+ */
+export function formatarCnpj(valor?: string | null): string {
+  if (!valor) return '';
+  const apenasNumeros = valor.replace(/\D/g, '');
+  if (apenasNumeros.length === 14) {
+    return apenasNumeros.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, '$1.$2.$3/$4-$5');
+  }
+  return valor;
+}

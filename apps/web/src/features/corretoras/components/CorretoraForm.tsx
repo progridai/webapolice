@@ -4,7 +4,7 @@
  * Formulário reutilizável para criação e edição de Corretoras.
  */
 import React, { useEffect } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
   FormField,
@@ -16,6 +16,9 @@ import {
   FormActions,
   BriefcaseIcon,
 } from '../../../components/ui';
+import { CnpjInput } from '../../../components/fields';
+import { normalizeCnpj } from '../../../shared/utils/normalizers';
+import { formatarCnpj } from '../../../shared/utils/formatters';
 import { corretoraFormSchema, type CorretoraFormData } from '../schemas/corretoraFormSchema';
 
 interface CorretoraFormProps {
@@ -32,6 +35,7 @@ export const CorretoraForm: React.FC<CorretoraFormProps> = ({
   onCancel,
 }) => {
   const {
+    control,
     register,
     handleSubmit,
     reset,
@@ -42,7 +46,7 @@ export const CorretoraForm: React.FC<CorretoraFormProps> = ({
       nome: initialData?.nome || '',
       codigo: initialData?.codigo || '',
       codigoProtheus: initialData?.codigoProtheus || '',
-      cnpj: initialData?.cnpj || '',
+      cnpj: formatarCnpj(initialData?.cnpj) || '',
       observacao: initialData?.observacao || '',
     },
   });
@@ -53,14 +57,21 @@ export const CorretoraForm: React.FC<CorretoraFormProps> = ({
         nome: initialData.nome || '',
         codigo: initialData.codigo || '',
         codigoProtheus: initialData.codigoProtheus || '',
-        cnpj: initialData.cnpj || '',
+        cnpj: formatarCnpj(initialData.cnpj) || '',
         observacao: initialData.observacao || '',
       });
     }
   }, [initialData, reset]);
 
+  const handleFormSubmit = (data: CorretoraFormData) => {
+    onSubmit({
+      ...data,
+      cnpj: normalizeCnpj(data.cnpj || ''),
+    });
+  };
+
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-6" noValidate>
+    <form onSubmit={handleSubmit(handleFormSubmit)} className="flex flex-col gap-6" noValidate>
       <FormSection title="Dados da Corretora" icon={<BriefcaseIcon size={20} />}>
         <FormGrid>
           <div className="lg:col-span-8">
@@ -75,10 +86,17 @@ export const CorretoraForm: React.FC<CorretoraFormProps> = ({
 
           <div className="lg:col-span-4">
             <FormField label="CNPJ" error={errors.cnpj?.message}>
-              <Input
-                {...register('cnpj')}
-                id="corretora-cnpj"
-                placeholder="Ex: 61.198.164/0001-60"
+              <Controller
+                name="cnpj"
+                control={control}
+                render={({ field }) => (
+                  <CnpjInput
+                    {...field}
+                    value={field.value || ''}
+                    id="corretora-cnpj"
+                    placeholder="Ex: 61.198.164/0001-60"
+                  />
+                )}
               />
             </FormField>
           </div>

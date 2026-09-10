@@ -4,7 +4,7 @@
  * Formulário reutilizável para criação e edição de Subestipulantes.
  */
 import React, { useEffect } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
   FormField,
@@ -16,6 +16,9 @@ import {
   FormActions,
   BriefcaseIcon,
 } from '../../../components/ui';
+import { CnpjInput } from '../../../components/fields';
+import { normalizeCnpj } from '../../../shared/utils/normalizers';
+import { formatarCnpj } from '../../../shared/utils/formatters';
 import { subestipulanteFormSchema, type SubestipulanteFormData } from '../schemas/subestipulanteFormSchema';
 
 interface SubestipulanteFormProps {
@@ -32,6 +35,7 @@ export const SubestipulanteForm: React.FC<SubestipulanteFormProps> = ({
   onCancel,
 }) => {
   const {
+    control,
     register,
     handleSubmit,
     reset,
@@ -41,7 +45,7 @@ export const SubestipulanteForm: React.FC<SubestipulanteFormProps> = ({
     defaultValues: {
       nome: initialData?.nome || '',
       codigo: initialData?.codigo || '',
-      cnpj: initialData?.cnpj || '',
+      cnpj: formatarCnpj(initialData?.cnpj) || '',
       observacao: initialData?.observacao || '',
     },
   });
@@ -51,14 +55,21 @@ export const SubestipulanteForm: React.FC<SubestipulanteFormProps> = ({
       reset({
         nome: initialData.nome || '',
         codigo: initialData.codigo || '',
-        cnpj: initialData.cnpj || '',
+        cnpj: formatarCnpj(initialData.cnpj) || '',
         observacao: initialData.observacao || '',
       });
     }
   }, [initialData, reset]);
 
+  const handleFormSubmit = (data: SubestipulanteFormData) => {
+    onSubmit({
+      ...data,
+      cnpj: normalizeCnpj(data.cnpj || ''),
+    });
+  };
+
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-6" noValidate>
+    <form onSubmit={handleSubmit(handleFormSubmit)} className="flex flex-col gap-6" noValidate>
       <FormSection title="Dados do Subestipulante" icon={<BriefcaseIcon size={20} />}>
         <FormGrid>
           <div className="lg:col-span-8">
@@ -73,10 +84,17 @@ export const SubestipulanteForm: React.FC<SubestipulanteFormProps> = ({
 
           <div className="lg:col-span-4">
             <FormField label="CNPJ" error={errors.cnpj?.message}>
-              <Input
-                {...register('cnpj')}
-                id="subestipulante-cnpj"
-                placeholder="Ex: 61.198.164/0001-60"
+              <Controller
+                name="cnpj"
+                control={control}
+                render={({ field }) => (
+                  <CnpjInput
+                    {...field}
+                    value={field.value || ''}
+                    id="subestipulante-cnpj"
+                    placeholder="Ex: 61.198.164/0001-60"
+                  />
+                )}
               />
             </FormField>
           </div>

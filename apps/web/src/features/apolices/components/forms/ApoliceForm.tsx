@@ -5,6 +5,10 @@ import { useNavigate } from 'react-router-dom';
 import { ROUTES } from '../../../../app/routes/routePaths';
 import { Button, Input, FormField, Card, CardHeader, CardContent, FormGrid } from '../../../../components/ui';
 import { apoliceFormSchema, type ApoliceFormValues } from '../../schemas/apoliceForm.schema';
+import { listarEstipulantes } from '../../../estipulantes/api/estipulantes.api';
+import { seguradorasApi } from '../../../seguradoras/api/seguradoras.api';
+import { corretorasApi } from '../../../corretoras/api/corretoras.api';
+import { AsyncEntityField } from './AsyncEntityField';
 
 interface ApoliceFormProps {
   initialData?: Partial<ApoliceFormValues>;
@@ -15,7 +19,7 @@ interface ApoliceFormProps {
 export const ApoliceForm: React.FC<ApoliceFormProps> = ({ initialData, onSubmit, isLoading }) => {
   const navigate = useNavigate();
 
-  const { register, handleSubmit, formState: { errors } } = useForm<ApoliceFormValues>({
+  const { register, handleSubmit, control, formState: { errors } } = useForm<ApoliceFormValues>({
     resolver: zodResolver(apoliceFormSchema),
     defaultValues: {
       nome: initialData?.nome || '',
@@ -31,6 +35,21 @@ export const ApoliceForm: React.FC<ApoliceFormProps> = ({ initialData, onSubmit,
 
   const handleVoltar = () => {
     navigate(-1);
+  };
+
+  const loadEstipulantes = async (inputValue: string) => {
+    const result = await listarEstipulantes({ busca: inputValue, page: 1, pageSize: 20 });
+    return result.itens.map(item => ({ value: String(item.id), label: item.razaoSocial || item.nomeFantasia || item.nome || 'Sem Nome' }));
+  };
+
+  const loadSeguradoras = async (inputValue: string) => {
+    const result = await seguradorasApi.listar({ busca: inputValue, page: 1, pageSize: 20 });
+    return result.itens.map(item => ({ value: String(item.id), label: item.razaoSocial || item.nomeFantasia || item.nome || 'Sem Nome' }));
+  };
+
+  const loadCorretoras = async (inputValue: string) => {
+    const result = await corretorasApi.listar({ busca: inputValue, page: 1, pageSize: 20 });
+    return result.itens.map(item => ({ value: String(item.id), label: item.razaoSocial || item.nomeFantasia || item.nome || 'Sem Nome' }));
   };
 
   return (
@@ -53,31 +72,40 @@ export const ApoliceForm: React.FC<ApoliceFormProps> = ({ initialData, onSubmit,
             </div>
 
             <div className="lg:col-span-6">
-              <FormField label="Estipulante (ID Público)" required error={errors.estipulanteId?.message}>
-                <Input
-                  id="estipulanteId"
-                  placeholder="ID do Estipulante"
-                  {...register('estipulanteId')}
+              <FormField label="Estipulante" required error={errors.estipulanteId?.message}>
+                <AsyncEntityField
+                  name="estipulanteId"
+                  control={control}
+                  label="Estipulante"
+                  placeholder="Selecione ou busque o estipulante"
+                  searcher={loadEstipulantes}
+                  initialLabel={(initialData as any)?._estipulanteNome}
                 />
               </FormField>
             </div>
             
             <div className="lg:col-span-6">
-              <FormField label="Seguradora (ID Público)" required error={errors.seguradoraId?.message}>
-                <Input
-                  id="seguradoraId"
-                  placeholder="ID da Seguradora"
-                  {...register('seguradoraId')}
+              <FormField label="Seguradora" required error={errors.seguradoraId?.message}>
+                <AsyncEntityField
+                  name="seguradoraId"
+                  control={control}
+                  label="Seguradora"
+                  placeholder="Selecione ou busque a seguradora"
+                  searcher={loadSeguradoras}
+                  initialLabel={(initialData as any)?._seguradoraNome}
                 />
               </FormField>
             </div>
 
             <div className="lg:col-span-12">
-              <FormField label="Corretora (ID Público) Opcional" error={errors.corretoraId?.message}>
-                <Input
-                  id="corretoraId"
-                  placeholder="ID da Corretora (Opcional)"
-                  {...register('corretoraId')}
+              <FormField label="Corretora (Opcional)" error={errors.corretoraId?.message}>
+                <AsyncEntityField
+                  name="corretoraId"
+                  control={control}
+                  label="Corretora"
+                  placeholder="Selecione ou busque a corretora (Opcional)"
+                  searcher={loadCorretoras}
+                  initialLabel={(initialData as any)?._corretoraNome}
                 />
               </FormField>
             </div>

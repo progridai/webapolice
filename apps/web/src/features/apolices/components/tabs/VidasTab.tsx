@@ -67,7 +67,10 @@ export const VidasTab: React.FC<VidasTabProps> = ({ publicId }) => {
         await atualizarApoliceVida(publicId, selectedVida.apoliceVidaPublicId, {
           dataInicioVigencia: formData.dataInicioVigencia || null,
           dataFimVigencia: formData.dataFimVigencia || null,
-          observacao: formData.observacao || null
+          observacao: formData.observacao || null,
+          contexto: formData.contexto,
+          subestipulantePublicId: formData.contexto === 'direto' ? null : formData.subestipulantePublicId,
+          moduloPublicId: formData.contexto === 'modulo' ? formData.moduloPublicId : null
         });
       } else {
         // Create mode

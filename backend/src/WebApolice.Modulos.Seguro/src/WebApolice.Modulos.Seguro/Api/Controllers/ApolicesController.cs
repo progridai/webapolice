@@ -437,6 +437,9 @@ public class ApolicesController : ControllerBase
             DataInicioVigencia = request.DataInicioVigencia,
             DataFimVigencia = request.DataFimVigencia,
             Observacao = request.Observacao,
+            Contexto = request.Contexto,
+            SubestipulantePublicId = request.SubestipulantePublicId,
+            ModuloPublicId = request.ModuloPublicId,
             UsuarioPublicId = Guid.Parse(userContext.KeycloakSub ?? Guid.Empty.ToString())
         };
         await handler.Handle(command, cancellationToken);

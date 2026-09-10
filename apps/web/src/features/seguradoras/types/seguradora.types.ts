@@ -5,6 +5,7 @@
  */
 
 export interface SeguradoraListItem {
+  id: number;
   publicId: string;
   nome: string;
   codigo?: string;

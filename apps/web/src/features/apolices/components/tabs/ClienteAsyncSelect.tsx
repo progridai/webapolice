@@ -20,13 +20,15 @@ interface ClienteAsyncSelectProps {
   onChange: (clientePublicId: string) => void;
   error?: boolean;
   disabled?: boolean;
+  initialNome?: string;
 }
 
 export const ClienteAsyncSelect: React.FC<ClienteAsyncSelectProps> = ({
   value,
   onChange,
   error,
-  disabled
+  disabled,
+  initialNome
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [options, setOptions] = useState<ClienteListItem[]>([]);
@@ -42,8 +44,11 @@ export const ClienteAsyncSelect: React.FC<ClienteAsyncSelectProps> = ({
     if (!value) {
       setSearchTerm('');
       setSelectedCliente(null);
+    } else if (value && initialNome && !selectedCliente) {
+      setSearchTerm(initialNome);
+      setSelectedCliente({ id: value, nome: initialNome } as ClienteListItem);
     }
-  }, [value]);
+  }, [value, initialNome, selectedCliente]);
 
   const fetchClientes = useCallback(async (query: string) => {
     setLoading(true);

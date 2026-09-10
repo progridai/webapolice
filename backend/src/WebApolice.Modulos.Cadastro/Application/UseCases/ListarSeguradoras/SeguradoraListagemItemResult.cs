@@ -4,6 +4,7 @@ namespace WebApolice.Modulos.Cadastro.Application.UseCases.ListarSeguradoras;
 
 public class SeguradoraListagemItemResult
 {
+    public long Id { get; set; }
     public Guid PublicId { get; set; }
     public string Nome { get; set; } = string.Empty;
     public string? Codigo { get; set; }

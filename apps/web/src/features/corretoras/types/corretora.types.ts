@@ -5,6 +5,7 @@
  */
 
 export interface CorretoraListItem {
+  id: number;
   publicId: string;
   nome: string;
   codigo?: string;

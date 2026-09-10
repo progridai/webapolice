@@ -55,6 +55,7 @@ public class SeguradorasQueries : ISeguradorasQueries
             .Take(tamanhoPagina)
             .Select(x => new SeguradoraListagemItemResult
             {
+                Id = x.s.Id,
                 PublicId = x.s.PublicId,
                 Nome = x.p.Nome,
                 Codigo = x.s.Codigo,

@@ -8,6 +8,7 @@ export type EstipulanteStatus = 'ativo' | 'inativo';
 export type StatusEstipulanteEnum = 1 | 2; // 1 = Ativo, 2 = Inativo
 
 export interface EstipulanteListItem {
+  id: number;
   publicId: string;
   razaoSocial: string;
   nomeFantasia?: string;

@@ -31,3 +31,4 @@ export * from './DropdownMenu';
 export * from './RowActions';
 export * from './DataTable';
 export * from './ResultsSummary';
+export * from './Select/AsyncSelect';

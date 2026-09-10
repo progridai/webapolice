@@ -55,6 +55,7 @@ public class CorretorasQueries : ICorretorasQueries
             .Take(tamanhoPagina)
             .Select(x => new CorretoraListagemItemResult
             {
+                Id = x.c.Id,
                 PublicId = x.c.PublicId,
                 Nome = x.p.Nome,
                 Cnpj = x.p.DocumentoPrincipal,

@@ -23,13 +23,17 @@ export const ApoliceFormPage: React.FC = () => {
         const apolice = await obterApolice(publicId);
         setInitialData({
           nome: apolice.nome,
-          estipulanteId: apolice.estipulanteId,
-          seguradoraId: apolice.seguradoraId,
-          corretoraId: apolice.corretoraId || '',
+          estipulanteId: String(apolice.estipulanteId),
+          seguradoraId: String(apolice.seguradoraId),
+          corretoraId: apolice.corretoraId ? String(apolice.corretoraId) : '',
           dataInicioVigencia: apolice.dataInicioVigencia,
           dataFimVigencia: apolice.dataFimVigencia || '',
           dataAniversario: apolice.dataAniversario || '',
           observacao: apolice.observacao || '',
+          // Labels para os combos na edição
+          _estipulanteNome: apolice.estipulanteNome,
+          _seguradoraNome: apolice.seguradoraNome,
+          _corretoraNome: apolice.corretoraNome,
         });
       } catch (err: any) {
         setError('Não foi possível carregar os dados da apólice.');

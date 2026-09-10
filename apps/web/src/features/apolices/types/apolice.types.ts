@@ -108,6 +108,9 @@ export interface AlterarApoliceVidaRequest {
   dataInicioVigencia?: string | null;
   dataFimVigencia?: string | null;
   observacao?: string | null;
+  contexto?: string | null;
+  subestipulantePublicId?: string | null;
+  moduloPublicId?: string | null;
 }
 
 export interface ApoliceSubestipulanteModuloResult {

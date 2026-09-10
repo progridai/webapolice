@@ -43,6 +43,7 @@ public class EstipulantesQueries : IEstipulantesQueries
             .Take(tamanhoPagina)
             .Select(e => new EstipulanteDetalheResult
             {
+                Id = e.Id,
                 PublicId = e.PublicId,
                 RazaoSocial = e.Nome,
                 NomeFantasia = e.NomeFormatado,

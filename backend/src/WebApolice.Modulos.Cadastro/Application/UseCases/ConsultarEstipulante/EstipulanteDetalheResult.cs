@@ -4,6 +4,7 @@ namespace WebApolice.Modulos.Cadastro.Application.UseCases.ConsultarEstipulante;
 
 public class EstipulanteDetalheResult
 {
+    public long Id { get; set; }
     public Guid PublicId { get; set; }
     public string RazaoSocial { get; set; } = string.Empty;
     public string? NomeFantasia { get; set; }

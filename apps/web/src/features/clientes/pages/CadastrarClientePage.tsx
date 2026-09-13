@@ -5,7 +5,7 @@ import { cadastrarCliente } from '../api/clienteWriteApi';
 import { Alert } from '../../../components/ui/Alert';
 import { PageHeader, Breadcrumbs, UsersIcon, HomeIcon } from '../../../components/ui';
 
-import { HttpApiError } from '../../../services/http/HttpError';
+import { HttpApiError } from '../../../services/http/httpError';
 
 export const CadastrarClientePage: React.FC = () => {
   const navigate = useNavigate();

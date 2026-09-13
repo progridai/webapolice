@@ -7,7 +7,7 @@ import { Alert } from '../../../components/ui/Alert';
 import { Spinner } from '../../../components/ui/Spinner';
 import { PageHeader, Breadcrumbs, UsersIcon, HomeIcon } from '../../../components/ui';
 
-import { HttpApiError } from '../../../services/http/HttpError';
+import { HttpApiError } from '../../../services/http/httpError';
 
 export const EditarClientePage: React.FC = () => {
   const { id } = useParams<{ id: string }>();

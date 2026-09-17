@@ -261,3 +261,60 @@ export async function inativarModuloSubestipulanteApolice(
 ): Promise<void> {
   await httpClient.patch(`/api/apolices/${apolicePublicId}/subestipulantes/${subestipulantePublicId}/modulos/${moduloPublicId}/inativar`);
 }
+
+// ── Subgrupos da Apólice ──────────────────────────────────────────────────
+
+export async function listarApoliceSubgrupos(
+  publicId: string,
+  signal?: AbortSignal
+): Promise<import('../types/apolice.types').ApoliceSubgrupoResult[]> {
+  const response = await httpClient.get<import('../types/apolice.types').ApoliceSubgrupoResult[]>(
+    `/api/apolices/${publicId}/subgrupos`,
+    { signal }
+  );
+  return response.data;
+}
+
+export async function obterApoliceSubgrupo(
+  apolicePublicId: string,
+  subgrupoPublicId: string,
+  signal?: AbortSignal
+): Promise<import('../types/apolice.types').ApoliceSubgrupoResult> {
+  const response = await httpClient.get<import('../types/apolice.types').ApoliceSubgrupoResult>(
+    `/api/apolices/${apolicePublicId}/subgrupos/${subgrupoPublicId}`,
+    { signal }
+  );
+  return response.data;
+}
+
+export async function criarApoliceSubgrupo(
+  apolicePublicId: string,
+  payload: import('../types/apolice.types').CriarSubgrupoApoliceRequest
+): Promise<{ subgrupoPublicId: string }> {
+  const response = await httpClient.post<{ subgrupoPublicId: string }>(
+    `/api/apolices/${apolicePublicId}/subgrupos`,
+    payload
+  );
+  return response.data;
+}
+
+export async function alterarApoliceSubgrupo(
+  apolicePublicId: string,
+  subgrupoPublicId: string,
+  payload: import('../types/apolice.types').AlterarSubgrupoApoliceRequest
+): Promise<void> {
+  await httpClient.put(
+    `/api/apolices/${apolicePublicId}/subgrupos/${subgrupoPublicId}`,
+    payload
+  );
+}
+
+export async function inativarApoliceSubgrupo(
+  apolicePublicId: string,
+  subgrupoPublicId: string
+): Promise<void> {
+  await httpClient.patch(
+    `/api/apolices/${apolicePublicId}/subgrupos/${subgrupoPublicId}/inativar`
+  );
+}
+

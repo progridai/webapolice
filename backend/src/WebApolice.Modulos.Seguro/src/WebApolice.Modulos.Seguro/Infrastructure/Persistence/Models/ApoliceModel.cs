@@ -40,4 +40,5 @@ public class ApoliceModel
     public ICollection<ApoliceHistoricoModel> Historicos { get; set; } = new List<ApoliceHistoricoModel>();
     public ICollection<ApoliceProdutoModel> ApoliceProdutos { get; set; } = new List<ApoliceProdutoModel>();
     public ICollection<Propostum> Propostas { get; set; } = new List<Propostum>();
+    public ICollection<ApoliceModuloModel> Modulos { get; set; } = new List<ApoliceModuloModel>();
 }

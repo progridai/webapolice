@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 using WebApolice.Modulos.Seguro.Application.UseCases.Apolices.ListarApolices;
@@ -58,4 +58,17 @@ public interface IApolicesQueries
         Guid apolicePublicId,
         Guid subestipulantePublicId,
         CancellationToken cancellationToken);
+
+    // ── Subgrupos da Apólice ────────────────────────────────────────────────
+    // Subgrupo é uma divisão contextual da Apólice (não é cadastro global).
+
+    Task<System.Collections.Generic.List<WebApolice.Modulos.Seguro.Application.UseCases.Apolices.ListarSubgrupos.ApoliceSubgrupoResult>> ListarSubgruposAsync(
+        Guid apolicePublicId,
+        CancellationToken cancellationToken);
+
+    Task<WebApolice.Modulos.Seguro.Application.UseCases.Apolices.ListarSubgrupos.ApoliceSubgrupoResult?> ObterSubgrupoPorPublicIdAsync(
+        Guid apolicePublicId,
+        Guid subgrupoPublicId,
+        CancellationToken cancellationToken);
 }
+

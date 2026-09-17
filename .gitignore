@@ -44,4 +44,6 @@ desktop.ini
 !.vscode/settings.json
 .history/
 *.log
+crash_log.txt
+scratch/
 brain/

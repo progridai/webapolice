@@ -464,4 +464,90 @@ public class ApolicesController : ControllerBase
         await handler.Handle(command, cancellationToken);
         return NoContent();
     }
+
+    // ── Subgrupos da Apólice ──────────────────────────────────────────────────
+    // Subgrupo é uma divisão contextual da Apólice (não é cadastro global).
+    // Leitura: apolices.visualizar | Escrita: apolices.subgrupos.*
+
+    [HttpGet("{publicId}/subgrupos")]
+    [AuthorizePermissao(PermissoesSeguranca.Apolices.Visualizar)]
+    public async Task<IActionResult> GetSubgrupos(
+        Guid publicId,
+        [FromServices] WebApolice.Modulos.Seguro.Application.UseCases.Apolices.ListarSubgrupos.ListarApoliceSubgruposHandler handler,
+        CancellationToken cancellationToken)
+    {
+        var query = new WebApolice.Modulos.Seguro.Application.UseCases.Apolices.ListarSubgrupos.ListarApoliceSubgruposQuery(publicId);
+        var result = await handler.Handle(query, cancellationToken);
+        return Ok(result);
+    }
+
+    [HttpGet("{publicId}/subgrupos/{subgrupoPublicId:guid}")]
+    [AuthorizePermissao(PermissoesSeguranca.Apolices.Visualizar)]
+    public async Task<IActionResult> GetSubgrupo(
+        Guid publicId,
+        Guid subgrupoPublicId,
+        [FromServices] WebApolice.Modulos.Seguro.Application.UseCases.Apolices.ObterSubgrupo.ObterApoliceSubgrupoHandler handler,
+        CancellationToken cancellationToken)
+    {
+        var query = new WebApolice.Modulos.Seguro.Application.UseCases.Apolices.ObterSubgrupo.ObterApoliceSubgrupoPorPublicIdQuery(publicId, subgrupoPublicId);
+        var result = await handler.Handle(query, cancellationToken);
+        if (result == null) return NotFound();
+        return Ok(result);
+    }
+
+    [HttpPost("{publicId}/subgrupos")]
+    [AuthorizePermissao(PermissoesSeguranca.ApolicesSubgrupos.Inserir)]
+    public async Task<IActionResult> PostSubgrupo(
+        Guid publicId,
+        [FromBody] CriarSubgrupoApoliceRequest request,
+        [FromServices] WebApolice.Modulos.Seguro.Application.UseCases.Apolices.CriarSubgrupo.CriarSubgrupoApoliceHandler handler,
+        CancellationToken cancellationToken)
+    {
+        var command = new WebApolice.Modulos.Seguro.Application.UseCases.Apolices.CriarSubgrupo.CriarSubgrupoApoliceCommand
+        {
+            ApolicePublicId = publicId,
+            Nome = request.Nome,
+            Observacao = request.Observacao
+        };
+        var subgrupoPublicId = await handler.Handle(command, cancellationToken);
+        return CreatedAtAction("GetSubgrupo", new { publicId, subgrupoPublicId }, new { subgrupoPublicId });
+    }
+
+    [HttpPut("{publicId}/subgrupos/{subgrupoPublicId:guid}")]
+    [AuthorizePermissao(PermissoesSeguranca.ApolicesSubgrupos.Alterar)]
+    public async Task<IActionResult> PutSubgrupo(
+        Guid publicId,
+        Guid subgrupoPublicId,
+        [FromBody] AlterarSubgrupoApoliceRequest request,
+        [FromServices] WebApolice.Modulos.Seguro.Application.UseCases.Apolices.AlterarSubgrupo.AlterarSubgrupoApoliceHandler handler,
+        CancellationToken cancellationToken)
+    {
+        var command = new WebApolice.Modulos.Seguro.Application.UseCases.Apolices.AlterarSubgrupo.AlterarSubgrupoApoliceCommand
+        {
+            ApolicePublicId = publicId,
+            SubgrupoPublicId = subgrupoPublicId,
+            Nome = request.Nome,
+            Observacao = request.Observacao
+        };
+        await handler.Handle(command, cancellationToken);
+        return NoContent();
+    }
+
+    [HttpPatch("{publicId}/subgrupos/{subgrupoPublicId:guid}/inativar")]
+    [AuthorizePermissao(PermissoesSeguranca.ApolicesSubgrupos.Inativar)]
+    public async Task<IActionResult> PatchInativarSubgrupo(
+        Guid publicId,
+        Guid subgrupoPublicId,
+        [FromServices] WebApolice.Modulos.Seguro.Application.UseCases.Apolices.InativarSubgrupo.InativarSubgrupoApoliceHandler handler,
+        CancellationToken cancellationToken)
+    {
+        var command = new WebApolice.Modulos.Seguro.Application.UseCases.Apolices.InativarSubgrupo.InativarSubgrupoApoliceCommand
+        {
+            ApolicePublicId = publicId,
+            SubgrupoPublicId = subgrupoPublicId
+        };
+        await handler.Handle(command, cancellationToken);
+        return NoContent();
+    }
 }
+

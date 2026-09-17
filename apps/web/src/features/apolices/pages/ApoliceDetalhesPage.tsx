@@ -13,22 +13,25 @@ import { useApoliceDetalhe } from '../hooks/useApoliceDetalhe';
 import { ResumoTab } from '../components/tabs/ResumoTab';
 import { RamosTab } from '../components/tabs/RamosTab';
 import { ConfiguracoesTab } from '../components/tabs/ConfiguracoesTab';
+import { SubgruposTab } from '../components/tabs/SubgruposTab';
 import { SubestipulantesTab } from '../components/tabs/SubestipulantesTab';
 import { VidasTab } from '../components/tabs/VidasTab';
 import { UniversoPermitidoTab } from '../components/tabs/UniversoPermitidoTab';
 import { HistoricoTab } from '../components/tabs/HistoricoTab';
 
-type TabKey = 'resumo' | 'ramos' | 'configuracoes' | 'subestipulantes' | 'vidas' | 'universo' | 'historico';
+type TabKey = 'resumo' | 'ramos' | 'configuracoes' | 'subgrupos' | 'subestipulantes' | 'vidas' | 'universo' | 'historico';
 
 const TABS: { key: TabKey; label: string }[] = [
   { key: 'resumo', label: 'Resumo' },
   { key: 'ramos', label: 'Ramos' },
   { key: 'configuracoes', label: 'Configurações' },
+  { key: 'subgrupos', label: 'Subgrupos' },
   { key: 'subestipulantes', label: 'Subestipulantes' },
   { key: 'vidas', label: 'Vidas' },
   { key: 'universo', label: 'Universo Permitido' },
   { key: 'historico', label: 'Histórico' },
 ];
+
 
 import { useAuthorization } from '../../../auth/AuthorizationProvider';
 import { ROUTES } from '../../../app/routes/routePaths';
@@ -156,6 +159,7 @@ export const ApoliceDetalhesPage: React.FC = () => {
           {activeTab === 'resumo' && <ResumoTab apolice={data} />}
           {activeTab === 'ramos' && <RamosTab apolice={data} onMutateSucesso={retry} />}
           {activeTab === 'configuracoes' && <ConfiguracoesTab apolice={data} />}
+          {activeTab === 'subgrupos' && <SubgruposTab publicId={data.publicId} />}
           {activeTab === 'subestipulantes' && <SubestipulantesTab publicId={data.publicId} />}
           {activeTab === 'vidas' && <VidasTab publicId={data.publicId} />}
           {activeTab === 'universo' && <UniversoPermitidoTab />}

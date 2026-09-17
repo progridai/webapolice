@@ -164,3 +164,21 @@ export interface ApoliceHistoricoResult {
   usuarioPublicId?: string;
   dataAcao: string;
 }
+
+export interface ApoliceSubgrupoResult {
+  subgrupoPublicId: string;
+  nome: string;
+  observacao?: string;
+  ativo: boolean;
+}
+
+export interface CriarSubgrupoApoliceRequest {
+  nome: string;
+  observacao?: string | null;
+}
+
+export interface AlterarSubgrupoApoliceRequest {
+  nome: string;
+  observacao?: string | null;
+}
+

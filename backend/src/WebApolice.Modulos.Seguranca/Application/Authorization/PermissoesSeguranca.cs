@@ -53,6 +53,25 @@ public static class PermissoesSeguranca
         public const string Inativar = "apolices.subestipulantes.inativar";
     }
 
+    /// <summary>
+    /// Permissões para gestão de Subgrupos da Apólice.
+    /// Subgrupo é uma divisão contextual da Apólice — não é cadastro global.
+    /// Leitura de Subgrupos cobre-se por apolices.visualizar.
+    /// </summary>
+    public static class ApolicesSubgrupos
+    {
+        public const string Inserir = "apolices.subgrupos.inserir";
+        public const string Alterar = "apolices.subgrupos.alterar";
+        public const string Inativar = "apolices.subgrupos.inativar";
+    }
+
+    public static class ApolicesModulos
+    {
+        public const string Inserir = "apolices.modulos.inserir";
+        public const string Alterar = "apolices.modulos.alterar";
+        public const string Inativar = "apolices.modulos.inativar";
+    }
+
     public static class ApolicesSubestipulantesModulos
     {
         public const string Inserir = "apolices.subestipulantes.modulos.inserir";

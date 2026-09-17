@@ -56,6 +56,15 @@ public static class SeguroModuleExtensions
         services.AddScoped<WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Application.UseCases.Apolices.InativarApoliceVida.InativarApoliceVidaHandler>();
         services.AddScoped<WebApolice.Modulos.Seguro.Application.UseCases.Apolices.ObterApoliceVida.ObterApoliceVidaHandler>();
 
+        // Handlers - Subgrupos da Apólice
+        // Subgrupo é uma divisão contextual da Apólice (não é cadastro global)
+        services.AddScoped<WebApolice.Modulos.Seguro.Application.UseCases.Apolices.ListarSubgrupos.ListarApoliceSubgruposHandler>();
+        services.AddScoped<WebApolice.Modulos.Seguro.Application.UseCases.Apolices.ObterSubgrupo.ObterApoliceSubgrupoHandler>();
+        services.AddScoped<WebApolice.Modulos.Seguro.Application.UseCases.Apolices.CriarSubgrupo.CriarSubgrupoApoliceHandler>();
+        services.AddScoped<WebApolice.Modulos.Seguro.Application.UseCases.Apolices.AlterarSubgrupo.AlterarSubgrupoApoliceHandler>();
+        services.AddScoped<WebApolice.Modulos.Seguro.Application.UseCases.Apolices.InativarSubgrupo.InativarSubgrupoApoliceHandler>();
+
+
         // Handlers - Ramo
         services.AddScoped<WebApolice.Modulos.Seguro.Application.UseCases.Ramos.ListarRamos.ListarRamosHandler>();
         services.AddScoped<WebApolice.Modulos.Seguro.Application.UseCases.Ramos.ObterRamo.ObterRamoHandler>();

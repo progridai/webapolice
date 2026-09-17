@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using WebApolice.Modulos.Seguro.Application.Ports;
 using WebApolice.Modulos.Seguro.Application.UseCases.Apolices.ListarApolices;
 using WebApolice.Modulos.Seguro.Application.UseCases.Apolices.ListarModulos;
+using WebApolice.Modulos.Seguro.Application.UseCases.Apolices.ListarSubgrupos;
 using WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence;
 using WebApolice.SharedKernel.Application.Models;
 
@@ -850,5 +851,50 @@ public class ApolicesQueries : IApolicesQueries
         if (digits.Length == 14)
             return $"**.***.{digits.Substring(5, 3)}/{digits.Substring(8, 4)}-**";
         return "***";
+    }
+
+    // ── Subgrupos da Apólice ─────────────────────────────────────────────────
+
+    /// <summary>
+    /// Lista todos os Subgrupos de uma Apólice.
+    /// Subgrupo é uma divisão contextual — não é cadastro global.
+    /// </summary>
+    public async Task<List<ApoliceSubgrupoResult>> ListarSubgruposAsync(
+        Guid apolicePublicId,
+        CancellationToken cancellationToken)
+    {
+        return await _dbContext.ApoliceSubgrupos
+            .AsNoTracking()
+            .Where(s => s.Apolice!.PublicId == apolicePublicId
+                     && s.DeletedAt == null)
+            .OrderBy(s => s.Nome)
+            .Select(s => new ApoliceSubgrupoResult(
+                s.PublicId,
+                s.Nome,
+                s.Observacao,
+                s.Ativo))
+            .ToListAsync(cancellationToken);
+    }
+
+    /// <summary>
+    /// Obtém um Subgrupo específico dentro de uma Apólice pelo PublicId.
+    /// Valida isolamento: retorna null se o subgrupo não pertencer à apólice indicada.
+    /// </summary>
+    public async Task<ApoliceSubgrupoResult?> ObterSubgrupoPorPublicIdAsync(
+        Guid apolicePublicId,
+        Guid subgrupoPublicId,
+        CancellationToken cancellationToken)
+    {
+        return await _dbContext.ApoliceSubgrupos
+            .AsNoTracking()
+            .Where(s => s.PublicId == subgrupoPublicId
+                     && s.Apolice!.PublicId == apolicePublicId
+                     && s.DeletedAt == null)
+            .Select(s => new ApoliceSubgrupoResult(
+                s.PublicId,
+                s.Nome,
+                s.Observacao,
+                s.Ativo))
+            .FirstOrDefaultAsync(cancellationToken);
     }
 }

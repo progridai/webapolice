@@ -72,13 +72,6 @@ public static class PermissoesSeguranca
         public const string Inativar = "apolices.modulos.inativar";
     }
 
-    public static class ApolicesSubestipulantesModulos
-    {
-        public const string Inserir = "apolices.subestipulantes.modulos.inserir";
-        public const string Alterar = "apolices.subestipulantes.modulos.alterar";
-        public const string Inativar = "apolices.subestipulantes.modulos.inativar";
-    }
-
     public static class ApolicesVidas
     {
         public const string Inserir = "apolices.vidas.inserir";
@@ -120,5 +113,17 @@ public static class PermissoesSeguranca
         public const string Alterar = "corretoras.alterar";
         public const string Inativar = "corretoras.inativar";
         public const string Reativar = "corretoras.reativar";
+    }
+
+    /// <summary>
+    /// Permissões para o Cadastro Global de Módulos.
+    /// Não confundir com <see cref="ApolicesModulos"/> (vínculo Apólice→Módulo).
+    /// </summary>
+    public static class Modulos
+    {
+        public const string Visualizar = "modulos.visualizar";
+        public const string Inserir = "modulos.inserir";
+        public const string Alterar = "modulos.alterar";
+        public const string Inativar = "modulos.inativar";
     }
 }

@@ -27,11 +27,11 @@ public class ApoliceVidaTests : IClassFixture<SeguroIntegrationTestFixture>
         _fixture = fixture;
     }
 
-    private async Task<(Guid apolicePublicId, Guid clientePublicId, Guid subestipulantePublicId, Guid moduloPublicId)> SeedDataAsync()
+    private async Task<(Guid apolicePublicId, Guid clientePublicId, Guid apoliceSubgrupoPublicId, Guid apoliceModuloPublicId)> SeedDataAsync()
     {
         var apolicePublicId = Guid.NewGuid();
         var clientePublicId = Guid.NewGuid();
-        var subestipulantePublicId = Guid.NewGuid();
+        var subgrupoPublicId = Guid.NewGuid();
         var moduloPublicId = Guid.NewGuid();
 
         var apolice = new ApoliceModel
@@ -57,11 +57,8 @@ public class ApoliceVidaTests : IClassFixture<SeguroIntegrationTestFixture>
             cmd.CommandText = $@"
                 INSERT INTO core.pessoa (id, tipo, nome, documento_principal, created_at, updated_at) VALUES (2001, 'F', 'Cliente Teste Vida', '12345678901', now(), now()) ON CONFLICT DO NOTHING;
                 INSERT INTO cadastro.cliente (id, pessoa_id, public_id, status_id, ativo, created_at, updated_at) VALUES (2001, 2001, '{clientePublicId}', 1, true, now(), now()) ON CONFLICT DO NOTHING;
-
-                INSERT INTO core.pessoa (id, tipo, nome, created_at, updated_at) VALUES (2002, 'J', 'Sub Teste Vida', now(), now()) ON CONFLICT DO NOTHING;
-                INSERT INTO cadastro.subestipulante (id, pessoa_id, public_id, ativo, created_at, updated_at) VALUES (2002, 2002, '{subestipulantePublicId}', true, now(), now()) ON CONFLICT DO NOTHING;
-
-                INSERT INTO cadastro.modulo (id, public_id, nome, ativo, created_at, updated_at) VALUES (2002, '{moduloPublicId}', 'Módulo Teste Vida', true, now(), now()) ON CONFLICT DO NOTHING;";
+                
+                INSERT INTO cadastro.modulo (id, public_id, nome, ativo, created_at, updated_at) VALUES (2002, '{Guid.NewGuid()}', 'Módulo Teste Vida', true, now(), now()) ON CONFLICT DO NOTHING;";
             await cmd.ExecuteNonQueryAsync();
         }
         finally
@@ -69,42 +66,42 @@ public class ApoliceVidaTests : IClassFixture<SeguroIntegrationTestFixture>
             if (!wasOpen) await conn.CloseAsync();
         }
 
-        var subVinculo = new ApoliceSubestipulanteModel
+        var apoliceSubgrupo = new ApoliceSubgrupoModel
         {
             ApoliceId = apolice.Id,
-            SubestipulanteId = 2002,
-            DataInicio = new DateOnly(2025, 1, 1),
-            DataFim = new DateOnly(2025, 12, 31),
+            PublicId = subgrupoPublicId,
+            Nome = "Subgrupo Teste Vida",
             Ativo = true,
             CreatedAt = DateTimeOffset.UtcNow,
             UpdatedAt = DateTimeOffset.UtcNow
         };
-        _fixture.DbContext.ApoliceSubestipulantes.Add(subVinculo);
-        await _fixture.DbContext.SaveChangesAsync();
+        _fixture.DbContext.ApoliceSubgrupos.Add(apoliceSubgrupo);
 
-        var moduloVinculo = new ApoliceSubestipulanteModuloModel
+        var apoliceModulo = new ApoliceModuloModel
         {
-            ApoliceSubestipulanteId = subVinculo.Id,
+            ApoliceId = apolice.Id,
             ModuloId = 2002,
+            PublicId = moduloPublicId,
             DataInicio = new DateOnly(2025, 1, 1),
             DataFim = new DateOnly(2025, 12, 31),
             Ativo = true,
             CreatedAt = DateTimeOffset.UtcNow,
             UpdatedAt = DateTimeOffset.UtcNow
         };
-        _fixture.DbContext.ApoliceSubestipulanteModulos.Add(moduloVinculo);
+        _fixture.DbContext.ApoliceModulos.Add(apoliceModulo);
+
         await _fixture.DbContext.SaveChangesAsync();
 
-        return (apolicePublicId, clientePublicId, subestipulantePublicId, moduloPublicId);
+        return (apolicePublicId, clientePublicId, subgrupoPublicId, moduloPublicId);
     }
 
     [Fact]
-    public async Task CriarVida_TresContextosValidos()
+    public async Task CriarVida_CombinacoesValidas()
     {
         var data = await SeedDataAsync();
         var handler = new CriarApoliceVidaHandler(_fixture.DbContext);
 
-        // Contexto A: Direto
+        // Direto
         var vidaDiretaId = await handler.Handle(new CriarApoliceVidaCommand
         {
             ApolicePublicId = data.apolicePublicId,
@@ -114,46 +111,103 @@ public class ApoliceVidaTests : IClassFixture<SeguroIntegrationTestFixture>
         }, CancellationToken.None);
         vidaDiretaId.Should().NotBeEmpty();
 
-        // Contexto B: Subestipulante
+        // Subgrupo
         var vidaSubId = await handler.Handle(new CriarApoliceVidaCommand
         {
             ApolicePublicId = data.apolicePublicId,
             ClientePublicId = data.clientePublicId,
-            SubestipulantePublicId = data.subestipulantePublicId,
+            ApoliceSubgrupoPublicId = data.apoliceSubgrupoPublicId,
             UsuarioPublicId = Guid.NewGuid()
         }, CancellationToken.None);
         vidaSubId.Should().NotBeEmpty();
 
-        // Contexto C: Subestipulante + Módulo
+        // Módulo
         var vidaModId = await handler.Handle(new CriarApoliceVidaCommand
         {
             ApolicePublicId = data.apolicePublicId,
             ClientePublicId = data.clientePublicId,
-            SubestipulantePublicId = data.subestipulantePublicId,
-            ModuloPublicId = data.moduloPublicId,
+            ApoliceModuloPublicId = data.apoliceModuloPublicId,
             UsuarioPublicId = Guid.NewGuid()
         }, CancellationToken.None);
         vidaModId.Should().NotBeEmpty();
+
+        // Subgrupo + Módulo
+        var vidaSubModId = await handler.Handle(new CriarApoliceVidaCommand
+        {
+            ApolicePublicId = data.apolicePublicId,
+            ClientePublicId = data.clientePublicId,
+            ApoliceSubgrupoPublicId = data.apoliceSubgrupoPublicId,
+            ApoliceModuloPublicId = data.apoliceModuloPublicId,
+            UsuarioPublicId = Guid.NewGuid()
+        }, CancellationToken.None);
+        vidaSubModId.Should().NotBeEmpty();
 
         // Queries
         IApolicesQueries queries = new ApolicesQueries(_fixture.DbContext);
         
         var list = await queries.ListarVidasPaginadoAsync(data.apolicePublicId, 1, 50, null, null, null, null, null, CancellationToken.None);
-        list.TotalCount.Should().BeGreaterThanOrEqualTo(3);
+        list.TotalCount.Should().BeGreaterThanOrEqualTo(4);
         
         var vDireto = await queries.ObterApoliceVidaPorPublicIdAsync(data.apolicePublicId, vidaDiretaId, CancellationToken.None);
         vDireto.Should().NotBeNull();
-        vDireto!.Contexto.Should().Be("direto");
+        vDireto!.ApoliceSubgrupoPublicId.Should().BeNull();
+        vDireto.ApoliceModuloPublicId.Should().BeNull();
 
         var vSub = await queries.ObterApoliceVidaPorPublicIdAsync(data.apolicePublicId, vidaSubId, CancellationToken.None);
-        vSub!.Contexto.Should().Be("subestipulante");
+        vSub!.ApoliceSubgrupoPublicId.Should().Be(data.apoliceSubgrupoPublicId);
+        vSub.ApoliceModuloPublicId.Should().BeNull();
         
         var vMod = await queries.ObterApoliceVidaPorPublicIdAsync(data.apolicePublicId, vidaModId, CancellationToken.None);
-        vMod!.Contexto.Should().Be("modulo");
+        vMod!.ApoliceSubgrupoPublicId.Should().BeNull();
+        vMod.ApoliceModuloPublicId.Should().Be(data.apoliceModuloPublicId);
+
+        var vSubMod = await queries.ObterApoliceVidaPorPublicIdAsync(data.apolicePublicId, vidaSubModId, CancellationToken.None);
+        vSubMod!.ApoliceSubgrupoPublicId.Should().Be(data.apoliceSubgrupoPublicId);
+        vSubMod.ApoliceModuloPublicId.Should().Be(data.apoliceModuloPublicId);
     }
 
     [Fact]
-    public async Task CriarVida_ModuloSemSubestipulante_RetornaErro()
+    public async Task CriarVida_SubgrupoOuModuloDeOutraApolice_RetornaErro()
+    {
+        var data = await SeedDataAsync();
+        var handler = new CriarApoliceVidaHandler(_fixture.DbContext);
+
+        var outraApolice = new ApoliceModel
+        {
+            PublicId = Guid.NewGuid(),
+            EstipulanteId = 1,
+            SeguradoraId = 1,
+            Nome = "Outra Apólice",
+            DataInicioVigencia = new DateOnly(2025, 1, 1),
+            Ativo = true,
+            CreatedAt = DateTimeOffset.UtcNow
+        };
+        _fixture.DbContext.Apolices.Add(outraApolice);
+        await _fixture.DbContext.SaveChangesAsync();
+
+        var outroSubgrupo = new ApoliceSubgrupoModel
+        {
+            ApoliceId = outraApolice.Id,
+            PublicId = Guid.NewGuid(),
+            Nome = "Outro",
+            Ativo = true
+        };
+        _fixture.DbContext.ApoliceSubgrupos.Add(outroSubgrupo);
+        await _fixture.DbContext.SaveChangesAsync();
+
+        var act1 = async () => await handler.Handle(new CriarApoliceVidaCommand
+        {
+            ApolicePublicId = data.apolicePublicId,
+            ClientePublicId = data.clientePublicId,
+            ApoliceSubgrupoPublicId = outroSubgrupo.PublicId,
+            UsuarioPublicId = Guid.NewGuid()
+        }, CancellationToken.None);
+
+        await act1.Should().ThrowAsync<ValidacaoException>().WithMessage("*pertence a outra Apólice*");
+    }
+
+    [Fact]
+    public async Task CriarVida_ForaDaVigenciaDaApolice_RetornaErro()
     {
         var data = await SeedDataAsync();
         var handler = new CriarApoliceVidaHandler(_fixture.DbContext);
@@ -162,30 +216,11 @@ public class ApoliceVidaTests : IClassFixture<SeguroIntegrationTestFixture>
         {
             ApolicePublicId = data.apolicePublicId,
             ClientePublicId = data.clientePublicId,
-            SubestipulantePublicId = null,
-            ModuloPublicId = data.moduloPublicId,
+            DataInicioVigencia = new DateOnly(2024, 12, 31), // Apólice inicia em 01/01/2025
             UsuarioPublicId = Guid.NewGuid()
         }, CancellationToken.None);
 
-        await act.Should().ThrowAsync<ValidacaoException>().WithMessage("*Não é possível vincular um Módulo sem informar o Subestipulante*");
-    }
-
-    [Fact]
-    public async Task CriarVida_ForaDaVigenciaDoContexto_RetornaErro()
-    {
-        var data = await SeedDataAsync();
-        var handler = new CriarApoliceVidaHandler(_fixture.DbContext);
-
-        var act = async () => await handler.Handle(new CriarApoliceVidaCommand
-        {
-            ApolicePublicId = data.apolicePublicId,
-            ClientePublicId = data.clientePublicId,
-            SubestipulantePublicId = data.subestipulantePublicId, // Pai vai de 01/01/2025 a 31/12/2025
-            DataInicioVigencia = new DateOnly(2024, 12, 31),
-            UsuarioPublicId = Guid.NewGuid()
-        }, CancellationToken.None);
-
-        await act.Should().ThrowAsync<ValidacaoException>().WithMessage("*não pode ser anterior à data de início do contexto pai*");
+        await act.Should().ThrowAsync<ValidacaoException>().WithMessage("*não pode ser anterior à data de início de Apólice*");
     }
 
     [Fact]
@@ -206,6 +241,8 @@ public class ApoliceVidaTests : IClassFixture<SeguroIntegrationTestFixture>
         {
             ApolicePublicId = data.apolicePublicId,
             ApoliceVidaPublicId = vidaId,
+            ApoliceSubgrupoPublicId = data.apoliceSubgrupoPublicId, // Adiciona subgrupo
+            ApoliceModuloPublicId = data.apoliceModuloPublicId,     // Adiciona modulo
             DataInicioVigencia = new DateOnly(2025, 3, 1),
             Observacao = "Atualizado",
             UsuarioPublicId = Guid.NewGuid()
@@ -215,6 +252,21 @@ public class ApoliceVidaTests : IClassFixture<SeguroIntegrationTestFixture>
         var vidaAtualizada = await queries.ObterApoliceVidaPorPublicIdAsync(data.apolicePublicId, vidaId, CancellationToken.None);
         vidaAtualizada!.DataInicioVigencia.Should().Be(new DateOnly(2025, 3, 1));
         vidaAtualizada.Observacao.Should().Be("Atualizado");
+        vidaAtualizada.ApoliceSubgrupoPublicId.Should().Be(data.apoliceSubgrupoPublicId);
+        vidaAtualizada.ApoliceModuloPublicId.Should().Be(data.apoliceModuloPublicId);
+
+        // Remover Subgrupo
+        await alterarHandler.Handle(new AlterarApoliceVidaCommand
+        {
+            ApolicePublicId = data.apolicePublicId,
+            ApoliceVidaPublicId = vidaId,
+            ApoliceSubgrupoPublicId = null, // Remove subgrupo
+            ApoliceModuloPublicId = data.apoliceModuloPublicId,
+            UsuarioPublicId = Guid.NewGuid()
+        }, CancellationToken.None);
+        var vidaAtualizada2 = await queries.ObterApoliceVidaPorPublicIdAsync(data.apolicePublicId, vidaId, CancellationToken.None);
+        vidaAtualizada2!.ApoliceSubgrupoPublicId.Should().BeNull();
+        vidaAtualizada2.ApoliceModuloPublicId.Should().Be(data.apoliceModuloPublicId);
 
         var inativarHandler = new InativarApoliceVidaHandler(_fixture.DbContext);
         await inativarHandler.Handle(new InativarApoliceVidaCommand

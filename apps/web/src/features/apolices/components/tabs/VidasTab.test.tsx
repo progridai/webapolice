@@ -5,13 +5,15 @@ import { useApoliceVidas } from '../../hooks/useApoliceVidas';
 import { useAuthorization } from '../../../../auth/AuthorizationProvider';
 import { inativarApoliceVida, criarApoliceVida, atualizarApoliceVida } from '../../api/apolices.api';
 import type { ApoliceVidaListItem } from '../../types/apolice.types';
-import { useApoliceSubestipulantes } from '../../hooks/useApoliceSubestipulantes';
+import { useApoliceSubgrupos } from '../../hooks/useApoliceSubgrupos';
+import { useApoliceModulos } from '../../hooks/useApoliceModulos';
 
 // Mock dependencies
 vi.mock('../../hooks/useApoliceVidas');
 vi.mock('../../../../auth/AuthorizationProvider');
 vi.mock('../../api/apolices.api');
-vi.mock('../../hooks/useApoliceSubestipulantes');
+vi.mock('../../hooks/useApoliceSubgrupos');
+vi.mock('../../hooks/useApoliceModulos');
 
 // Mock ClienteAsyncSelect to avoid complex async select rendering in these tests
 vi.mock('./ClienteAsyncSelect', () => ({
@@ -30,7 +32,6 @@ const mockVidaDireta: ApoliceVidaListItem = {
   clientePublicId: 'cli-1',
   clienteNome: 'João da Silva',
   clienteDocumentoMascarado: '111.222.333-44',
-  contexto: 'direto',
   ativo: true,
   status: 'Ativa'
 };
@@ -40,23 +41,19 @@ const mockVidaSub: ApoliceVidaListItem = {
   clientePublicId: 'cli-1', // Mesmo cliente, multiplas participacoes
   clienteNome: 'João da Silva',
   clienteDocumentoMascarado: '111.222.333-44',
-  contexto: 'subestipulante',
-  subestipulantePublicId: 'sub-1',
-  subestipulanteNome: 'Empresa Alpha',
+  apoliceSubgrupoPublicId: 'sub-1',
+  subgrupoNome: 'Subgrupo Alpha',
   ativo: true,
   status: 'Ativa'
 };
 
-const mockSubestipulantes = [
-  {
-    subestipulantePublicId: 'sub-1',
-    nome: 'Empresa Alpha',
-    ativo: true,
-    modulos: [
-      { moduloPublicId: 'mod-1', moduloNome: 'Modulo Básico', vinculoAtivo: true },
-      { moduloPublicId: 'mod-2', moduloNome: 'Modulo Premium', vinculoAtivo: true }
-    ]
-  }
+const mockSubgrupos = [
+  { subgrupoPublicId: 'sub-1', nome: 'Subgrupo Alpha', ativo: true }
+];
+
+const mockModulos = [
+  { publicId: 'mod-1', nome: 'Modulo Básico', ativo: true },
+  { publicId: 'mod-2', nome: 'Modulo Premium', ativo: true }
 ];
 
 describe('VidasTab', () => {
@@ -68,8 +65,13 @@ describe('VidasTab', () => {
       possuiPermissao: () => true
     });
 
-    (useApoliceSubestipulantes as any).mockReturnValue({
-      data: mockSubestipulantes,
+    (useApoliceSubgrupos as any).mockReturnValue({
+      data: mockSubgrupos,
+      isLoading: false
+    });
+
+    (useApoliceModulos as any).mockReturnValue({
+      data: mockModulos,
       isLoading: false
     });
   });
@@ -84,7 +86,7 @@ describe('VidasTab', () => {
 
     render(<VidasTab publicId="apol-123" />);
     
-    expect(screen.getByText('Nenhuma vida encontrada')).toBeInTheDocument();
+    expect(screen.queryByText('Nenhuma vida encontrada')).not.toBeNull();
   });
 
   it('deve renderizar múltiplas participações do mesmo cliente (duplicidade permitida)', () => {
@@ -98,19 +100,14 @@ describe('VidasTab', () => {
     render(<VidasTab publicId="apol-123" />);
     
     // Duas vezes o mesmo nome
-    const rows = screen.getAllByText('João da Silva');
-    expect(rows).toHaveLength(2);
+    const clientNames = screen.getAllByText('João da Silva');
+    expect(clientNames).toHaveLength(2);
     
-    // Verifica os badges de contexto
-    expect(screen.getByText('Direto na Apólice')).toBeInTheDocument();
-    expect(screen.getByText('Empresa Alpha')).toBeInTheDocument();
+    // Verifica os nomes de Subgrupo (onde preenchido)
+    expect(screen.queryByText('Subgrupo Alpha')).not.toBeNull();
   });
 
   it('não deve exibir botões de ação se usuário tiver apenas permissão de visualizar', () => {
-    (useAuthorization as any).mockReturnValue({
-      possuiPermissao: (perm: string) => perm === 'apolices.visualizar'
-    });
-
     (useApoliceVidas as any).mockReturnValue({
       data: { items: [mockVidaDireta], totalCount: 1, page: 1, pageSize: 10 },
       isLoading: false,
@@ -118,11 +115,15 @@ describe('VidasTab', () => {
       retry: vi.fn()
     });
 
+    (useAuthorization as any).mockReturnValue({
+      possuiPermissao: () => false // Só pode ver
+    });
+
     render(<VidasTab publicId="apol-123" />);
     
-    expect(screen.queryByText('Adicionar Vida')).not.toBeInTheDocument();
-    expect(screen.queryByText('Editar')).not.toBeInTheDocument();
-    expect(screen.queryByText('Encerrar')).not.toBeInTheDocument();
+    expect(screen.queryByText('Adicionar Vida')).toBeNull();
+    expect(screen.queryByText('Editar')).toBeNull();
+    expect(screen.queryByText('Encerrar')).toBeNull();
   });
 
   describe('Encerramento', () => {
@@ -141,11 +142,11 @@ describe('VidasTab', () => {
       fireEvent.click(btnEncerrar);
       
       // Modal should appear
-      expect(screen.getByText('Deseja encerrar esta participação na Apólice? O Cadastro Global do Cliente será preservado e a participação continuará disponível no histórico.')).toBeInTheDocument();
+      expect(screen.queryByText('Deseja encerrar esta participação na Apólice? O Cadastro Global do Cliente será preservado e a participação continuará disponível no histórico.')).not.toBeNull();
       
       // Confirm
       (inativarApoliceVida as any).mockResolvedValueOnce();
-      const btnConfirmar = screen.getByText('Encerrar', { selector: 'button.btn-error' }); // Assuming destructive button text or styling
+      const btnConfirmar = screen.getByText('Encerrar', { selector: 'button.btn-danger' }); // Assuming destructive button text or styling
       
       fireEvent.click(btnConfirmar);
       
@@ -157,7 +158,7 @@ describe('VidasTab', () => {
   });
 
   describe('Formulário de Inclusão', () => {
-    it('deve criar Vida com contexto Direto (sem Subestipulante/Módulo)', async () => {
+    it('deve criar Vida sem vínculos (sem Subgrupo/Módulo)', async () => {
       const retryMock = vi.fn();
       (useApoliceVidas as any).mockReturnValue({
         data: { items: [], totalCount: 0, page: 1, pageSize: 10 },
@@ -172,12 +173,6 @@ describe('VidasTab', () => {
       // Preenche Cliente
       fireEvent.change(screen.getByTestId('mock-cliente-select'), { target: { value: 'cli-novo' } });
       
-      // Contexto por default é direto
-      expect(screen.getAllByRole('combobox')[0]).toHaveValue('direto');
-      
-      // Campos de subestipulante não devem estar na tela
-      expect(screen.queryByText('Subestipulante da Apólice')).not.toBeInTheDocument();
-      
       // Submit
       (criarApoliceVida as any).mockResolvedValueOnce({ publicId: 'nova-vida' });
       fireEvent.click(screen.getByText('Salvar'));
@@ -185,13 +180,13 @@ describe('VidasTab', () => {
       await waitFor(() => {
         expect(criarApoliceVida).toHaveBeenCalledWith('apol-123', expect.objectContaining({
           clientePublicId: 'cli-novo',
-          subestipulantePublicId: null,
-          moduloPublicId: null
+          apoliceSubgrupoPublicId: null,
+          apoliceModuloPublicId: null
         }));
       });
     });
 
-    it('deve limpar módulo em cascata ao mudar contexto ou subestipulante', async () => {
+    it('deve permitir seleção independente de Subgrupo e Módulo', async () => {
       const retryMock = vi.fn();
       (useApoliceVidas as any).mockReturnValue({
         data: { items: [], totalCount: 0, page: 1, pageSize: 10 },
@@ -202,25 +197,30 @@ describe('VidasTab', () => {
       render(<VidasTab publicId="apol-123" />);
       fireEvent.click(screen.getByText('Adicionar Vida'));
       
-      // Muda contexto para módulo
-      fireEvent.change(screen.getAllByRole('combobox')[0], { target: { value: 'modulo' } });
+      const selects = screen.getAllByRole('combobox') as HTMLSelectElement[];
+      const subgrupoSelect = selects[0]; // First select is Subgrupo
+      const moduloSelect = selects[1];   // Second select is Módulo
+
+      // Muda Subgrupo
+      fireEvent.change(subgrupoSelect, { target: { value: 'sub-1' } });
+      expect(moduloSelect.value).toBe(''); // Módulo permanece intacto
+
+      // Muda Módulo
+      fireEvent.change(moduloSelect, { target: { value: 'mod-1' } });
+      expect(subgrupoSelect.value).toBe('sub-1'); // Subgrupo permanece intacto
       
-      // Agora seleciona subestipulante
-      fireEvent.change(screen.getAllByRole('combobox')[1], { target: { value: 'sub-1' } });
+      // Remove Subgrupo
+      fireEvent.change(subgrupoSelect, { target: { value: '' } });
+      expect(moduloSelect.value).toBe('mod-1'); // Módulo permanece intacto
       
-      // Agora o módulo deve estar disponível
-      expect(screen.getByText('Modulo Básico')).toBeInTheDocument();
-      
-      // Muda de volta para Direto -> deve esconder subestipulante
-      fireEvent.change(screen.getByRole('combobox', { name: /contexto/i }), { target: { value: 'direto' } });
-      
-      expect(screen.queryByText('Modulo Básico')).not.toBeInTheDocument();
-      expect(screen.queryByText('Empresa Alpha')).not.toBeInTheDocument();
+      // Remove Módulo
+      fireEvent.change(moduloSelect, { target: { value: '' } });
+      expect(subgrupoSelect.value).toBe(''); // Ambos vazios
     });
   });
 
   describe('Formulário de Edição', () => {
-    it('deve manter dados estruturais read-only no modo edição', async () => {
+    it('deve enviar nuláveis corretamente ao remover vínculos', async () => {
       (useApoliceVidas as any).mockReturnValue({
         data: { items: [mockVidaSub], totalCount: 1, page: 1, pageSize: 10 },
         isLoading: false,
@@ -232,22 +232,19 @@ describe('VidasTab', () => {
       
       fireEvent.click(screen.getByText('Editar'));
       
-      // Campos read-only devem renderizar como textos
-      expect(screen.getByText('Informações Estruturais')).toBeInTheDocument();
+      // Subgrupo deve vir preenchido, removemos ele
+      const subgrupoSelect = screen.getAllByRole('combobox')[0] as HTMLSelectElement;
+      expect(subgrupoSelect.value).toBe('sub-1');
       
-      // Não deve ter inputs select para contexto ou cliente
-      expect(screen.queryByTestId('mock-cliente-select')).not.toBeInTheDocument();
-      expect(screen.queryByRole('combobox', { name: /contexto/i })).not.toBeInTheDocument();
-      
-      // Submit edit apenas de datas
-      fireEvent.change(screen.getByLabelText(/Observação/i), { target: { value: 'Obs atualizada' } });
+      fireEvent.change(subgrupoSelect, { target: { value: '' } });
       
       (atualizarApoliceVida as any).mockResolvedValueOnce();
       fireEvent.click(screen.getByText('Salvar'));
       
       await waitFor(() => {
         expect(atualizarApoliceVida).toHaveBeenCalledWith('apol-123', 'vida-2', expect.objectContaining({
-          observacao: 'Obs atualizada'
+          apoliceSubgrupoPublicId: null,
+          apoliceModuloPublicId: null // mockVidaSub não tinha módulo
         }));
       });
     });

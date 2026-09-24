@@ -327,10 +327,6 @@ namespace WebApolice.Modulos.Cadastro.Infrastructure.Migrations
                         .HasColumnType("bigint")
                         .HasColumnName("pessoa_id");
 
-                    b.Property<long?>("SubestipulanteId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("subestipulante_id");
-
                     b.Property<long?>("SubgrupoId")
                         .HasColumnType("bigint")
                         .HasColumnName("subgrupo_id");

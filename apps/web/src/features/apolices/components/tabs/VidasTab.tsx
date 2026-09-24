@@ -68,16 +68,15 @@ export const VidasTab: React.FC<VidasTabProps> = ({ publicId }) => {
           dataInicioVigencia: formData.dataInicioVigencia || null,
           dataFimVigencia: formData.dataFimVigencia || null,
           observacao: formData.observacao || null,
-          contexto: formData.contexto,
-          subestipulantePublicId: formData.contexto === 'direto' ? null : formData.subestipulantePublicId,
-          moduloPublicId: formData.contexto === 'modulo' ? formData.moduloPublicId : null
+          apoliceSubgrupoPublicId: formData.apoliceSubgrupoPublicId || null,
+          apoliceModuloPublicId: formData.apoliceModuloPublicId || null
         });
       } else {
         // Create mode
         await criarApoliceVida(publicId, {
           clientePublicId: formData.clientePublicId,
-          subestipulantePublicId: formData.contexto === 'direto' ? null : formData.subestipulantePublicId,
-          moduloPublicId: formData.contexto === 'modulo' ? formData.moduloPublicId : null,
+          apoliceSubgrupoPublicId: formData.apoliceSubgrupoPublicId || null,
+          apoliceModuloPublicId: formData.apoliceModuloPublicId || null,
           dataInicioVigencia: formData.dataInicioVigencia || null,
           dataFimVigencia: formData.dataFimVigencia || null,
           observacao: formData.observacao || null
@@ -106,30 +105,18 @@ export const VidasTab: React.FC<VidasTabProps> = ({ publicId }) => {
         ),
       },
       {
-        key: 'contexto',
-        label: 'Contexto',
-        render: (vida) => {
-          if (vida.contexto === 'direto') {
-            return <Badge variant="neutral">Direto na Apólice</Badge>;
-          }
-          if (vida.contexto === 'subestipulante') {
-            return (
-              <div className="flex flex-col">
-                <span className="text-xs font-medium text-texto-secundario uppercase">Subestipulante</span>
-                <span className="text-sm text-texto-principal">{vida.subestipulanteNome}</span>
-              </div>
-            );
-          }
-          return (
-            <div className="flex flex-col">
-              <span className="text-xs font-medium text-texto-secundario uppercase">Subestipulante</span>
-              <span className="text-sm text-texto-principal mb-1">{vida.subestipulanteNome}</span>
-              <div className="flex items-center text-xs text-texto-terciario">
-                <span className="mr-1">&rarr;</span> Módulo: <span className="font-medium ml-1 text-texto-secundario">{vida.moduloNome}</span>
-              </div>
-            </div>
-          );
-        },
+        key: 'subgrupo',
+        label: 'Subgrupo',
+        render: (vida) => (
+          <span className="text-sm text-texto-principal">{vida.subgrupoNome || '—'}</span>
+        ),
+      },
+      {
+        key: 'modulo',
+        label: 'Módulo',
+        render: (vida) => (
+          <span className="text-sm text-texto-principal">{vida.moduloNome || '—'}</span>
+        ),
       },
       {
         key: 'vigencia',

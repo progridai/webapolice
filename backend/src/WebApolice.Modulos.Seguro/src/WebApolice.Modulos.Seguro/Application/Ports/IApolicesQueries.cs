@@ -28,12 +28,12 @@ public interface IApolicesQueries
         Guid apolicePublicId,
         int pagina,
         int tamanhoPagina,
-        string? buscaCliente,
-        string? status,
-        Guid? subestipulantePublicId,
-        Guid? moduloPublicId,
-        DateOnly? vigenciaDataReferencia,
-        CancellationToken cancellationToken);
+        string? buscaCliente = null,
+        string? status = null,
+        Guid? apoliceSubgrupoPublicId = null,
+        Guid? apoliceModuloPublicId = null,
+        DateOnly? vigenciaDataReferencia = null,
+        CancellationToken cancellationToken = default);
 
     Task<WebApolice.Modulos.Seguro.Application.UseCases.Apolices.ListarVidas.ApoliceVidaResult?> ObterApoliceVidaPorPublicIdAsync(
         Guid apolicePublicId,
@@ -54,10 +54,7 @@ public interface IApolicesQueries
         int tamanhoPagina,
         CancellationToken cancellationToken);
 
-    Task<System.Collections.Generic.List<WebApolice.Modulos.Seguro.Application.UseCases.Apolices.ListarModulos.ModuloDoSubestipulanteResult>> ListarModulosDoSubestipulanteAsync(
-        Guid apolicePublicId,
-        Guid subestipulantePublicId,
-        CancellationToken cancellationToken);
+
 
     // ── Subgrupos da Apólice ────────────────────────────────────────────────
     // Subgrupo é uma divisão contextual da Apólice (não é cadastro global).

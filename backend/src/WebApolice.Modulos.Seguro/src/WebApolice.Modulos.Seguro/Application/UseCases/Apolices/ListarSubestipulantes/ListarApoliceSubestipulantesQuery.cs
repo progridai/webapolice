@@ -14,20 +14,7 @@ public sealed record ApoliceSubestipulanteResult(
     string? Codigo,
     DateOnly? DataInicio,
     DateOnly? DataFim,
-    bool Ativo,
-    List<ApoliceSubestipulanteModuloResult> Modulos
+    bool Ativo
 );
 
-/// <summary>
-/// Projeção pública do vínculo contextual Apólice → Subestipulante → Módulo.
-/// Não expõe IDs internos (bigint). Identificação externa via ModuloPublicId.
-/// </summary>
-public sealed record ApoliceSubestipulanteModuloResult(
-    Guid ModuloPublicId,
-    string ModuloNome,
-    string? ModuloDescricao,
-    bool ModuloAtivoGlobal,
-    bool VinculoAtivo,
-    DateOnly? DataInicio,
-    DateOnly? DataFim
-);
+

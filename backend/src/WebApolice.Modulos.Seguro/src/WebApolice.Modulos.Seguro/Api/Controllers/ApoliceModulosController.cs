@@ -1,7 +1,6 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -20,40 +19,41 @@ namespace WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Api.Controller
 [Authorize]
 public class ApoliceModulosController : ControllerBase
 {
-    private readonly IMediator _mediator;
-
-    public ApoliceModulosController(IMediator mediator)
-    {
-        _mediator = mediator;
-    }
-
     [HttpGet]
     [AuthorizePermissao(PermissoesSeguranca.Apolices.Visualizar)]
-    public async Task<IActionResult> Listar(Guid apolicePublicId, CancellationToken cancellationToken)
+    public async Task<IActionResult> Listar(
+        Guid apolicePublicId,
+        [FromServices] ListarModulosApoliceHandler handler,
+        CancellationToken cancellationToken)
     {
         var query = new ListarModulosApoliceQuery { ApolicePublicId = apolicePublicId };
-        var result = await _mediator.Send(query, cancellationToken);
+        var result = await handler.Handle(query, cancellationToken);
         return Ok(result);
     }
 
     [HttpGet("{apoliceModuloPublicId}")]
     [AuthorizePermissao(PermissoesSeguranca.Apolices.Visualizar)]
-    public async Task<IActionResult> Obter(Guid apolicePublicId, Guid apoliceModuloPublicId, CancellationToken cancellationToken)
+    public async Task<IActionResult> Obter(
+        Guid apolicePublicId,
+        Guid apoliceModuloPublicId,
+        [FromServices] ObterModuloApolicePorPublicIdHandler handler,
+        CancellationToken cancellationToken)
     {
-        var query = new ObterModuloApolicePorPublicIdQuery 
-        { 
-            ApolicePublicId = apolicePublicId, 
-            ApoliceModuloPublicId = apoliceModuloPublicId 
+        var query = new ObterModuloApolicePorPublicIdQuery
+        {
+            ApolicePublicId = apolicePublicId,
+            ApoliceModuloPublicId = apoliceModuloPublicId
         };
-        var result = await _mediator.Send(query, cancellationToken);
+        var result = await handler.Handle(query, cancellationToken);
         return Ok(result);
     }
 
     [HttpPost]
     [AuthorizePermissao(PermissoesSeguranca.ApolicesModulos.Inserir)]
     public async Task<IActionResult> Criar(
-        Guid apolicePublicId, 
+        Guid apolicePublicId,
         [FromBody] CriarModuloApoliceRequest request,
+        [FromServices] CriarModuloApoliceHandler handler,
         [FromServices] IContextoUsuarioAutenticado userContext,
         CancellationToken cancellationToken)
     {
@@ -67,16 +67,17 @@ public class ApoliceModulosController : ControllerBase
             UsuarioPublicId = Guid.Parse(userContext.KeycloakSub ?? Guid.Empty.ToString())
         };
 
-        var newPublicId = await _mediator.Send(command, cancellationToken);
+        var newPublicId = await handler.Handle(command, cancellationToken);
         return StatusCode(StatusCodes.Status201Created, new { PublicId = newPublicId });
     }
 
     [HttpPut("{apoliceModuloPublicId}")]
     [AuthorizePermissao(PermissoesSeguranca.ApolicesModulos.Alterar)]
     public async Task<IActionResult> Alterar(
-        Guid apolicePublicId, 
-        Guid apoliceModuloPublicId, 
+        Guid apolicePublicId,
+        Guid apoliceModuloPublicId,
         [FromBody] AlterarModuloApoliceRequest request,
+        [FromServices] AlterarModuloApoliceHandler handler,
         [FromServices] IContextoUsuarioAutenticado userContext,
         CancellationToken cancellationToken)
     {
@@ -90,15 +91,16 @@ public class ApoliceModulosController : ControllerBase
             UsuarioPublicId = Guid.Parse(userContext.KeycloakSub ?? Guid.Empty.ToString())
         };
 
-        await _mediator.Send(command, cancellationToken);
+        await handler.Handle(command, cancellationToken);
         return NoContent();
     }
 
     [HttpPatch("{apoliceModuloPublicId}/inativar")]
     [AuthorizePermissao(PermissoesSeguranca.ApolicesModulos.Inativar)]
     public async Task<IActionResult> Inativar(
-        Guid apolicePublicId, 
+        Guid apolicePublicId,
         Guid apoliceModuloPublicId,
+        [FromServices] InativarModuloApoliceHandler handler,
         [FromServices] IContextoUsuarioAutenticado userContext,
         CancellationToken cancellationToken)
     {
@@ -109,7 +111,7 @@ public class ApoliceModulosController : ControllerBase
             UsuarioPublicId = Guid.Parse(userContext.KeycloakSub ?? Guid.Empty.ToString())
         };
 
-        await _mediator.Send(command, cancellationToken);
+        await handler.Handle(command, cancellationToken);
         return NoContent();
     }
 }
@@ -117,14 +119,14 @@ public class ApoliceModulosController : ControllerBase
 public class CriarModuloApoliceRequest
 {
     public Guid ModuloPublicId { get; set; }
-    public DateTime? DataInicio { get; set; }
-    public DateTime? DataFim { get; set; }
+    public DateOnly? DataInicio { get; set; }
+    public DateOnly? DataFim { get; set; }
     public string? Observacao { get; set; }
 }
 
 public class AlterarModuloApoliceRequest
 {
-    public DateTime? DataInicio { get; set; }
-    public DateTime? DataFim { get; set; }
+    public DateOnly? DataInicio { get; set; }
+    public DateOnly? DataFim { get; set; }
     public string? Observacao { get; set; }
 }

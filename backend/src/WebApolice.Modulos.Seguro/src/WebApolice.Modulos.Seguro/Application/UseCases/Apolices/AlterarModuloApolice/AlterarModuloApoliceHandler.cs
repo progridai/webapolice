@@ -33,8 +33,8 @@ public class AlterarModuloApoliceHandler : IRequestHandler<AlterarModuloApoliceC
         if (apolice == null)
             throw new ValidacaoException("Apólice não encontrada.");
             
-        var dataInicioReqDate = request.DataInicio.HasValue ? DateOnly.FromDateTime(request.DataInicio.Value) : (DateOnly?)null;
-        var dataFimReqDate = request.DataFim.HasValue ? DateOnly.FromDateTime(request.DataFim.Value) : (DateOnly?)null;
+        var dataInicioReqDate = request.DataInicio.HasValue ? request.DataInicio.Value : (DateOnly?)null;
+        var dataFimReqDate = request.DataFim.HasValue ? request.DataFim.Value : (DateOnly?)null;
         
         if (dataInicioReqDate.HasValue && dataInicioReqDate < apolice.DataInicioVigencia)
             throw new ValidacaoException($"A data de início do Módulo não pode ser anterior à data de início de vigência da Apólice ({apolice.DataInicioVigencia}).");

@@ -28,7 +28,6 @@ export interface ClienteVinculoResponse {
   matricula: string;
   ativo: boolean;
   estipulante: string;
-  subestipulante: string;
   grupo: string;
   subgrupo: string;
   lotacao: string;

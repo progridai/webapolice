@@ -20,6 +20,4 @@ public class ApoliceSubestipulanteModel
 
     // Propriedades de Navegação (EF)
     public ApoliceModel? Apolice { get; set; }
-    public ICollection<ApoliceVidaModel> Vidas { get; set; } = new List<ApoliceVidaModel>();
-    public ICollection<ApoliceSubestipulanteModuloModel> Modulos { get; set; } = new List<ApoliceSubestipulanteModuloModel>();
 }

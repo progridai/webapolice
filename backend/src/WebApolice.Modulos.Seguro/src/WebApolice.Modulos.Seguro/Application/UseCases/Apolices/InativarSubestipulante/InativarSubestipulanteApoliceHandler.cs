@@ -33,8 +33,6 @@ public class InativarSubestipulanteApoliceHandler : IRequestHandler<InativarSube
         }
 
         var vinculoExistente = await _dbContext.ApoliceSubestipulantes
-            .Include(v => v.Vidas)
-            .Include(v => v.Modulos)
             .FirstOrDefaultAsync(ar => ar.ApoliceId == apolice.Id && ar.SubestipulanteId == subestipulanteId, cancellationToken);
         
         if (vinculoExistente == null)
@@ -47,16 +45,8 @@ public class InativarSubestipulanteApoliceHandler : IRequestHandler<InativarSube
             throw new ValidacaoException("O vínculo já está inativo.");
         }
 
-        // Validação de dependências ativas
-        if (vinculoExistente.Vidas.Any(v => v.Ativo))
-        {
-            throw new ValidacaoException("Não é possível inativar o vínculo pois existem Vidas ativas associadas a este Subestipulante.");
-        }
 
-        if (vinculoExistente.Modulos.Any(m => m.Ativo))
-        {
-            throw new ValidacaoException("Não é possível inativar o vínculo pois existem Módulos ativos associados a este Subestipulante.");
-        }
+
 
         vinculoExistente.Ativo = false;
         vinculoExistente.UpdatedAt = DateTimeOffset.UtcNow;

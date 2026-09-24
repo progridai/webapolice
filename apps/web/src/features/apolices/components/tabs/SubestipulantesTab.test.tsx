@@ -24,8 +24,7 @@ const mockData = [
     documento: '11.111.111/0001-11',
     dataInicio: '2026-01-01',
     dataFim: null,
-    ativo: true,
-    modulos: [{ moduloIdInternal: 1 }]
+    ativo: true
   },
   {
     subestipulantePublicId: 'sub-2',
@@ -33,8 +32,7 @@ const mockData = [
     codigo: 'COD-123',
     dataInicio: '2026-02-01',
     dataFim: '2026-12-31',
-    ativo: false,
-    modulos: []
+    ativo: false
   }
 ];
 
@@ -56,7 +54,7 @@ describe('SubestipulantesTab', () => {
     
     render(<SubestipulantesTab publicId="apolice-1" />);
     // Verifica se a tabela não mostra "Nenhum Subestipulante" quando está carregando
-    expect(screen.queryByText('Nenhum Subestipulante')).not.toBeInTheDocument();
+    expect(screen.queryByText('Nenhum Subestipulante')).toBeNull();
   });
 
   it('deve renderizar estado de erro', () => {
@@ -64,8 +62,8 @@ describe('SubestipulantesTab', () => {
     mockPossuiPermissao.mockReturnValue(false);
     
     render(<SubestipulantesTab publicId="apolice-1" />);
-    expect(screen.getByText('Erro ao carregar subestipulantes')).toBeInTheDocument();
-    expect(screen.getByText('Falha')).toBeInTheDocument();
+    expect(screen.queryByText('Erro ao carregar subestipulantes')).not.toBeNull();
+    expect(screen.queryByText('Falha')).not.toBeNull();
   });
 
   it('deve renderizar estado vazio', () => {
@@ -73,8 +71,8 @@ describe('SubestipulantesTab', () => {
     mockPossuiPermissao.mockReturnValue(false);
     
     render(<SubestipulantesTab publicId="apolice-1" />);
-    expect(screen.getByText('Nenhum Subestipulante')).toBeInTheDocument();
-    expect(screen.getByText('Nenhum Subestipulante vinculado a esta Apólice.')).toBeInTheDocument();
+    expect(screen.queryByText('Nenhum Subestipulante')).not.toBeNull();
+    expect(screen.queryByText('Nenhum Subestipulante vinculado a esta Apólice.')).not.toBeNull();
   });
 
   it('deve renderizar a lista de subestipulantes corretamente (Ativo e Inativo)', () => {
@@ -83,15 +81,13 @@ describe('SubestipulantesTab', () => {
     
     render(<SubestipulantesTab publicId="apolice-1" />);
     
-    expect(screen.getByText('Empresa A')).toBeInTheDocument();
-    expect(screen.getByText('11.111.111/0001-11')).toBeInTheDocument();
-    expect(screen.getByText(/01\/01\/2026/)).toBeInTheDocument();
-    expect(screen.getByText('1 módulo(s)')).toBeInTheDocument();
+    expect(screen.queryByText('Empresa A')).not.toBeNull();
+    expect(screen.queryByText('11.111.111/0001-11')).not.toBeNull();
+    expect(screen.queryByText(/01\/01\/2026/)).not.toBeNull();
     
-    expect(screen.getByText('Empresa B')).toBeInTheDocument();
-    expect(screen.getByText('COD-123')).toBeInTheDocument();
-    expect(screen.getByText('Sem módulos')).toBeInTheDocument();
-    expect(screen.getByText('Inativo')).toBeInTheDocument();
+    expect(screen.queryByText('Empresa B')).not.toBeNull();
+    expect(screen.queryByText('COD-123')).not.toBeNull();
+    expect(screen.queryByText('Inativo')).not.toBeNull();
   });
 
   it('não deve exibir botões de ação se usuário não tem permissão', () => {
@@ -100,9 +96,9 @@ describe('SubestipulantesTab', () => {
     
     render(<SubestipulantesTab publicId="apolice-1" />);
     
-    expect(screen.queryByRole('button', { name: /Adicionar Subestipulante/i })).not.toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: /Editar/i })).not.toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: /Inativar/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /Adicionar Subestipulante/i })).toBeNull();
+    expect(screen.queryByRole('button', { name: /Editar/i })).toBeNull();
+    expect(screen.queryByRole('button', { name: /Inativar/i })).toBeNull();
   });
 
   it('deve exibir botão Adicionar se tiver permissão e abrir modal', () => {
@@ -112,10 +108,10 @@ describe('SubestipulantesTab', () => {
     render(<SubestipulantesTab publicId="apolice-1" />);
     
     const btn = screen.getByRole('button', { name: /Adicionar Subestipulante/i });
-    expect(btn).toBeInTheDocument();
+    expect(btn).not.toBeNull();
 
     fireEvent.click(btn);
-    expect(screen.getByTestId('sub-modal')).toBeInTheDocument();
+    expect(screen.queryByTestId('sub-modal')).not.toBeNull();
   });
 
   it('deve exibir Editar e Inativar apenas no vínculo ativo e se tiver permissão', () => {
@@ -132,6 +128,17 @@ describe('SubestipulantesTab', () => {
     expect(inativarBtns).toHaveLength(1);
     
     fireEvent.click(editBtns[0]);
-    expect(screen.getByTestId('sub-modal')).toBeInTheDocument();
+    expect(screen.queryByTestId('sub-modal')).not.toBeNull();
+  });
+
+  it('não deve apresentar ações ou indicadores de Módulos Vinculados', () => {
+    (useApoliceSubestipulantes as any).mockReturnValue({ isLoading: false, data: mockData, error: null, refetch: mockRefetch });
+    mockPossuiPermissao.mockReturnValue(true);
+    
+    render(<SubestipulantesTab publicId="apolice-1" />);
+    
+    expect(screen.queryByText('Módulos')).toBeNull();
+    expect(screen.queryByText('Módulos Vinculados')).toBeNull();
+    expect(screen.queryByRole('button', { name: /Adicionar Módulo/i })).toBeNull();
   });
 });

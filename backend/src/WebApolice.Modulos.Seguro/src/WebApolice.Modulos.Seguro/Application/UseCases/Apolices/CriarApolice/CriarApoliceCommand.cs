@@ -11,7 +11,6 @@ public sealed record CriarApoliceCommand(
     DateOnly DataInicioVigencia,
     DateOnly? DataFimVigencia,
     DateOnly? DataAniversario,
-    IReadOnlyList<long>? SubestipulantesIds,
     string? Observacao
 );
 

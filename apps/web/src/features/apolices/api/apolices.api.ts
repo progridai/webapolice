@@ -226,42 +226,6 @@ export async function inativarSubestipulanteApolice(
   await httpClient.patch(`/api/apolices/${apolicePublicId}/subestipulantes/${subestipulantePublicId}/inativar`);
 }
 
-export interface VincularModuloSubestipulanteApoliceRequest {
-  moduloPublicId: string;
-  dataInicio?: string;
-  dataFim?: string;
-}
-
-export async function vincularModuloSubestipulanteApolice(
-  apolicePublicId: string,
-  subestipulantePublicId: string,
-  payload: VincularModuloSubestipulanteApoliceRequest
-): Promise<void> {
-  await httpClient.post(`/api/apolices/${apolicePublicId}/subestipulantes/${subestipulantePublicId}/modulos`, payload);
-}
-
-export interface AtualizarModuloSubestipulanteApoliceRequest {
-  dataInicio?: string;
-  dataFim?: string;
-}
-
-export async function atualizarModuloSubestipulanteApolice(
-  apolicePublicId: string,
-  subestipulantePublicId: string,
-  moduloPublicId: string,
-  payload: AtualizarModuloSubestipulanteApoliceRequest
-): Promise<void> {
-  await httpClient.put(`/api/apolices/${apolicePublicId}/subestipulantes/${subestipulantePublicId}/modulos/${moduloPublicId}`, payload);
-}
-
-export async function inativarModuloSubestipulanteApolice(
-  apolicePublicId: string,
-  subestipulantePublicId: string,
-  moduloPublicId: string
-): Promise<void> {
-  await httpClient.patch(`/api/apolices/${apolicePublicId}/subestipulantes/${subestipulantePublicId}/modulos/${moduloPublicId}/inativar`);
-}
-
 // ── Subgrupos da Apólice ──────────────────────────────────────────────────
 
 export async function listarApoliceSubgrupos(
@@ -318,3 +282,48 @@ export async function inativarApoliceSubgrupo(
   );
 }
 
+// ── Módulos da Apólice (nova relação direta Apólice → Módulo) ────────────────
+
+export async function listarApoliceModulos(
+  apolicePublicId: string,
+  signal?: AbortSignal
+): Promise<import('../types/apolice.types').ApoliceModuloResult[]> {
+  const response = await httpClient.get<import('../types/apolice.types').ApoliceModuloResult[]>(
+    `/api/apolices/${apolicePublicId}/modulos`,
+    { signal }
+  );
+  return response.data;
+}
+
+export async function criarApoliceModulo(
+  apolicePublicId: string,
+  payload: import('../types/apolice.types').CriarModuloApoliceRequest
+): Promise<{ publicId: string }> {
+  const response = await httpClient.post<{ publicId: string }>(
+    `/api/apolices/${apolicePublicId}/modulos`,
+    payload
+  );
+  return response.data;
+}
+
+// PUT usa apoliceModuloPublicId (publicId do vínculo seguro.apolice_modulo)
+export async function alterarApoliceModulo(
+  apolicePublicId: string,
+  apoliceModuloPublicId: string,
+  payload: import('../types/apolice.types').AlterarModuloApoliceRequest
+): Promise<void> {
+  await httpClient.put(
+    `/api/apolices/${apolicePublicId}/modulos/${apoliceModuloPublicId}`,
+    payload
+  );
+}
+
+// PATCH usa apoliceModuloPublicId (publicId do vínculo seguro.apolice_modulo)
+export async function inativarApoliceModulo(
+  apolicePublicId: string,
+  apoliceModuloPublicId: string
+): Promise<void> {
+  await httpClient.patch(
+    `/api/apolices/${apolicePublicId}/modulos/${apoliceModuloPublicId}/inativar`
+  );
+}

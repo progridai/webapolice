@@ -34,10 +34,10 @@ public class CriarModuloApoliceHandler : IRequestHandler<CriarModuloApoliceComma
             throw new ValidacaoException("Apólice não encontrada.");
             
         // Validar limite de vigência da Apólice (regra de negócio: módulo deve estar contido na vigência da apólice, caso ela tenha datas)
-        // Convertendo DateTime? para DateOnly? se for necessário comparar com Apolice (Apolice tem DateOnly)
+        // Convertendo DateOnly? para DateOnly? se for necessário comparar com Apolice (Apolice tem DateOnly)
         // DateOnly? dataInicioApolice = apolice.DataInicioVigencia; // Isso não é anulável em ApoliceModel
-        var dataInicioReqDate = request.DataInicio.HasValue ? DateOnly.FromDateTime(request.DataInicio.Value) : (DateOnly?)null;
-        var dataFimReqDate = request.DataFim.HasValue ? DateOnly.FromDateTime(request.DataFim.Value) : (DateOnly?)null;
+        var dataInicioReqDate = request.DataInicio.HasValue ? request.DataInicio.Value : (DateOnly?)null;
+        var dataFimReqDate = request.DataFim.HasValue ? request.DataFim.Value : (DateOnly?)null;
         
         if (dataInicioReqDate.HasValue && dataInicioReqDate < apolice.DataInicioVigencia)
             throw new ValidacaoException($"A data de início do Módulo não pode ser anterior à data de início de vigência da Apólice ({apolice.DataInicioVigencia}).");

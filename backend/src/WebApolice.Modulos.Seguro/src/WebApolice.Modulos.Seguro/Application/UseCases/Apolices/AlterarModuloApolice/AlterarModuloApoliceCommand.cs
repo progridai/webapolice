@@ -8,8 +8,8 @@ public class AlterarModuloApoliceCommand : IRequest<Unit>
     public Guid ApolicePublicId { get; set; }
     public Guid ApoliceModuloPublicId { get; set; }
     
-    public DateTime? DataInicio { get; set; }
-    public DateTime? DataFim { get; set; }
+    public DateOnly? DataInicio { get; set; }
+    public DateOnly? DataFim { get; set; }
     public string? Observacao { get; set; }
     
     public Guid UsuarioPublicId { get; set; }

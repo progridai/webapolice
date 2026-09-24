@@ -5,7 +5,6 @@ import type { Column } from '../../../../components/ui/DataTable/DataTable';
 import type { ApoliceSubestipulanteResult } from '../../types/apolice.types';
 import { useAuthorization } from '../../../../auth/AuthorizationProvider';
 import { SubestipulanteApoliceModal } from '../modals/SubestipulanteApoliceModal';
-import { SubestipulanteModulos } from '../modulos/SubestipulanteModulos';
 import { inativarSubestipulanteApolice } from '../../api/apolices.api';
 
 interface SubestipulantesTabProps {
@@ -86,18 +85,6 @@ export const SubestipulantesTab: React.FC<SubestipulantesTabProps> = ({ publicId
       },
     },
     {
-      key: 'modulos',
-      label: 'Módulos',
-      render: (item) => {
-        const count = item.modulos?.length || 0;
-        return (
-          <span className="text-sm text-texto-secundario">
-            {count === 0 ? 'Sem módulos' : `${count} módulo(s)`}
-          </span>
-        );
-      },
-    },
-    {
       key: 'status',
       label: 'Status do Vínculo',
       render: (item) => <StatusBadge status={item.ativo ? 'ativo' : 'inativo'} label={item.ativo ? 'Ativo' : 'Inativo'} />,
@@ -154,13 +141,6 @@ export const SubestipulantesTab: React.FC<SubestipulantesTabProps> = ({ publicId
           columns={columns}
           keyExtractor={(item) => item.subestipulantePublicId}
           isLoading={isLoading}
-          renderExpandedRow={(item) => (
-            <SubestipulanteModulos 
-              apolicePublicId={publicId} 
-              subestipulante={item} 
-              onRefresh={refetch} 
-            />
-          )}
           aria-label="Lista de Subestipulantes da Apólice"
         />
       )}

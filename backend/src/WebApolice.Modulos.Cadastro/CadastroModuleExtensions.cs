@@ -105,6 +105,7 @@ public static class CadastroModuleExtensions
         services.AddScoped<WebApolice.Modulos.Cadastro.Application.UseCases.Modulos.AtualizarModulo.AtualizarModuloHandler>();
         services.AddScoped<WebApolice.Modulos.Cadastro.Application.UseCases.Modulos.InativarModulo.InativarModuloHandler>();
         services.AddScoped<WebApolice.Modulos.Cadastro.Application.UseCases.Modulos.ListarModulos.ListarModulosHandler>();
+        services.AddScoped<WebApolice.Modulos.Cadastro.Application.UseCases.Modulos.ConsultarModulo.ConsultarModuloHandler>();
 
         return services;
     }

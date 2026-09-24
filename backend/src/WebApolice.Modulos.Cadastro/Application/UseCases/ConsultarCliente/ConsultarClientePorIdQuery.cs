@@ -11,7 +11,7 @@ public sealed record ClienteContatoResponse(string Tipo, string Valor, bool Prin
 
 public sealed record ClienteEnderecoResponse(string Tipo, string Cep, string Logradouro, string Numero, string Complemento, string Bairro, string Cidade, long? CidadeId, string Uf, bool Principal, bool Ativo);
 
-public sealed record ClienteVinculoResponse(string Matricula, bool Ativo, string Estipulante, string Subestipulante, string Grupo, string Subgrupo, string Lotacao);
+public sealed record ClienteVinculoResponse(string Matricula, bool Ativo, string Estipulante, string Grupo, string Subgrupo, string Lotacao);
 
 public sealed record ClienteDependenteResponse(string Nome, string TipoRelacao, string DocumentoMascarado, DateOnly? DataNascimento);
 

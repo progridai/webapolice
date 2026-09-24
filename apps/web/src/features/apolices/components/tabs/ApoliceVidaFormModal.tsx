@@ -12,7 +12,8 @@ import {
 } from '../../../../components/ui';
 import { ClienteAsyncSelect } from './ClienteAsyncSelect';
 import { apoliceVidaSchema, type ApoliceVidaFormValues } from '../../schemas/apoliceVida.schema';
-import { useApoliceSubestipulantes } from '../../hooks/useApoliceSubestipulantes';
+import { useApoliceSubgrupos } from '../../hooks/useApoliceSubgrupos';
+import { useApoliceModulos } from '../../hooks/useApoliceModulos';
 import type { ApoliceVidaListItem } from '../../types/apolice.types';
 
 interface ApoliceVidaFormModalProps {
@@ -33,7 +34,8 @@ export const ApoliceVidaFormModal: React.FC<ApoliceVidaFormModalProps> = ({
   isSubmitting = false
 }) => {
   const isEdit = !!initialData;
-  const { data: subestipulantes, isLoading: loadingSubestipulantes } = useApoliceSubestipulantes(apolicePublicId);
+  const { data: subgrupos, isLoading: loadingSubgrupos } = useApoliceSubgrupos(apolicePublicId);
+  const { data: modulos, isLoading: loadingModulos } = useApoliceModulos(apolicePublicId);
 
   const {
     control,
@@ -46,26 +48,24 @@ export const ApoliceVidaFormModal: React.FC<ApoliceVidaFormModalProps> = ({
     resolver: zodResolver(apoliceVidaSchema),
     defaultValues: {
       clientePublicId: '',
-      contexto: 'direto',
-      subestipulantePublicId: '',
-      moduloPublicId: '',
+      apoliceSubgrupoPublicId: '',
+      apoliceModuloPublicId: '',
       dataInicioVigencia: '',
       dataFimVigencia: '',
       observacao: ''
     }
   });
 
-  const contexto = watch('contexto');
-  const subestipulantePublicId = watch('subestipulantePublicId');
+  const apoliceSubgrupoPublicId = watch('apoliceSubgrupoPublicId');
+  const apoliceModuloPublicId = watch('apoliceModuloPublicId');
 
   useEffect(() => {
     if (isOpen) {
       if (initialData) {
         reset({
           clientePublicId: initialData.clientePublicId,
-          contexto: initialData.contexto,
-          subestipulantePublicId: initialData.subestipulantePublicId || '',
-          moduloPublicId: initialData.moduloPublicId || '',
+          apoliceSubgrupoPublicId: initialData.apoliceSubgrupoPublicId || '',
+          apoliceModuloPublicId: initialData.apoliceModuloPublicId || '',
           dataInicioVigencia: initialData.dataInicioVigencia?.split('T')[0] || '',
           dataFimVigencia: initialData.dataFimVigencia?.split('T')[0] || '',
           observacao: initialData.observacao || ''
@@ -73,9 +73,8 @@ export const ApoliceVidaFormModal: React.FC<ApoliceVidaFormModalProps> = ({
       } else {
         reset({
           clientePublicId: '',
-          contexto: 'direto',
-          subestipulantePublicId: '',
-          moduloPublicId: '',
+          apoliceSubgrupoPublicId: '',
+          apoliceModuloPublicId: '',
           dataInicioVigencia: '',
           dataFimVigencia: '',
           observacao: ''
@@ -84,14 +83,9 @@ export const ApoliceVidaFormModal: React.FC<ApoliceVidaFormModalProps> = ({
     }
   }, [isOpen, initialData, reset]);
 
-  const handleSubestipulanteChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setValue('subestipulantePublicId', e.target.value);
-    setValue('moduloPublicId', ''); // limpa módulo quando troca o subestipulante
-  };
-
-  const selectedSubestipulante = subestipulantes?.find(s => s.subestipulantePublicId === subestipulantePublicId);
-  const modulosDisponiveis = selectedSubestipulante?.modulos.filter(m => m.vinculoAtivo) || [];
-  const subestipulantesDisponiveis = subestipulantes?.filter(s => s.ativo) || [];
+  // Se estiver editando e o item atual está inativo, ainda o mantemos na lista de disponíveis para não sumir.
+  const subgruposDisponiveis = subgrupos?.filter(s => s.ativo || (isEdit && initialData?.apoliceSubgrupoPublicId === s.subgrupoPublicId)) || [];
+  const modulosDisponiveis = modulos?.filter(m => m.ativo || (isEdit && initialData?.apoliceModuloPublicId === m.publicId)) || [];
 
   return (
     <Modal
@@ -124,71 +118,47 @@ export const ApoliceVidaFormModal: React.FC<ApoliceVidaFormModalProps> = ({
             )}
           </FormGrid>
           
-          <h3 className="text-sm font-medium text-texto-secundario uppercase tracking-wider mt-4 mb-2">Contexto da Participação</h3>
-          <FormGrid columns={3}>
-            <FormField label="Contexto" required error={errors.contexto?.message}>
+          <h3 className="text-sm font-medium text-texto-secundario uppercase tracking-wider mt-4 mb-2">Vínculo na Apólice</h3>
+          <FormGrid columns={2}>
+            <FormField label="Subgrupo da Apólice" error={errors.apoliceSubgrupoPublicId?.message}>
               <Controller
-                name="contexto"
+                name="apoliceSubgrupoPublicId"
                 control={control}
                 render={({ field }) => (
                   <Select
                     {...field}
-                    onChange={(e) => {
-                      field.onChange(e);
-                      const val = e.target.value;
-                      if (val === 'direto') {
-                        setValue('subestipulantePublicId', '');
-                        setValue('moduloPublicId', '');
-                      } else if (val === 'subestipulante') {
-                        setValue('moduloPublicId', '');
-                      }
-                    }}
-                    error={!!errors.contexto}
-                    disabled={isSubmitting}
+                    value={field.value || ''}
+                    error={!!errors.apoliceSubgrupoPublicId}
+                    disabled={isSubmitting || loadingSubgrupos}
                   >
-                    <option value="direto">Direto na Apólice</option>
-                    <option value="subestipulante">Subestipulante</option>
-                    <option value="modulo">Subestipulante + Módulo</option>
+                    <option value="">Selecione...</option>
+                    {subgruposDisponiveis.map(s => (
+                      <option key={s.subgrupoPublicId} value={s.subgrupoPublicId}>{s.nome}</option>
+                    ))}
                   </Select>
                 )}
               />
             </FormField>
-            {(contexto === 'subestipulante' || contexto === 'modulo') && (
-              <FormField label="Subestipulante da Apólice" required error={errors.subestipulantePublicId?.message}>
-                <Select
-                  value={subestipulantePublicId}
-                  onChange={handleSubestipulanteChange}
-                  error={!!errors.subestipulantePublicId}
-                  disabled={isSubmitting || loadingSubestipulantes}
-                >
-                  <option value="" disabled>Selecione um subestipulante...</option>
-                  {subestipulantesDisponiveis.map(s => (
-                    <option key={s.subestipulantePublicId} value={s.subestipulantePublicId}>{s.nome}</option>
-                  ))}
-                </Select>
-              </FormField>
-            )}
 
-            {contexto === 'modulo' && (
-              <FormField label="Módulo" required error={errors.moduloPublicId?.message}>
-                <Controller
-                  name="moduloPublicId"
-                  control={control}
-                  render={({ field }) => (
-                    <Select
-                      {...field}
-                      error={!!errors.moduloPublicId}
-                      disabled={isSubmitting || !subestipulantePublicId}
-                    >
-                      <option value="" disabled>Selecione um módulo...</option>
-                      {modulosDisponiveis.map(m => (
-                        <option key={m.moduloPublicId} value={m.moduloPublicId}>{m.moduloNome}</option>
-                      ))}
-                    </Select>
-                  )}
-                />
-              </FormField>
-            )}
+            <FormField label="Módulo da Apólice" error={errors.apoliceModuloPublicId?.message}>
+              <Controller
+                name="apoliceModuloPublicId"
+                control={control}
+                render={({ field }) => (
+                  <Select
+                    {...field}
+                    value={field.value || ''}
+                    error={!!errors.apoliceModuloPublicId}
+                    disabled={isSubmitting || loadingModulos}
+                  >
+                    <option value="">Selecione...</option>
+                    {modulosDisponiveis.map(m => (
+                      <option key={m.publicId} value={m.publicId}>{m.nome}</option>
+                    ))}
+                  </Select>
+                )}
+              />
+            </FormField>
           </FormGrid>
         </div>
 

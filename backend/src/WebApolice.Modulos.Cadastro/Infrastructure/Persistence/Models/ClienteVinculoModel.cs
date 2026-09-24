@@ -11,7 +11,6 @@ public sealed class ClienteVinculoModel
     public long ClienteId { get; private set; }
     public long PessoaId { get; private set; }
     public long? EstipulanteId { get; private set; }
-    public long? SubestipulanteId { get; private set; }
     public long? GrupoId { get; private set; }
     public long? SubgrupoId { get; private set; }
     public long? LotacaoId { get; private set; }

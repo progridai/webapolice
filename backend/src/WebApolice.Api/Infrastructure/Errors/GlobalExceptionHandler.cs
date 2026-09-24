@@ -66,7 +66,7 @@ public class GlobalExceptionHandler : IExceptionHandler
                 Detail = exception.Message,
                 Instance = context.Request.Path
             },
-            ClienteNaoEncontradoException or CooperadoNaoEncontradoException => new ProblemDetails
+            ClienteNaoEncontradoException or CooperadoNaoEncontradoException or ModuloNaoEncontradoException => new ProblemDetails
             {
                 Type = "https://webapolice/errors/recurso-nao-encontrado",
                 Title = "Recurso não encontrado",

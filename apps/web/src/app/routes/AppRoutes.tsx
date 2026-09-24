@@ -52,6 +52,7 @@ import { RamosRoutes } from '../../features/ramos/routes/ramos.routes';
 import { SeguradorasRoutes } from '../../features/seguradoras/routes/seguradoras.routes';
 import { CorretorasRoutes } from '../../features/corretoras/routes/corretoras.routes';
 import { SubestipulantesRoutes } from '../../features/subestipulantes/routes/subestipulantes.routes';
+import { ModulosRoutes } from '../../features/modulos/routes/modulos.routes';
 
 export const AppRoutes: React.FC = () => {
   return (
@@ -97,6 +98,13 @@ export const AppRoutes: React.FC = () => {
 
       {/* Cadastro: Subestipulantes */}
       {SubestipulantesRoutes}
+
+      {/* Cadastro: Módulos Globais */}
+      <Route element={<ProtectedRoute />}>
+        <Route element={<AuthenticatedLayout />}>
+          <Route path="modulos/*" element={<ModulosRoutes />} />
+        </Route>
+      </Route>
 
       {/* ── Design System (autenticado + operador de sistema) ── */}
       {ENV.ENABLE_DESIGN_SYSTEM && (

@@ -53,7 +53,6 @@ public class CriarPropostaHandler : IRequestHandler<CriarPropostaCommand, Guid>
             // Snapshot obrigatÃ³rio de hierarquia
             EstipulanteId = apolice.EstipulanteId,
             SeguradoraId = apolice.SeguradoraId,
-            SubestipulanteId = apoliceVida.ApoliceSubestipulanteId,
             
             // Snapshot HÃ­brido (Se a apÃ³lice forÃ§ar corretora, usamos ela. Se nÃ£o, permitimos o input da requisiÃ§Ã£o)
             CorretoraId = apolice.CorretoraId ?? request.CorretoraId,

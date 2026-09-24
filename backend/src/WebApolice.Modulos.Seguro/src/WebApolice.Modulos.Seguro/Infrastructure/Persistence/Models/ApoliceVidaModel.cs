@@ -12,8 +12,9 @@ public class ApoliceVidaModel
     public long ClienteId { get; set; }
     public long? ClienteVinculoId { get; set; }
 
-    public long? ApoliceSubestipulanteId { get; set; }
-    public long? ApoliceSubestipulanteModuloId { get; set; }
+
+    public long? ApoliceSubgrupoId { get; set; }
+    public long? ApoliceModuloId { get; set; }
 
     public DateOnly? DataInicioVigencia { get; set; }
     public DateOnly? DataFimVigencia { get; set; }
@@ -31,8 +32,9 @@ public class ApoliceVidaModel
 
     // Propriedades de Navegação (EF)
     public ApoliceModel? Apolice { get; set; }
-    public ApoliceSubestipulanteModel? ApoliceSubestipulante { get; set; }
-    public ApoliceSubestipulanteModuloModel? ApoliceSubestipulanteModulo { get; set; }
+
+    public ApoliceSubgrupoModel? ApoliceSubgrupo { get; set; }
+    public ApoliceModuloModel? ApoliceModulo { get; set; }
     
     public ICollection<Propostum> Propostas { get; set; } = new List<Propostum>();
 }

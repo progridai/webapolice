@@ -18,8 +18,9 @@ public class ApoliceVidaConfiguration : IEntityTypeConfiguration<ApoliceVidaMode
             .HasDefaultValueSql("gen_random_uuid()");
             
         builder.Property(x => x.ApoliceId).HasColumnName("apolice_id").IsRequired();
-        builder.Property(x => x.ApoliceSubestipulanteId).HasColumnName("apolice_subestipulante_id");
-        builder.Property(x => x.ApoliceSubestipulanteModuloId).HasColumnName("apolice_subestipulante_modulo_id");
+
+        builder.Property(x => x.ApoliceSubgrupoId).HasColumnName("apolice_subgrupo_id");
+        builder.Property(x => x.ApoliceModuloId).HasColumnName("apolice_modulo_id");
         builder.Property(x => x.ClienteId).HasColumnName("cliente_id").IsRequired();
         builder.Property(x => x.ClienteVinculoId).HasColumnName("cliente_vinculo_id");
         
@@ -48,28 +49,34 @@ public class ApoliceVidaConfiguration : IEntityTypeConfiguration<ApoliceVidaMode
         builder.HasIndex(x => new { x.DataInicioVigencia, x.DataFimVigencia })
             .HasDatabaseName("ix_apolice_vida_vigencia");
             
-        builder.HasIndex(x => x.ApoliceSubestipulanteId)
-            .HasDatabaseName("ix_apolice_vida_subestip")
-            .HasFilter("apolice_subestipulante_id IS NOT NULL");
-            
+
         builder.HasIndex(x => x.LegadoId)
             .HasDatabaseName("ux_apolice_vida_legado")
             .IsUnique()
             .HasFilter("legado_id IS NOT NULL");
+
+        builder.HasIndex(x => x.ApoliceSubgrupoId)
+            .HasDatabaseName("ix_apolice_vida_subgrupo")
+            .HasFilter("apolice_subgrupo_id IS NOT NULL");
+
+        builder.HasIndex(x => x.ApoliceModuloId)
+            .HasDatabaseName("ix_apolice_vida_modulo")
+            .HasFilter("apolice_modulo_id IS NOT NULL");
 
         builder.HasOne(x => x.Apolice)
             .WithMany(x => x.Vidas)
             .HasForeignKey(x => x.ApoliceId)
             .OnDelete(DeleteBehavior.Cascade);
             
-        builder.HasOne(x => x.ApoliceSubestipulante)
+
+        builder.HasOne(x => x.ApoliceSubgrupo)
                .WithMany(x => x.Vidas)
-               .HasForeignKey(x => x.ApoliceSubestipulanteId)
+               .HasForeignKey(x => x.ApoliceSubgrupoId)
                .OnDelete(DeleteBehavior.Restrict);
 
-        builder.HasOne(x => x.ApoliceSubestipulanteModulo)
+        builder.HasOne(x => x.ApoliceModulo)
                .WithMany(x => x.Vidas)
-               .HasForeignKey(x => x.ApoliceSubestipulanteModuloId)
+               .HasForeignKey(x => x.ApoliceModuloId)
                .OnDelete(DeleteBehavior.Restrict);
     }
 }

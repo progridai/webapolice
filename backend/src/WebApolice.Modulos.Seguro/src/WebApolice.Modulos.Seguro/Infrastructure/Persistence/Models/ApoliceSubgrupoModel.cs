@@ -1,5 +1,5 @@
 using System;
-
+using System.Collections.Generic;
 namespace WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models;
 
 /// <summary>
@@ -30,4 +30,5 @@ public class ApoliceSubgrupoModel
 
     // Propriedade de Navegação (EF)
     public ApoliceModel? Apolice { get; set; }
+    public ICollection<ApoliceVidaModel> Vidas { get; set; } = new List<ApoliceVidaModel>();
 }

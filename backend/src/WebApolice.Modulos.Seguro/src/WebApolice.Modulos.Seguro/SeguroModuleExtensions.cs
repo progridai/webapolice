@@ -45,10 +45,7 @@ public static class SeguroModuleExtensions
         services.AddScoped<WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Application.UseCases.Apolices.AtualizarSubestipulante.AtualizarSubestipulanteApoliceHandler>();
         services.AddScoped<WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Application.UseCases.Apolices.InativarSubestipulante.InativarSubestipulanteApoliceHandler>();
 
-        services.AddScoped<WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Application.UseCases.Apolices.VincularModulo.VincularModuloApoliceHandler>();
-        services.AddScoped<WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Application.UseCases.Apolices.AtualizarModulo.AtualizarModuloApoliceHandler>();
-        services.AddScoped<WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Application.UseCases.Apolices.InativarModulo.InativarModuloApoliceHandler>();
-        services.AddScoped<WebApolice.Modulos.Seguro.Application.UseCases.Apolices.ListarModulos.ListarModulosDoSubestipulanteHandler>();
+
 
         // Handlers - ApoliceVida (Etapa 1: Backend)
         services.AddScoped<WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Application.UseCases.Apolices.CriarApoliceVida.CriarApoliceVidaHandler>();
@@ -64,6 +61,13 @@ public static class SeguroModuleExtensions
         services.AddScoped<WebApolice.Modulos.Seguro.Application.UseCases.Apolices.AlterarSubgrupo.AlterarSubgrupoApoliceHandler>();
         services.AddScoped<WebApolice.Modulos.Seguro.Application.UseCases.Apolices.InativarSubgrupo.InativarSubgrupoApoliceHandler>();
 
+        // Handlers - Módulos da Apólice (nova relação direta Apólice → Módulo)
+        // seguro.apolice_modulo — NÃO confundir com a relação antiga via Subestipulante
+        services.AddScoped<WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Application.UseCases.Apolices.ListarModulos.ListarModulosApoliceHandler>();
+        services.AddScoped<WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Application.UseCases.Apolices.ListarModulos.ObterModuloApolicePorPublicIdHandler>();
+        services.AddScoped<WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Application.UseCases.Apolices.CriarModuloApolice.CriarModuloApoliceHandler>();
+        services.AddScoped<WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Application.UseCases.Apolices.AlterarModuloApolice.AlterarModuloApoliceHandler>();
+        services.AddScoped<WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Application.UseCases.Apolices.InativarModuloApolice.InativarModuloApoliceHandler>();
 
         // Handlers - Ramo
         services.AddScoped<WebApolice.Modulos.Seguro.Application.UseCases.Ramos.ListarRamos.ListarRamosHandler>();

@@ -15,9 +15,9 @@ namespace WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Application.Us
 /// 1. Apólice deve existir.
 /// 2. Vida deve existir e pertencer à Apólice.
 /// 3. Vida já encerrada (ativo=false) não pode ser editada.
-/// 4. Campos imutáveis: ClienteId e ApoliceId. (O Contexto - Subestipulante e Módulo - pode ser alterado).
+/// 4. Campos imutáveis: ClienteId e ApoliceId. (O Subgrupo e Módulo podem ser alterados).
 /// 5. DataFim >= DataInicio quando ambos informados.
-/// 6. Vigência atualizada deve permanecer dentro do contexto pai atualizado.
+/// 6. Vigência atualizada deve permanecer dentro da Apólice e do Módulo da Apólice.
 /// 7. Registrar Histórico funcional da Apólice.
 /// </summary>
 public class AlterarApoliceVidaHandler
@@ -61,87 +61,59 @@ public class AlterarApoliceVidaHandler
             throw new ValidacaoException("A data de fim de vigência não pode ser anterior à data de início.");
         }
 
-        // 5. Avaliar mudança de contexto
-        long? novoSubestipulanteId = vida.ApoliceSubestipulanteId;
-        long? novoModuloId = vida.ApoliceSubestipulanteModuloId;
+        // 5. Avaliar mudança de Subgrupo e Módulo independentemente
+        // Se null for enviado no Command, remove a associação. Se Value for enviado, altera/adiciona.
+        long? novoSubgrupoId = null;
+        long? novoModuloId = null;
+        DateOnly? moduloDataInicio = null;
+        DateOnly? moduloDataFim = null;
 
-        if (!string.IsNullOrWhiteSpace(request.Contexto))
+        if (request.ApoliceSubgrupoPublicId.HasValue)
         {
-            if (request.Contexto == "direto")
-            {
-                novoSubestipulanteId = null;
-                novoModuloId = null;
-            }
-            else if (request.Contexto == "subestipulante" || request.Contexto == "modulo")
-            {
-                if (request.SubestipulantePublicId.HasValue)
-                {
-                    var subestipulanteId = await _dbContext.Database
-                        .SqlQuery<long>($"SELECT id AS \"Value\" FROM cadastro.subestipulante WHERE public_id = {request.SubestipulantePublicId.Value} AND deleted_at IS NULL")
-                        .FirstOrDefaultAsync(cancellationToken);
+            var subgrupo = await _dbContext.ApoliceSubgrupos
+                .FirstOrDefaultAsync(s => s.PublicId == request.ApoliceSubgrupoPublicId.Value, cancellationToken);
 
-                    if (subestipulanteId == 0) throw new ValidacaoException("Subestipulante não encontrado no Cadastro Global.");
-
-                    var sub = await _dbContext.ApoliceSubestipulantes
-                        .FirstOrDefaultAsync(s => s.SubestipulanteId == subestipulanteId && s.ApoliceId == apolice.Id && s.DeletedAt == null, cancellationToken);
-                    if (sub == null || !sub.Ativo) throw new ValidacaoException("Subestipulante não encontrado ou inativo nesta Apólice.");
-                    novoSubestipulanteId = sub.Id;
-                }
-                
-                if (request.Contexto == "modulo")
-                {
-                    if (request.ModuloPublicId.HasValue)
-                    {
-                        var moduloId = await _dbContext.Database
-                            .SqlQuery<long>($"SELECT id AS \"Value\" FROM cadastro.modulo WHERE public_id = {request.ModuloPublicId.Value} AND deleted_at IS NULL")
-                            .FirstOrDefaultAsync(cancellationToken);
-
-                        if (moduloId == 0) throw new ValidacaoException("Módulo não encontrado no Cadastro Global.");
-
-                        var mod = await _dbContext.ApoliceSubestipulanteModulos
-                            .FirstOrDefaultAsync(m => m.ModuloId == moduloId && m.ApoliceSubestipulanteId == novoSubestipulanteId && m.DeletedAt == null, cancellationToken);
-                        if (mod == null || !mod.Ativo) throw new ValidacaoException("Módulo não encontrado ou inativo no Subestipulante informado.");
-                        novoModuloId = mod.Id;
-                    }
-                }
-                else
-                {
-                    novoModuloId = null;
-                }
-            }
+            if (subgrupo == null) throw new ValidacaoException("Subgrupo não encontrado.");
+            if (subgrupo.DeletedAt != null) throw new ValidacaoException("Subgrupo não encontrado.");
+            if (subgrupo.ApoliceId != apolice.Id) throw new ValidacaoException("O Subgrupo informado pertence a outra Apólice.");
+            if (!subgrupo.Ativo) throw new ValidacaoException("O Subgrupo está inativo. Não é possível vincular Vidas a um Subgrupo inativo.");
+            
+            novoSubgrupoId = subgrupo.Id;
         }
 
-        // 6. Validar vigência dentro do contexto pai (quando há vínculo pai)
-        if (novoSubestipulanteId.HasValue)
+        if (request.ApoliceModuloPublicId.HasValue)
         {
-            var vinculoPai = await _dbContext.ApoliceSubestipulantes
-                .FirstOrDefaultAsync(s => s.Id == novoSubestipulanteId.Value, cancellationToken);
+            var modulo = await _dbContext.ApoliceModulos
+                .FirstOrDefaultAsync(m => m.PublicId == request.ApoliceModuloPublicId.Value, cancellationToken);
 
-            DateOnly? paiInicio = vinculoPai?.DataInicio;
-            DateOnly? paiFim = vinculoPai?.DataFim;
+            if (modulo == null) throw new ValidacaoException("Módulo da Apólice não encontrado.");
+            if (modulo.DeletedAt != null) throw new ValidacaoException("Módulo da Apólice não encontrado.");
+            if (modulo.ApoliceId != apolice.Id) throw new ValidacaoException("O Módulo informado pertence a outra Apólice.");
+            if (!modulo.Ativo) throw new ValidacaoException("O Módulo da Apólice está inativo. Não é possível vincular Vidas a um Módulo inativo.");
+            
+            novoModuloId = modulo.Id;
+            moduloDataInicio = modulo.DataInicio;
+            moduloDataFim = modulo.DataFim;
+        }
 
-            if (novoModuloId.HasValue)
-            {
-                var vinculoModulo = await _dbContext.ApoliceSubestipulanteModulos
-                    .FirstOrDefaultAsync(m => m.Id == novoModuloId.Value, cancellationToken);
-                paiInicio = vinculoModulo?.DataInicio ?? paiInicio;
-                paiFim = vinculoModulo?.DataFim ?? paiFim;
-            }
+        // 6. Validar vigência dentro da Apólice e do Módulo
+        ValidarVigenciaDentroDoContextoPai(novoInicio, novoFim, apolice.DataInicioVigencia, apolice.DataFimVigencia, "Apólice");
 
-            if (novoInicio.HasValue && paiInicio.HasValue && novoInicio < paiInicio)
-                throw new ValidacaoException($"A data de início da Vida ({novoInicio}) não pode ser anterior à data de início do contexto pai ({paiInicio}).");
-
-            if (novoFim.HasValue && paiFim.HasValue && novoFim > paiFim)
-                throw new ValidacaoException($"A data de fim da Vida ({novoFim}) não pode ser posterior à data de fim do contexto pai ({paiFim}).");
+        if (novoModuloId.HasValue)
+        {
+            ValidarVigenciaDentroDoContextoPai(novoInicio, novoFim, moduloDataInicio, moduloDataFim, "Módulo da Apólice");
         }
 
         // 7. Atualizar campos editáveis
-        vida.ApoliceSubestipulanteId = novoSubestipulanteId;
-        vida.ApoliceSubestipulanteModuloId = novoModuloId;
+        vida.ApoliceSubgrupoId = novoSubgrupoId;
+        vida.ApoliceModuloId = novoModuloId;
         vida.DataInicioVigencia = request.DataInicioVigencia ?? vida.DataInicioVigencia;
         vida.DataFimVigencia = request.DataFimVigencia;
         vida.Observacao = request.Observacao ?? vida.Observacao;
         vida.UpdatedAt = DateTimeOffset.UtcNow;
+        
+        // Mantemos os IDs legados intocados caso já existissem (não os zeramos, conforme regra exigida)
+        // vida.ApoliceSubestipulanteId permanece como está.
 
         // 8. Registrar Histórico funcional
         _dbContext.ApoliceHistoricos.Add(new ApoliceHistoricoModel
@@ -155,5 +127,25 @@ public class AlterarApoliceVidaHandler
         });
 
         await _dbContext.SaveChangesAsync(cancellationToken);
+    }
+
+    private static void ValidarVigenciaDentroDoContextoPai(
+        DateOnly? dataInicio,
+        DateOnly? dataFim,
+        DateOnly? paiInicio,
+        DateOnly? paiFim,
+        string nomeContexto)
+    {
+        if (dataInicio.HasValue && paiInicio.HasValue && dataInicio < paiInicio)
+        {
+            throw new ValidacaoException(
+                $"A data de início da Vida ({dataInicio}) não pode ser anterior à data de início de {nomeContexto} ({paiInicio}).");
+        }
+
+        if (dataFim.HasValue && paiFim.HasValue && dataFim > paiFim)
+        {
+            throw new ValidacaoException(
+                $"A data de fim da Vida ({dataFim}) não pode ser posterior à data de fim de {nomeContexto} ({paiFim}).");
+        }
     }
 }

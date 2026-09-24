@@ -168,7 +168,6 @@ internal sealed class ClientesQueries : IClientesQueries
             v.v.Matricula ?? "",
             v.v.Ativo,
             v.v.EstipulanteId.HasValue && estipulantes.ContainsKey(v.v.EstipulanteId.Value) ? estipulantes[v.v.EstipulanteId.Value] : "",
-            "", // Subestipulante (left for later)
             v.v.GrupoId.HasValue && grupos.ContainsKey(v.v.GrupoId.Value) ? grupos[v.v.GrupoId.Value] : "",
             "",
             ""

@@ -40,7 +40,7 @@ public class ListarModulosHandler : IRequestHandler<ListarModulosQuery, PagedRes
             .OrderBy(m => m.Nome)
             .Skip((request.Pagina - 1) * request.TamanhoPagina)
             .Take(request.TamanhoPagina)
-            .Select(m => new ModuloListDto(m.PublicId, m.Nome, m.Descricao, m.Ativo))
+            .Select(m => new ModuloListDto(m.PublicId, m.Nome, m.Descricao, m.Ativo, m.CreatedAt))
             .ToListAsync(cancellationToken);
 
         return new PagedResult<ModuloListDto>

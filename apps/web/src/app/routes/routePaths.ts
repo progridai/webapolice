@@ -69,6 +69,11 @@ export const ROUTES = {
   CORRETORA_NOVA: '/corretoras/nova',
   CORRETORA_EDITAR: '/corretoras/:publicId/editar',
 
+  /** Cadastro Global de Módulos */
+  MODULOS: '/modulos',
+  MODULOS_NOVO: '/modulos/novo',
+  MODULOS_EDITAR: '/modulos/:publicId/editar',
+
   /** Módulo de Segurança — Usuários */
   SEGURANCA_USUARIOS: '/seguranca/usuarios',
   SEGURANCA_USUARIO_NOVO: '/seguranca/usuarios/novo',

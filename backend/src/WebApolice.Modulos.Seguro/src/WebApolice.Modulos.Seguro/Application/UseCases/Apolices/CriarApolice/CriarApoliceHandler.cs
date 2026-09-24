@@ -51,21 +51,6 @@ public sealed class CriarApoliceHandler
                 UpdatedAt = DateTimeOffset.UtcNow
             };
 
-            // Processar Subestipulantes (vinculo inicial)
-            if (command.SubestipulantesIds != null && command.SubestipulantesIds.Any())
-            {
-                foreach (var subId in command.SubestipulantesIds.Distinct())
-                {
-                    apolice.Subestipulantes.Add(new ApoliceSubestipulanteModel
-                    {
-                        SubestipulanteId = subId,
-                        Ativo = true,
-                        CreatedAt = DateTimeOffset.UtcNow,
-                        UpdatedAt = DateTimeOffset.UtcNow
-                    });
-                }
-            }
-
             _repository.Adicionar(apolice);
             await _repository.SalvarAlteracoesAsync(cancellationToken);
             await transaction.CommitAsync(cancellationToken);

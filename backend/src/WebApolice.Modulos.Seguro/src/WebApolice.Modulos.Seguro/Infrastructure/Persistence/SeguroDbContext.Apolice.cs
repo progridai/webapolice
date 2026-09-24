@@ -15,7 +15,6 @@ public partial class SeguroDbContext
     public virtual DbSet<ApoliceCoberturaModel> ApoliceCoberturas { get; set; } = null!;
     public virtual DbSet<ApoliceRamoModel> ApoliceRamos { get; set; } = null!;
     public virtual DbSet<ApoliceSubestipulanteModel> ApoliceSubestipulantes { get; set; } = null!;
-    public virtual DbSet<ApoliceSubestipulanteModuloModel> ApoliceSubestipulanteModulos { get; set; } = null!;
     public virtual DbSet<ApoliceVidaModel> ApoliceVidas { get; set; } = null!;
     public virtual DbSet<ApoliceSubgrupoModel> ApoliceSubgrupos { get; set; } = null!;
     public virtual DbSet<ApoliceModuloModel> ApoliceModulos { get; set; } = null!;
@@ -31,7 +30,6 @@ public partial class SeguroDbContext
         modelBuilder.ApplyConfiguration(new ApoliceCoberturaConfiguration());
         modelBuilder.ApplyConfiguration(new ApoliceRamoConfiguration());
         modelBuilder.ApplyConfiguration(new ApoliceSubestipulanteConfiguration());
-        modelBuilder.ApplyConfiguration(new ApoliceSubestipulanteModuloConfiguration());
         modelBuilder.ApplyConfiguration(new ApoliceVidaConfiguration());
         modelBuilder.ApplyConfiguration(new ApoliceSubgrupoConfiguration());
         modelBuilder.ApplyConfiguration(new ApoliceModuloConfiguration());

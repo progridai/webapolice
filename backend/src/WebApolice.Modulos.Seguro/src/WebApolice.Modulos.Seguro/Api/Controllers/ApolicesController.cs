@@ -66,7 +66,6 @@ public class ApolicesController : ControllerBase
             request.DataInicioVigencia,
             request.DataFimVigencia,
             request.DataAniversario,
-            request.SubestipulantesIds,
             request.Observacao
         );
 
@@ -274,86 +273,7 @@ public class ApolicesController : ControllerBase
         return NoContent();
     }
 
-    [HttpGet("{publicId}/subestipulantes/{subestipulantePublicId}/modulos")]
-    [AuthorizePermissao(PermissoesSeguranca.Apolices.Visualizar)]
-    public async Task<IActionResult> GetModulosSubestipulante(
-        Guid publicId,
-        Guid subestipulantePublicId,
-        [FromServices] WebApolice.Modulos.Seguro.Application.UseCases.Apolices.ListarModulos.ListarModulosDoSubestipulanteHandler handler,
-        CancellationToken cancellationToken)
-    {
-        var query = new WebApolice.Modulos.Seguro.Application.UseCases.Apolices.ListarModulos.ListarModulosDoSubestipulanteQuery(publicId, subestipulantePublicId);
-        var result = await handler.Handle(query, cancellationToken);
-        return Ok(result);
-    }
 
-    [HttpPost("{publicId}/subestipulantes/{subestipulantePublicId}/modulos")]
-    [AuthorizePermissao(PermissoesSeguranca.ApolicesSubestipulantesModulos.Inserir)]
-    public async Task<IActionResult> PostModuloSubestipulante(
-        Guid publicId,
-        Guid subestipulantePublicId,
-        [FromBody] VincularModuloApoliceRequest request,
-        [FromServices] WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Application.UseCases.Apolices.VincularModulo.VincularModuloApoliceHandler handler,
-        [FromServices] WebApolice.Modulos.Seguranca.Application.Ports.IContextoUsuarioAutenticado userContext,
-        CancellationToken cancellationToken)
-    {
-        var command = new WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Application.UseCases.Apolices.VincularModulo.VincularModuloApoliceCommand
-        {
-            ApolicePublicId = publicId,
-            SubestipulantePublicId = subestipulantePublicId,
-            ModuloPublicId = request.ModuloPublicId,
-            DataInicio = request.DataInicio,
-            DataFim = request.DataFim,
-            UsuarioPublicId = Guid.Parse(userContext.KeycloakSub ?? Guid.Empty.ToString())
-        };
-        await handler.Handle(command, cancellationToken);
-        return Ok();
-    }
-
-    [HttpPut("{publicId}/subestipulantes/{subestipulantePublicId}/modulos/{moduloPublicId}")]
-    [AuthorizePermissao(PermissoesSeguranca.ApolicesSubestipulantesModulos.Alterar)]
-    public async Task<IActionResult> PutModuloSubestipulante(
-        Guid publicId,
-        Guid subestipulantePublicId,
-        Guid moduloPublicId,
-        [FromBody] AtualizarModuloApoliceRequest request,
-        [FromServices] WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Application.UseCases.Apolices.AtualizarModulo.AtualizarModuloApoliceHandler handler,
-        [FromServices] WebApolice.Modulos.Seguranca.Application.Ports.IContextoUsuarioAutenticado userContext,
-        CancellationToken cancellationToken)
-    {
-        var command = new WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Application.UseCases.Apolices.AtualizarModulo.AtualizarModuloApoliceCommand
-        {
-            ApolicePublicId = publicId,
-            SubestipulantePublicId = subestipulantePublicId,
-            ModuloPublicId = moduloPublicId,
-            DataInicio = request.DataInicio,
-            DataFim = request.DataFim,
-            UsuarioPublicId = Guid.Parse(userContext.KeycloakSub ?? Guid.Empty.ToString())
-        };
-        await handler.Handle(command, cancellationToken);
-        return NoContent();
-    }
-
-    [HttpPatch("{publicId}/subestipulantes/{subestipulantePublicId}/modulos/{moduloPublicId}/inativar")]
-    [AuthorizePermissao(PermissoesSeguranca.ApolicesSubestipulantesModulos.Inativar)]
-    public async Task<IActionResult> PatchInativarModuloSubestipulante(
-        Guid publicId,
-        Guid subestipulantePublicId,
-        Guid moduloPublicId,
-        [FromServices] WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Application.UseCases.Apolices.InativarModulo.InativarModuloApoliceHandler handler,
-        [FromServices] WebApolice.Modulos.Seguranca.Application.Ports.IContextoUsuarioAutenticado userContext,
-        CancellationToken cancellationToken)
-    {
-        var command = new WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Application.UseCases.Apolices.InativarModulo.InativarModuloApoliceCommand
-        {
-            ApolicePublicId = publicId,
-            SubestipulantePublicId = subestipulantePublicId,
-            ModuloPublicId = moduloPublicId,
-            UsuarioPublicId = Guid.Parse(userContext.KeycloakSub ?? Guid.Empty.ToString())
-        };
-        await handler.Handle(command, cancellationToken);
-        return NoContent();
-    }
     [HttpGet("{publicId}/vidas")]
     [AuthorizePermissao(PermissoesSeguranca.Apolices.Visualizar)]
     public async Task<IActionResult> GetVidas(
@@ -362,8 +282,8 @@ public class ApolicesController : ControllerBase
         [FromQuery] int tamanhoPagina,
         [FromQuery] string? busca,
         [FromQuery] string? status,
-        [FromQuery] Guid? subestipulantePublicId,
-        [FromQuery] Guid? moduloPublicId,
+        [FromQuery] Guid? apoliceSubgrupoPublicId,
+        [FromQuery] Guid? apoliceModuloPublicId,
         [FromQuery] DateOnly? vigenciaDataReferencia,
         [FromServices] WebApolice.Modulos.Seguro.Application.UseCases.Apolices.ListarVidas.ListarApoliceVidasHandler handler,
         CancellationToken cancellationToken)
@@ -374,8 +294,8 @@ public class ApolicesController : ControllerBase
             tamanhoPagina,
             busca,
             status,
-            subestipulantePublicId,
-            moduloPublicId,
+            apoliceSubgrupoPublicId,
+            apoliceModuloPublicId,
             vigenciaDataReferencia);
         var result = await handler.Handle(query, cancellationToken);
         return Ok(result);
@@ -409,8 +329,8 @@ public class ApolicesController : ControllerBase
         {
             ApolicePublicId = publicId,
             ClientePublicId = request.ClientePublicId,
-            SubestipulantePublicId = request.SubestipulantePublicId,
-            ModuloPublicId = request.ModuloPublicId,
+            ApoliceSubgrupoPublicId = request.ApoliceSubgrupoPublicId,
+            ApoliceModuloPublicId = request.ApoliceModuloPublicId,
             DataInicioVigencia = request.DataInicioVigencia,
             DataFimVigencia = request.DataFimVigencia,
             Observacao = request.Observacao,
@@ -437,9 +357,8 @@ public class ApolicesController : ControllerBase
             DataInicioVigencia = request.DataInicioVigencia,
             DataFimVigencia = request.DataFimVigencia,
             Observacao = request.Observacao,
-            Contexto = request.Contexto,
-            SubestipulantePublicId = request.SubestipulantePublicId,
-            ModuloPublicId = request.ModuloPublicId,
+            ApoliceSubgrupoPublicId = request.ApoliceSubgrupoPublicId,
+            ApoliceModuloPublicId = request.ApoliceModuloPublicId,
             UsuarioPublicId = Guid.Parse(userContext.KeycloakSub ?? Guid.Empty.ToString())
         };
         await handler.Handle(command, cancellationToken);

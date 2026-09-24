@@ -43,9 +43,26 @@ public class ListarModulosApoliceHandler : IRequestHandler<ListarModulosApoliceQ
 
         var modulosIds = string.Join(",", vinculos.Select(v => v.ModuloId));
 
-        var modulosGlobais = await _dbContext.Database
-            .SqlQueryRaw<ModuloGlobalDto>($"SELECT id AS \"Id\", public_id AS \"PublicId\", nome AS \"Nome\", descricao AS \"Descricao\", ativo AS \"Ativo\" FROM cadastro.modulo WHERE id IN ({modulosIds})")
-            .ToListAsync(cancellationToken);
+        var modulosGlobais = new List<ModuloGlobalDto>();
+        using (var command = _dbContext.Database.GetDbConnection().CreateCommand())
+        {
+            command.CommandText = $"SELECT id, public_id, nome, descricao, ativo FROM cadastro.modulo WHERE id IN ({modulosIds})";
+            await _dbContext.Database.OpenConnectionAsync(cancellationToken);
+            using (var reader = await command.ExecuteReaderAsync(cancellationToken))
+            {
+                while (await reader.ReadAsync(cancellationToken))
+                {
+                    modulosGlobais.Add(new ModuloGlobalDto
+                    {
+                        Id = reader.GetInt64(0),
+                        PublicId = reader.GetGuid(1),
+                        Nome = reader.GetString(2),
+                        Descricao = reader.IsDBNull(3) ? null : reader.GetString(3),
+                        Ativo = reader.GetBoolean(4)
+                    });
+                }
+            }
+        }
 
         var result = vinculos.Select(v => 
         {

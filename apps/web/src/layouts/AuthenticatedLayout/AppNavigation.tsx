@@ -77,6 +77,12 @@ const NAV_ITEMS: NavItem[] = [
     permissaoCodigo: 'corretoras.visualizar',
   },
   {
+    label: 'Módulos Globais',
+    path: ROUTES.MODULOS,
+    icon: SettingsIcon,
+    permissaoCodigo: 'modulos.visualizar',
+  },
+  {
     label: 'Cooperados',
     path: ROUTES.COOPERADOS,
     icon: UsersIcon,

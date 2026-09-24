@@ -3,6 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using WebApolice.Modulos.Cadastro.Domain.Exceptions;
 using WebApolice.Modulos.Cadastro.Infrastructure.Persistence;
 using WebApolice.SharedKernel.Application.Exceptions;
 using WebApolice.Modulos.Cadastro.Application.UseCases.Modulos;
@@ -23,7 +24,7 @@ public class AtualizarModuloHandler : IRequestHandler<AtualizarModuloCommand, Mo
         var modulo = await _dbContext.Modulos.FirstOrDefaultAsync(m => m.PublicId == request.PublicId && m.DeletedAt == null, cancellationToken);
         if (modulo == null)
         {
-            throw new ValidacaoException("Módulo não encontrado no catálogo.");
+            throw new ModuloNaoEncontradoException("Módulo não encontrado no catálogo.");
         }
 
         var existeOutroComNome = await _dbContext.Modulos.AnyAsync(m => m.Id != modulo.Id && m.Nome.ToLower() == request.Nome.ToLower() && m.DeletedAt == null, cancellationToken);

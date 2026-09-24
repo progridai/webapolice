@@ -1,5 +1,5 @@
 using System;
-
+using System.Collections.Generic;
 namespace WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models;
 
 public class ApoliceModuloModel
@@ -10,8 +10,8 @@ public class ApoliceModuloModel
     public long ApoliceId { get; set; }
     public long ModuloId { get; set; }
     
-    public DateTime? DataInicio { get; set; }
-    public DateTime? DataFim { get; set; }
+    public DateOnly? DataInicio { get; set; }
+    public DateOnly? DataFim { get; set; }
     
     public bool Ativo { get; set; }
     public string? Observacao { get; set; }
@@ -22,4 +22,5 @@ public class ApoliceModuloModel
 
     // Navigation properties
     public ApoliceModel? Apolice { get; set; }
+    public ICollection<ApoliceVidaModel> Vidas { get; set; } = new List<ApoliceVidaModel>();
 }

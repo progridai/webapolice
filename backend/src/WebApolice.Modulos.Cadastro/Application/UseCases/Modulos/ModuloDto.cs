@@ -15,5 +15,6 @@ public record ModuloListDto(
     Guid PublicId,
     string Nome,
     string? Descricao,
-    bool Ativo
+    bool Ativo,
+    DateTimeOffset CreatedAt
 );

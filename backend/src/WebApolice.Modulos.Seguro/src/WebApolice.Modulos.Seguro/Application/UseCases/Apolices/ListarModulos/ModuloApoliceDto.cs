@@ -8,8 +8,8 @@ public class ModuloApoliceDto
     public Guid ModuloPublicId { get; set; }
     public string Nome { get; set; } = null!;
     public string? Descricao { get; set; }
-    public DateTime? DataInicio { get; set; }
-    public DateTime? DataFim { get; set; }
+    public DateOnly? DataInicio { get; set; }
+    public DateOnly? DataFim { get; set; }
     public string? Observacao { get; set; }
     public bool Ativo { get; set; }
 }

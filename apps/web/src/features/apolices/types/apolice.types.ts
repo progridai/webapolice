@@ -73,10 +73,9 @@ export interface ApoliceVidaListItem {
   clientePublicId: string;
   clienteNome: string;
   clienteDocumentoMascarado?: string;
-  contexto: 'direto' | 'subestipulante' | 'modulo';
-  subestipulantePublicId?: string;
-  subestipulanteNome?: string;
-  moduloPublicId?: string;
+  apoliceSubgrupoPublicId?: string;
+  subgrupoNome?: string;
+  apoliceModuloPublicId?: string;
   moduloNome?: string;
   dataInicioVigencia?: string;
   dataFimVigencia?: string;
@@ -90,15 +89,15 @@ export interface ApoliceVidaQuery {
   pageSize?: number;
   busca?: string;
   status?: string;
-  subestipulantePublicId?: string;
-  moduloPublicId?: string;
+  apoliceSubgrupoPublicId?: string;
+  apoliceModuloPublicId?: string;
   vigenciaDataReferencia?: string;
 }
 
 export interface CriarApoliceVidaRequest {
   clientePublicId: string;
-  subestipulantePublicId?: string | null;
-  moduloPublicId?: string | null;
+  apoliceSubgrupoPublicId?: string | null;
+  apoliceModuloPublicId?: string | null;
   dataInicioVigencia?: string | null;
   dataFimVigencia?: string | null;
   observacao?: string | null;
@@ -108,19 +107,8 @@ export interface AlterarApoliceVidaRequest {
   dataInicioVigencia?: string | null;
   dataFimVigencia?: string | null;
   observacao?: string | null;
-  contexto?: string | null;
-  subestipulantePublicId?: string | null;
-  moduloPublicId?: string | null;
-}
-
-export interface ApoliceSubestipulanteModuloResult {
-  moduloPublicId: string;
-  moduloNome: string;
-  moduloDescricao?: string;
-  moduloAtivoGlobal: boolean;
-  vinculoAtivo: boolean;
-  dataInicio?: string;
-  dataFim?: string;
+  apoliceSubgrupoPublicId?: string | null;
+  apoliceModuloPublicId?: string | null;
 }
 
 export interface ApoliceSubestipulanteResult {
@@ -131,7 +119,6 @@ export interface ApoliceSubestipulanteResult {
   dataInicio?: string;
   dataFim?: string;
   ativo: boolean;
-  modulos: ApoliceSubestipulanteModuloResult[];
 }
 
 export interface ApoliceCoberturaResult {
@@ -179,6 +166,34 @@ export interface CriarSubgrupoApoliceRequest {
 
 export interface AlterarSubgrupoApoliceRequest {
   nome: string;
+  observacao?: string | null;
+}
+
+// ── Módulos da Apólice ───────────────────────────────────────────────────────
+// publicId  → apoliceModuloPublicId (seguro.apolice_modulo)
+// moduloPublicId → publicId do cadastro global (cadastro.modulo)
+
+export interface ApoliceModuloResult {
+  publicId: string;          // apoliceModuloPublicId — identificador do vínculo
+  moduloPublicId: string;    // publicId do cadastro.modulo
+  nome: string;
+  descricao?: string;
+  dataInicio?: string;
+  dataFim?: string;
+  observacao?: string;
+  ativo: boolean;
+}
+
+export interface CriarModuloApoliceRequest {
+  moduloPublicId: string;    // obrigatório — publicId do cadastro.modulo
+  dataInicio?: string | null;
+  dataFim?: string | null;
+  observacao?: string | null;
+}
+
+export interface AlterarModuloApoliceRequest {
+  dataInicio?: string | null;
+  dataFim?: string | null;
   observacao?: string | null;
 }
 

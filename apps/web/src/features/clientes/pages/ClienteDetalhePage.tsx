@@ -268,12 +268,7 @@ export const ClienteDetalhePage: React.FC = () => {
                         <span className="text-base text-texto-principal">{vinculo.estipulante}</span>
                       </div>
                     )}
-                    {vinculo.subestipulante && (
-                      <div className="flex flex-col">
-                        <span className="text-[10px] font-medium text-texto-secundario uppercase tracking-wider mb-0.5">Subestipulante</span>
-                        <span className="text-base text-texto-principal">{vinculo.subestipulante}</span>
-                      </div>
-                    )}
+
                     {vinculo.grupo && (
                       <div className="flex flex-col">
                         <span className="text-[10px] font-medium text-texto-secundario uppercase tracking-wider mb-0.5">Grupo</span>

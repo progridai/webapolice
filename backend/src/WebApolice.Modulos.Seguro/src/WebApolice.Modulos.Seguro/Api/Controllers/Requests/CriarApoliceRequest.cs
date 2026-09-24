@@ -15,7 +15,5 @@ public class CriarApoliceRequest
     public DateOnly? DataFimVigencia { get; set; }
     public DateOnly? DataAniversario { get; set; }
 
-    public List<long>? SubestipulantesIds { get; set; }
-
     public string? Observacao { get; set; }
 }

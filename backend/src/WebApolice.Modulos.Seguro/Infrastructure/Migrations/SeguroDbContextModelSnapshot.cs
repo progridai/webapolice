@@ -70,11 +70,14 @@ namespace WebApolice.Modulos.Seguro.Infrastructure.Migrations
                         .HasColumnName("updated_at")
                         .HasDefaultValueSql("now()");
 
-                    b.HasKey("Id");
+                    b.HasKey("Id")
+                        .HasName("pk_apolice_cobertura");
 
-                    b.HasIndex("ApolicePlanoId");
+                    b.HasIndex("ApolicePlanoId")
+                        .HasDatabaseName("ix_apolice_cobertura_apolice_plano_id");
 
-                    b.HasIndex("CoberturaId");
+                    b.HasIndex("CoberturaId")
+                        .HasDatabaseName("ix_apolice_cobertura_cobertura_id");
 
                     b.ToTable("apolice_cobertura", "seguro");
                 });
@@ -140,7 +143,8 @@ namespace WebApolice.Modulos.Seguro.Infrastructure.Migrations
                         .HasColumnName("updated_at")
                         .HasDefaultValueSql("now()");
 
-                    b.HasKey("ApoliceId");
+                    b.HasKey("ApoliceId")
+                        .HasName("pk_apolice_configuracao");
 
                     b.ToTable("apolice_configuracao", "seguro");
                 });
@@ -185,9 +189,11 @@ namespace WebApolice.Modulos.Seguro.Infrastructure.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("usuario_public_id");
 
-                    b.HasKey("Id");
+                    b.HasKey("Id")
+                        .HasName("pk_apolice_historico");
 
-                    b.HasIndex("ApoliceId");
+                    b.HasIndex("ApoliceId")
+                        .HasDatabaseName("ix_apolice_historico_apolice_id");
 
                     b.ToTable("apolice_historico", "seguro");
                 });
@@ -284,9 +290,11 @@ namespace WebApolice.Modulos.Seguro.Infrastructure.Migrations
                         .HasDefaultValue(1)
                         .HasColumnName("versao");
 
-                    b.HasKey("Id");
+                    b.HasKey("Id")
+                        .HasName("pk_apolice");
 
-                    b.HasIndex("ApoliceOrigemId");
+                    b.HasIndex("ApoliceOrigemId")
+                        .HasDatabaseName("ix_apolice_apolice_origem_id");
 
                     b.HasIndex("EstipulanteId")
                         .HasDatabaseName("ix_apolice_estipulante");
@@ -334,12 +342,12 @@ namespace WebApolice.Modulos.Seguro.Infrastructure.Migrations
                         .HasColumnName("created_at")
                         .HasDefaultValueSql("now()");
 
-                    b.Property<DateTime?>("DataFim")
-                        .HasColumnType("timestamp with time zone")
+                    b.Property<DateOnly?>("DataFim")
+                        .HasColumnType("date")
                         .HasColumnName("data_fim");
 
-                    b.Property<DateTime?>("DataInicio")
-                        .HasColumnType("timestamp with time zone")
+                    b.Property<DateOnly?>("DataInicio")
+                        .HasColumnType("date")
                         .HasColumnName("data_inicio");
 
                     b.Property<DateTimeOffset?>("DeletedAt")
@@ -366,7 +374,8 @@ namespace WebApolice.Modulos.Seguro.Infrastructure.Migrations
                         .HasColumnName("updated_at")
                         .HasDefaultValueSql("now()");
 
-                    b.HasKey("Id");
+                    b.HasKey("Id")
+                        .HasName("pk_apolice_modulo");
 
                     b.HasIndex("ApoliceId")
                         .HasDatabaseName("ix_apolice_modulo_apolice_id");
@@ -425,13 +434,17 @@ namespace WebApolice.Modulos.Seguro.Infrastructure.Migrations
                         .HasColumnName("updated_at")
                         .HasDefaultValueSql("now()");
 
-                    b.HasKey("Id");
+                    b.HasKey("Id")
+                        .HasName("pk_apolice_plano");
 
-                    b.HasIndex("ApoliceProdutoId");
+                    b.HasIndex("ApoliceProdutoId")
+                        .HasDatabaseName("ix_apolice_plano_apolice_produto_id");
 
-                    b.HasIndex("PlanoId");
+                    b.HasIndex("PlanoId")
+                        .HasDatabaseName("ix_apolice_plano_plano_id");
 
-                    b.HasIndex("TabelaPrecoId");
+                    b.HasIndex("TabelaPrecoId")
+                        .HasDatabaseName("ix_apolice_plano_tabela_preco_id");
 
                     b.ToTable("apolice_plano", "seguro");
                 });
@@ -471,11 +484,14 @@ namespace WebApolice.Modulos.Seguro.Infrastructure.Migrations
                         .HasColumnName("updated_at")
                         .HasDefaultValueSql("now()");
 
-                    b.HasKey("Id");
+                    b.HasKey("Id")
+                        .HasName("pk_apolice_produto");
 
-                    b.HasIndex("ApoliceId");
+                    b.HasIndex("ApoliceId")
+                        .HasDatabaseName("ix_apolice_produto_apolice_id");
 
-                    b.HasIndex("ProdutoId");
+                    b.HasIndex("ProdutoId")
+                        .HasDatabaseName("ix_apolice_produto_produto_id");
 
                     b.ToTable("apolice_produto", "seguro");
                 });
@@ -529,7 +545,8 @@ namespace WebApolice.Modulos.Seguro.Infrastructure.Migrations
                         .HasColumnName("updated_at")
                         .HasDefaultValueSql("now()");
 
-                    b.HasKey("Id");
+                    b.HasKey("Id")
+                        .HasName("pk_apolice_ramo");
 
                     b.HasIndex("ApoliceId")
                         .HasDatabaseName("ix_apolice_ramo_apolice");
@@ -596,7 +613,8 @@ namespace WebApolice.Modulos.Seguro.Infrastructure.Migrations
                         .HasColumnName("updated_at")
                         .HasDefaultValueSql("now()");
 
-                    b.HasKey("Id");
+                    b.HasKey("Id")
+                        .HasName("pk_apolice_subestipulante");
 
                     b.HasIndex("ApoliceId")
                         .HasDatabaseName("ix_apolice_sub_apolice");
@@ -610,62 +628,6 @@ namespace WebApolice.Modulos.Seguro.Infrastructure.Migrations
                         .HasFilter("ativo = true AND deleted_at IS NULL");
 
                     b.ToTable("apolice_subestipulante", "seguro");
-                });
-
-            modelBuilder.Entity("WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models.ApoliceSubestipulanteModuloModel", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasColumnName("id");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityAlwaysColumn(b.Property<long>("Id"));
-
-                    b.Property<long>("ApoliceSubestipulanteId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("apolice_subestipulante_id");
-
-                    b.Property<bool>("Ativo")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("boolean")
-                        .HasDefaultValue(true)
-                        .HasColumnName("ativo");
-
-                    b.Property<DateTimeOffset>("CreatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_at")
-                        .HasDefaultValueSql("now()");
-
-                    b.Property<DateOnly?>("DataFim")
-                        .HasColumnType("date")
-                        .HasColumnName("data_fim");
-
-                    b.Property<DateOnly?>("DataInicio")
-                        .HasColumnType("date")
-                        .HasColumnName("data_inicio");
-
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("deleted_at");
-
-                    b.Property<long>("ModuloId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("modulo_id");
-
-                    b.Property<DateTimeOffset>("UpdatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("updated_at")
-                        .HasDefaultValueSql("now()");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ApoliceSubestipulanteId", "ModuloId")
-                        .IsUnique()
-                        .HasFilter("deleted_at IS NULL");
-
-                    b.ToTable("apolice_subestipulante_modulo", "seguro");
                 });
 
             modelBuilder.Entity("WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models.ApoliceSubgrupoModel", b =>
@@ -719,7 +681,8 @@ namespace WebApolice.Modulos.Seguro.Infrastructure.Migrations
                         .HasColumnName("updated_at")
                         .HasDefaultValueSql("now()");
 
-                    b.HasKey("Id");
+                    b.HasKey("Id")
+                        .HasName("pk_apolice_subgrupo");
 
                     b.HasIndex("ApoliceId")
                         .HasDatabaseName("ix_apolice_subgrupo_apolice_id");
@@ -744,13 +707,13 @@ namespace WebApolice.Modulos.Seguro.Infrastructure.Migrations
                         .HasColumnType("bigint")
                         .HasColumnName("apolice_id");
 
-                    b.Property<long?>("ApoliceSubestipulanteId")
+                    b.Property<long?>("ApoliceModuloId")
                         .HasColumnType("bigint")
-                        .HasColumnName("apolice_subestipulante_id");
+                        .HasColumnName("apolice_modulo_id");
 
-                    b.Property<long?>("ApoliceSubestipulanteModuloId")
+                    b.Property<long?>("ApoliceSubgrupoId")
                         .HasColumnType("bigint")
-                        .HasColumnName("apolice_subestipulante_modulo_id");
+                        .HasColumnName("apolice_subgrupo_id");
 
                     b.Property<bool>("Ativo")
                         .ValueGeneratedOnAdd()
@@ -817,16 +780,19 @@ namespace WebApolice.Modulos.Seguro.Infrastructure.Migrations
                         .HasColumnName("updated_at")
                         .HasDefaultValueSql("now()");
 
-                    b.HasKey("Id");
+                    b.HasKey("Id")
+                        .HasName("pk_apolice_vida");
 
                     b.HasIndex("ApoliceId")
                         .HasDatabaseName("ix_apolice_vida_apolice");
 
-                    b.HasIndex("ApoliceSubestipulanteId")
-                        .HasDatabaseName("ix_apolice_vida_subestip")
-                        .HasFilter("apolice_subestipulante_id IS NOT NULL");
+                    b.HasIndex("ApoliceModuloId")
+                        .HasDatabaseName("ix_apolice_vida_modulo")
+                        .HasFilter("apolice_modulo_id IS NOT NULL");
 
-                    b.HasIndex("ApoliceSubestipulanteModuloId");
+                    b.HasIndex("ApoliceSubgrupoId")
+                        .HasDatabaseName("ix_apolice_vida_subgrupo")
+                        .HasFilter("apolice_subgrupo_id IS NOT NULL");
 
                     b.HasIndex("ClienteId")
                         .HasDatabaseName("ix_apolice_vida_cliente");
@@ -903,13 +869,15 @@ namespace WebApolice.Modulos.Seguro.Infrastructure.Migrations
                     b.HasKey("Id")
                         .HasName("cobertura_pkey");
 
-                    b.HasIndex(new[] { "Nome" }, "ix_cobertura_nome_trgm");
+                    b.HasIndex(new[] { "Nome" }, "ix_cobertura_nome_trgm")
+                        .HasDatabaseName("ix_cobertura_nome");
 
                     NpgsqlIndexBuilderExtensions.HasMethod(b.HasIndex(new[] { "Nome" }, "ix_cobertura_nome_trgm"), "gin");
                     NpgsqlIndexBuilderExtensions.HasOperators(b.HasIndex(new[] { "Nome" }, "ix_cobertura_nome_trgm"), new[] { "gin_trgm_ops" });
 
                     b.HasIndex(new[] { "LegadoId" }, "ux_cobertura_legado")
                         .IsUnique()
+                        .HasDatabaseName("ix_cobertura_legado_id")
                         .HasFilter("(legado_id IS NOT NULL)");
 
                     b.ToTable("cobertura", "seguro");
@@ -979,12 +947,15 @@ namespace WebApolice.Modulos.Seguro.Infrastructure.Migrations
                     b.HasKey("Id")
                         .HasName("movimento_tipo_pkey");
 
-                    b.HasIndex(new[] { "Classificacao" }, "ix_movimento_tipo_classificacao");
+                    b.HasIndex(new[] { "Classificacao" }, "ix_movimento_tipo_classificacao")
+                        .HasDatabaseName("ix_movimento_tipo_classificacao");
 
-                    b.HasIndex(new[] { "Financeiro" }, "ix_movimento_tipo_financeiro");
+                    b.HasIndex(new[] { "Financeiro" }, "ix_movimento_tipo_financeiro")
+                        .HasDatabaseName("ix_movimento_tipo_financeiro");
 
                     b.HasIndex(new[] { "LegadoId" }, "ux_movimento_tipo_legado")
                         .IsUnique()
+                        .HasDatabaseName("ix_movimento_tipo_legado_id")
                         .HasFilter("(legado_id IS NOT NULL)");
 
                     b.ToTable("movimento_tipo", "seguro");
@@ -1046,15 +1017,18 @@ namespace WebApolice.Modulos.Seguro.Infrastructure.Migrations
                     b.HasKey("Id")
                         .HasName("plano_pkey");
 
-                    b.HasIndex(new[] { "Nome" }, "ix_plano_nome_trgm");
+                    b.HasIndex(new[] { "Nome" }, "ix_plano_nome_trgm")
+                        .HasDatabaseName("ix_plano_nome");
 
                     NpgsqlIndexBuilderExtensions.HasMethod(b.HasIndex(new[] { "Nome" }, "ix_plano_nome_trgm"), "gin");
                     NpgsqlIndexBuilderExtensions.HasOperators(b.HasIndex(new[] { "Nome" }, "ix_plano_nome_trgm"), new[] { "gin_trgm_ops" });
 
-                    b.HasIndex(new[] { "Ramo" }, "ix_plano_ramo");
+                    b.HasIndex(new[] { "Ramo" }, "ix_plano_ramo")
+                        .HasDatabaseName("ix_plano_ramo");
 
                     b.HasIndex(new[] { "LegadoId" }, "ux_plano_legado")
                         .IsUnique()
+                        .HasDatabaseName("ix_plano_legado_id")
                         .HasFilter("(legado_id IS NOT NULL)");
 
                     b.ToTable("plano", "seguro");
@@ -1129,14 +1103,18 @@ namespace WebApolice.Modulos.Seguro.Infrastructure.Migrations
                     b.HasKey("Id")
                         .HasName("produto_pkey");
 
-                    b.HasIndex(new[] { "CodigoReferencia" }, "ix_produto_codigo_referencia");
+                    b.HasIndex(new[] { "CodigoReferencia" }, "ix_produto_codigo_referencia")
+                        .HasDatabaseName("ix_produto_codigo_referencia");
 
-                    b.HasIndex(new[] { "PlanoId" }, "ix_produto_plano");
+                    b.HasIndex(new[] { "PlanoId" }, "ix_produto_plano")
+                        .HasDatabaseName("ix_produto_plano_id");
 
-                    b.HasIndex(new[] { "TabelaPrecoId" }, "ix_produto_tabela_preco");
+                    b.HasIndex(new[] { "TabelaPrecoId" }, "ix_produto_tabela_preco")
+                        .HasDatabaseName("ix_produto_tabela_preco_id");
 
                     b.HasIndex(new[] { "LegadoId" }, "ux_produto_legado")
                         .IsUnique()
+                        .HasDatabaseName("ix_produto_legado_id")
                         .HasFilter("(legado_id IS NOT NULL)");
 
                     b.ToTable("produto", "seguro");
@@ -1229,21 +1207,27 @@ namespace WebApolice.Modulos.Seguro.Infrastructure.Migrations
                     b.HasKey("Id")
                         .HasName("proposta_beneficiario_pkey");
 
-                    b.HasIndex(new[] { "CpfLimpo" }, "ix_proposta_beneficiario_cpf");
+                    b.HasIndex(new[] { "CpfLimpo" }, "ix_proposta_beneficiario_cpf")
+                        .HasDatabaseName("ix_proposta_beneficiario_cpf_limpo");
 
-                    b.HasIndex(new[] { "Nome" }, "ix_proposta_beneficiario_nome_trgm");
+                    b.HasIndex(new[] { "Nome" }, "ix_proposta_beneficiario_nome_trgm")
+                        .HasDatabaseName("ix_proposta_beneficiario_nome");
 
                     NpgsqlIndexBuilderExtensions.HasMethod(b.HasIndex(new[] { "Nome" }, "ix_proposta_beneficiario_nome_trgm"), "gin");
                     NpgsqlIndexBuilderExtensions.HasOperators(b.HasIndex(new[] { "Nome" }, "ix_proposta_beneficiario_nome_trgm"), new[] { "gin_trgm_ops" });
 
-                    b.HasIndex(new[] { "ParentescoNormalizado" }, "ix_proposta_beneficiario_parentesco");
+                    b.HasIndex(new[] { "ParentescoNormalizado" }, "ix_proposta_beneficiario_parentesco")
+                        .HasDatabaseName("ix_proposta_beneficiario_parentesco_normalizado");
 
-                    b.HasIndex(new[] { "PessoaId" }, "ix_proposta_beneficiario_pessoa");
+                    b.HasIndex(new[] { "PessoaId" }, "ix_proposta_beneficiario_pessoa")
+                        .HasDatabaseName("ix_proposta_beneficiario_pessoa_id");
 
-                    b.HasIndex(new[] { "PropostaId" }, "ix_proposta_beneficiario_proposta");
+                    b.HasIndex(new[] { "PropostaId" }, "ix_proposta_beneficiario_proposta")
+                        .HasDatabaseName("ix_proposta_beneficiario_proposta_id");
 
                     b.HasIndex(new[] { "LegadoId" }, "ux_proposta_beneficiario_legado")
-                        .IsUnique();
+                        .IsUnique()
+                        .HasDatabaseName("ix_proposta_beneficiario_legado_id");
 
                     b.ToTable("proposta_beneficiario", "seguro");
                 });
@@ -1317,14 +1301,18 @@ namespace WebApolice.Modulos.Seguro.Infrastructure.Migrations
                     b.HasKey("Id")
                         .HasName("proposta_cobertura_pkey");
 
-                    b.HasIndex(new[] { "CoberturaId" }, "ix_proposta_cobertura_cobertura");
+                    b.HasIndex(new[] { "CoberturaId" }, "ix_proposta_cobertura_cobertura")
+                        .HasDatabaseName("ix_proposta_cobertura_cobertura_id");
 
-                    b.HasIndex(new[] { "PropostaItemId" }, "ix_proposta_cobertura_item");
+                    b.HasIndex(new[] { "PropostaItemId" }, "ix_proposta_cobertura_item")
+                        .HasDatabaseName("ix_proposta_cobertura_proposta_item_id");
 
-                    b.HasIndex(new[] { "PropostaId" }, "ix_proposta_cobertura_proposta");
+                    b.HasIndex(new[] { "PropostaId" }, "ix_proposta_cobertura_proposta")
+                        .HasDatabaseName("ix_proposta_cobertura_proposta_id");
 
                     b.HasIndex(new[] { "LegadoId" }, "ux_proposta_cobertura_legado")
-                        .IsUnique();
+                        .IsUnique()
+                        .HasDatabaseName("ix_proposta_cobertura_legado_id");
 
                     b.ToTable("proposta_cobertura", "seguro");
                 });
@@ -1375,9 +1363,11 @@ namespace WebApolice.Modulos.Seguro.Infrastructure.Migrations
                     b.HasKey("Id")
                         .HasName("proposta_historico_pkey");
 
-                    b.HasIndex(new[] { "PropostaAnteriorId" }, "ix_proposta_historico_anterior");
+                    b.HasIndex(new[] { "PropostaAnteriorId" }, "ix_proposta_historico_anterior")
+                        .HasDatabaseName("ix_proposta_historico_proposta_anterior_id");
 
-                    b.HasIndex(new[] { "PropostaNovaId" }, "ix_proposta_historico_nova");
+                    b.HasIndex(new[] { "PropostaNovaId" }, "ix_proposta_historico_nova")
+                        .HasDatabaseName("ix_proposta_historico_proposta_nova_id");
 
                     b.ToTable("proposta_historico", "seguro");
                 });
@@ -1476,18 +1466,24 @@ namespace WebApolice.Modulos.Seguro.Infrastructure.Migrations
                     b.HasKey("Id")
                         .HasName("proposta_item_pkey");
 
-                    b.HasIndex(new[] { "PlanoId" }, "ix_proposta_item_plano");
+                    b.HasIndex(new[] { "PlanoId" }, "ix_proposta_item_plano")
+                        .HasDatabaseName("ix_proposta_item_plano_id");
 
-                    b.HasIndex(new[] { "ProdutoId" }, "ix_proposta_item_produto");
+                    b.HasIndex(new[] { "ProdutoId" }, "ix_proposta_item_produto")
+                        .HasDatabaseName("ix_proposta_item_produto_id");
 
-                    b.HasIndex(new[] { "PropostaId" }, "ix_proposta_item_proposta");
+                    b.HasIndex(new[] { "PropostaId" }, "ix_proposta_item_proposta")
+                        .HasDatabaseName("ix_proposta_item_proposta_id");
 
-                    b.HasIndex(new[] { "TabelaPrecoId" }, "ix_proposta_item_tabela");
+                    b.HasIndex(new[] { "TabelaPrecoId" }, "ix_proposta_item_tabela")
+                        .HasDatabaseName("ix_proposta_item_tabela_preco_id");
 
-                    b.HasIndex(new[] { "TipoProdutoId" }, "ix_proposta_item_tipo");
+                    b.HasIndex(new[] { "TipoProdutoId" }, "ix_proposta_item_tipo")
+                        .HasDatabaseName("ix_proposta_item_tipo_produto_id");
 
                     b.HasIndex(new[] { "LegadoId" }, "ux_proposta_item_legado")
-                        .IsUnique();
+                        .IsUnique()
+                        .HasDatabaseName("ix_proposta_item_legado_id");
 
                     b.ToTable("proposta_item", "seguro");
                 });
@@ -1705,27 +1701,37 @@ namespace WebApolice.Modulos.Seguro.Infrastructure.Migrations
                     b.HasKey("Id")
                         .HasName("proposta_movimento_pkey");
 
-                    b.HasIndex(new[] { "Classificacao" }, "ix_proposta_movimento_classificacao");
+                    b.HasIndex(new[] { "Classificacao" }, "ix_proposta_movimento_classificacao")
+                        .HasDatabaseName("ix_proposta_movimento_classificacao");
 
-                    b.HasIndex(new[] { "ClienteId" }, "ix_proposta_movimento_cliente");
+                    b.HasIndex(new[] { "ClienteId" }, "ix_proposta_movimento_cliente")
+                        .HasDatabaseName("ix_proposta_movimento_cliente_id");
 
-                    b.HasIndex(new[] { "Ano", "Mes" }, "ix_proposta_movimento_competencia");
+                    b.HasIndex(new[] { "Ano", "Mes" }, "ix_proposta_movimento_competencia")
+                        .HasDatabaseName("ix_proposta_movimento_ano_mes");
 
-                    b.HasIndex(new[] { "CompetenciaInt" }, "ix_proposta_movimento_competencia_int");
+                    b.HasIndex(new[] { "CompetenciaInt" }, "ix_proposta_movimento_competencia_int")
+                        .HasDatabaseName("ix_proposta_movimento_competencia_int");
 
                     b.HasIndex(new[] { "DataPagamento" }, "ix_proposta_movimento_data_pagamento")
+                        .HasDatabaseName("ix_proposta_movimento_data_pagamento")
                         .HasFilter("(data_pagamento IS NOT NULL)");
 
-                    b.HasIndex(new[] { "EstipulanteId" }, "ix_proposta_movimento_estipulante");
+                    b.HasIndex(new[] { "EstipulanteId" }, "ix_proposta_movimento_estipulante")
+                        .HasDatabaseName("ix_proposta_movimento_estipulante_id");
 
-                    b.HasIndex(new[] { "PropostaId" }, "ix_proposta_movimento_proposta");
+                    b.HasIndex(new[] { "PropostaId" }, "ix_proposta_movimento_proposta")
+                        .HasDatabaseName("ix_proposta_movimento_proposta_id");
 
-                    b.HasIndex(new[] { "MovimentoTipoId" }, "ix_proposta_movimento_tipo");
+                    b.HasIndex(new[] { "MovimentoTipoId" }, "ix_proposta_movimento_tipo")
+                        .HasDatabaseName("ix_proposta_movimento_movimento_tipo_id");
 
-                    b.HasIndex(new[] { "ClienteVinculoId" }, "ix_proposta_movimento_vinculo");
+                    b.HasIndex(new[] { "ClienteVinculoId" }, "ix_proposta_movimento_vinculo")
+                        .HasDatabaseName("ix_proposta_movimento_cliente_vinculo_id");
 
                     b.HasIndex(new[] { "LegadoId" }, "ux_proposta_movimento_legado")
-                        .IsUnique();
+                        .IsUnique()
+                        .HasDatabaseName("ix_proposta_movimento_legado_id");
 
                     b.ToTable("proposta_movimento", "seguro");
                 });
@@ -1768,7 +1774,8 @@ namespace WebApolice.Modulos.Seguro.Infrastructure.Migrations
                         .HasName("proposta_status_pkey");
 
                     b.HasIndex(new[] { "Codigo" }, "proposta_status_codigo_key")
-                        .IsUnique();
+                        .IsUnique()
+                        .HasDatabaseName("ix_proposta_status_codigo");
 
                     b.ToTable("proposta_status", "seguro");
                 });
@@ -2017,34 +2024,47 @@ namespace WebApolice.Modulos.Seguro.Infrastructure.Migrations
                     b.HasKey("Id")
                         .HasName("proposta_pkey");
 
-                    b.HasIndex("PropostaOrigemId");
+                    b.HasIndex("PropostaOrigemId")
+                        .HasDatabaseName("ix_proposta_proposta_origem_id");
 
                     b.HasIndex(new[] { "ApoliceId" }, "ix_proposta_apolice")
+                        .HasDatabaseName("ix_proposta_apolice_id")
                         .HasFilter("apolice_id IS NOT NULL");
 
                     b.HasIndex(new[] { "ApoliceVidaId" }, "ix_proposta_apolice_vida")
+                        .HasDatabaseName("ix_proposta_apolice_vida_id")
                         .HasFilter("apolice_vida_id IS NOT NULL");
 
-                    b.HasIndex(new[] { "ClienteId" }, "ix_proposta_cliente");
+                    b.HasIndex(new[] { "ClienteId" }, "ix_proposta_cliente")
+                        .HasDatabaseName("ix_proposta_cliente_id");
 
-                    b.HasIndex(new[] { "ClienteVinculoId" }, "ix_proposta_cliente_vinculo");
+                    b.HasIndex(new[] { "ClienteVinculoId" }, "ix_proposta_cliente_vinculo")
+                        .HasDatabaseName("ix_proposta_cliente_vinculo_id");
 
-                    b.HasIndex(new[] { "DataInclusao" }, "ix_proposta_data_inclusao");
+                    b.HasIndex(new[] { "DataInclusao" }, "ix_proposta_data_inclusao")
+                        .HasDatabaseName("ix_proposta_data_inclusao");
 
-                    b.HasIndex(new[] { "EstipulanteId" }, "ix_proposta_estipulante");
+                    b.HasIndex(new[] { "EstipulanteId" }, "ix_proposta_estipulante")
+                        .HasDatabaseName("ix_proposta_estipulante_id");
 
-                    b.HasIndex(new[] { "EstipulanteId", "StatusId" }, "ix_proposta_estipulante_status");
+                    b.HasIndex(new[] { "EstipulanteId", "StatusId" }, "ix_proposta_estipulante_status")
+                        .HasDatabaseName("ix_proposta_estipulante_id_status_id");
 
-                    b.HasIndex(new[] { "Numero" }, "ix_proposta_numero");
+                    b.HasIndex(new[] { "Numero" }, "ix_proposta_numero")
+                        .HasDatabaseName("ix_proposta_numero");
 
-                    b.HasIndex(new[] { "PessoaId" }, "ix_proposta_pessoa");
+                    b.HasIndex(new[] { "PessoaId" }, "ix_proposta_pessoa")
+                        .HasDatabaseName("ix_proposta_pessoa_id");
 
-                    b.HasIndex(new[] { "StatusId" }, "ix_proposta_status");
+                    b.HasIndex(new[] { "StatusId" }, "ix_proposta_status")
+                        .HasDatabaseName("ix_proposta_status_id");
 
-                    b.HasIndex(new[] { "Vigente" }, "ix_proposta_vigente");
+                    b.HasIndex(new[] { "Vigente" }, "ix_proposta_vigente")
+                        .HasDatabaseName("ix_proposta_vigente");
 
                     b.HasIndex(new[] { "LegadoId" }, "ux_proposta_legado")
-                        .IsUnique();
+                        .IsUnique()
+                        .HasDatabaseName("ix_proposta_legado_id");
 
                     b.ToTable("proposta", "seguro");
                 });
@@ -2151,6 +2171,7 @@ namespace WebApolice.Modulos.Seguro.Infrastructure.Migrations
 
                     b.HasIndex(new[] { "LegadoId" }, "ux_tabela_preco_legado")
                         .IsUnique()
+                        .HasDatabaseName("ix_tabela_preco_legado_id")
                         .HasFilter("(legado_id IS NOT NULL)");
 
                     b.ToTable("tabela_preco", "seguro");
@@ -2196,10 +2217,12 @@ namespace WebApolice.Modulos.Seguro.Infrastructure.Migrations
                     b.HasKey("Id")
                         .HasName("tipo_produto_pkey");
 
-                    b.HasIndex(new[] { "Nome" }, "ix_tipo_produto_nome");
+                    b.HasIndex(new[] { "Nome" }, "ix_tipo_produto_nome")
+                        .HasDatabaseName("ix_tipo_produto_nome");
 
                     b.HasIndex(new[] { "LegadoId" }, "ux_tipo_produto_legado")
                         .IsUnique()
+                        .HasDatabaseName("ix_tipo_produto_legado_id")
                         .HasFilter("(legado_id IS NOT NULL)");
 
                     b.ToTable("tipo_produto", "seguro");
@@ -2211,13 +2234,15 @@ namespace WebApolice.Modulos.Seguro.Infrastructure.Migrations
                         .WithMany("Coberturas")
                         .HasForeignKey("ApolicePlanoId")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("fk_apolice_cobertura_apolice_plano_apolice_plano_id");
 
                     b.HasOne("WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models.Cobertura", "Cobertura")
                         .WithMany()
                         .HasForeignKey("CoberturaId")
                         .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("fk_apolice_cobertura_cobertura_cobertura_id");
 
                     b.Navigation("ApolicePlano");
 
@@ -2230,7 +2255,8 @@ namespace WebApolice.Modulos.Seguro.Infrastructure.Migrations
                         .WithOne("Configuracao")
                         .HasForeignKey("WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models.ApoliceConfiguracaoModel", "ApoliceId")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("fk_apolice_configuracao_apolice_apolice_id");
 
                     b.Navigation("Apolice");
                 });
@@ -2241,7 +2267,8 @@ namespace WebApolice.Modulos.Seguro.Infrastructure.Migrations
                         .WithMany("Historicos")
                         .HasForeignKey("ApoliceId")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("fk_apolice_historico_apolice_apolice_id");
 
                     b.Navigation("Apolice");
                 });
@@ -2251,7 +2278,8 @@ namespace WebApolice.Modulos.Seguro.Infrastructure.Migrations
                     b.HasOne("WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models.ApoliceModel", "ApoliceOrigem")
                         .WithMany("Renovacoes")
                         .HasForeignKey("ApoliceOrigemId")
-                        .OnDelete(DeleteBehavior.SetNull);
+                        .OnDelete(DeleteBehavior.SetNull)
+                        .HasConstraintName("fk_apolice_apolice_apolice_origem_id");
 
                     b.Navigation("ApoliceOrigem");
                 });
@@ -2274,18 +2302,21 @@ namespace WebApolice.Modulos.Seguro.Infrastructure.Migrations
                         .WithMany("Planos")
                         .HasForeignKey("ApoliceProdutoId")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("fk_apolice_plano_apolice_produto_apolice_produto_id");
 
                     b.HasOne("WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models.Plano", "Plano")
                         .WithMany()
                         .HasForeignKey("PlanoId")
                         .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("fk_apolice_plano_plano_plano_id");
 
                     b.HasOne("WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models.TabelaPreco", "TabelaPreco")
                         .WithMany()
                         .HasForeignKey("TabelaPrecoId")
-                        .OnDelete(DeleteBehavior.SetNull);
+                        .OnDelete(DeleteBehavior.SetNull)
+                        .HasConstraintName("fk_apolice_plano_tabela_preco_tabela_preco_id");
 
                     b.Navigation("ApoliceProduto");
 
@@ -2300,13 +2331,15 @@ namespace WebApolice.Modulos.Seguro.Infrastructure.Migrations
                         .WithMany("ApoliceProdutos")
                         .HasForeignKey("ApoliceId")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("fk_apolice_produto_apolice_apolice_id");
 
                     b.HasOne("WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models.Produto", "Produto")
                         .WithMany()
                         .HasForeignKey("ProdutoId")
                         .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("fk_apolice_produto_produto_produto_id");
 
                     b.Navigation("Apolice");
 
@@ -2319,13 +2352,15 @@ namespace WebApolice.Modulos.Seguro.Infrastructure.Migrations
                         .WithMany("Ramos")
                         .HasForeignKey("ApoliceId")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("fk_apolice_ramo_apolice_apolice_id");
 
                     b.HasOne("WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models.RamoModel", "Ramo")
                         .WithMany()
                         .HasForeignKey("RamoId")
                         .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("fk_apolice_ramo_ramo_ramo_id");
 
                     b.Navigation("Apolice");
 
@@ -2338,20 +2373,10 @@ namespace WebApolice.Modulos.Seguro.Infrastructure.Migrations
                         .WithMany("Subestipulantes")
                         .HasForeignKey("ApoliceId")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("fk_apolice_subestipulante_apolice_apolice_id");
 
                     b.Navigation("Apolice");
-                });
-
-            modelBuilder.Entity("WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models.ApoliceSubestipulanteModuloModel", b =>
-                {
-                    b.HasOne("WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models.ApoliceSubestipulanteModel", "ApoliceSubestipulante")
-                        .WithMany("Modulos")
-                        .HasForeignKey("ApoliceSubestipulanteId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("ApoliceSubestipulante");
                 });
 
             modelBuilder.Entity("WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models.ApoliceSubgrupoModel", b =>
@@ -2372,23 +2397,26 @@ namespace WebApolice.Modulos.Seguro.Infrastructure.Migrations
                         .WithMany("Vidas")
                         .HasForeignKey("ApoliceId")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("fk_apolice_vida_apolice_apolice_id");
 
-                    b.HasOne("WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models.ApoliceSubestipulanteModel", "ApoliceSubestipulante")
+                    b.HasOne("WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models.ApoliceModuloModel", "ApoliceModulo")
                         .WithMany("Vidas")
-                        .HasForeignKey("ApoliceSubestipulanteId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .HasForeignKey("ApoliceModuloId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("fk_apolice_vida_apolice_modulos_apolice_modulo_id");
 
-                    b.HasOne("WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models.ApoliceSubestipulanteModuloModel", "ApoliceSubestipulanteModulo")
+                    b.HasOne("WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models.ApoliceSubgrupoModel", "ApoliceSubgrupo")
                         .WithMany("Vidas")
-                        .HasForeignKey("ApoliceSubestipulanteModuloId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .HasForeignKey("ApoliceSubgrupoId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("fk_apolice_vida_apolice_subgrupos_apolice_subgrupo_id");
 
                     b.Navigation("Apolice");
 
-                    b.Navigation("ApoliceSubestipulante");
+                    b.Navigation("ApoliceModulo");
 
-                    b.Navigation("ApoliceSubestipulanteModulo");
+                    b.Navigation("ApoliceSubgrupo");
                 });
 
             modelBuilder.Entity("WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models.Produto", b =>
@@ -2574,6 +2602,11 @@ namespace WebApolice.Modulos.Seguro.Infrastructure.Migrations
                     b.Navigation("Vidas");
                 });
 
+            modelBuilder.Entity("WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models.ApoliceModuloModel", b =>
+                {
+                    b.Navigation("Vidas");
+                });
+
             modelBuilder.Entity("WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models.ApolicePlanoModel", b =>
                 {
                     b.Navigation("Coberturas");
@@ -2584,14 +2617,7 @@ namespace WebApolice.Modulos.Seguro.Infrastructure.Migrations
                     b.Navigation("Planos");
                 });
 
-            modelBuilder.Entity("WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models.ApoliceSubestipulanteModel", b =>
-                {
-                    b.Navigation("Modulos");
-
-                    b.Navigation("Vidas");
-                });
-
-            modelBuilder.Entity("WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models.ApoliceSubestipulanteModuloModel", b =>
+            modelBuilder.Entity("WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models.ApoliceSubgrupoModel", b =>
                 {
                     b.Navigation("Vidas");
                 });

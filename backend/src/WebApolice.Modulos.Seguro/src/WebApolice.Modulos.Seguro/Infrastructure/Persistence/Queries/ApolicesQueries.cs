@@ -6,10 +6,12 @@ using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using WebApolice.Modulos.Seguro.Application.Ports;
 using WebApolice.Modulos.Seguro.Application.UseCases.Apolices.ListarApolices;
-using WebApolice.Modulos.Seguro.Application.UseCases.Apolices.ListarModulos;
+
 using WebApolice.Modulos.Seguro.Application.UseCases.Apolices.ListarSubgrupos;
 using WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence;
+using WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models;
 using WebApolice.SharedKernel.Application.Models;
+using System.Data.Common;
 
 namespace WebApolice.Modulos.Seguro.Infrastructure.Persistence.Queries;
 
@@ -58,23 +60,45 @@ public class ApolicesQueries : IApolicesQueries
         
         var skip = (pagina - 1) * tamanhoPagina;
 
-        var itens = await query
+        var apolicesRaw = await query
             .OrderByDescending(a => a.CreatedAt)
             .Skip(skip)
             .Take(tamanhoPagina)
-            .Select(a => new ApoliceListagemItemResult(
+            .Select(a => new
+            {
                 a.PublicId,
-                a.Nome ?? "",
-                "Estipulante Nome (Implementar)",
-                "Seguradora Nome (Implementar)",
+                a.Nome,
+                a.EstipulanteId,
+                a.SeguradoraId,
+                a.CorretoraId,
                 a.DataInicioVigencia,
                 a.DataFimVigencia,
                 a.Status,
                 a.Ativo,
-                a.Ramos.Count,
-                ""
-            ))
+                QtdRamos = a.Ramos.Count
+            })
             .ToListAsync(cancellationToken);
+
+        var estipulanteIds = apolicesRaw.Select(a => a.EstipulanteId).Distinct().ToList();
+        var seguradoraIds = apolicesRaw.Select(a => a.SeguradoraId).Distinct().ToList();
+        var corretoraIds = apolicesRaw.Where(a => a.CorretoraId.HasValue).Select(a => a.CorretoraId!.Value).Distinct().ToList();
+
+        var nomesEstipulantes = await ObterNomesGlobaisAsync("estipulante", estipulanteIds, cancellationToken);
+        var nomesSeguradoras = await ObterNomesGlobaisAsync("seguradora", seguradoraIds, cancellationToken);
+        var nomesCorretoras = await ObterNomesGlobaisAsync("corretora", corretoraIds, cancellationToken);
+
+        var itens = apolicesRaw.Select(a => new ApoliceListagemItemResult(
+            a.PublicId,
+            a.Nome ?? "",
+            nomesEstipulantes.GetValueOrDefault(a.EstipulanteId, "Desconhecido"),
+            nomesSeguradoras.GetValueOrDefault(a.SeguradoraId, "Desconhecido"),
+            a.DataInicioVigencia,
+            a.DataFimVigencia,
+            a.Status,
+            a.Ativo,
+            a.QtdRamos,
+            ""
+        )).ToList();
 
         return new PagedResult<ApoliceListagemItemResult> 
         {
@@ -89,25 +113,23 @@ public class ApolicesQueries : IApolicesQueries
         Guid publicId, 
         CancellationToken cancellationToken)
     {
-        var apolice = await _dbContext.Apolices
+        var apoliceRaw = await _dbContext.Apolices
             .AsNoTracking()
             .Where(a => a.PublicId == publicId && a.DeletedAt == null)
-            .Select(a => new WebApolice.Modulos.Seguro.Application.UseCases.Apolices.ObterApolice.ApoliceDetalheResult(
+            .Select(a => new
+            {
                 a.PublicId,
-                a.Nome ?? "",
+                a.Nome,
                 a.EstipulanteId,
-                "Estipulante Nome (Implementar)",
                 a.SeguradoraId,
-                "Seguradora Nome (Implementar)",
                 a.CorretoraId,
-                "Corretora Nome (Implementar)",
                 a.DataInicioVigencia,
                 a.DataFimVigencia,
                 a.DataAniversario,
                 a.Status,
                 a.Ativo,
                 a.Observacao,
-                a.Ramos.Select(ar => new WebApolice.Modulos.Seguro.Application.UseCases.Apolices.ObterApolice.ApoliceRamoResult(
+                Ramos = a.Ramos.Select(ar => new WebApolice.Modulos.Seguro.Application.UseCases.Apolices.ObterApolice.ApoliceRamoResult(
                     ar.Ramo.PublicId,
                     ar.Ramo.Codigo,
                     ar.Ramo.Nome,
@@ -115,19 +137,46 @@ public class ApolicesQueries : IApolicesQueries
                     ar.IofPercentual,
                     ar.Ativo
                 )).ToList(),
-                a.Configuracao != null ? new WebApolice.Modulos.Seguro.Application.UseCases.Apolices.ObterApolice.ApoliceConfiguracaoResult(
-                    a.Configuracao.TipoAdesao,
-                    a.Configuracao.Custeio,
-                    a.Configuracao.CarenciaDias,
-                    a.Configuracao.MesBaseReajuste,
-                    a.Configuracao.IndiceReajuste,
-                    a.Configuracao.CobreConjuge,
-                    a.Configuracao.ControlaExcedente,
-                    a.Configuracao.DiaCorteFaturamento,
-                    a.Configuracao.PrazoAvisoSinistroDias
-                ) : null
-            ))
+                a.Configuracao
+            })
             .FirstOrDefaultAsync(cancellationToken);
+
+        if (apoliceRaw == null) return null;
+
+        var nomesEstipulantes = await ObterNomesGlobaisAsync("estipulante", new List<long> { apoliceRaw.EstipulanteId }, cancellationToken);
+        var nomesSeguradoras = await ObterNomesGlobaisAsync("seguradora", new List<long> { apoliceRaw.SeguradoraId }, cancellationToken);
+        var nomesCorretoras = apoliceRaw.CorretoraId.HasValue 
+            ? await ObterNomesGlobaisAsync("corretora", new List<long> { apoliceRaw.CorretoraId.Value }, cancellationToken) 
+            : new Dictionary<long, string>();
+
+        var apolice = new WebApolice.Modulos.Seguro.Application.UseCases.Apolices.ObterApolice.ApoliceDetalheResult(
+            apoliceRaw.PublicId,
+            apoliceRaw.Nome ?? "",
+            apoliceRaw.EstipulanteId,
+            nomesEstipulantes.GetValueOrDefault(apoliceRaw.EstipulanteId, "Desconhecido"),
+            apoliceRaw.SeguradoraId,
+            nomesSeguradoras.GetValueOrDefault(apoliceRaw.SeguradoraId, "Desconhecido"),
+            apoliceRaw.CorretoraId,
+            apoliceRaw.CorretoraId.HasValue ? nomesCorretoras.GetValueOrDefault(apoliceRaw.CorretoraId.Value, "Desconhecido") : "Nenhuma",
+            apoliceRaw.DataInicioVigencia,
+            apoliceRaw.DataFimVigencia,
+            apoliceRaw.DataAniversario,
+            apoliceRaw.Status,
+            apoliceRaw.Ativo,
+            apoliceRaw.Observacao,
+            apoliceRaw.Ramos,
+            apoliceRaw.Configuracao != null ? new WebApolice.Modulos.Seguro.Application.UseCases.Apolices.ObterApolice.ApoliceConfiguracaoResult(
+                apoliceRaw.Configuracao.TipoAdesao,
+                apoliceRaw.Configuracao.Custeio,
+                apoliceRaw.Configuracao.CarenciaDias,
+                apoliceRaw.Configuracao.MesBaseReajuste,
+                apoliceRaw.Configuracao.IndiceReajuste,
+                apoliceRaw.Configuracao.CobreConjuge,
+                apoliceRaw.Configuracao.ControlaExcedente,
+                apoliceRaw.Configuracao.DiaCorteFaturamento,
+                apoliceRaw.Configuracao.PrazoAvisoSinistroDias
+            ) : null
+        );
 
         return apolice;
     }
@@ -138,8 +187,8 @@ public class ApolicesQueries : IApolicesQueries
         int tamanhoPagina,
         string? buscaCliente,
         string? status,
-        Guid? subestipulantePublicId,
-        Guid? moduloPublicId,
+        Guid? apoliceSubgrupoPublicId,
+        Guid? apoliceModuloPublicId,
         DateOnly? vigenciaDataReferencia,
         CancellationToken cancellationToken)
     {
@@ -160,40 +209,29 @@ public class ApolicesQueries : IApolicesQueries
             };
         }
 
-        // Resolver IDs de filtro cross-module (antes de aplicar no EF)
-        long? filtroSubestipulanteId = null;
-        if (subestipulantePublicId.HasValue)
+        // Resolver IDs de filtro
+        long? filtroSubgrupoId = null;
+        if (apoliceSubgrupoPublicId.HasValue)
         {
-            var subId = await _dbContext.Database
-                .SqlQuery<long>($"SELECT id AS \"Value\" FROM cadastro.subestipulante WHERE public_id = {subestipulantePublicId.Value} AND deleted_at IS NULL")
-                .FirstOrDefaultAsync(cancellationToken);
-            if (subId == 0) return new PagedResult<WebApolice.Modulos.Seguro.Application.UseCases.Apolices.ListarVidas.ApoliceVidaResult> { Items = new List<WebApolice.Modulos.Seguro.Application.UseCases.Apolices.ListarVidas.ApoliceVidaResult>(), Page = pagina, PageSize = tamanhoPagina, TotalCount = 0 };
-
-            // Resolver o apolice_subestipulante_id (FK local) a partir do subestipulante global
-            var vinculoSub = await _dbContext.ApoliceSubestipulantes
+            var subId = await _dbContext.ApoliceSubgrupos
                 .AsNoTracking()
-                .Where(s => s.ApoliceId == apoliceId && s.SubestipulanteId == subId && s.DeletedAt == null)
+                .Where(s => s.ApoliceId == apoliceId && s.PublicId == apoliceSubgrupoPublicId.Value && s.DeletedAt == null)
                 .Select(s => s.Id)
                 .FirstOrDefaultAsync(cancellationToken);
-            if (vinculoSub == 0) return new PagedResult<WebApolice.Modulos.Seguro.Application.UseCases.Apolices.ListarVidas.ApoliceVidaResult> { Items = new List<WebApolice.Modulos.Seguro.Application.UseCases.Apolices.ListarVidas.ApoliceVidaResult>(), Page = pagina, PageSize = tamanhoPagina, TotalCount = 0 };
-            filtroSubestipulanteId = vinculoSub;
+            if (subId == 0) return new PagedResult<WebApolice.Modulos.Seguro.Application.UseCases.Apolices.ListarVidas.ApoliceVidaResult> { Items = new List<WebApolice.Modulos.Seguro.Application.UseCases.Apolices.ListarVidas.ApoliceVidaResult>(), Page = pagina, PageSize = tamanhoPagina, TotalCount = 0 };
+            filtroSubgrupoId = subId;
         }
 
-        long? filtroModuloVinculoId = null;
-        if (moduloPublicId.HasValue && filtroSubestipulanteId.HasValue)
+        long? filtroModuloId = null;
+        if (apoliceModuloPublicId.HasValue)
         {
-            var modId = await _dbContext.Database
-                .SqlQuery<long>($"SELECT id AS \"Value\" FROM cadastro.modulo WHERE public_id = {moduloPublicId.Value} AND deleted_at IS NULL")
+            var modId = await _dbContext.ApoliceModulos
+                .AsNoTracking()
+                .Where(m => m.ApoliceId == apoliceId && m.PublicId == apoliceModuloPublicId.Value && m.DeletedAt == null)
+                .Select(m => m.Id)
                 .FirstOrDefaultAsync(cancellationToken);
-            if (modId > 0)
-            {
-                var vinculoMod = await _dbContext.ApoliceSubestipulanteModulos
-                    .AsNoTracking()
-                    .Where(m => m.ApoliceSubestipulanteId == filtroSubestipulanteId.Value && m.ModuloId == modId && m.DeletedAt == null)
-                    .Select(m => m.Id)
-                    .FirstOrDefaultAsync(cancellationToken);
-                filtroModuloVinculoId = vinculoMod > 0 ? vinculoMod : null;
-            }
+            if (modId == 0) return new PagedResult<WebApolice.Modulos.Seguro.Application.UseCases.Apolices.ListarVidas.ApoliceVidaResult> { Items = new List<WebApolice.Modulos.Seguro.Application.UseCases.Apolices.ListarVidas.ApoliceVidaResult>(), Page = pagina, PageSize = tamanhoPagina, TotalCount = 0 };
+            filtroModuloId = modId;
         }
 
         // Construir query base com filtros aplicados no banco
@@ -204,11 +242,11 @@ public class ApolicesQueries : IApolicesQueries
         if (!string.IsNullOrWhiteSpace(status))
             query = query.Where(v => v.Status == status);
 
-        if (filtroSubestipulanteId.HasValue)
-            query = query.Where(v => v.ApoliceSubestipulanteId == filtroSubestipulanteId.Value);
+        if (filtroSubgrupoId.HasValue)
+            query = query.Where(v => v.ApoliceSubgrupoId == filtroSubgrupoId.Value);
 
-        if (filtroModuloVinculoId.HasValue)
-            query = query.Where(v => v.ApoliceSubestipulanteModuloId == filtroModuloVinculoId.Value);
+        if (filtroModuloId.HasValue)
+            query = query.Where(v => v.ApoliceModuloId == filtroModuloId.Value);
 
         if (vigenciaDataReferencia.HasValue)
         {
@@ -230,8 +268,8 @@ public class ApolicesQueries : IApolicesQueries
                 v.Id,
                 v.PublicId,
                 v.ClienteId,
-                v.ApoliceSubestipulanteId,
-                v.ApoliceSubestipulanteModuloId,
+                v.ApoliceSubgrupoId,
+                v.ApoliceModuloId,
                 v.DataInicioVigencia,
                 v.DataFimVigencia,
                 v.Status,
@@ -262,25 +300,35 @@ public class ApolicesQueries : IApolicesQueries
             vidasRaw = vidasRaw.Where(v => clientesFiltrados.Contains(v.ClienteId)).ToList();
         }
 
-        var subVinculoIds = vidasRaw.Where(v => v.ApoliceSubestipulanteId.HasValue)
-            .Select(v => v.ApoliceSubestipulanteId!.Value).Distinct().ToList();
-        var subGlobaisDict = await ObterSubestipulantesGlobaisAsync(subVinculoIds, cancellationToken);
+        var subgrupoIds = vidasRaw.Where(v => v.ApoliceSubgrupoId.HasValue)
+            .Select(v => v.ApoliceSubgrupoId!.Value).Distinct().ToList();
+        var subgruposDict = await _dbContext.ApoliceSubgrupos
+            .AsNoTracking()
+            .Where(s => subgrupoIds.Contains(s.Id))
+            .ToDictionaryAsync(s => s.Id, cancellationToken);
 
-        var moduloVinculoIds = vidasRaw.Where(v => v.ApoliceSubestipulanteModuloId.HasValue)
-            .Select(v => v.ApoliceSubestipulanteModuloId!.Value).Distinct().ToList();
-        var modulosDict = await ObterModulosGlobaisAsync(moduloVinculoIds, cancellationToken);
+        var moduloIds = vidasRaw.Where(v => v.ApoliceModuloId.HasValue)
+            .Select(v => v.ApoliceModuloId!.Value).Distinct().ToList();
+        
+        var apoliceModulos = await _dbContext.ApoliceModulos
+            .AsNoTracking()
+            .Where(m => moduloIds.Contains(m.Id))
+            .ToListAsync(cancellationToken);
+            
+        var cadastroModuloIds = apoliceModulos.Select(m => m.ModuloId).Distinct().ToList();
+        var modulosDict = await ObterModulosGlobaisAsync(cadastroModuloIds, cancellationToken);
+        var apoliceModulosDict = apoliceModulos.ToDictionary(m => m.Id);
 
         var clientesDict = clientesGlobais.ToDictionary(c => c.Id);
 
         var itens = vidasRaw.Select(v =>
         {
             var cliente = clientesDict.GetValueOrDefault(v.ClienteId);
-            var subVinculo = v.ApoliceSubestipulanteId.HasValue ? subGlobaisDict.GetValueOrDefault(v.ApoliceSubestipulanteId.Value) : null;
-            var moduloVinculo = v.ApoliceSubestipulanteModuloId.HasValue ? modulosDict.GetValueOrDefault(v.ApoliceSubestipulanteModuloId.Value) : null;
-
-            var contexto = v.ApoliceSubestipulanteModuloId.HasValue ? "modulo"
-                : v.ApoliceSubestipulanteId.HasValue ? "subestipulante"
-                : "direto";
+            
+            var subgrupo = v.ApoliceSubgrupoId.HasValue ? subgruposDict.GetValueOrDefault(v.ApoliceSubgrupoId.Value) : null;
+            
+            var apoliceModulo = v.ApoliceModuloId.HasValue ? apoliceModulosDict.GetValueOrDefault(v.ApoliceModuloId.Value) : null;
+            var moduloGlobal = apoliceModulo != null ? modulosDict.GetValueOrDefault(apoliceModulo.ModuloId) : null;
 
             var docMascarado = MascararDocumento(cliente?.Documento);
 
@@ -289,11 +337,10 @@ public class ApolicesQueries : IApolicesQueries
                 cliente?.PublicId ?? Guid.Empty,
                 cliente?.Nome ?? $"Cliente {v.ClienteId}",
                 docMascarado,
-                contexto,
-                subVinculo?.SubestipulantePublicId,
-                subVinculo?.SubestipulanteNome,
-                moduloVinculo?.ModuloPublicId,
-                moduloVinculo?.ModuloNome,
+                subgrupo?.PublicId,
+                subgrupo?.Nome,
+                apoliceModulo?.PublicId,
+                moduloGlobal?.ModuloNome,
                 v.DataInicioVigencia,
                 v.DataFimVigencia,
                 v.Status,
@@ -331,8 +378,8 @@ public class ApolicesQueries : IApolicesQueries
             {
                 x.PublicId,
                 x.ClienteId,
-                x.ApoliceSubestipulanteId,
-                x.ApoliceSubestipulanteModuloId,
+                x.ApoliceSubgrupoId,
+                x.ApoliceModuloId,
                 x.DataInicioVigencia,
                 x.DataFimVigencia,
                 x.Status,
@@ -346,34 +393,38 @@ public class ApolicesQueries : IApolicesQueries
         var clientesGlobais = await ObterClientesGlobaisAsync(new List<long> { v.ClienteId }, cancellationToken);
         var cliente = clientesGlobais.FirstOrDefault();
 
-        VidaSubestipulanteQueryDto? subVinculo = null;
-        if (v.ApoliceSubestipulanteId.HasValue)
+        ApoliceSubgrupoModel? subgrupo = null;
+        if (v.ApoliceSubgrupoId.HasValue)
         {
-            var subDict = await ObterSubestipulantesGlobaisAsync(new List<long> { v.ApoliceSubestipulanteId.Value }, cancellationToken);
-            subVinculo = subDict.GetValueOrDefault(v.ApoliceSubestipulanteId.Value);
+            subgrupo = await _dbContext.ApoliceSubgrupos
+                .AsNoTracking()
+                .FirstOrDefaultAsync(s => s.Id == v.ApoliceSubgrupoId.Value, cancellationToken);
         }
 
-        VidaModuloQueryDto? moduloVinculo = null;
-        if (v.ApoliceSubestipulanteModuloId.HasValue)
+        ApoliceModuloModel? apoliceModulo = null;
+        VidaModuloQueryDto? moduloGlobal = null;
+        if (v.ApoliceModuloId.HasValue)
         {
-            var modDict = await ObterModulosGlobaisAsync(new List<long> { v.ApoliceSubestipulanteModuloId.Value }, cancellationToken);
-            moduloVinculo = modDict.GetValueOrDefault(v.ApoliceSubestipulanteModuloId.Value);
+            apoliceModulo = await _dbContext.ApoliceModulos
+                .AsNoTracking()
+                .FirstOrDefaultAsync(m => m.Id == v.ApoliceModuloId.Value, cancellationToken);
+                
+            if (apoliceModulo != null)
+            {
+                var modDict = await ObterModulosGlobaisAsync(new List<long> { apoliceModulo.ModuloId }, cancellationToken);
+                moduloGlobal = modDict.GetValueOrDefault(apoliceModulo.ModuloId);
+            }
         }
-
-        var contexto = v.ApoliceSubestipulanteModuloId.HasValue ? "modulo"
-            : v.ApoliceSubestipulanteId.HasValue ? "subestipulante"
-            : "direto";
 
         return new WebApolice.Modulos.Seguro.Application.UseCases.Apolices.ListarVidas.ApoliceVidaResult(
             v.PublicId,
             cliente?.PublicId ?? Guid.Empty,
             cliente?.Nome ?? $"Cliente {v.ClienteId}",
             MascararDocumento(cliente?.Documento),
-            contexto,
-            subVinculo?.SubestipulantePublicId,
-            subVinculo?.SubestipulanteNome,
-            moduloVinculo?.ModuloPublicId,
-            moduloVinculo?.ModuloNome,
+            subgrupo?.PublicId,
+            subgrupo?.Nome,
+            apoliceModulo?.PublicId,
+            moduloGlobal?.ModuloNome,
             v.DataInicioVigencia,
             v.DataFimVigencia,
             v.Status,
@@ -442,64 +493,11 @@ public class ApolicesQueries : IApolicesQueries
 
         var subestipulantesDict = subestipulantesGlobais.ToDictionary(s => s.Id);
 
-        // Carregar módulos vinculados para cada subestipulante (sem N+1)
-        var vinculoIds = vinculos.Select(v => v.Id).ToList();
-        var moduloVinculos = await _dbContext.ApoliceSubestipulanteModulos
-            .AsNoTracking()
-            .Where(m => vinculoIds.Contains(m.ApoliceSubestipulanteId) && m.DeletedAt == null)
-            .ToListAsync();
 
-        // Carregar dados globais dos módulos via ADO.NET (cross-schema cadastro → seguro)
-        var moduloIds = moduloVinculos.Select(m => m.ModuloId).Distinct().ToList();
-        var modulosGlobais = new List<ModuloGlobalQueryDto>();
-        if (moduloIds.Any())
-        {
-            var idsCsv = string.Join(",", moduloIds);
-            var connModulo = _dbContext.Database.GetDbConnection();
-            var wasOpenModulo = connModulo.State == System.Data.ConnectionState.Open;
-            if (!wasOpenModulo) await connModulo.OpenAsync();
-            try
-            {
-                using var cmd = connModulo.CreateCommand();
-                cmd.CommandText = $"SELECT id, public_id, nome, descricao, ativo FROM cadastro.modulo WHERE id IN ({idsCsv})";
-                using var reader = await cmd.ExecuteReaderAsync();
-                while (await reader.ReadAsync())
-                {
-                    modulosGlobais.Add(new ModuloGlobalQueryDto
-                    {
-                        Id = reader.GetInt64(0),
-                        PublicId = reader.GetGuid(1),
-                        Nome = reader.GetString(2),
-                        Descricao = reader.IsDBNull(3) ? null : reader.GetString(3),
-                        Ativo = reader.GetBoolean(4)
-                    });
-                }
-            }
-            finally
-            {
-                if (!wasOpenModulo) await connModulo.CloseAsync();
-            }
-        }
-        var modulosGlobaisDict = modulosGlobais.ToDictionary(m => m.Id);
 
         var itens = vinculos.Select(s =>
         {
             var subGlobal = subestipulantesDict.GetValueOrDefault(s.SubestipulanteId);
-            var modulosDoSub = moduloVinculos
-                .Where(m => m.ApoliceSubestipulanteId == s.Id)
-                .Select(m =>
-                {
-                    var mg = modulosGlobaisDict.GetValueOrDefault(m.ModuloId);
-                    return new WebApolice.Modulos.Seguro.Application.UseCases.Apolices.ListarSubestipulantes.ApoliceSubestipulanteModuloResult(
-                        mg?.PublicId ?? Guid.Empty,
-                        mg?.Nome ?? "Desconhecido",
-                        mg?.Descricao,
-                        mg?.Ativo ?? false,
-                        m.Ativo,
-                        m.DataInicio,
-                        m.DataFim
-                    );
-                }).ToList();
 
             return new WebApolice.Modulos.Seguro.Application.UseCases.Apolices.ListarSubestipulantes.ApoliceSubestipulanteResult(
                 subGlobal?.PublicId ?? Guid.Empty,
@@ -508,8 +506,7 @@ public class ApolicesQueries : IApolicesQueries
                 subGlobal?.Codigo,
                 s.DataInicio,
                 s.DataFim,
-                s.Ativo,
-                modulosDoSub
+                s.Ativo
             );
         }).ToList();
 
@@ -601,98 +598,7 @@ public class ApolicesQueries : IApolicesQueries
         };
     }
 
-    /// <summary>
-    /// Lista os Módulos vinculados a um Subestipulante no contexto de uma Apólice.
-    /// Usa ADO.NET cross-schema (padrão vigente) para resolver dados do Catálogo Global (cadastro.modulo).
-    /// AsNoTracking + select eficiente — sem N+1.
-    /// </summary>
-    public async Task<List<ModuloDoSubestipulanteResult>> ListarModulosDoSubestipulanteAsync(
-        Guid apolicePublicId,
-        Guid subestipulantePublicId,
-        CancellationToken cancellationToken)
-    {
-        var apoliceId = await _dbContext.Apolices
-            .AsNoTracking()
-            .Where(a => a.PublicId == apolicePublicId && a.DeletedAt == null)
-            .Select(a => a.Id)
-            .FirstOrDefaultAsync(cancellationToken);
 
-        if (apoliceId == 0)
-            return new List<ModuloDoSubestipulanteResult>();
-
-        // Resolver subestipulanteId cross-module
-        var subestipulanteId = await _dbContext.Database
-            .SqlQuery<long>($"SELECT id AS \"Value\" FROM cadastro.subestipulante WHERE public_id = {subestipulantePublicId} AND deleted_at IS NULL")
-            .FirstOrDefaultAsync(cancellationToken);
-
-        if (subestipulanteId == 0)
-            return new List<ModuloDoSubestipulanteResult>();
-
-        // Localizar vínculo pai
-        var vinculoPaiId = await _dbContext.ApoliceSubestipulantes
-            .AsNoTracking()
-            .Where(s => s.ApoliceId == apoliceId && s.SubestipulanteId == subestipulanteId && s.DeletedAt == null)
-            .Select(s => s.Id)
-            .FirstOrDefaultAsync(cancellationToken);
-
-        if (vinculoPaiId == 0)
-            return new List<ModuloDoSubestipulanteResult>();
-
-        // Carregar todos os vínculos do subestipulante (sem filtro de ativo — mostra histórico também)
-        var vinculos = await _dbContext.ApoliceSubestipulanteModulos
-            .AsNoTracking()
-            .Where(m => m.ApoliceSubestipulanteId == vinculoPaiId && m.DeletedAt == null)
-            .ToListAsync(cancellationToken);
-
-        if (!vinculos.Any())
-            return new List<ModuloDoSubestipulanteResult>();
-
-        // Carregar dados globais via ADO.NET (cross-schema — padrão vigente)
-        var moduloIds = vinculos.Select(m => m.ModuloId).Distinct().ToList();
-        var idsCsv = string.Join(",", moduloIds);
-        var modulosGlobais = new List<ModuloGlobalQueryDto>();
-
-        var conn = _dbContext.Database.GetDbConnection();
-        var wasOpen = conn.State == System.Data.ConnectionState.Open;
-        if (!wasOpen) await conn.OpenAsync();
-        try
-        {
-            using var cmd = conn.CreateCommand();
-            cmd.CommandText = $"SELECT id, public_id, nome, descricao, ativo FROM cadastro.modulo WHERE id IN ({idsCsv})";
-            using var reader = await cmd.ExecuteReaderAsync();
-            while (await reader.ReadAsync())
-            {
-                modulosGlobais.Add(new ModuloGlobalQueryDto
-                {
-                    Id = reader.GetInt64(0),
-                    PublicId = reader.GetGuid(1),
-                    Nome = reader.GetString(2),
-                    Descricao = reader.IsDBNull(3) ? null : reader.GetString(3),
-                    Ativo = reader.GetBoolean(4)
-                });
-            }
-        }
-        finally
-        {
-            if (!wasOpen) await conn.CloseAsync();
-        }
-
-        var modulosDict = modulosGlobais.ToDictionary(m => m.Id);
-
-        return vinculos.Select(m =>
-        {
-            var mg = modulosDict.GetValueOrDefault(m.ModuloId);
-            return new ModuloDoSubestipulanteResult(
-                mg?.PublicId ?? Guid.Empty,
-                mg?.Nome ?? "Desconhecido",
-                mg?.Descricao,
-                mg?.Ativo ?? false,
-                m.Ativo,
-                m.DataInicio,
-                m.DataFim
-            );
-        }).ToList();
-    }
 
     private class ModuloGlobalQueryDto
     {
@@ -713,16 +619,10 @@ public class ApolicesQueries : IApolicesQueries
         public string? Documento { get; set; }
     }
 
-    private sealed class VidaSubestipulanteQueryDto
-    {
-        public long ApoliceSubestipulanteId { get; set; }
-        public Guid SubestipulantePublicId { get; set; }
-        public string SubestipulanteNome { get; set; } = null!;
-    }
 
     private sealed class VidaModuloQueryDto
     {
-        public long ApoliceSubestipulanteModuloId { get; set; }
+        public long ModuloId { get; set; }
         public Guid ModuloPublicId { get; set; }
         public string ModuloNome { get; set; } = null!;
     }
@@ -759,58 +659,18 @@ public class ApolicesQueries : IApolicesQueries
         return result;
     }
 
-    /// <summary>
-    /// Retorna dados do Subestipulante Global para cada apolice_subestipulante.id (FK local).
-    /// Key do dicionário = apolice_subestipulante.id.
-    /// </summary>
-    private async Task<Dictionary<long, VidaSubestipulanteQueryDto>> ObterSubestipulantesGlobaisAsync(List<long> apoliceSubIds, CancellationToken cancellationToken)
-    {
-        var result = new Dictionary<long, VidaSubestipulanteQueryDto>();
-        if (!apoliceSubIds.Any()) return result;
 
-        var idsCsv = string.Join(",", apoliceSubIds);
-        var conn = _dbContext.Database.GetDbConnection();
-        var wasOpen = conn.State == System.Data.ConnectionState.Open;
-        if (!wasOpen) await conn.OpenAsync(cancellationToken);
-        try
-        {
-            using var cmd = conn.CreateCommand();
-            // Junta apolice_subestipulante (seguro) com cadastro.subestipulante e core.pessoa
-            cmd.CommandText = $@"
-                SELECT aps.id, s.public_id, p.nome
-                FROM seguro.apolice_subestipulante aps
-                INNER JOIN cadastro.subestipulante s ON s.id = aps.subestipulante_id
-                INNER JOIN core.pessoa p ON p.id = s.pessoa_id
-                WHERE aps.id IN ({idsCsv})";
-            using var reader = await cmd.ExecuteReaderAsync(cancellationToken);
-            while (await reader.ReadAsync(cancellationToken))
-            {
-                var dto = new VidaSubestipulanteQueryDto
-                {
-                    ApoliceSubestipulanteId = reader.GetInt64(0),
-                    SubestipulantePublicId = reader.GetGuid(1),
-                    SubestipulanteNome = reader.GetString(2)
-                };
-                result[dto.ApoliceSubestipulanteId] = dto;
-            }
-        }
-        finally
-        {
-            if (!wasOpen) await conn.CloseAsync();
-        }
-        return result;
-    }
 
     /// <summary>
-    /// Retorna dados do Módulo Global para cada apolice_subestipulante_modulo.id (FK local).
-    /// Key do dicionário = apolice_subestipulante_modulo.id.
+    /// Retorna dados do Módulo Global.
+    /// Key do dicionário = cadastro.modulo.id.
     /// </summary>
-    private async Task<Dictionary<long, VidaModuloQueryDto>> ObterModulosGlobaisAsync(List<long> apoliceModuloIds, CancellationToken cancellationToken)
+    private async Task<Dictionary<long, VidaModuloQueryDto>> ObterModulosGlobaisAsync(List<long> cadastroModuloIds, CancellationToken cancellationToken)
     {
         var result = new Dictionary<long, VidaModuloQueryDto>();
-        if (!apoliceModuloIds.Any()) return result;
+        if (!cadastroModuloIds.Any()) return result;
 
-        var idsCsv = string.Join(",", apoliceModuloIds);
+        var idsCsv = string.Join(",", cadastroModuloIds);
         var conn = _dbContext.Database.GetDbConnection();
         var wasOpen = conn.State == System.Data.ConnectionState.Open;
         if (!wasOpen) await conn.OpenAsync(cancellationToken);
@@ -818,20 +678,19 @@ public class ApolicesQueries : IApolicesQueries
         {
             using var cmd = conn.CreateCommand();
             cmd.CommandText = $@"
-                SELECT apm.id, m.public_id, m.nome
-                FROM seguro.apolice_subestipulante_modulo apm
-                INNER JOIN cadastro.modulo m ON m.id = apm.modulo_id
-                WHERE apm.id IN ({idsCsv})";
+                SELECT m.id, m.public_id, m.nome
+                FROM cadastro.modulo m
+                WHERE m.id IN ({idsCsv})";
             using var reader = await cmd.ExecuteReaderAsync(cancellationToken);
             while (await reader.ReadAsync(cancellationToken))
             {
                 var dto = new VidaModuloQueryDto
                 {
-                    ApoliceSubestipulanteModuloId = reader.GetInt64(0),
+                    ModuloId = reader.GetInt64(0),
                     ModuloPublicId = reader.GetGuid(1),
                     ModuloNome = reader.GetString(2)
                 };
-                result[dto.ApoliceSubestipulanteModuloId] = dto;
+                result[dto.ModuloId] = dto;
             }
         }
         finally
@@ -896,5 +755,36 @@ public class ApolicesQueries : IApolicesQueries
                 s.Observacao,
                 s.Ativo))
             .FirstOrDefaultAsync(cancellationToken);
+    }
+
+    private async Task<Dictionary<long, string>> ObterNomesGlobaisAsync(string tabela, List<long> ids, CancellationToken cancellationToken)
+    {
+        var result = new Dictionary<long, string>();
+        if (!ids.Any()) return result;
+
+        var idsCsv = string.Join(",", ids.Distinct());
+        var conn = _dbContext.Database.GetDbConnection();
+        var wasOpen = conn.State == System.Data.ConnectionState.Open;
+        if (!wasOpen) await conn.OpenAsync(cancellationToken);
+        try
+        {
+            using var cmd = conn.CreateCommand();
+            cmd.CommandText = $@"
+                SELECT e.id, p.nome 
+                FROM cadastro.{tabela} e 
+                INNER JOIN core.pessoa p ON e.pessoa_id = p.id 
+                WHERE e.id IN ({idsCsv})";
+            
+            using var reader = await cmd.ExecuteReaderAsync(cancellationToken);
+            while (await reader.ReadAsync(cancellationToken))
+            {
+                result[reader.GetInt64(0)] = reader.GetString(1);
+            }
+        }
+        finally
+        {
+            if (!wasOpen) await conn.CloseAsync();
+        }
+        return result;
     }
 }

@@ -126,4 +126,14 @@ public static class PermissoesSeguranca
         public const string Alterar = "modulos.alterar";
         public const string Inativar = "modulos.inativar";
     }
+
+    /// <summary>
+    /// Permissão de acesso ao sistema CRM (Progrid+).
+    /// Módulo externo ao WebApólice — compartilha identidade e autorização centralizados.
+    /// Permissões específicas de telas CRM serão adicionadas aqui futuramente.
+    /// </summary>
+    public static class Crm
+    {
+        public const string Acessar = "crm.acessar";
+    }
 }

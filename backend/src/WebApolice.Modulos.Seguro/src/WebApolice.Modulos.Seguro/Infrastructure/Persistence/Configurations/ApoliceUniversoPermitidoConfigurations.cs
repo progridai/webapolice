@@ -64,6 +64,10 @@ public class ApoliceCoberturaConfiguration : IEntityTypeConfiguration<ApoliceCob
         builder.Property(x => x.CoberturaId).HasColumnName("cobertura_id").IsRequired();
         
         builder.Property(x => x.ImportanciaSeguradaOverride).HasColumnName("importancia_segurada_override").HasPrecision(18, 2);
+        builder.Property(x => x.PublicId).HasColumnName("public_id").HasDefaultValueSql("gen_random_uuid()").IsRequired();
+        builder.HasIndex(x => x.PublicId).IsUnique();
+        builder.Property(x => x.PremioTitularOverride).HasColumnName("premio_titular_override").HasPrecision(18, 2);
+        builder.Property(x => x.PremioConjugeOverride).HasColumnName("premio_conjuge_override").HasPrecision(18, 2);
         builder.Property(x => x.PremioOverride).HasColumnName("premio_override").HasPrecision(18, 2);
         
         builder.Property(x => x.Ativo).HasColumnName("ativo").HasDefaultValue(true).IsRequired();

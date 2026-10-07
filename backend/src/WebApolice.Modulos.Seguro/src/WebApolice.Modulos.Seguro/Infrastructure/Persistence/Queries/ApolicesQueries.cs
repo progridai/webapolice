@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -18,10 +18,12 @@ namespace WebApolice.Modulos.Seguro.Infrastructure.Persistence.Queries;
 public class ApolicesQueries : IApolicesQueries
 {
     private readonly SeguroDbContext _dbContext;
+    private readonly WebApolice.Modulos.Financeiro.Contracts.IConveniosCobrancaConsulta? _convenios;
 
-    public ApolicesQueries(SeguroDbContext dbContext)
+    public ApolicesQueries(SeguroDbContext dbContext, WebApolice.Modulos.Financeiro.Contracts.IConveniosCobrancaConsulta? convenios = null)
     {
         _dbContext = dbContext;
+        _convenios = convenios;
     }
 
     public async Task<PagedResult<ApoliceListagemItemResult>> ListarPaginadoAsync(
@@ -518,7 +520,7 @@ public class ApolicesQueries : IApolicesQueries
         CancellationToken cancellationToken)
     {
         var apoliceId = await _dbContext.Apolices
-            .Where(a => a.PublicId == apolicePublicId)
+            .Where(a => a.PublicId == apolicePublicId && a.DeletedAt == null)
             .Select(a => a.Id)
             .FirstOrDefaultAsync(cancellationToken);
 
@@ -538,12 +540,33 @@ public class ApolicesQueries : IApolicesQueries
                         c.CoberturaId,
                         c.Ativo,
                         c.ImportanciaSeguradaOverride,
-                        c.PremioOverride
-                    )).ToList()
+                        c.PremioOverride,
+                        c.PublicId,
+                        c.Cobertura!.Nome,
+                        c.PremioTitularOverride,
+                        c.PremioConjugeOverride
+                    )).ToList(),
+                    pl.Plano!.Nome
                 )).ToList()
             ))
             .ToListAsync(cancellationToken);
 
+        var planoIds = produtos.SelectMany(p => p.Planos).Select(p => p.PlanoIdInternal).Distinct().ToArray();
+        var padroes = await _dbContext.Set<PlanoCoberturaModel>().AsNoTracking()
+            .Where(e => planoIds.Contains(e.PlanoId))
+            .Select(e => new { e.PlanoId, e.CoberturaId, e.PremioTitular, e.PremioConjuge }).ToListAsync(cancellationToken);
+        var porPar = padroes.ToDictionary(e => (e.PlanoId, e.CoberturaId));
+        produtos = produtos.Select(p => p with { Planos = p.Planos.Select(pl => pl with {
+            Coberturas = pl.Coberturas.Select(c => {
+                var padrao = porPar.GetValueOrDefault((pl.PlanoIdInternal, c.CoberturaIdInternal));
+                return c with {
+                    PremioTitularPadrao = padrao?.PremioTitular,
+                    PremioConjugePadrao = padrao?.PremioConjuge,
+                    PremioTitularEfetivo = c.PremioTitularOverride ?? padrao?.PremioTitular,
+                    PremioConjugeEfetivo = c.PremioConjugeOverride ?? padrao?.PremioConjuge
+                };
+            }).ToList()
+        }).ToList() }).ToList();
         return new WebApolice.Modulos.Seguro.Application.UseCases.Apolices.ObterUniversoPermitido.ApoliceUniversoPermitidoResult(produtos);
     }
 
@@ -718,43 +741,24 @@ public class ApolicesQueries : IApolicesQueries
     /// Lista todos os Subgrupos de uma Apólice.
     /// Subgrupo é uma divisão contextual — não é cadastro global.
     /// </summary>
-    public async Task<List<ApoliceSubgrupoResult>> ListarSubgruposAsync(
-        Guid apolicePublicId,
-        CancellationToken cancellationToken)
+    public async Task<List<ApoliceSubgrupoResult>> ListarSubgruposAsync(Guid apolicePublicId,CancellationToken cancellationToken)
     {
-        return await _dbContext.ApoliceSubgrupos
-            .AsNoTracking()
-            .Where(s => s.Apolice!.PublicId == apolicePublicId
-                     && s.DeletedAt == null)
-            .OrderBy(s => s.Nome)
-            .Select(s => new ApoliceSubgrupoResult(
-                s.PublicId,
-                s.Nome,
-                s.Observacao,
-                s.Ativo))
-            .ToListAsync(cancellationToken);
+        var rows=await _dbContext.ApoliceSubgrupos.AsNoTracking().Where(s=>s.Apolice!.PublicId==apolicePublicId && s.Apolice.DeletedAt==null && s.DeletedAt==null).OrderBy(s=>s.Nome).ToListAsync(cancellationToken);
+        return await MapearSubgruposAsync(rows,cancellationToken);
     }
-
-    /// <summary>
-    /// Obtém um Subgrupo específico dentro de uma Apólice pelo PublicId.
-    /// Valida isolamento: retorna null se o subgrupo não pertencer à apólice indicada.
-    /// </summary>
-    public async Task<ApoliceSubgrupoResult?> ObterSubgrupoPorPublicIdAsync(
-        Guid apolicePublicId,
-        Guid subgrupoPublicId,
-        CancellationToken cancellationToken)
+    public async Task<ApoliceSubgrupoResult?> ObterSubgrupoPorPublicIdAsync(Guid apolicePublicId,Guid subgrupoPublicId,CancellationToken cancellationToken)
     {
-        return await _dbContext.ApoliceSubgrupos
-            .AsNoTracking()
-            .Where(s => s.PublicId == subgrupoPublicId
-                     && s.Apolice!.PublicId == apolicePublicId
-                     && s.DeletedAt == null)
-            .Select(s => new ApoliceSubgrupoResult(
-                s.PublicId,
-                s.Nome,
-                s.Observacao,
-                s.Ativo))
-            .FirstOrDefaultAsync(cancellationToken);
+        var rows=await _dbContext.ApoliceSubgrupos.AsNoTracking().Where(s=>s.PublicId==subgrupoPublicId && s.Apolice!.PublicId==apolicePublicId && s.Apolice.DeletedAt==null && s.DeletedAt==null).ToListAsync(cancellationToken);
+        return (await MapearSubgruposAsync(rows,cancellationToken)).FirstOrDefault();
+    }
+    private async Task<List<ApoliceSubgrupoResult>> MapearSubgruposAsync(List<ApoliceSubgrupoModel> rows,CancellationToken ct)
+    {
+        var ids=rows.Where(e=>e.ConvenioCobrancaId.HasValue).Select(e=>e.ConvenioCobrancaId!.Value).Distinct().ToList();
+        if(ids.Count>0 && _convenios is null) throw new InvalidOperationException("Consulta de Convênios não configurada.");
+        var refs=ids.Count==0?new Dictionary<long,WebApolice.Modulos.Financeiro.Contracts.ConvenioCobrancaReferencia>():
+            (await _convenios!.ObterPorIdsAsync(ids,ct)).ToDictionary(e=>e.Id);
+        return rows.Select(e=>{var c=e.ConvenioCobrancaId.HasValue?refs.GetValueOrDefault(e.ConvenioCobrancaId.Value):null;
+            return new ApoliceSubgrupoResult(e.PublicId,e.Nome,e.Observacao,e.Ativo,c?.PublicId,c?.Nome,c?.Ativo);}).ToList();
     }
 
     private async Task<Dictionary<long, string>> ObterNomesGlobaisAsync(string tabela, List<long> ids, CancellationToken cancellationToken)

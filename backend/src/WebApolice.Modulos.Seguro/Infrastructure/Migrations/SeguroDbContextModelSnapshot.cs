@@ -59,10 +59,26 @@ namespace WebApolice.Modulos.Seguro.Infrastructure.Migrations
                         .HasColumnType("numeric(18,2)")
                         .HasColumnName("importancia_segurada_override");
 
+                    b.Property<decimal?>("PremioConjugeOverride")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("numeric(18,2)")
+                        .HasColumnName("premio_conjuge_override");
+
                     b.Property<decimal?>("PremioOverride")
                         .HasPrecision(18, 2)
                         .HasColumnType("numeric(18,2)")
                         .HasColumnName("premio_override");
+
+                    b.Property<decimal?>("PremioTitularOverride")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("numeric(18,2)")
+                        .HasColumnName("premio_titular_override");
+
+                    b.Property<Guid>("PublicId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("public_id")
+                        .HasDefaultValueSql("gen_random_uuid()");
 
                     b.Property<DateTimeOffset>("UpdatedAt")
                         .ValueGeneratedOnAdd()
@@ -78,6 +94,10 @@ namespace WebApolice.Modulos.Seguro.Infrastructure.Migrations
 
                     b.HasIndex("CoberturaId")
                         .HasDatabaseName("ix_apolice_cobertura_cobertura_id");
+
+                    b.HasIndex("PublicId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_apolice_cobertura_public_id");
 
                     b.ToTable("apolice_cobertura", "seguro");
                 });
@@ -317,6 +337,75 @@ namespace WebApolice.Modulos.Seguro.Infrastructure.Migrations
                     b.ToTable("apolice", "seguro");
                 });
 
+            modelBuilder.Entity("WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models.ApoliceModuloCoberturaModel", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityAlwaysColumn(b.Property<long>("Id"));
+
+                    b.Property<long>("ApoliceModuloPlanoId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("apolice_modulo_plano_id");
+
+                    b.Property<bool>("Ativo")
+                        .HasColumnType("boolean")
+                        .HasColumnName("ativo");
+
+                    b.Property<long>("CoberturaId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("cobertura_id");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at")
+                        .HasDefaultValueSql("now()");
+
+                    b.Property<decimal>("PremioConjuge")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("numeric(18,2)")
+                        .HasColumnName("premio_conjuge");
+
+                    b.Property<decimal>("PremioTitular")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("numeric(18,2)")
+                        .HasColumnName("premio_titular");
+
+                    b.Property<Guid>("PublicId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("public_id")
+                        .HasDefaultValueSql("gen_random_uuid()");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at")
+                        .HasDefaultValueSql("now()");
+
+                    b.HasKey("Id")
+                        .HasName("pk_apolice_modulo_cobertura");
+
+                    b.HasIndex("CoberturaId")
+                        .HasDatabaseName("ix_apolice_modulo_cobertura_cobertura_id");
+
+                    b.HasIndex("PublicId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_apolice_modulo_cobertura_public_id");
+
+                    b.HasIndex("ApoliceModuloPlanoId", "CoberturaId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_apolice_modulo_cobertura_apolice_modulo_plano_id_cobertura_");
+
+                    b.ToTable("apolice_modulo_cobertura", "seguro", t =>
+                        {
+                            t.HasCheckConstraint("ck_modulo_cobertura_premios", "premio_titular >= 0 AND premio_conjuge >= 0");
+                        });
+                });
+
             modelBuilder.Entity("WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models.ApoliceModuloModel", b =>
                 {
                     b.Property<long>("Id")
@@ -393,6 +482,77 @@ namespace WebApolice.Modulos.Seguro.Infrastructure.Migrations
                         .HasFilter("deleted_at IS NULL");
 
                     b.ToTable("apolice_modulo", "seguro");
+                });
+
+            modelBuilder.Entity("WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models.ApoliceModuloPlanoModel", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityAlwaysColumn(b.Property<long>("Id"));
+
+                    b.Property<long>("ApoliceModuloId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("apolice_modulo_id");
+
+                    b.Property<bool>("Ativo")
+                        .HasColumnType("boolean")
+                        .HasColumnName("ativo");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at")
+                        .HasDefaultValueSql("now()");
+
+                    b.Property<string>("Nome")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("character varying(150)")
+                        .HasColumnName("nome");
+
+                    b.Property<bool?>("Paga")
+                        .HasColumnType("boolean")
+                        .HasColumnName("paga");
+
+                    b.Property<Guid>("PublicId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("public_id")
+                        .HasDefaultValueSql("gen_random_uuid()");
+
+                    b.Property<string>("Ramo")
+                        .HasMaxLength(80)
+                        .HasColumnType("character varying(80)")
+                        .HasColumnName("ramo");
+
+                    b.Property<bool?>("Reajuste")
+                        .HasColumnType("boolean")
+                        .HasColumnName("reajuste");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at")
+                        .HasDefaultValueSql("now()");
+
+                    b.HasKey("Id")
+                        .HasName("pk_apolice_modulo_plano");
+
+                    b.HasIndex("ApoliceModuloId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_apolice_modulo_plano_apolice_modulo_id");
+
+                    b.HasIndex("PublicId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_apolice_modulo_plano_public_id");
+
+                    b.ToTable("apolice_modulo_plano", "seguro", t =>
+                        {
+                            t.HasCheckConstraint("ck_modulo_plano_nome", "length(btrim(nome)) > 0");
+                        });
                 });
 
             modelBuilder.Entity("WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models.ApolicePlanoModel", b =>
@@ -649,6 +809,10 @@ namespace WebApolice.Modulos.Seguro.Infrastructure.Migrations
                         .HasDefaultValue(true)
                         .HasColumnName("ativo");
 
+                    b.Property<long?>("ConvenioCobrancaId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("convenio_cobranca_id");
+
                     b.Property<DateTimeOffset>("CreatedAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
@@ -686,6 +850,9 @@ namespace WebApolice.Modulos.Seguro.Infrastructure.Migrations
 
                     b.HasIndex("ApoliceId")
                         .HasDatabaseName("ix_apolice_subgrupo_apolice_id");
+
+                    b.HasIndex("ConvenioCobrancaId")
+                        .HasDatabaseName("ix_apolice_subgrupo_convenio_cobranca_id");
 
                     b.HasIndex("PublicId")
                         .IsUnique()
@@ -856,6 +1023,12 @@ namespace WebApolice.Modulos.Seguro.Infrastructure.Migrations
                         .HasColumnType("character varying(30)")
                         .HasColumnName("nome_reduzido");
 
+                    b.Property<Guid>("PublicId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("public_id")
+                        .HasDefaultValueSql("gen_random_uuid()");
+
                     b.Property<bool?>("Reajuste")
                         .HasColumnType("boolean")
                         .HasColumnName("reajuste");
@@ -868,6 +1041,10 @@ namespace WebApolice.Modulos.Seguro.Infrastructure.Migrations
 
                     b.HasKey("Id")
                         .HasName("cobertura_pkey");
+
+                    b.HasIndex("PublicId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_cobertura_public_id");
 
                     b.HasIndex(new[] { "Nome" }, "ix_cobertura_nome_trgm")
                         .HasDatabaseName("ix_cobertura_nome");
@@ -999,6 +1176,12 @@ namespace WebApolice.Modulos.Seguro.Infrastructure.Migrations
                         .HasColumnType("boolean")
                         .HasColumnName("paga");
 
+                    b.Property<Guid>("PublicId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("public_id")
+                        .HasDefaultValueSql("gen_random_uuid()");
+
                     b.Property<string>("Ramo")
                         .HasMaxLength(80)
                         .HasColumnType("character varying(80)")
@@ -1017,6 +1200,10 @@ namespace WebApolice.Modulos.Seguro.Infrastructure.Migrations
                     b.HasKey("Id")
                         .HasName("plano_pkey");
 
+                    b.HasIndex("PublicId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_plano_public_id");
+
                     b.HasIndex(new[] { "Nome" }, "ix_plano_nome_trgm")
                         .HasDatabaseName("ix_plano_nome");
 
@@ -1032,6 +1219,58 @@ namespace WebApolice.Modulos.Seguro.Infrastructure.Migrations
                         .HasFilter("(legado_id IS NOT NULL)");
 
                     b.ToTable("plano", "seguro");
+                });
+
+            modelBuilder.Entity("WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models.PlanoCoberturaModel", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityAlwaysColumn(b.Property<long>("Id"));
+
+                    b.Property<bool>("Ativo")
+                        .HasColumnType("boolean")
+                        .HasColumnName("ativo");
+
+                    b.Property<long>("CoberturaId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("cobertura_id");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<long>("PlanoId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("plano_id");
+
+                    b.Property<decimal?>("PremioConjuge")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("numeric(18,2)")
+                        .HasColumnName("premio_conjuge");
+
+                    b.Property<decimal?>("PremioTitular")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("numeric(18,2)")
+                        .HasColumnName("premio_titular");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("Id")
+                        .HasName("pk_plano_cobertura");
+
+                    b.HasIndex("CoberturaId")
+                        .HasDatabaseName("ix_plano_cobertura_cobertura_id");
+
+                    b.HasIndex("PlanoId", "CoberturaId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_plano_cobertura_plano_id_cobertura_id");
+
+                    b.ToTable("plano_cobertura", "seguro");
                 });
 
             modelBuilder.Entity("WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models.Produto", b =>
@@ -2284,6 +2523,27 @@ namespace WebApolice.Modulos.Seguro.Infrastructure.Migrations
                     b.Navigation("ApoliceOrigem");
                 });
 
+            modelBuilder.Entity("WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models.ApoliceModuloCoberturaModel", b =>
+                {
+                    b.HasOne("WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models.ApoliceModuloPlanoModel", "Plano")
+                        .WithMany("Coberturas")
+                        .HasForeignKey("ApoliceModuloPlanoId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_apolice_modulo_cobertura_apolice_modulo_plano_apolice_modul");
+
+                    b.HasOne("WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models.Cobertura", "Cobertura")
+                        .WithMany()
+                        .HasForeignKey("CoberturaId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_apolice_modulo_cobertura_cobertura_cobertura_id");
+
+                    b.Navigation("Cobertura");
+
+                    b.Navigation("Plano");
+                });
+
             modelBuilder.Entity("WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models.ApoliceModuloModel", b =>
                 {
                     b.HasOne("WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models.ApoliceModel", "Apolice")
@@ -2294,6 +2554,18 @@ namespace WebApolice.Modulos.Seguro.Infrastructure.Migrations
                         .HasConstraintName("fk_apolice_modulo_apolice_id");
 
                     b.Navigation("Apolice");
+                });
+
+            modelBuilder.Entity("WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models.ApoliceModuloPlanoModel", b =>
+                {
+                    b.HasOne("WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models.ApoliceModuloModel", "ApoliceModulo")
+                        .WithOne()
+                        .HasForeignKey("WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models.ApoliceModuloPlanoModel", "ApoliceModuloId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_apolice_modulo_plano_apolice_modulo_apolice_modulo_id");
+
+                    b.Navigation("ApoliceModulo");
                 });
 
             modelBuilder.Entity("WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models.ApolicePlanoModel", b =>
@@ -2417,6 +2689,27 @@ namespace WebApolice.Modulos.Seguro.Infrastructure.Migrations
                     b.Navigation("ApoliceModulo");
 
                     b.Navigation("ApoliceSubgrupo");
+                });
+
+            modelBuilder.Entity("WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models.PlanoCoberturaModel", b =>
+                {
+                    b.HasOne("WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models.Cobertura", "Cobertura")
+                        .WithMany()
+                        .HasForeignKey("CoberturaId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_plano_cobertura_cobertura_cobertura_id");
+
+                    b.HasOne("WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models.Plano", "Plano")
+                        .WithMany()
+                        .HasForeignKey("PlanoId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_plano_cobertura_plano_plano_id");
+
+                    b.Navigation("Cobertura");
+
+                    b.Navigation("Plano");
                 });
 
             modelBuilder.Entity("WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models.Produto", b =>
@@ -2605,6 +2898,11 @@ namespace WebApolice.Modulos.Seguro.Infrastructure.Migrations
             modelBuilder.Entity("WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models.ApoliceModuloModel", b =>
                 {
                     b.Navigation("Vidas");
+                });
+
+            modelBuilder.Entity("WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models.ApoliceModuloPlanoModel", b =>
+                {
+                    b.Navigation("Coberturas");
                 });
 
             modelBuilder.Entity("WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models.ApolicePlanoModel", b =>

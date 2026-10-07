@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using WebApolice.Modulos.Financeiro.src.WebApolice.Modulos.Financeiro.Infrastructure.Persistence.Models;
@@ -47,8 +47,10 @@ public partial class FinanceiroDbContext : DbContext
     public virtual DbSet<TituloStatus> TituloStatuses { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
-        => optionsBuilder.UseNpgsql("Host=painel.bravida.com.br;Port=5432;Database=webapolice_teste;Username=bravito;Password=Bravida@2023!");
+    {
+        if (!optionsBuilder.IsConfigured)
+            throw new InvalidOperationException("Configure a conex?o PostgreSQL externamente antes de criar o contexto.");
+    }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -136,6 +138,9 @@ public partial class FinanceiroDbContext : DbContext
             entity.HasKey(e => e.Id).HasName("convenio_cobranca_pkey");
 
             entity.ToTable("convenio_cobranca", "financeiro");
+            entity.Property(e => e.PublicId).HasColumnName("public_id").HasDefaultValueSql("gen_random_uuid()");
+            entity.HasIndex(e => e.PublicId).IsUnique();
+            entity.Property(e => e.Ativo).HasColumnName("ativo").HasDefaultValue(true);
 
             entity.HasIndex(e => e.BancoId, "ix_convenio_cobranca_banco");
 
@@ -193,6 +198,7 @@ public partial class FinanceiroDbContext : DbContext
             entity.Property(e => e.LocalRemessaArquivo).HasColumnName("local_remessa_arquivo");
             entity.Property(e => e.LocalRetornoArquivo).HasColumnName("local_retorno_arquivo");
             entity.Property(e => e.Nome)
+                .IsRequired()
                 .HasMaxLength(150)
                 .HasColumnName("nome");
             entity.Property(e => e.NomeEmpresa)
@@ -659,6 +665,13 @@ public partial class FinanceiroDbContext : DbContext
                 .HasColumnName("permite_cobranca");
         });
 
+        // Other scaffolded aggregates are not implemented yet. Their tables must not
+        // be created as a side effect of enabling the Convenio CRUD.
+        foreach (var entityType in modelBuilder.Model.GetEntityTypes().ToList())
+        {
+            if (entityType.ClrType != typeof(ConvenioCobranca))
+                modelBuilder.Entity(entityType.ClrType).ToTable(entityType.GetTableName()!, entityType.GetSchema(), table => table.ExcludeFromMigrations());
+        }
         OnModelCreatingPartial(modelBuilder);
     }
 

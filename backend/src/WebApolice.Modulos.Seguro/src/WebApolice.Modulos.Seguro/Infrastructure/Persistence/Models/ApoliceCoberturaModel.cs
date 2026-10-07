@@ -5,6 +5,7 @@ namespace WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure
 public class ApoliceCoberturaModel
 {
     public long Id { get; set; }
+    public Guid PublicId { get; set; }
     public long ApolicePlanoId { get; set; }
     
     // FK Global
@@ -13,6 +14,8 @@ public class ApoliceCoberturaModel
     // Opcional: Overrides de importâncias seguradas ou preços específicos por apólice
     public decimal? ImportanciaSeguradaOverride { get; set; }
     public decimal? PremioOverride { get; set; }
+    public decimal? PremioTitularOverride { get; set; }
+    public decimal? PremioConjugeOverride { get; set; }
 
     public bool Ativo { get; set; }
     

@@ -18,4 +18,5 @@ public class CriarSubgrupoApoliceCommand
     public string Nome { get; set; } = null!;
 
     public string? Observacao { get; set; }
+    public Guid? ConvenioCobrancaPublicId { get; set; }
 }

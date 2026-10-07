@@ -126,9 +126,18 @@ export interface ApoliceCoberturaResult {
   ativo: boolean;
   importanciaSeguradaOverride?: number;
   premioOverride?: number;
+  publicId?: string;
+  nome?: string;
+  premioTitularOverride?: number | null;
+  premioConjugeOverride?: number | null;
+  premioTitularPadrao?: number | null;
+  premioConjugePadrao?: number | null;
+  premioTitularEfetivo?: number | null;
+  premioConjugeEfetivo?: number | null;
 }
 
 export interface ApolicePlanoResult {
+  nome?: string;
   planoIdInternal: number;
   tabelaPrecoIdInternal?: number;
   ativo: boolean;
@@ -155,17 +164,22 @@ export interface ApoliceHistoricoResult {
 export interface ApoliceSubgrupoResult {
   subgrupoPublicId: string;
   nome: string;
+  convenioCobrancaPublicId?: string | null;
   observacao?: string;
   ativo: boolean;
+  convenioCobrancaNome?: string;
+  convenioCobrancaAtivo?: boolean;
 }
 
 export interface CriarSubgrupoApoliceRequest {
   nome: string;
+  convenioCobrancaPublicId?: string | null;
   observacao?: string | null;
 }
 
 export interface AlterarSubgrupoApoliceRequest {
   nome: string;
+  convenioCobrancaPublicId?: string | null;
   observacao?: string | null;
 }
 

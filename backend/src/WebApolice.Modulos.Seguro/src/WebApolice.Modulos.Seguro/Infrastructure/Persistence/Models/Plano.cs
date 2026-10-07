@@ -6,6 +6,7 @@ namespace WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure
 public partial class Plano
 {
     public long Id { get; set; }
+    public Guid PublicId { get; set; }
 
     public string? Nome { get; set; }
 

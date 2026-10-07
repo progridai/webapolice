@@ -78,3 +78,7 @@ export function formatarCnpj(valor?: string | null): string {
   }
   return valor;
 }
+
+export function formatarPremio(valor?: number | null) {
+  return valor == null ? 'Não informado' : new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(valor);
+}

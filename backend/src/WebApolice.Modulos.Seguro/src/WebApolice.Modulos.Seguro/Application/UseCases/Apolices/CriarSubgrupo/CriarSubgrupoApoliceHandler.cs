@@ -1,49 +1,13 @@
-using System;
-using System.Threading;
-using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
-using WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence;
-using WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models;
+using WebApolice.Modulos.Seguro.Application.Ports;
 using WebApolice.SharedKernel.Application.Exceptions;
-
 namespace WebApolice.Modulos.Seguro.Application.UseCases.Apolices.CriarSubgrupo;
-
-public class CriarSubgrupoApoliceHandler
+public sealed class CriarSubgrupoApoliceHandler(ISubgruposCadastro cadastro)
 {
-    private readonly SeguroDbContext _dbContext;
-
-    public CriarSubgrupoApoliceHandler(SeguroDbContext dbContext)
+    public Task<Guid> Handle(CriarSubgrupoApoliceCommand request,CancellationToken cancellationToken)
     {
-        _dbContext = dbContext;
-    }
-
-    public async Task<Guid> Handle(CriarSubgrupoApoliceCommand request, CancellationToken cancellationToken)
-    {
-        if (string.IsNullOrWhiteSpace(request.Nome))
-            throw new ValidacaoException("O nome do Subgrupo é obrigatório.");
-
-        if (request.Nome.Length > 200)
-            throw new ValidacaoException("O nome do Subgrupo não pode exceder 200 caracteres.");
-
-        var apolice = await _dbContext.Apolices
-            .FirstOrDefaultAsync(a => a.PublicId == request.ApolicePublicId && a.DeletedAt == null, cancellationToken);
-
-        if (apolice == null)
-            throw new ValidacaoException("Apólice não encontrada.");
-
-        var subgrupo = new ApoliceSubgrupoModel
-        {
-            ApoliceId = apolice.Id,
-            Nome = request.Nome.Trim(),
-            Observacao = request.Observacao?.Trim(),
-            Ativo = true,
-            CreatedAt = DateTimeOffset.UtcNow,
-            UpdatedAt = DateTimeOffset.UtcNow
-        };
-
-        _dbContext.ApoliceSubgrupos.Add(subgrupo);
-        await _dbContext.SaveChangesAsync(cancellationToken);
-
-        return subgrupo.PublicId;
+        if(string.IsNullOrWhiteSpace(request.Nome)) throw new ValidacaoException("O nome do Subgrupo é obrigatório.");
+        if(request.Nome.Trim().Length>200) throw new ValidacaoException("O nome do Subgrupo não pode exceder 200 caracteres.");
+        if(request.ConvenioCobrancaPublicId is null || request.ConvenioCobrancaPublicId==Guid.Empty) throw new ValidacaoException("O Convênio de Cobrança é obrigatório para novos Subgrupos.");
+        return cadastro.SalvarAsync(request.ApolicePublicId,null,request.Nome,request.Observacao,request.ConvenioCobrancaPublicId,cancellationToken);
     }
 }

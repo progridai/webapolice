@@ -52,6 +52,7 @@ import { RamosRoutes } from '../../features/ramos/routes/ramos.routes';
 import { SeguradorasRoutes } from '../../features/seguradoras/routes/seguradoras.routes';
 import { CorretorasRoutes } from '../../features/corretoras/routes/corretoras.routes';
 import { SubestipulantesRoutes } from '../../features/subestipulantes/routes/subestipulantes.routes';
+import { CatalogosRoutes } from '../../features/cadastros-seguro/routes/catalogos.routes';
 import { ModulosRoutes } from '../../features/modulos/routes/modulos.routes';
 
 export const AppRoutes: React.FC = () => {
@@ -84,6 +85,7 @@ export const AppRoutes: React.FC = () => {
       </Route>
 
       {/* ── Módulos de Funcionalidade ── */}
+      {CatalogosRoutes}
       {ClientesRoutes}
       {CooperadosRoutes}
       {EstipulantesRoutes}

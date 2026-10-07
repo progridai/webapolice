@@ -52,9 +52,10 @@ public class ApoliceSubgrupoTests : IClassFixture<SeguroIntegrationTestFixture>
         _fixture.DbContext.Apolices.Add(apolice);
         await _fixture.DbContext.SaveChangesAsync();
 
-        var handler = new CriarSubgrupoApoliceHandler(_fixture.DbContext);
+        var handler = new CriarSubgrupoApoliceHandler(_fixture.SubgruposCadastro);
         var command = new CriarSubgrupoApoliceCommand
         {
+            ConvenioCobrancaPublicId = _fixture.ConvenioPublicId,
             ApolicePublicId = apolice.PublicId,
             Nome = "Matriz"
         };
@@ -80,9 +81,10 @@ public class ApoliceSubgrupoTests : IClassFixture<SeguroIntegrationTestFixture>
         _fixture.DbContext.Apolices.Add(apolice);
         await _fixture.DbContext.SaveChangesAsync();
 
-        var handler = new CriarSubgrupoApoliceHandler(_fixture.DbContext);
+        var handler = new CriarSubgrupoApoliceHandler(_fixture.SubgruposCadastro);
         var command = new CriarSubgrupoApoliceCommand
         {
+            ConvenioCobrancaPublicId = _fixture.ConvenioPublicId,
             ApolicePublicId = apolice.PublicId,
             Nome = "Filial Centro",
             Observacao = "Filial localizada no centro da cidade."
@@ -104,9 +106,10 @@ public class ApoliceSubgrupoTests : IClassFixture<SeguroIntegrationTestFixture>
         _fixture.DbContext.Apolices.Add(apolice);
         await _fixture.DbContext.SaveChangesAsync();
 
-        var handler = new CriarSubgrupoApoliceHandler(_fixture.DbContext);
+        var handler = new CriarSubgrupoApoliceHandler(_fixture.SubgruposCadastro);
         var command = new CriarSubgrupoApoliceCommand
         {
+            ConvenioCobrancaPublicId = _fixture.ConvenioPublicId,
             ApolicePublicId = apolice.PublicId,
             Nome = ""
         };
@@ -119,9 +122,10 @@ public class ApoliceSubgrupoTests : IClassFixture<SeguroIntegrationTestFixture>
     [Fact]
     public async Task CriarSubgrupo_ApoliceInexistente_DeveLancarValidacaoException()
     {
-        var handler = new CriarSubgrupoApoliceHandler(_fixture.DbContext);
+        var handler = new CriarSubgrupoApoliceHandler(_fixture.SubgruposCadastro);
         var command = new CriarSubgrupoApoliceCommand
         {
+            ConvenioCobrancaPublicId = _fixture.ConvenioPublicId,
             ApolicePublicId = Guid.NewGuid(), // apólice que não existe
             Nome = "Subgrupo Órfão"
         };
@@ -142,17 +146,19 @@ public class ApoliceSubgrupoTests : IClassFixture<SeguroIntegrationTestFixture>
         await _fixture.DbContext.SaveChangesAsync();
 
         // Cria Subgrupo na Apólice A
-        var criarHandler = new CriarSubgrupoApoliceHandler(_fixture.DbContext);
+        var criarHandler = new CriarSubgrupoApoliceHandler(_fixture.SubgruposCadastro);
         var publicIdSub = await criarHandler.Handle(new CriarSubgrupoApoliceCommand
         {
+            ConvenioCobrancaPublicId = _fixture.ConvenioPublicId,
             ApolicePublicId = apolice1.PublicId,
             Nome = "Funcionários"
         }, CancellationToken.None);
 
         // Tenta alterar o Subgrupo usando contexto da Apólice B
-        var alterarHandler = new AlterarSubgrupoApoliceHandler(_fixture.DbContext);
+        var alterarHandler = new AlterarSubgrupoApoliceHandler(_fixture.SubgruposCadastro);
         Func<Task> act = async () => await alterarHandler.Handle(new AlterarSubgrupoApoliceCommand
         {
+            ConvenioCobrancaPublicId = _fixture.ConvenioPublicId,
             ApolicePublicId = apolice2.PublicId, // outra apólice!
             SubgrupoPublicId = publicIdSub,
             Nome = "Tentativa Indevida"
@@ -171,16 +177,18 @@ public class ApoliceSubgrupoTests : IClassFixture<SeguroIntegrationTestFixture>
         _fixture.DbContext.Apolices.Add(apolice);
         await _fixture.DbContext.SaveChangesAsync();
 
-        var criarHandler = new CriarSubgrupoApoliceHandler(_fixture.DbContext);
+        var criarHandler = new CriarSubgrupoApoliceHandler(_fixture.SubgruposCadastro);
         var publicId = await criarHandler.Handle(new CriarSubgrupoApoliceCommand
         {
+            ConvenioCobrancaPublicId = _fixture.ConvenioPublicId,
             ApolicePublicId = apolice.PublicId,
             Nome = "Nome Original"
         }, CancellationToken.None);
 
-        var alterarHandler = new AlterarSubgrupoApoliceHandler(_fixture.DbContext);
+        var alterarHandler = new AlterarSubgrupoApoliceHandler(_fixture.SubgruposCadastro);
         await alterarHandler.Handle(new AlterarSubgrupoApoliceCommand
         {
+            ConvenioCobrancaPublicId = _fixture.ConvenioPublicId,
             ApolicePublicId = apolice.PublicId,
             SubgrupoPublicId = publicId,
             Nome = "Nome Atualizado",
@@ -201,16 +209,18 @@ public class ApoliceSubgrupoTests : IClassFixture<SeguroIntegrationTestFixture>
         _fixture.DbContext.Apolices.Add(apolice);
         await _fixture.DbContext.SaveChangesAsync();
 
-        var criarHandler = new CriarSubgrupoApoliceHandler(_fixture.DbContext);
+        var criarHandler = new CriarSubgrupoApoliceHandler(_fixture.SubgruposCadastro);
         var publicId = await criarHandler.Handle(new CriarSubgrupoApoliceCommand
         {
+            ConvenioCobrancaPublicId = _fixture.ConvenioPublicId,
             ApolicePublicId = apolice.PublicId,
             Nome = "Nome Valido"
         }, CancellationToken.None);
 
-        var alterarHandler = new AlterarSubgrupoApoliceHandler(_fixture.DbContext);
+        var alterarHandler = new AlterarSubgrupoApoliceHandler(_fixture.SubgruposCadastro);
         Func<Task> act = async () => await alterarHandler.Handle(new AlterarSubgrupoApoliceCommand
         {
+            ConvenioCobrancaPublicId = _fixture.ConvenioPublicId,
             ApolicePublicId = apolice.PublicId,
             SubgrupoPublicId = publicId,
             Nome = "   "
@@ -229,14 +239,15 @@ public class ApoliceSubgrupoTests : IClassFixture<SeguroIntegrationTestFixture>
         _fixture.DbContext.Apolices.Add(apolice);
         await _fixture.DbContext.SaveChangesAsync();
 
-        var criarHandler = new CriarSubgrupoApoliceHandler(_fixture.DbContext);
+        var criarHandler = new CriarSubgrupoApoliceHandler(_fixture.SubgruposCadastro);
         var publicId = await criarHandler.Handle(new CriarSubgrupoApoliceCommand
         {
+            ConvenioCobrancaPublicId = _fixture.ConvenioPublicId,
             ApolicePublicId = apolice.PublicId,
             Nome = "Diretoria"
         }, CancellationToken.None);
 
-        var inativarHandler = new InativarSubgrupoApoliceHandler(_fixture.DbContext);
+        var inativarHandler = new InativarSubgrupoApoliceHandler(_fixture.SubgruposCadastro);
         await inativarHandler.Handle(new InativarSubgrupoApoliceCommand
         {
             ApolicePublicId = apolice.PublicId,
@@ -256,14 +267,15 @@ public class ApoliceSubgrupoTests : IClassFixture<SeguroIntegrationTestFixture>
         _fixture.DbContext.Apolices.Add(apolice);
         await _fixture.DbContext.SaveChangesAsync();
 
-        var criarHandler = new CriarSubgrupoApoliceHandler(_fixture.DbContext);
+        var criarHandler = new CriarSubgrupoApoliceHandler(_fixture.SubgruposCadastro);
         var publicId = await criarHandler.Handle(new CriarSubgrupoApoliceCommand
         {
+            ConvenioCobrancaPublicId = _fixture.ConvenioPublicId,
             ApolicePublicId = apolice.PublicId,
             Nome = "Grupo A"
         }, CancellationToken.None);
 
-        var inativarHandler = new InativarSubgrupoApoliceHandler(_fixture.DbContext);
+        var inativarHandler = new InativarSubgrupoApoliceHandler(_fixture.SubgruposCadastro);
 
         // Primeira inativação — OK
         await inativarHandler.Handle(new InativarSubgrupoApoliceCommand
@@ -293,7 +305,7 @@ public class ApoliceSubgrupoTests : IClassFixture<SeguroIntegrationTestFixture>
         _fixture.DbContext.Apolices.AddRange(apoliceA, apoliceB);
         await _fixture.DbContext.SaveChangesAsync();
 
-        var criarHandler = new CriarSubgrupoApoliceHandler(_fixture.DbContext);
+        var criarHandler = new CriarSubgrupoApoliceHandler(_fixture.SubgruposCadastro);
 
         // Subgrupos da Apólice A
         await criarHandler.Handle(new CriarSubgrupoApoliceCommand { ApolicePublicId = apoliceA.PublicId, Nome = "Sub A1" }, CancellationToken.None);
@@ -319,9 +331,10 @@ public class ApoliceSubgrupoTests : IClassFixture<SeguroIntegrationTestFixture>
         _fixture.DbContext.Apolices.Add(apolice);
         await _fixture.DbContext.SaveChangesAsync();
 
-        var criarHandler = new CriarSubgrupoApoliceHandler(_fixture.DbContext);
+        var criarHandler = new CriarSubgrupoApoliceHandler(_fixture.SubgruposCadastro);
         var publicId = await criarHandler.Handle(new CriarSubgrupoApoliceCommand
         {
+            ConvenioCobrancaPublicId = _fixture.ConvenioPublicId,
             ApolicePublicId = apolice.PublicId,
             Nome = "Folha"
         }, CancellationToken.None);
@@ -347,9 +360,10 @@ public class ApoliceSubgrupoTests : IClassFixture<SeguroIntegrationTestFixture>
         _fixture.DbContext.Apolices.AddRange(apoliceA, apoliceB);
         await _fixture.DbContext.SaveChangesAsync();
 
-        var criarHandler = new CriarSubgrupoApoliceHandler(_fixture.DbContext);
+        var criarHandler = new CriarSubgrupoApoliceHandler(_fixture.SubgruposCadastro);
         var publicIdSubA = await criarHandler.Handle(new CriarSubgrupoApoliceCommand
         {
+            ConvenioCobrancaPublicId = _fixture.ConvenioPublicId,
             ApolicePublicId = apoliceA.PublicId,
             Nome = "Sub da A"
         }, CancellationToken.None);

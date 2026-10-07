@@ -69,6 +69,11 @@ export const SubgruposTab: React.FC<SubgruposTabProps> = ({ publicId }) => {
       render: (row) => <span className="font-medium text-texto-principal">{row.nome}</span>,
     },
     {
+      key: 'convenioCobrancaNome',
+      label: 'Convênio de Cobrança',
+      render: row => row.convenioCobrancaNome ? `${row.convenioCobrancaNome}${row.convenioCobrancaAtivo === false ? ' (inativo)' : ''}` : 'Pendente',
+    },
+    {
       key: 'observacao',
       label: 'Observação',
       render: (row) => {

@@ -47,3 +47,5 @@ desktop.ini
 crash_log.txt
 scratch/
 brain/
+
+/backend/.artifacts/

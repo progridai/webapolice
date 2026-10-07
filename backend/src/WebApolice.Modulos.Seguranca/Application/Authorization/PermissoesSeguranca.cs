@@ -2,6 +2,34 @@ namespace WebApolice.Modulos.Seguranca.Application.Authorization;
 
 public static class PermissoesSeguranca
 {
+    public static class ConveniosCobranca
+    {
+        public const string Visualizar = "convenios_cobranca.visualizar";
+        public const string Inserir = "convenios_cobranca.inserir";
+        public const string Alterar = "convenios_cobranca.alterar";
+        public const string Inativar = "convenios_cobranca.inativar";
+        public const string Reativar = "convenios_cobranca.reativar";
+    }
+
+    public static class Coberturas
+    {
+        public const string Visualizar = "coberturas.visualizar";
+        public const string Inserir = "coberturas.inserir";
+        public const string Alterar = "coberturas.alterar";
+        public const string Inativar = "coberturas.inativar";
+        public const string Reativar = "coberturas.reativar";
+    }
+
+    public static class Planos
+    {
+        public const string Visualizar = "planos.visualizar";
+        public const string Inserir = "planos.inserir";
+        public const string Alterar = "planos.alterar";
+        public const string Inativar = "planos.inativar";
+        public const string Reativar = "planos.reativar";
+        public const string GerenciarCoberturas = "planos.coberturas.alterar";
+    }
+
     public const string PrefixoPolicy = "Permissao:";
 
     public static class Clientes

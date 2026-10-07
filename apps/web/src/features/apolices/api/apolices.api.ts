@@ -1,4 +1,9 @@
 import { httpClient } from '../../../services/http/httpClient';
+import type { PremiosCobertura } from '../../cadastros-seguro/api/catalogos.api';
+
+export async function alterarPremiosApolice(apolicePublicId: string, vinculoPublicId: string, dados: PremiosCobertura): Promise<void> {
+  await httpClient.put(`/api/apolices/${apolicePublicId}/coberturas/${vinculoPublicId}/premios`, dados);
+}
 import type { 
   ApoliceListItem, ApolicesQuery, PagedResult, 
   ApoliceDetalheResponse, ApoliceVidaListItem

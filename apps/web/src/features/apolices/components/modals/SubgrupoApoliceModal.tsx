@@ -1,11 +1,28 @@
-import React, { useEffect, useState } from 'react';
-import { useForm, Controller } from 'react-hook-form';
+import { useEffect, useState } from 'react';
+import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Modal, Button, Input, Textarea, Alert } from '../../../../components/ui';
-import { subgrupoApoliceSchema, type SubgrupoApoliceFormValues } from '../../schemas/subgrupoApolice.schema';
-import { criarApoliceSubgrupo, alterarApoliceSubgrupo } from '../../api/apolices.api';
+import {
+  Modal,
+  Button,
+  Input,
+  Textarea,
+  Alert,
+  FormField,
+  Select,
+} from '../../../../components/ui';
+import {
+  subgrupoApoliceSchema,
+  type SubgrupoApoliceFormValues,
+} from '../../schemas/subgrupoApolice.schema';
+import {
+  criarApoliceSubgrupo,
+  alterarApoliceSubgrupo,
+} from '../../api/apolices.api';
 import type { ApoliceSubgrupoResult } from '../../types/apolice.types';
-
+import {
+  catalogosApi,
+  type ConvenioOpcao,
+} from '../../../cadastros-seguro/api/catalogos.api';
 interface SubgrupoApoliceModalProps {
   aberto: boolean;
   onClose: () => void;
@@ -13,124 +30,172 @@ interface SubgrupoApoliceModalProps {
   subgrupoEdicao?: ApoliceSubgrupoResult;
   onSucesso: () => void;
 }
-
-export const SubgrupoApoliceModal: React.FC<SubgrupoApoliceModalProps> = ({
+export function SubgrupoApoliceModal({
   aberto,
   onClose,
   apolicePublicId,
   subgrupoEdicao,
   onSucesso,
-}) => {
+}: SubgrupoApoliceModalProps) {
   const [submitting, setSubmitting] = useState(false);
-  const [errorFeedback, setErrorFeedback] = useState<string | null>(null);
-  
-  const isEdicao = !!subgrupoEdicao;
-
+  const [error, setError] = useState('');
+  const [opcoes, setOpcoes] = useState<ConvenioOpcao[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [falhaOpcoes, setFalhaOpcoes] = useState(false);
   const {
     register,
     handleSubmit,
-    control,
-    reset,
+    setError: setFieldError,
     formState: { errors },
   } = useForm<SubgrupoApoliceFormValues>({
     resolver: zodResolver(subgrupoApoliceSchema),
     defaultValues: {
-      nome: '',
-      observacao: '',
+      nome: subgrupoEdicao?.nome ?? '',
+      observacao: subgrupoEdicao?.observacao ?? '',
+      convenioCobrancaPublicId: subgrupoEdicao?.convenioCobrancaPublicId ?? '',
     },
   });
-
   useEffect(() => {
-    if (aberto) {
-      setErrorFeedback(null);
-      if (isEdicao && subgrupoEdicao) {
-        reset({
-          nome: subgrupoEdicao.nome,
-          observacao: subgrupoEdicao.observacao || '',
-        });
-      } else {
-        reset({
-          nome: '',
-          observacao: '',
-        });
-      }
-    }
-  }, [aberto, isEdicao, subgrupoEdicao, reset]);
-
+    if (!aberto) return;
+    const c = new AbortController();
+    catalogosApi
+      .conveniosSubgrupo(c.signal)
+      .then((rows) => {
+        if (!c.signal.aborted) setOpcoes(rows);
+      })
+      .catch((err) => {
+        if (!c.signal.aborted) {
+          setFalhaOpcoes(true);
+          setError(
+            err instanceof Error
+              ? err.message
+              : 'Não foi possível carregar os Convênios.',
+          );
+        }
+      })
+      .finally(() => {
+        if (!c.signal.aborted) setLoading(false);
+      });
+    return () => c.abort();
+  }, [aberto]);
   const onSubmit = async (data: SubgrupoApoliceFormValues) => {
+    if (
+      (!subgrupoEdicao || subgrupoEdicao.convenioCobrancaPublicId) &&
+      !data.convenioCobrancaPublicId
+    ) {
+      setFieldError('convenioCobrancaPublicId', {
+        message: 'Selecione um Convênio de Cobrança.',
+      });
+      return;
+    }
+    setSubmitting(true);
+    setError('');
     try {
-      setSubmitting(true);
-      setErrorFeedback(null);
-
-      if (isEdicao && subgrupoEdicao) {
-        await alterarApoliceSubgrupo(apolicePublicId, subgrupoEdicao.subgrupoPublicId, data);
-      } else {
-        await criarApoliceSubgrupo(apolicePublicId, data);
-      }
-
+      const body = {
+        ...data,
+        convenioCobrancaPublicId: data.convenioCobrancaPublicId || null,
+      };
+      if (subgrupoEdicao)
+        await alterarApoliceSubgrupo(
+          apolicePublicId,
+          subgrupoEdicao.subgrupoPublicId,
+          body,
+        );
+      else await criarApoliceSubgrupo(apolicePublicId, body);
       onSucesso();
       onClose();
-    } catch (err: any) {
-      if (err.response?.data?.detail) {
-        setErrorFeedback(err.response.data.detail);
-      } else {
-        setErrorFeedback(err.message || 'Erro inesperado ao salvar o Subgrupo da Apólice.');
-      }
+    } catch (err) {
+      setError(
+        err instanceof Error
+          ? err.message
+          : 'Não foi possível salvar o Subgrupo.',
+      );
     } finally {
       setSubmitting(false);
     }
   };
-
-  const footer = (
-    <>
-      <Button type="button" variant="ghost" onClick={onClose} disabled={submitting}>
-        Cancelar
-      </Button>
-      <Button type="submit" form="subgrupo-form" variant="primary" disabled={submitting}>
-        {submitting ? 'Salvando...' : 'Salvar'}
-      </Button>
-    </>
-  );
-
+  const atuais =
+    subgrupoEdicao?.convenioCobrancaPublicId &&
+    !opcoes.some((o) => o.publicId === subgrupoEdicao.convenioCobrancaPublicId)
+      ? [
+          {
+            publicId: subgrupoEdicao.convenioCobrancaPublicId,
+            nome: `${subgrupoEdicao.convenioCobrancaNome ?? 'Convênio atual'} (inativo)`,
+            ativo: false,
+          },
+        ]
+      : [];
   return (
     <Modal
       aberto={aberto}
-      onClose={onClose}
-      title={isEdicao ? 'Editar Subgrupo' : 'Adicionar Subgrupo'}
+      onClose={() => !submitting && onClose()}
+      title={subgrupoEdicao ? 'Editar Subgrupo' : 'Adicionar Subgrupo'}
       size="medium"
-      footer={footer}
+      footer={
+        <>
+          <Button variant="secondary" onClick={onClose} disabled={submitting}>
+            Cancelar
+          </Button>
+          <Button
+            type="submit"
+            form="subgrupo-form"
+            loading={submitting}
+            disabled={loading || falhaOpcoes}
+          >
+            Salvar
+          </Button>
+        </>
+      }
     >
-      <form id="subgrupo-form" onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
-        {errorFeedback && (
-          <Alert variant="error" title="Erro ao salvar">
-            {errorFeedback}
+      <form
+        id="subgrupo-form"
+        onSubmit={handleSubmit(onSubmit)}
+        className="flex flex-col gap-3"
+      >
+        {error && (
+          <Alert variant="error" title="Não foi possível concluir">
+            {error}
           </Alert>
         )}
-
-        <div className="flex flex-col gap-4">
+        <FormField label="Nome" required error={errors.nome?.message}>
           <Input
-            label="Nome"
-            placeholder="Ex: Matriz, Filial Centro"
-            error={errors.nome?.message}
             required
+            maxLength={200}
             {...register('nome')}
+            disabled={submitting}
           />
-          
-          <Controller
-            name="observacao"
-            control={control}
-            render={({ field }) => (
-              <Textarea
-                label="Observação"
-                placeholder="Observações adicionais..."
-                error={errors.observacao?.message}
-                {...field}
-                value={field.value || ''}
-              />
-            )}
+        </FormField>
+        <FormField
+          label="Convênio de Cobrança"
+          required={
+            !subgrupoEdicao || !!subgrupoEdicao.convenioCobrancaPublicId
+          }
+          error={errors.convenioCobrancaPublicId?.message}
+          hint={
+            subgrupoEdicao && !subgrupoEdicao.convenioCobrancaPublicId
+              ? 'Selecione o Convênio quando estiver disponível.'
+              : undefined
+          }
+        >
+          <Select
+            {...register('convenioCobrancaPublicId')}
+            disabled={loading || submitting}
+            options={[
+              {
+                value: '',
+                label: loading ? 'Carregando...' : 'Selecione um Convênio',
+              },
+              ...[...atuais, ...opcoes].map((o) => ({
+                value: o.publicId,
+                label: o.nome,
+              })),
+            ]}
           />
-        </div>
+        </FormField>
+        <FormField label="Observação" error={errors.observacao?.message}>
+          <Textarea {...register('observacao')} disabled={submitting} />
+        </FormField>
       </form>
     </Modal>
   );
-};
+}

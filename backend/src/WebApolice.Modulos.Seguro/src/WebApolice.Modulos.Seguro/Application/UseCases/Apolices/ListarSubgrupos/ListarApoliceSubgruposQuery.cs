@@ -19,5 +19,8 @@ public sealed record ApoliceSubgrupoResult(
     Guid SubgrupoPublicId,
     string Nome,
     string? Observacao,
-    bool Ativo
+    bool Ativo,
+    Guid? ConvenioCobrancaPublicId = null,
+    string? ConvenioCobrancaNome = null,
+    bool? ConvenioCobrancaAtivo = null
 );

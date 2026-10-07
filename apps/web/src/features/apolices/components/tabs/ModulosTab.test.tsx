@@ -251,9 +251,7 @@ describe('ModulosTab', () => {
     fireEvent.click(screen.getByText('Inativar'));
 
     mockInativarApoliceModulo.mockRejectedValueOnce(
-      Object.assign(new Error('Erro de API'), {
-        response: { data: { detail: 'Vínculo não encontrado.' } },
-      })
+      new Error('Vínculo não encontrado.')
     );
 
     const botoesInativar = screen

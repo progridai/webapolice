@@ -12,6 +12,7 @@ public class ApoliceSubgrupoModel
     public Guid PublicId { get; set; }
 
     public long ApoliceId { get; set; }
+    public long? ConvenioCobrancaId { get; set; }
 
     /// <summary>
     /// Nome do Subgrupo. Identificação funcional definida pelo negócio.

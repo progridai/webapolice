@@ -18,6 +18,8 @@ public partial class SeguroDbContext
     public virtual DbSet<ApoliceVidaModel> ApoliceVidas { get; set; } = null!;
     public virtual DbSet<ApoliceSubgrupoModel> ApoliceSubgrupos { get; set; } = null!;
     public virtual DbSet<ApoliceModuloModel> ApoliceModulos { get; set; } = null!;
+    public virtual DbSet<ApoliceModuloPlanoModel> ApoliceModuloPlanos { get; set; } = null!;
+    public virtual DbSet<ApoliceModuloCoberturaModel> ApoliceModuloCoberturas { get; set; } = null!;
 
     partial void OnModelCreatingPartial(ModelBuilder modelBuilder)
     {
@@ -33,6 +35,8 @@ public partial class SeguroDbContext
         modelBuilder.ApplyConfiguration(new ApoliceVidaConfiguration());
         modelBuilder.ApplyConfiguration(new ApoliceSubgrupoConfiguration());
         modelBuilder.ApplyConfiguration(new ApoliceModuloConfiguration());
+        modelBuilder.ApplyConfiguration(new ApoliceModuloPlanoConfiguration());
+        modelBuilder.ApplyConfiguration(new ApoliceModuloCoberturaConfiguration());
         
         // Atualiza a configuração do Propostum
         modelBuilder.Entity<Propostum>(entity => 

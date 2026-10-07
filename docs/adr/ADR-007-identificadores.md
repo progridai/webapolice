@@ -1,7 +1,7 @@
 # ADR 007: Escolha de Identificadores (IDs)
 
 ## Status
-Aceito
+Aceito, revisado em 06/10/2026
 
 ## Contexto
 O WebApólice precisa definir um padrão consistente para identificadores das entidades de negócio no banco de dados. Temos um contexto de migração de um banco SQL Server legado onde predominantemente utilizam-se identificadores baseados em inteiros incrementais. Adicionalmente, as APIs e as integrações precisarão compartilhar esses identificadores. 
@@ -17,5 +17,7 @@ A geração do ID, a princípio, será delegada ao banco de dados no momento da 
 
 ## Consequências
 *   A migração de dados e relacionamentos legados manterá fidelidade às chaves numéricas atuais, impedindo a necessidade de mapeamento em runtime complexo.
-*   Em expostos públicos das APIs (ex.: IDs na URL), adotar-se-á o valor numérico. Caso seja necessário ofuscar no futuro para segurança, uma estratégia de Hashids poderá ser introduzida em nível de apresentação.
+*   As PKs e FKs numéricas permanecem internas. Novos contratos e URLs de entidades de negócio utilizam `PublicId` do tipo `Guid`, persistido como `uuid` com índice único. O padrão acompanha os CRUDs atuais de Apólices e entidades de Cadastro.
+*   UUID não substitui autorização nem validação de propriedade contextual. Subgrupos continuam sendo validados pela Apólice.
+*   Respostas antigas do Universo Permitido ainda expõem IDs internos; sua migração é uma pendência independente dos novos cadastros.
 *   Simplifica índices no PostgreSQL.

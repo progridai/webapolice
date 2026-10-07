@@ -26,20 +26,26 @@ export const ModulosTab: React.FC<ModulosTabProps> = ({ publicId }) => {
   const podeAlterar = possuiPermissao('apolices.modulos.alterar');
   const podeInativar = possuiPermissao('apolices.modulos.inativar');
 
+  const [somenteLeitura, setSomenteLeitura] = useState(false);
   const [modalAberto, setModalAberto] = useState(false);
   // publicId do vínculo (apoliceModuloPublicId) — NÃO é o moduloPublicId do cadastro global
-  const [moduloEdicao, setModuloEdicao] = useState<ApoliceModuloResult | undefined>();
+  const [moduloEdicao, setModuloEdicao] = useState<
+    ApoliceModuloResult | undefined
+  >();
 
-  const [moduloInativacao, setModuloInativacao] = useState<ApoliceModuloResult | null>(null);
+  const [moduloInativacao, setModuloInativacao] =
+    useState<ApoliceModuloResult | null>(null);
   const [inativando, setInativando] = useState(false);
   const [inativarErro, setInativarErro] = useState<string | null>(null);
 
   const handleNovo = () => {
+    setSomenteLeitura(false);
     setModuloEdicao(undefined);
     setModalAberto(true);
   };
 
   const handleEditar = (modulo: ApoliceModuloResult) => {
+    setSomenteLeitura(false);
     setModuloEdicao(modulo);
     setModalAberto(true);
   };
@@ -53,12 +59,9 @@ export const ModulosTab: React.FC<ModulosTabProps> = ({ publicId }) => {
       await inativarApoliceModulo(publicId, moduloInativacao.publicId);
       setModuloInativacao(null);
       refetch();
-    } catch (err: any) {
+    } catch (err) {
       setInativarErro(
-        err.response?.data?.detail ||
-          err.response?.data?.message ||
-          err.message ||
-          'Erro ao inativar o módulo.'
+        err instanceof Error ? err.message : 'Erro ao inativar o módulo.',
       );
     } finally {
       setInativando(false);
@@ -67,8 +70,10 @@ export const ModulosTab: React.FC<ModulosTabProps> = ({ publicId }) => {
 
   const formatarVigencia = (inicio?: string, fim?: string): string => {
     if (!inicio && !fim) return '—';
-    const i = inicio ? new Date(inicio).toLocaleDateString('pt-BR') : '…';
-    const f = fim ? new Date(fim).toLocaleDateString('pt-BR') : '…';
+    const i = inicio
+      ? inicio.substring(0, 10).split('-').reverse().join('/')
+      : '…';
+    const f = fim ? fim.substring(0, 10).split('-').reverse().join('/') : '…';
     return `${i} → ${f}`;
   };
 
@@ -80,7 +85,9 @@ export const ModulosTab: React.FC<ModulosTabProps> = ({ publicId }) => {
         <div>
           <span className="font-medium text-texto-principal">{row.nome}</span>
           {row.descricao && (
-            <p className="text-xs text-texto-terciario mt-0.5">{row.descricao}</p>
+            <p className="text-xs text-texto-terciario mt-0.5">
+              {row.descricao}
+            </p>
           )}
         </div>
       ),
@@ -98,7 +105,8 @@ export const ModulosTab: React.FC<ModulosTabProps> = ({ publicId }) => {
       key: 'observacao',
       label: 'Observação',
       render: (row) => {
-        if (!row.observacao) return <span className="text-texto-secundario">—</span>;
+        if (!row.observacao)
+          return <span className="text-texto-secundario">—</span>;
         return (
           <span className="text-texto-secundario" title={row.observacao}>
             {row.observacao.length > 50
@@ -111,9 +119,7 @@ export const ModulosTab: React.FC<ModulosTabProps> = ({ publicId }) => {
     {
       key: 'status',
       label: 'Status',
-      render: (row) => (
-        <StatusBadge status={row.ativo ? 'ativo' : 'inativo'} label={row.ativo ? 'Ativo' : 'Inativo'} />
-      ),
+      render: (row) => <StatusBadge status={row.ativo ? 'ativo' : 'inativo'} />,
     },
     {
       key: 'acoes',
@@ -121,13 +127,32 @@ export const ModulosTab: React.FC<ModulosTabProps> = ({ publicId }) => {
       align: 'right',
       render: (row) => (
         <div className="flex justify-end gap-2">
+          <Button
+            variant="secondary"
+            size="small"
+            onClick={() => {
+              setModuloEdicao(row);
+              setSomenteLeitura(!podeAlterar || !row.ativo);
+              setModalAberto(true);
+            }}
+          >
+            Plano e Coberturas
+          </Button>
           {podeAlterar && row.ativo && (
-            <Button variant="secondary" size="small" onClick={() => handleEditar(row)}>
+            <Button
+              variant="secondary"
+              size="small"
+              onClick={() => handleEditar(row)}
+            >
               Editar
             </Button>
           )}
           {podeInativar && row.ativo && (
-            <Button variant="danger" size="small" onClick={() => setModuloInativacao(row)}>
+            <Button
+              variant="danger"
+              size="small"
+              onClick={() => setModuloInativacao(row)}
+            >
               Inativar
             </Button>
           )}
@@ -140,9 +165,15 @@ export const ModulosTab: React.FC<ModulosTabProps> = ({ publicId }) => {
     return (
       <div className="flex flex-col gap-4 items-start">
         <Alert variant="error" title="Erro ao carregar Módulos">
-          {error.message || 'Não foi possível carregar os módulos desta apólice.'}
+          {error.message ||
+            'Não foi possível carregar os módulos desta apólice.'}
         </Alert>
-        <Button onClick={refetch} variant="primary" size="small" loading={isLoading}>
+        <Button
+          onClick={refetch}
+          variant="primary"
+          size="small"
+          loading={isLoading}
+        >
           Tentar novamente
         </Button>
       </div>
@@ -153,9 +184,11 @@ export const ModulosTab: React.FC<ModulosTabProps> = ({ publicId }) => {
     <div className="flex flex-col gap-4">
       <div className="flex justify-between items-center mb-2">
         <div>
-          <h2 className="text-xl font-semibold text-texto-principal">Módulos da Apólice</h2>
+          <h2 className="text-xl font-semibold text-texto-principal">
+            Módulos da Apólice
+          </h2>
           <p className="text-sm text-texto-terciario mt-1">
-            Gestão dos módulos contratados vinculados diretamente à Apólice.
+            Cada Módulo vinculado possui seu próprio Plano e suas Coberturas.
           </p>
         </div>
         {podeInserir && (
@@ -166,7 +199,11 @@ export const ModulosTab: React.FC<ModulosTabProps> = ({ publicId }) => {
       </div>
 
       {inativarErro && (
-        <Alert variant="error" title="Atenção" onClose={() => setInativarErro(null)}>
+        <Alert
+          variant="error"
+          title="Atenção"
+          onClose={() => setInativarErro(null)}
+        >
           {inativarErro}
         </Alert>
       )}
@@ -200,6 +237,7 @@ export const ModulosTab: React.FC<ModulosTabProps> = ({ publicId }) => {
           apolicePublicId={publicId}
           modulosVinculados={data || []}
           moduloEdicao={moduloEdicao}
+          somenteLeitura={somenteLeitura}
           onSucesso={refetch}
         />
       )}

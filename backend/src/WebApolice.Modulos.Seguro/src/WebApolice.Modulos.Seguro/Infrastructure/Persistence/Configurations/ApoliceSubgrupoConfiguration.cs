@@ -11,6 +11,8 @@ public class ApoliceSubgrupoConfiguration : IEntityTypeConfiguration<ApoliceSubg
         builder.ToTable("apolice_subgrupo", "seguro");
 
         builder.HasKey(x => x.Id);
+        builder.Property(x => x.ConvenioCobrancaId).HasColumnName("convenio_cobranca_id");
+        builder.HasIndex(x => x.ConvenioCobrancaId);
 
         builder.Property(x => x.Id).HasColumnName("id").UseIdentityAlwaysColumn();
         builder.Property(x => x.PublicId)

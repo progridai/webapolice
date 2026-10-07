@@ -1,4 +1,4 @@
-using System.Security.Claims;
+﻿using System.Security.Claims;
 using System.Text.Json;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -12,6 +12,7 @@ using WebApolice.Shared.Infrastructure.Persistence;
 using WebApolice.Modulos.Cadastro;
 using WebApolice.Modulos.Seguranca;
 using WebApolice.Modulos.Seguro;
+using WebApolice.Modulos.Financeiro;
 using WebApolice.Modulos.Seguranca.Infrastructure.Authentication;
 using WebApolice.SharedKernel.Application.Ports;
 using WebApolice.Shared.Infrastructure.Providers;
@@ -208,6 +209,8 @@ builder.Services.AddHealthChecks()
 builder.Services.AddModuloSeguranca(builder.Configuration);
 builder.Services.AddCadastroModule(builder.Configuration);
 builder.Services.AddSeguroModule(builder.Configuration);
+builder.Services.AddFinanceiroModule();
+builder.Services.AddScoped<WebApolice.Auditoria.Infrastructure.OperacaoAuditada>();
 
 // =============================================================================
 // SERVIÇOS GLOBAIS COMPARTILHADOS
@@ -220,6 +223,7 @@ builder.Services.AddScoped<ILocalidadeResolver, LocalidadeResolver>();
 // =============================================================================
 builder.Services.AddOpenApi();
 builder.Services.AddControllers()
+    .AddApplicationPart(typeof(WebApolice.Modulos.Financeiro.Api.Controllers.ConveniosCobrancaController).Assembly)
     .ConfigureApiBehaviorOptions(options =>
     {
         options.InvalidModelStateResponseFactory = context =>

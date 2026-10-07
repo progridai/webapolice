@@ -26,6 +26,9 @@ interface NavItem {
 }
 
 const NAV_ITEMS: NavItem[] = [
+  { label: 'Coberturas', path: ROUTES.COBERTURAS, icon: BookOpenIcon, moduloCodigo: 'CADASTRO', permissaoCodigo: 'coberturas.visualizar' },
+  { label: 'Convênios de Cobrança', path: ROUTES.CONVENIOS_COBRANCA, icon: BookOpenIcon, moduloCodigo: 'CADASTRO', permissaoCodigo: 'convenios_cobranca.visualizar' },
+
   {
     label: 'Início',
     path: ROUTES.APP,

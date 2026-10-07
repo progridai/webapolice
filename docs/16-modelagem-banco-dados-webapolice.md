@@ -1,5 +1,8 @@
 # 17 — Modelagem do Banco de Dados do webapolice
 
+> Atualização de 06/10/2026: as referências históricas a Subgrupo global neste documento foram superadas pelo Subgrupo contextual em `seguro.apolice_subgrupo`, pertencente à Apólice. Vidas podem referenciar Subgrupo e/ou Módulo da mesma Apólice; Subestipulantes são independentes. PKs/FKs numéricas são internas e novos contratos utilizam UUID, conforme [ADR-007](adr/ADR-007-identificadores.md). Convênios, Planos e Coberturas seguem as regras de [Cadastros de Seguro](21-cadastros-convenios-planos-coberturas.md).
+
+
 ## 1. Objetivo deste documento
 
 Este documento registra a estrutura base do banco de dados PostgreSQL do projeto **webapolice**.

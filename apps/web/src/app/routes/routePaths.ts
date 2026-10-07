@@ -15,6 +15,9 @@ export const ROUTES = {
 
   /** Área autenticada — página inicial */
   APP: '/app',
+  CONVENIOS_COBRANCA: '/convenios-cobranca',
+  COBERTURAS: '/coberturas',
+  PLANOS: '/planos',
 
   /** Autenticação — login via Keycloak */
   LOGIN: '/login',

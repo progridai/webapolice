@@ -21,12 +21,21 @@ public sealed record ApolicePlanoResult(
     long PlanoIdInternal,
     long? TabelaPrecoIdInternal,
     bool Ativo,
-    List<ApoliceCoberturaResult> Coberturas
+    List<ApoliceCoberturaResult> Coberturas,
+    string? Nome = null
 );
 
 public sealed record ApoliceCoberturaResult(
     long CoberturaIdInternal,
     bool Ativo,
     decimal? ImportanciaSeguradaOverride,
-    decimal? PremioOverride
+    decimal? PremioOverride,
+    Guid PublicId = default,
+    string? Nome = null,
+    decimal? PremioTitularOverride = null,
+    decimal? PremioConjugeOverride = null,
+    decimal? PremioTitularPadrao = null,
+    decimal? PremioConjugePadrao = null,
+    decimal? PremioTitularEfetivo = null,
+    decimal? PremioConjugeEfetivo = null
 );

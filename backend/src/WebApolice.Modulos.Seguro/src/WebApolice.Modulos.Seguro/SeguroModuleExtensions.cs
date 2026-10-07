@@ -15,9 +15,9 @@ public static class SeguroModuleExtensions
     public static IServiceCollection AddSeguroModule(this IServiceCollection services, IConfiguration configuration)
     {
         var connectionString = configuration.GetConnectionString("PostgreSql");
-        
-        services.AddDbContext<SeguroDbContext>(options =>
-            options.UseNpgsql(connectionString, o => 
+
+        services.AddDbContext<SeguroDbContext>((sp, options) =>
+            options.UseNpgsql(sp.GetRequiredService<System.Data.Common.DbConnection>(), o =>
             {
                 o.MigrationsHistoryTable("__EFMigrationsHistory", "seguro");
             })
@@ -36,7 +36,7 @@ public static class SeguroModuleExtensions
         services.AddScoped<WebApolice.Modulos.Seguro.Application.UseCases.Apolices.ObterUniversoPermitido.ObterApoliceUniversoPermitidoHandler>();
         services.AddScoped<WebApolice.Modulos.Seguro.Application.UseCases.Apolices.ListarSubestipulantes.ListarApoliceSubestipulantesHandler>();
         services.AddScoped<WebApolice.Modulos.Seguro.Application.UseCases.Apolices.ListarHistorico.ListarApoliceHistoricoHandler>();
-        
+
         services.AddScoped<WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Application.UseCases.Apolices.VincularRamo.VincularRamoApoliceHandler>();
         services.AddScoped<WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Application.UseCases.Apolices.AtualizarRamo.AtualizarRamoApoliceHandler>();
         services.AddScoped<WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Application.UseCases.Apolices.InativarRamo.InativarRamoApoliceHandler>();
@@ -76,6 +76,13 @@ public static class SeguroModuleExtensions
         services.AddScoped<WebApolice.Modulos.Seguro.Application.UseCases.Ramos.AlterarRamo.AlterarRamoHandler>();
         services.AddScoped<WebApolice.Modulos.Seguro.Application.UseCases.Ramos.AlterarStatusRamo.AlterarStatusRamoHandler>();
 
+        services.AddScoped<ISubgruposCadastro, SubgruposCadastroRepository>();
+        services.AddScoped<IPlanoModuloApolice, PlanoModuloApoliceRepository>();
+        services.AddScoped<WebApolice.Modulos.Seguro.Application.UseCases.Apolices.PlanoModulo.PlanoModuloApoliceHandler>();
+        services.AddScoped<ICatalogosSeguro, CatalogosSeguroRepository>();
+        services.AddScoped<IPremiosApolice, PremiosApoliceRepository>();
+        services.AddScoped<WebApolice.Modulos.Seguro.Application.UseCases.Catalogos.PremiosApoliceHandler>();
+        services.AddScoped<WebApolice.Modulos.Seguro.Application.UseCases.Catalogos.CatalogosSeguroHandler>();
         return services;
     }
 }

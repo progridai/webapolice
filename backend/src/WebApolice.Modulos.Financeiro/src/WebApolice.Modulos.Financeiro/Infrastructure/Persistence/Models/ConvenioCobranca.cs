@@ -6,6 +6,8 @@ namespace WebApolice.Modulos.Financeiro.src.WebApolice.Modulos.Financeiro.Infras
 public partial class ConvenioCobranca
 {
     public long Id { get; set; }
+    public Guid PublicId { get; set; }
+    public bool Ativo { get; set; } = true;
 
     public long? BancoId { get; set; }
 

@@ -426,7 +426,8 @@ public class ApolicesController : ControllerBase
         {
             ApolicePublicId = publicId,
             Nome = request.Nome,
-            Observacao = request.Observacao
+            Observacao = request.Observacao,
+            ConvenioCobrancaPublicId = request.ConvenioCobrancaPublicId
         };
         var subgrupoPublicId = await handler.Handle(command, cancellationToken);
         return CreatedAtAction("GetSubgrupo", new { publicId, subgrupoPublicId }, new { subgrupoPublicId });
@@ -446,7 +447,8 @@ public class ApolicesController : ControllerBase
             ApolicePublicId = publicId,
             SubgrupoPublicId = subgrupoPublicId,
             Nome = request.Nome,
-            Observacao = request.Observacao
+            Observacao = request.Observacao,
+            ConvenioCobrancaPublicId = request.ConvenioCobrancaPublicId
         };
         await handler.Handle(command, cancellationToken);
         return NoContent();

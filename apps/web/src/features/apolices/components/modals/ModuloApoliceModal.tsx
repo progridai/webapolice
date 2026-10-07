@@ -1,321 +1,272 @@
-import React, { useEffect, useState } from 'react';
-import { useForm, Controller } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { Modal, Button, Input, Select, Textarea, Alert } from '../../../../components/ui';
+import { useEffect, useState } from 'react';
+import {
+  Modal,
+  Button,
+  Input,
+  Select,
+  Textarea,
+  Alert,
+  FormField,
+} from '../../../../components/ui';
 import {
   criarModuloApoliceSchema,
   alterarModuloApoliceSchema,
-  type CriarModuloApoliceFormValues,
-  type AlterarModuloApoliceFormValues,
 } from '../../schemas/moduloApolice.schema';
-import { criarApoliceModulo, alterarApoliceModulo } from '../../api/apolices.api';
-import { modulosGlobaisApi, type ModuloGlobalListItem } from '../../api/modulosGlobais.api';
+import {
+  criarApoliceModulo,
+  alterarApoliceModulo,
+} from '../../api/apolices.api';
+import {
+  modulosGlobaisApi,
+  type ModuloGlobalListItem,
+} from '../../api/modulosGlobais.api';
 import type { ApoliceModuloResult } from '../../types/apolice.types';
+import { PlanoModuloEditor } from '../PlanoModuloEditor';
+import { useAuthorization } from '../../../../auth/AuthorizationProvider';
 
 interface ModuloApoliceModalProps {
   aberto: boolean;
   onClose: () => void;
   apolicePublicId: string;
-  /** Módulos já vinculados à Apólice (para filtrar do catálogo no modo criação) */
   modulosVinculados: ApoliceModuloResult[];
-  /** Vínculo a ser editado; undefined = modo criação */
   moduloEdicao?: ApoliceModuloResult;
+  somenteLeitura?: boolean;
   onSucesso: () => void;
 }
 
-export const ModuloApoliceModal: React.FC<ModuloApoliceModalProps> = ({
+export function ModuloApoliceModal({
   aberto,
   onClose,
   apolicePublicId,
   modulosVinculados,
   moduloEdicao,
+  somenteLeitura = false,
   onSucesso,
-}) => {
+}: ModuloApoliceModalProps) {
+  const { possuiPermissao } = useAuthorization();
+  // O UUID contextual permanece após criar o vínculo, permitindo cadastrar o Plano em seguida.
+  const [vinculoPublicId, setVinculoPublicId] = useState(
+    moduloEdicao?.publicId,
+  );
+  const [moduloPublicId, setModuloPublicId] = useState('');
+  const [dataInicio, setDataInicio] = useState(
+    moduloEdicao?.dataInicio?.substring(0, 10) ?? '',
+  );
+  const [dataFim, setDataFim] = useState(
+    moduloEdicao?.dataFim?.substring(0, 10) ?? '',
+  );
+  const [observacao, setObservacao] = useState(moduloEdicao?.observacao ?? '');
+  const [catalogo, setCatalogo] = useState<ModuloGlobalListItem[]>([]);
+  const [carregando, setCarregando] = useState(!moduloEdicao);
+  const [erroCatalogo, setErroCatalogo] = useState('');
   const [submitting, setSubmitting] = useState(false);
-  const [errorFeedback, setErrorFeedback] = useState<string | null>(null);
-
-  const [catalogoModulos, setCatalogoModulos] = useState<ModuloGlobalListItem[]>([]);
-  const [carregandoCatalogo, setCarregandoCatalogo] = useState(false);
-
-  const isEdicao = !!moduloEdicao;
-
-  // ── Formulário Criar ──────────────────────────────────────────────────────
-  const criarForm = useForm<CriarModuloApoliceFormValues>({
-    resolver: zodResolver(criarModuloApoliceSchema),
-    defaultValues: { moduloPublicId: '', dataInicio: '', dataFim: '', observacao: '' },
-  });
-
-  // ── Formulário Editar ─────────────────────────────────────────────────────
-  const editarForm = useForm<AlterarModuloApoliceFormValues>({
-    resolver: zodResolver(alterarModuloApoliceSchema),
-    defaultValues: { dataInicio: '', dataFim: '', observacao: '' },
-  });
-
-  // ── Inicialização ao abrir ────────────────────────────────────────────────
+  const [erro, setErro] = useState('');
+  const [sucesso, setSucesso] = useState('');
+  const [errosCampos, setErrosCampos] = useState<Record<string, string>>({});
+  const podeEditarVinculo =
+    !somenteLeitura &&
+    (!vinculoPublicId || possuiPermissao('apolices.modulos.alterar'));
   useEffect(() => {
-    if (!aberto) return;
-    setErrorFeedback(null);
-
-    if (isEdicao && moduloEdicao) {
-      editarForm.reset({
-        dataInicio: moduloEdicao.dataInicio
-          ? moduloEdicao.dataInicio.substring(0, 10)
-          : '',
-        dataFim: moduloEdicao.dataFim
-          ? moduloEdicao.dataFim.substring(0, 10)
-          : '',
-        observacao: moduloEdicao.observacao || '',
+    if (vinculoPublicId || !aberto) return;
+    let cancelado = false;
+    void modulosGlobaisApi
+      .listar({ ativo: true, tamanhoPagina: 200 })
+      .then((res) => {
+        if (cancelado) return;
+        const vinculados = new Set(
+          modulosVinculados.map((m) => m.moduloPublicId),
+        );
+        setCatalogo(res.items.filter((m) => !vinculados.has(m.publicId)));
+      })
+      .catch((err) => {
+        if (!cancelado)
+          setErroCatalogo(
+            err instanceof Error
+              ? err.message
+              : 'Não foi possível carregar os Módulos disponíveis.',
+          );
+      })
+      .finally(() => {
+        if (!cancelado) setCarregando(false);
       });
-    } else {
-      criarForm.reset({ moduloPublicId: '', dataInicio: '', dataFim: '', observacao: '' });
-      carregarCatalogo();
-    }
-  }, [aberto, isEdicao, moduloEdicao]);
-
-  // ── Catálogo de Módulos Globais ───────────────────────────────────────────
-  // Carrega apenas módulos ativos e filtra os que já possuem vínculo com a
-  // Apólice (inclusive inativos), conforme regra de unicidade (apolice_id, modulo_id)
-  // WHERE deleted_at IS NULL. O backend é a autoridade final desta regra.
-  const carregarCatalogo = async () => {
+    return () => {
+      cancelado = true;
+    };
+  }, [aberto, vinculoPublicId, modulosVinculados]);
+  async function salvar(e: React.FormEvent) {
+    e.preventDefault();
+    setErro('');
+    setSucesso('');
+    const dados = {
+      moduloPublicId,
+      dataInicio: dataInicio || null,
+      dataFim: dataFim || null,
+      observacao: observacao.trim() || null,
+    };
+    const validacao = vinculoPublicId
+      ? alterarModuloApoliceSchema.safeParse(dados)
+      : criarModuloApoliceSchema.safeParse(dados);
+    const campos: Record<string, string> = {};
+    if (!validacao.success)
+      validacao.error.issues.forEach((i) => {
+        campos[String(i.path[0])] = i.message;
+      });
+    setErrosCampos(campos);
+    if (!validacao.success) return;
+    setSubmitting(true);
     try {
-      setCarregandoCatalogo(true);
-      const res = await modulosGlobaisApi.listar({ ativo: true, tamanhoPagina: 200 });
-
-      // IDs de módulos do cadastro global que já têm vínculo com esta apólice
-      const idsJaVinculados = new Set(modulosVinculados.map((m) => m.moduloPublicId));
-
-      const disponiveis = res.items.filter((m) => !idsJaVinculados.has(m.publicId));
-      setCatalogoModulos(disponiveis);
+      if (vinculoPublicId) {
+        await alterarApoliceModulo(apolicePublicId, vinculoPublicId, dados);
+        setSucesso('Vínculo atualizado.');
+      } else {
+        const salvo = await criarApoliceModulo(apolicePublicId, dados);
+        setVinculoPublicId(salvo.publicId);
+        setSucesso(
+          'Módulo vinculado. Cadastre abaixo o Plano e suas Coberturas.',
+        );
+      }
+      onSucesso();
     } catch (err) {
-      console.error('Erro ao carregar catálogo de módulos:', err);
-    } finally {
-      setCarregandoCatalogo(false);
-    }
-  };
-
-  // ── Submit Criar ──────────────────────────────────────────────────────────
-  const onSubmitCriar = async (data: CriarModuloApoliceFormValues) => {
-    try {
-      setSubmitting(true);
-      setErrorFeedback(null);
-      // moduloPublicId = publicId do cadastro.modulo (NÃO é o apoliceModuloPublicId)
-      await criarApoliceModulo(apolicePublicId, {
-        moduloPublicId: data.moduloPublicId,
-        dataInicio: data.dataInicio || null,
-        dataFim: data.dataFim || null,
-        observacao: data.observacao || null,
-      });
-      onSucesso();
-      onClose();
-    } catch (err: any) {
-      setErrorFeedback(
-        err.response?.data?.detail ||
-          err.response?.data?.message ||
-          err.message ||
-          'Erro inesperado ao vincular o Módulo.'
+      setErro(
+        err instanceof Error
+          ? err.message
+          : 'Não foi possível salvar o vínculo.',
       );
     } finally {
       setSubmitting(false);
     }
-  };
-
-  // ── Submit Editar ─────────────────────────────────────────────────────────
-  const onSubmitEditar = async (data: AlterarModuloApoliceFormValues) => {
-    if (!moduloEdicao) return;
-    try {
-      setSubmitting(true);
-      setErrorFeedback(null);
-      // Usa publicId do vínculo (apoliceModuloPublicId = seguro.apolice_modulo)
-      // NÃO usa moduloEdicao.moduloPublicId aqui
-      await alterarApoliceModulo(apolicePublicId, moduloEdicao.publicId, {
-        dataInicio: data.dataInicio || null,
-        dataFim: data.dataFim || null,
-        observacao: data.observacao || null,
-      });
-      onSucesso();
-      onClose();
-    } catch (err: any) {
-      setErrorFeedback(
-        err.response?.data?.detail ||
-          err.response?.data?.message ||
-          err.message ||
-          'Erro inesperado ao alterar o vínculo.'
-      );
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
-  // ── Footer ────────────────────────────────────────────────────────────────
-  const formId = isEdicao ? 'modulo-apolice-editar-form' : 'modulo-apolice-criar-form';
-
-  const footer = (
-    <>
-      <Button type="button" variant="ghost" onClick={onClose} disabled={submitting}>
-        Cancelar
-      </Button>
-      <Button type="submit" form={formId} variant="primary" loading={submitting}>
-        Salvar
-      </Button>
-    </>
-  );
-
-  // ── Campos de datas e observação (compartilhados entre os dois modos) ─────
-  const CamposCompartilhados = ({
-    register,
-    control,
-    errors,
-  }: {
-    register: any;
-    control: any;
-    errors: any;
-  }) => (
-    <>
-      <div className="grid grid-cols-2 gap-4">
-        <div className="flex flex-col gap-1">
-          <label htmlFor="dataInicio" className="form-label font-medium text-texto-principal">
-            Início de Vigência
-          </label>
-          <Input
-            id="dataInicio"
-            type="date"
-            {...register('dataInicio')}
-            error={!!errors.dataInicio}
-          />
-          {errors.dataInicio && (
-            <p className="form-error">{errors.dataInicio.message}</p>
-          )}
-        </div>
-        <div className="flex flex-col gap-1">
-          <label htmlFor="dataFim" className="form-label font-medium text-texto-principal">
-            Fim de Vigência
-          </label>
-          <Input
-            id="dataFim"
-            type="date"
-            {...register('dataFim')}
-            error={!!errors.dataFim}
-          />
-          {errors.dataFim && (
-            <p className="form-error">{errors.dataFim.message}</p>
-          )}
-        </div>
-      </div>
-
-      <Controller
-        name="observacao"
-        control={control}
-        render={({ field }) => (
-          <Textarea
-            label="Observação"
-            placeholder="Observações adicionais..."
-            error={errors.observacao?.message}
-            {...field}
-            value={field.value || ''}
-          />
-        )}
-      />
-    </>
-  );
-
-  // ── Render ────────────────────────────────────────────────────────────────
+  }
+  const nomeModulo =
+    moduloEdicao?.nome ??
+    catalogo.find((m) => m.publicId === moduloPublicId)?.nome;
   return (
     <Modal
       aberto={aberto}
-      onClose={onClose}
-      title={isEdicao ? 'Editar Vínculo de Módulo' : 'Vincular Módulo'}
-      size="medium"
-      footer={footer}
-    >
-      {/* ── Modo Criação ── */}
-      {!isEdicao && (
-        <form
-          id="modulo-apolice-criar-form"
-          onSubmit={criarForm.handleSubmit(onSubmitCriar)}
-          className="flex flex-col gap-4"
-        >
-          {errorFeedback && (
-            <Alert variant="error" title="Erro ao vincular">
-              {errorFeedback}
-            </Alert>
+      onClose={() => !submitting && onClose()}
+      title={
+        somenteLeitura
+          ? 'Consultar Módulo da Apólice'
+          : vinculoPublicId
+            ? 'Editar Vínculo de Módulo'
+            : 'Vincular Módulo'
+      }
+      size="large"
+      footer={
+        <>
+          <Button variant="secondary" disabled={submitting} onClick={onClose}>
+            {vinculoPublicId ? 'Concluir' : 'Cancelar'}
+          </Button>
+          {podeEditarVinculo && (
+            <Button
+              type="submit"
+              form="modulo-apolice-form"
+              loading={submitting}
+            >
+              {vinculoPublicId
+                ? 'Salvar vínculo'
+                : 'Salvar vínculo e continuar'}
+            </Button>
           )}
-
-          <div className="flex flex-col gap-1">
-            <label htmlFor="moduloPublicId" className="form-label font-medium text-texto-principal">
-              Módulo <span className="text-red-500">*</span>
-            </label>
-            <Controller
-              name="moduloPublicId"
-              control={criarForm.control}
-              render={({ field }) => (
-                <Select
-                  {...field}
-                  id="moduloPublicId"
-                  error={!!criarForm.formState.errors.moduloPublicId}
-                  disabled={carregandoCatalogo}
-                  placeholder={carregandoCatalogo ? 'Carregando...' : 'Selecione um módulo...'}
+        </>
+      }
+    >
+      <div className="flex flex-col gap-4">
+        {erro && (
+          <Alert variant="error" title="Erro ao salvar vínculo">
+            {erro}
+          </Alert>
+        )}
+        {sucesso && (
+          <Alert variant="success" title="Salvo">
+            {sucesso}
+          </Alert>
+        )}
+        <form
+          id="modulo-apolice-form"
+          onSubmit={(e) => void salvar(e)}
+          className="flex flex-col gap-3"
+        >
+          <fieldset
+            disabled={submitting || !podeEditarVinculo}
+            className="flex flex-col gap-3"
+          >
+            {!vinculoPublicId ? (
+              <>
+                <FormField
+                  label="Módulo"
+                  required
+                  error={errosCampos.moduloPublicId}
                 >
-                  <option value="" disabled>
-                    Selecione um módulo...
-                  </option>
-                  {catalogoModulos.map((m) => (
-                    <option key={m.publicId} value={m.publicId}>
-                      {m.nome}
-                      {m.descricao ? ` — ${m.descricao}` : ''}
-                    </option>
-                  ))}
-                </Select>
-              )}
-            />
-            {criarForm.formState.errors.moduloPublicId && (
-              <p className="form-error">{criarForm.formState.errors.moduloPublicId.message}</p>
-            )}
-            {!carregandoCatalogo && catalogoModulos.length === 0 && (
-              <p className="text-sm text-texto-terciario mt-1">
-                Nenhum módulo disponível para vincular a esta apólice.
+                  <Select
+                    placeholder={
+                      carregando
+                        ? 'Carregando Módulos...'
+                        : 'Selecione um Módulo'
+                    }
+                    value={moduloPublicId}
+                    disabled={carregando}
+                    options={catalogo.map((m) => ({
+                      label: m.nome,
+                      value: m.publicId,
+                    }))}
+                    onChange={(e) => setModuloPublicId(e.target.value)}
+                  />
+                </FormField>
+                {erroCatalogo && (
+                  <Alert variant="error" title="Erro ao carregar Módulos">
+                    {erroCatalogo}
+                  </Alert>
+                )}
+                {!carregando && !erroCatalogo && catalogo.length === 0 && (
+                  <p className="text-sm text-texto-secundario">
+                    Nenhum Módulo disponível para vincular a esta Apólice.
+                  </p>
+                )}
+                <p className="text-sm text-texto-secundario">
+                  Salve o vínculo para cadastrar seu Plano e suas Coberturas na
+                  próxima etapa.
+                </p>
+              </>
+            ) : (
+              <p className="font-medium text-texto-principal">
+                Módulo: {nomeModulo}
               </p>
             )}
-          </div>
-
-          <CamposCompartilhados
-            register={criarForm.register}
-            control={criarForm.control}
-            errors={criarForm.formState.errors}
-          />
-        </form>
-      )}
-
-      {/* ── Modo Edição ── */}
-      {isEdicao && moduloEdicao && (
-        <form
-          id="modulo-apolice-editar-form"
-          onSubmit={editarForm.handleSubmit(onSubmitEditar)}
-          className="flex flex-col gap-4"
-        >
-          {errorFeedback && (
-            <Alert variant="error" title="Erro ao salvar">
-              {errorFeedback}
-            </Alert>
-          )}
-
-          {/* Módulo em modo somente leitura — não pode ser alterado na edição */}
-          <div className="flex flex-col gap-1">
-            <span className="form-label font-medium text-texto-principal">Módulo</span>
-            <div className="p-3 bg-fundo-secundario border border-borda rounded-md">
-              <p className="font-medium text-texto-principal">{moduloEdicao.nome}</p>
-              {moduloEdicao.descricao && (
-                <p className="text-sm text-texto-secundario mt-0.5">{moduloEdicao.descricao}</p>
-              )}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <FormField
+                label="Início de Vigência"
+                error={errosCampos.dataInicio}
+              >
+                <Input
+                  type="date"
+                  value={dataInicio}
+                  onChange={(e) => setDataInicio(e.target.value)}
+                />
+              </FormField>
+              <FormField label="Fim de Vigência" error={errosCampos.dataFim}>
+                <Input
+                  type="date"
+                  value={dataFim}
+                  onChange={(e) => setDataFim(e.target.value)}
+                />
+              </FormField>
             </div>
-          </div>
-
-          <CamposCompartilhados
-            register={editarForm.register}
-            control={editarForm.control}
-            errors={editarForm.formState.errors}
-          />
+            <FormField label="Observação" error={errosCampos.observacao}>
+              <Textarea
+                value={observacao}
+                onChange={(e) => setObservacao(e.target.value)}
+              />
+            </FormField>
+          </fieldset>
         </form>
-      )}
+        {vinculoPublicId && (
+          <PlanoModuloEditor
+            key={vinculoPublicId}
+            apolicePublicId={apolicePublicId}
+            moduloPublicId={vinculoPublicId}
+          />
+        )}
+      </div>
     </Modal>
   );
-};
+}

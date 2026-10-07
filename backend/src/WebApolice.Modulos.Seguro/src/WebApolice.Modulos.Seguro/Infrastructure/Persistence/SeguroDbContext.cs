@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models;
@@ -47,12 +47,7 @@ public partial class SeguroDbContext : DbContext
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
         if (!optionsBuilder.IsConfigured)
-        {
-#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
-            optionsBuilder.UseNpgsql("Host=painel.bravida.com.br;Port=5432;Database=webapolice_teste;Username=bravito;Password=Bravida@2023!");
-        }
-        
-        optionsBuilder.ConfigureWarnings(w => w.Ignore(Microsoft.EntityFrameworkCore.Diagnostics.RelationalEventId.PendingModelChangesWarning));
+            throw new InvalidOperationException("Configure a conex?o PostgreSQL externamente antes de criar o contexto.");
     }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -67,6 +62,8 @@ public partial class SeguroDbContext : DbContext
             entity.HasKey(e => e.Id).HasName("cobertura_pkey");
 
             entity.ToTable("cobertura", "seguro");
+            entity.Property(e => e.PublicId).HasColumnName("public_id").HasDefaultValueSql("gen_random_uuid()");
+            entity.HasIndex(e => e.PublicId).IsUnique();
 
             entity.HasIndex(e => e.Nome, "ix_cobertura_nome_trgm")
                 .HasMethod("gin")
@@ -143,6 +140,8 @@ public partial class SeguroDbContext : DbContext
             entity.HasKey(e => e.Id).HasName("plano_pkey");
 
             entity.ToTable("plano", "seguro");
+            entity.Property(e => e.PublicId).HasColumnName("public_id").HasDefaultValueSql("gen_random_uuid()");
+            entity.HasIndex(e => e.PublicId).IsUnique();
 
             entity.HasIndex(e => e.Nome, "ix_plano_nome_trgm")
                 .HasMethod("gin")
@@ -779,6 +778,17 @@ public partial class SeguroDbContext : DbContext
                 .HasColumnName("updated_at");
         });
 
+        modelBuilder.Entity<PlanoCoberturaModel>(entity =>
+        {
+            entity.ToTable("plano_cobertura", "seguro");
+            entity.HasKey(e=>e.Id);
+            entity.Property(e=>e.PremioTitular).HasPrecision(18, 2).HasColumnName("premio_titular");
+            entity.Property(e=>e.PremioConjuge).HasPrecision(18, 2).HasColumnName("premio_conjuge");
+            entity.Property(e=>e.Id).UseIdentityAlwaysColumn();
+            entity.HasIndex(e=>new { e.PlanoId,e.CoberturaId }).IsUnique();
+            entity.HasOne(e=>e.Plano).WithMany().HasForeignKey(e=>e.PlanoId).OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne(e=>e.Cobertura).WithMany().HasForeignKey(e=>e.CoberturaId).OnDelete(DeleteBehavior.Restrict);
+        });
         OnModelCreatingPartial(modelBuilder);
     }
 

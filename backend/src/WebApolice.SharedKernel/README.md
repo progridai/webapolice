@@ -14,3 +14,7 @@ Este projeto destina-se a conter exclusivamente tipos e abstrações verdadeiram
 
 ## Classe Marcadora
 A classe `SharedKernelMarker` é disponibilizada apenas como ponto de referência de assembly para testes arquiteturais e varredura de reflexão (Reflection).
+
+## Regra obrigatória de dados: Title Case
+
+Todo texto humano deve ser normalizado em todas as entradas e na persistência. Campos técnicos e evidências históricas preservam suas regras. Consulte a [política geral](../../../docs/26-padronizacao-title-case.md) e o `AGENTS.md` da raiz antes de implementar novos campos, módulos ou importadores.

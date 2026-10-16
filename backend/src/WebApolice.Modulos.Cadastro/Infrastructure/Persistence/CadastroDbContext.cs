@@ -6,7 +6,7 @@ using WebApolice.Modulos.Cadastro.Infrastructure.Persistence.Models.Vinculos;
 
 namespace WebApolice.Modulos.Cadastro.Infrastructure.Persistence;
 
-public class CadastroDbContext : DbContext
+public class CadastroDbContext : global::WebApolice.Shared.Infrastructure.Persistence.TextoPadronizadoDbContext
 {
     public CadastroDbContext(DbContextOptions<CadastroDbContext> options)
         : base(options)

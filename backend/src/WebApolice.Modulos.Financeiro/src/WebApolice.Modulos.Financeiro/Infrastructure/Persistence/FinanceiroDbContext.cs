@@ -5,7 +5,7 @@ using WebApolice.Modulos.Financeiro.src.WebApolice.Modulos.Financeiro.Infrastruc
 
 namespace WebApolice.Modulos.Financeiro.src.WebApolice.Modulos.Financeiro.Infrastructure.Persistence;
 
-public partial class FinanceiroDbContext : DbContext
+public partial class FinanceiroDbContext : global::WebApolice.Shared.Infrastructure.Persistence.TextoPadronizadoDbContext
 {
     public FinanceiroDbContext()
     {

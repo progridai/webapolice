@@ -5,7 +5,7 @@ using WebApolice.Modulos.Comissao.src.WebApolice.Modulos.Comissao.Infrastructure
 
 namespace WebApolice.Modulos.Comissao.src.WebApolice.Modulos.Comissao.Infrastructure.Persistence;
 
-public partial class ComissaoDbContext : DbContext
+public partial class ComissaoDbContext : global::WebApolice.Shared.Infrastructure.Persistence.TextoPadronizadoDbContext
 {
     public ComissaoDbContext()
     {

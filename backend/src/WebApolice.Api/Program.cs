@@ -305,6 +305,7 @@ app.UseCors("Frontend");
 app.UseAuthentication();
 app.UseMiddleware<ProvisionamentoUsuarioMiddleware>();
 app.UseAuthorization();
+app.UseMiddleware<WebApolice.Api.Infrastructure.PadronizacaoTextoMiddleware>();
 
 // =============================================================================
 // ENDPOINTS PÚBLICOS

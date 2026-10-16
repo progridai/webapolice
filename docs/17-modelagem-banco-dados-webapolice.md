@@ -307,3 +307,7 @@ A adoção e integração do banco de dados na aplicação seguirá uma ordem de
 > Banco orienta o domínio,
 > backend traduz domínio em casos de uso,
 > frontend consome DTOs próprios da experiência do usuário.
+
+## Padronização textual obrigatória
+
+Os campos humanos de todos os módulos são persistidos em Title Case. Colunas técnicas, de pesquisa normalizada e de evidências históricas mantêm o formato próprio. Consulte [26-padronizacao-title-case.md](26-padronizacao-title-case.md), incluindo o script transacional para normalizar dados existentes e instalar os triggers que cobrem SQL direto e importadores. Não há alteração de tipo ou tamanho das colunas.

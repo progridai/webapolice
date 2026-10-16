@@ -5,7 +5,7 @@ using WebApolice.Shared.Infrastructure.Persistence.Models;
 
 namespace WebApolice.Shared.Infrastructure.Persistence;
 
-public partial class InfraestruturaDbContext : DbContext
+public partial class InfraestruturaDbContext : global::WebApolice.Shared.Infrastructure.Persistence.TextoPadronizadoDbContext
 {
     public InfraestruturaDbContext()
     {

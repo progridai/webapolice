@@ -5,7 +5,7 @@ using WebApolice.Shared.Infrastructure.Persistence.Models;
 
 namespace WebApolice.Shared.Infrastructure.Persistence;
 
-public partial class CoreDbContext : DbContext
+public partial class CoreDbContext : global::WebApolice.Shared.Infrastructure.Persistence.TextoPadronizadoDbContext
 {
     public CoreDbContext()
     {

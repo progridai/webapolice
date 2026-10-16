@@ -16,6 +16,7 @@
  * REGRA: Nenhuma chamada HTTP deve ser feita diretamente em componentes visuais.
  * Use sempre este cliente ou funções de api/ dentro de features.
  */
+import { normalizeHumanData } from './titleCase';
 import { API_CONFIG } from './apiConfig';
 import { HttpApiError, normalizeError, normalizeNetworkError } from './httpError';
 import type { HttpOptions, HttpResponse } from './http.types';
@@ -116,7 +117,7 @@ async function request<T>(
   };
 
   if (body !== undefined) {
-    requestOptions.body = JSON.stringify(body);
+    requestOptions.body = JSON.stringify(normalizeHumanData(body));
   }
 
   const url = buildUrl(path, options.params);

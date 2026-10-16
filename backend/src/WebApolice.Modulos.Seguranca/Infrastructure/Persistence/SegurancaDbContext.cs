@@ -5,7 +5,7 @@ using WebApolice.Modulos.Seguranca.Domain.Relacionamentos;
 
 namespace WebApolice.Modulos.Seguranca.Infrastructure.Persistence;
 
-public class SegurancaDbContext : DbContext
+public class SegurancaDbContext : global::WebApolice.Shared.Infrastructure.Persistence.TextoPadronizadoDbContext
 {
     public SegurancaDbContext(DbContextOptions<SegurancaDbContext> options) : base(options)
     {

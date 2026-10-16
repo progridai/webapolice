@@ -63,6 +63,18 @@ describe('httpClient', () => {
     expect((options as RequestInit).method).toBe('POST');
   });
 
+  it('normaliza dados humanos no envio e preserva contratos técnicos', async () => {
+    mockFetch.mockResolvedValue(mockResponse(201, {}));
+    await httpClient.post('/api/clientes', {
+      nome: 'JOÃO DA SILVA', email: 'ABC@EXAMPLE.COM', codigo: 'abc-X',
+      dependentes: [{ nome: 'MARIA SOUZA' }],
+    });
+    expect(JSON.parse(mockFetch.mock.calls[0][1].body)).toEqual({
+      nome: 'João da Silva', email: 'ABC@EXAMPLE.COM', codigo: 'abc-X',
+      dependentes: [{ nome: 'Maria Souza' }],
+    });
+  });
+
   it('handles 204 responses without a body', async () => {
     mockFetch.mockResolvedValue(mockResponse(204, null));
 

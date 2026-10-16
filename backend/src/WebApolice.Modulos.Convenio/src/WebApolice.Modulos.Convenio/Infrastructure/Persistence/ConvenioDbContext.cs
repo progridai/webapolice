@@ -5,7 +5,7 @@ using WebApolice.Modulos.Convenio.src.WebApolice.Modulos.Convenio.Infrastructure
 
 namespace WebApolice.Modulos.Convenio.src.WebApolice.Modulos.Convenio.Infrastructure.Persistence;
 
-public partial class ConvenioDbContext : DbContext
+public partial class ConvenioDbContext : global::WebApolice.Shared.Infrastructure.Persistence.TextoPadronizadoDbContext
 {
     public ConvenioDbContext()
     {

@@ -5,7 +5,7 @@ using WebApolice.Modulos.Integracao.src.WebApolice.Modulos.Integracao.Infrastruc
 
 namespace WebApolice.Modulos.Integracao.src.WebApolice.Modulos.Integracao.Infrastructure.Persistence;
 
-public partial class IntegracaoDbContext : DbContext
+public partial class IntegracaoDbContext : global::WebApolice.Shared.Infrastructure.Persistence.TextoPadronizadoDbContext
 {
     public IntegracaoDbContext()
     {

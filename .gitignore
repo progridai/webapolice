@@ -49,3 +49,9 @@ scratch/
 brain/
 
 /backend/.artifacts/
+
+# Local diagnostics and generated publish output
+/backend/check_vidas.csx
+/backend/test_output.txt
+/backend/test_modulos_out.txt
+/backend/src/WebApolice.Api/out/

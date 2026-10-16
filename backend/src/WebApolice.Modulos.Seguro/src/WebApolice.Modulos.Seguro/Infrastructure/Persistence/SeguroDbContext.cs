@@ -5,7 +5,7 @@ using WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Per
 
 namespace WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence;
 
-public partial class SeguroDbContext : DbContext
+public partial class SeguroDbContext : global::WebApolice.Shared.Infrastructure.Persistence.TextoPadronizadoDbContext
 {
     public SeguroDbContext()
     {

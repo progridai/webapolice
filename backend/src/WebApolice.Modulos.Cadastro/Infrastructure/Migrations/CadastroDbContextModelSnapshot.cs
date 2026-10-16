@@ -225,6 +225,18 @@ namespace WebApolice.Modulos.Cadastro.Infrastructure.Migrations
                         .HasColumnType("date")
                         .HasColumnName("data_nascimento");
 
+                    b.Property<DateOnly?>("DataEmissaoRg")
+                        .HasColumnType("date")
+                        .HasColumnName("data_emissao_rg");
+
+                    b.Property<string>("Rg")
+                        .HasColumnType("text")
+                        .HasColumnName("rg");
+
+                    b.Property<string>("OrgaoRg")
+                        .HasColumnType("text")
+                        .HasColumnName("orgao_rg");
+
                     b.Property<string>("Nome")
                         .IsRequired()
                         .HasColumnType("text")

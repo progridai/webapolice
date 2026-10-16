@@ -201,3 +201,7 @@ As escolhas estruturais do projeto estão justificadas e documentadas em:
 * [ADR-004: Monólito Modular](file:///c:/PROJETOS/Rsul%20Automacoes/Projetos/webapolice/docs/adr/ADR-004-monolito-modular.md) (Divisão lógica de fronteiras e controle de acoplamento)
 * [ADR-005: Infraestrutura Local com Docker Compose](file:///c:/PROJETOS/Rsul%20Automacoes/Projetos/webapolice/docs/adr/ADR-005-infraestrutura-local-docker.md) (Uso de Docker Compose para PostgreSQL e Keycloak local)
 * [ADR-006: Keycloak como Provedor Central de Identidade](file:///c:/PROJETOS/Rsul%20Automacoes/Projetos/webapolice/docs/adr/ADR-006-keycloak-identidade-central.md) (Uso do Keycloak local, fluxo PKCE, clients OIDC e provisionamento automatizado)
+
+## Regra obrigatória de dados: Title Case
+
+Todo texto humano deve ser normalizado em todas as entradas e na persistência. Campos técnicos e evidências históricas preservam suas regras. Consulte a [política geral](docs/26-padronizacao-title-case.md) e o `AGENTS.md` da raiz antes de implementar novos campos, módulos ou importadores.

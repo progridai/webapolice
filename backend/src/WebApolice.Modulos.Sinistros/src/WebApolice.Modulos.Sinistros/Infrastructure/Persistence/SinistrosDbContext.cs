@@ -5,7 +5,7 @@ using WebApolice.Modulos.Sinistros.src.WebApolice.Modulos.Sinistros.Infrastructu
 
 namespace WebApolice.Modulos.Sinistros.src.WebApolice.Modulos.Sinistros.Infrastructure.Persistence;
 
-public partial class SinistrosDbContext : DbContext
+public partial class SinistrosDbContext : global::WebApolice.Shared.Infrastructure.Persistence.TextoPadronizadoDbContext
 {
     public SinistrosDbContext()
     {

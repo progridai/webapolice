@@ -73,3 +73,7 @@ export default defineConfig([
 ])
 
 ```
+
+## Regra obrigatória de dados: Title Case
+
+Todo texto humano deve ser normalizado em todas as entradas e na persistência. Campos técnicos e evidências históricas preservam suas regras. Consulte a [política geral](../../docs/26-padronizacao-title-case.md) e o `AGENTS.md` da raiz antes de implementar novos campos, módulos ou importadores.

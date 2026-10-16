@@ -56,5 +56,8 @@ internal sealed class ClienteDependenteConfiguration : IEntityTypeConfiguration<
     {
         builder.ToTable("cliente_dependente", "cadastro");
         builder.HasKey(d => d.Id);
+        builder.Property(d => d.Rg).HasColumnName("rg").HasColumnType("text").IsRequired(false);
+        builder.Property(d => d.OrgaoRg).HasColumnName("orgao_rg").HasColumnType("text").IsRequired(false);
+        builder.Property(d => d.DataEmissaoRg).HasColumnName("data_emissao_rg").HasColumnType("date").IsRequired(false);
     }
 }

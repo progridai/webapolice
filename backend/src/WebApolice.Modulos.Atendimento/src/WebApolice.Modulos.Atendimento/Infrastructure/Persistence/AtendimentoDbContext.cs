@@ -5,7 +5,7 @@ using WebApolice.Modulos.Atendimento.src.WebApolice.Modulos.Atendimento.Infrastr
 
 namespace WebApolice.Modulos.Atendimento.src.WebApolice.Modulos.Atendimento.Infrastructure.Persistence;
 
-public partial class AtendimentoDbContext : DbContext
+public partial class AtendimentoDbContext : global::WebApolice.Shared.Infrastructure.Persistence.TextoPadronizadoDbContext
 {
     public AtendimentoDbContext()
     {

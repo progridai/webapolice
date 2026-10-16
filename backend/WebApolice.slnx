@@ -15,6 +15,11 @@
     <Project Path="src/WebApolice.Modulos.Convenio/WebApolice.Modulos.Convenio.csproj" />
     <Project Path="src/WebApolice.Modulos.Documentos/WebApolice.Modulos.Documentos.csproj" />
   </Folder>
+  <Folder Name="/tools/">
+    <Project Path="tools/ClientesMigrationSimulator/ClientesMigrationSimulator.csproj" />
+    <Project Path="tools/CatalogosMigrationImporter/CatalogosMigrationImporter.csproj" />
+    <Project Path="tools/ClientesMigrationImporter/ClientesMigrationImporter.csproj" />
+  </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/WebApolice.Api.Tests/WebApolice.Api.Tests.csproj" />
     <Project Path="tests/WebApolice.Architecture.Tests/WebApolice.Architecture.Tests.csproj" />

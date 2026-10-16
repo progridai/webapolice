@@ -358,3 +358,7 @@ Apesar da modelagem inicial clara, durante o desenrolar das sprints algumas deci
 * A exibição dos dependentes deverá constar integralmente já na versão inicial de resumo?
 * Os relatórios, propostas vinculadas e arquivos do cliente serão sub-abas dinâmicas de chamadas HTTP assíncronas na mesma rota de página, ou haverá separação de *routes* distintas no React Router?
 * Os títulos financeiros e repasses irão requerer `role` e política de IAM adicional apartada das permissões de Gestor de Clientes regular?
+
+## Padronização textual obrigatória
+
+Os campos humanos de todos os módulos são persistidos em Title Case. Colunas técnicas, de pesquisa normalizada e de evidências históricas mantêm o formato próprio. Consulte [26-padronizacao-title-case.md](26-padronizacao-title-case.md), incluindo o script transacional para normalizar dados existentes e instalar os triggers que cobrem SQL direto e importadores. Não há alteração de tipo ou tamanho das colunas.

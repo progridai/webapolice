@@ -29,6 +29,7 @@ $function$;
 -- Instala trigger para INSERT/UPDATE, incluindo COPY e SQL que não usam EF.
 DO $block$
 DECLARE target record; assignments text; arguments text; changed bigint;
+        normalize_existing boolean := coalesce(nullif(current_setting('webapolice.title_case_normalizar_existentes', true), ''), 'on')::boolean;
 BEGIN
     FOR target IN
         SELECT c.table_schema, c.table_name, array_agg(c.column_name ORDER BY c.ordinal_position) AS fields
@@ -49,9 +50,12 @@ BEGIN
           INTO assignments, arguments FROM unnest(target.fields) f;
         EXECUTE format('DROP TRIGGER IF EXISTS webapolice_title_case ON %I.%I', target.table_schema, target.table_name);
         EXECUTE format('CREATE TRIGGER webapolice_title_case BEFORE INSERT OR UPDATE ON %I.%I FOR EACH ROW EXECUTE FUNCTION public.webapolice_normalizar_textos(%s)', target.table_schema, target.table_name, arguments);
-        EXECUTE format('UPDATE %I.%I SET %s WHERE %s', target.table_schema, target.table_name, assignments,
-            (SELECT string_agg(format('%I IS DISTINCT FROM public.webapolice_title_case(%I)', f, f), ' OR ') FROM unnest(target.fields) f));
-        GET DIAGNOSTICS changed = ROW_COUNT;
+        changed := 0;
+        IF normalize_existing THEN
+            EXECUTE format('UPDATE %I.%I SET %s WHERE %s', target.table_schema, target.table_name, assignments,
+                (SELECT string_agg(format('%I IS DISTINCT FROM public.webapolice_title_case(%I)', f, f), ' OR ') FROM unnest(target.fields) f));
+            GET DIAGNOSTICS changed = ROW_COUNT;
+        END IF;
         RAISE NOTICE 'Title Case: %.%: % registros alterados', target.table_schema, target.table_name, changed;
     END LOOP;
 END;

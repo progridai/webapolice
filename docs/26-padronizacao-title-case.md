@@ -22,6 +22,8 @@ Permanecem nas regras próprias: senhas/tokens, username/sub/roles, e-mails, URL
 
 Aplicar o script integralmente na conexão do ambiente de destino durante a implantação, após as migrations. Verificar backup recuperável antes da execução: a capitalização anterior não pode ser inferida após a conversão. O script registra somente tabela e quantidade de linhas alteradas, sem dados pessoais. Para simular, substituir o COMMIT final por ROLLBACK. Confirmar as contagens e eventuais colisões de nomes únicos na homologação antes da produção. Não executar apenas partes do arquivo.
 
+Para instalar ou atualizar a proteção de novas gravações sem normalizar o histórico existente, executar `SET webapolice.title_case_normalizar_existentes = 'off';` na mesma sessão antes do script integral. Esse modo instala as mesmas funções e triggers e não executa os UPDATEs em lote; o padrão continua sendo normalizar os registros existentes. Restaurar a configuração com `RESET webapolice.title_case_normalizar_existentes;` ao terminar. Correções pontuais devem preservar antes uma imagem original do registro. Fazer push não atualiza processos da API em execução: recompilar e reiniciar o processo no ambiente de destino também é necessário.
+
 A função SQL usa a classificação alfabética/capitalização do locale UTF-8 da base. Validar os exemplos com acentos no ambiente de destino. Preservar as colunas de pesquisa normalizadas; elas não recebem Title Case.
 
 ## Novas implementações

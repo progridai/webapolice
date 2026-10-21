@@ -23,7 +23,15 @@ public class KeycloakUsuariosAdminClient : IKeycloakUsuariosAdminClient
     {
         _httpClient = httpClient;
         _options = options.Value;
-        
+
+        if (string.IsNullOrWhiteSpace(_options.BaseUrl))
+        {
+            throw new InvalidOperationException(
+                "A configuração 'KeycloakAdmin:BaseUrl' é obrigatória e está vazia. " +
+                "Defina a variável de ambiente 'KeycloakAdmin__BaseUrl' no servidor/container " +
+                "(ex: 'https://auth.bravida.com.br') ou adicione a seção 'KeycloakAdmin' no appsettings.json.");
+        }
+
         _httpClient.BaseAddress = new Uri(_options.BaseUrl.TrimEnd('/'));
     }
 

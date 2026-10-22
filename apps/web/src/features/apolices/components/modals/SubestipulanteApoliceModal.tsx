@@ -99,8 +99,10 @@ export const SubestipulanteApoliceModal: React.FC<SubestipulanteApoliceModalProp
 
       onSucesso();
       onClose();
-    } catch (error: any) {
-      setErrorFeedback(error.response?.data?.message || 'Ocorreu um erro ao salvar o vínculo.');
+    } catch (error: unknown) {
+      setErrorFeedback(
+        error instanceof Error && error.message ? error.message : 'Ocorreu um erro ao salvar o vínculo.',
+      );
     } finally {
       setSubmitting(false);
     }
@@ -108,7 +110,7 @@ export const SubestipulanteApoliceModal: React.FC<SubestipulanteApoliceModalProp
 
   const footer = (
     <>
-      <Button type="button" variant="ghost" onClick={onClose} disabled={submitting}>
+      <Button type="button" variant="text" onClick={onClose} disabled={submitting}>
         Cancelar
       </Button>
       <Button type="submit" form="subestipulante-form" variant="primary" loading={submitting}>

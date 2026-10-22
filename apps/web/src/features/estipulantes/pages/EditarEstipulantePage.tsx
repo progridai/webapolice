@@ -148,7 +148,7 @@ export const EditarEstipulantePage: React.FC = () => {
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-64">
-        <Spinner size="lg" />
+        <Spinner size="large" />
       </div>
     );
   }

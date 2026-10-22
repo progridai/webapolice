@@ -258,8 +258,6 @@ describe('UI Components Unit Tests', () => {
           currentPage={1}
           totalPages={3}
           onPageChange={handlePageChange}
-          totalItems={15}
-          pageSize={5}
         />
       );
 

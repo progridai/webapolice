@@ -231,7 +231,7 @@ export const SubestipulantesListPage: React.FC = () => {
           <div className="flex flex-col gap-2">
             <span>{error}</span>
             <div>
-              <Button variant="secondary" size="sm" onClick={carregarSubestipulantes}>
+              <Button variant="secondary" size="small" onClick={carregarSubestipulantes}>
                 Tentar novamente
               </Button>
             </div>
@@ -304,8 +304,6 @@ export const SubestipulantesListPage: React.FC = () => {
           <Pagination
             currentPage={pagina}
             totalPages={Math.ceil(total / tamanhoPagina)}
-            totalItems={total}
-            pageSize={tamanhoPagina}
             onPageChange={setPagina}
           />
         )}

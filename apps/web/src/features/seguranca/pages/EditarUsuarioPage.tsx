@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { UsuarioForm, type UsuarioFormData } from '../components/UsuarioForm';
+import { UsuarioForm, type EditarUsuarioFormData } from '../components/UsuarioForm';
 import { obterUsuarioDetalhe, atualizarUsuario } from '../api/usuariosApi';
 import { listarPerfis } from '../api/perfisApi';
 import { Alert, PageHeader, Breadcrumbs, Spinner, Button } from '../../../components/ui';
@@ -10,7 +10,7 @@ export const EditarUsuarioPage: React.FC = () => {
   const { publicId } = useParams<{ publicId: string }>();
   const navigate = useNavigate();
 
-  const [initialData, setInitialData] = useState<Partial<UsuarioFormData> | null>(null);
+  const [initialData, setInitialData] = useState<Partial<EditarUsuarioFormData> | null>(null);
   const [perfis, setPerfis] = useState<PerfilDto[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -44,7 +44,7 @@ export const EditarUsuarioPage: React.FC = () => {
     fetch();
   }, [publicId]);
 
-  const handleSubmit = async (data: UsuarioFormData) => {
+  const handleSubmit = async (data: EditarUsuarioFormData) => {
     if (!publicId) return;
     setIsSubmitting(true);
     setError(null);
@@ -68,7 +68,7 @@ export const EditarUsuarioPage: React.FC = () => {
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-64">
-        <Spinner size="lg" />
+        <Spinner size="large" />
       </div>
     );
   }

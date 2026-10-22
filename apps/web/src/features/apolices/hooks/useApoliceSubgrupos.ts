@@ -14,9 +14,17 @@ export function useApoliceSubgrupos(publicId: string | undefined) {
       setError(null);
       const result = await listarApoliceSubgrupos(publicId);
       setData(result);
-    } catch (err: any) {
-      if (err.name === 'AbortError') return;
-      setError(err);
+    } catch (err: unknown) {
+      if (
+        (err instanceof Error || err instanceof DOMException) &&
+        err.name === 'AbortError'
+      )
+        return;
+      setError(
+        err instanceof Error
+          ? err
+          : new Error('Erro ao carregar subgrupos da apólice'),
+      );
     } finally {
       setIsLoading(false);
     }

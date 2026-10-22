@@ -14,7 +14,7 @@ import { SubestipulanteFormPage } from '../pages/SubestipulanteFormPage';
 export const SubestipulantesRoutes = (
   <Route
     element={
-      <PermissionProtectedRoute permissoes={['subestipulantes.visualizar']}>
+      <PermissionProtectedRoute permissaoCodigo="subestipulantes.visualizar">
         <AuthenticatedLayout />
       </PermissionProtectedRoute>
     }
@@ -23,7 +23,7 @@ export const SubestipulantesRoutes = (
     <Route
       path={ROUTES.SUBESTIPULANTE_NOVO}
       element={
-        <PermissionProtectedRoute permissoes={['subestipulantes.inserir']}>
+        <PermissionProtectedRoute permissaoCodigo="subestipulantes.inserir">
           <SubestipulanteFormPage />
         </PermissionProtectedRoute>
       }
@@ -31,7 +31,7 @@ export const SubestipulantesRoutes = (
     <Route
       path={ROUTES.SUBESTIPULANTE_EDITAR}
       element={
-        <PermissionProtectedRoute permissoes={['subestipulantes.alterar']}>
+        <PermissionProtectedRoute permissaoCodigo="subestipulantes.alterar">
           <SubestipulanteFormPage />
         </PermissionProtectedRoute>
       }

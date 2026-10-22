@@ -85,30 +85,34 @@ export const PerfilForm: React.FC<PerfilFormProps> = ({
             />
           </FormField>
           
-          <FormField label="Descrição" error={errors.descricao?.message} className="col-span-1 md:col-span-2">
-            <Input
-              {...register('descricao')}
-              disabled={isSubmitting}
-              placeholder="Ex: Acesso aos relatórios e aprovações de vendas."
-              error={!!errors.descricao}
-            />
-          </FormField>
+          <div className="col-span-1 md:col-span-2">
+            <FormField label="Descrição" error={errors.descricao?.message}>
+              <Input
+                {...register('descricao')}
+                disabled={isSubmitting}
+                placeholder="Ex: Acesso aos relatórios e aprovações de vendas."
+                error={!!errors.descricao}
+              />
+            </FormField>
+          </div>
 
-          <FormField label="Status" className="col-span-1 md:col-span-2">
-            <Controller
-              name="ativo"
-              control={control}
-              render={({ field }) => (
-                <Checkbox
-                  id="ativo"
-                  label="Perfil ativo no sistema"
-                  checked={field.value}
-                  onChange={(e) => field.onChange(e.target.checked)}
-                  disabled={isSubmitting}
-                />
-              )}
-            />
-          </FormField>
+          <div className="col-span-1 md:col-span-2">
+            <FormField label="Status">
+              <Controller
+                name="ativo"
+                control={control}
+                render={({ field }) => (
+                  <Checkbox
+                    id="ativo"
+                    label="Perfil ativo no sistema"
+                    checked={field.value}
+                    onChange={(e) => field.onChange(e.target.checked)}
+                    disabled={isSubmitting}
+                  />
+                )}
+              />
+            </FormField>
+          </div>
         </FormGrid>
       </FormSection>
 
@@ -130,7 +134,7 @@ export const PerfilForm: React.FC<PerfilFormProps> = ({
       </FormSection>
 
       <FormActions>
-        <Button type="button" variant="ghost" onClick={onCancel} disabled={isSubmitting}>
+        <Button type="button" variant="text" onClick={onCancel} disabled={isSubmitting}>
           Cancelar
         </Button>
         <Button type="submit" variant="primary" loading={isSubmitting}>

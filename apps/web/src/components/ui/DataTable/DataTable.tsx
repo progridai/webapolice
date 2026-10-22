@@ -1,4 +1,4 @@
-import React, { ReactNode, useState } from 'react';
+import React, { type ReactNode, useState } from 'react';
 import { Table, TableHeader, TableBody, TableRow, TableCell } from '../Table';
 import { SortIcon, ChevronRightIcon } from '../Icons';
 import { Skeleton } from '../Skeleton';

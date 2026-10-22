@@ -9,7 +9,7 @@ import { RamoFormPage } from '../pages/RamoFormPage';
 export const RamosRoutes = (
   <Route
     element={
-      <PermissionProtectedRoute permissoes={['ramos.visualizar']}>
+      <PermissionProtectedRoute permissaoCodigo="ramos.visualizar">
         <AuthenticatedLayout />
       </PermissionProtectedRoute>
     }

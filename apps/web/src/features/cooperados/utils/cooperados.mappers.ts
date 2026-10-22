@@ -5,11 +5,11 @@ import { normalizeCpf, normalizeCep, normalizePhone, normalizeText } from '../..
  * Converte o estado do formulário para o Payload DTO esperado pela API,
  * aplicando a normalização defensiva e estrita exigida pelo contrato canônico.
  */
-export function toCadastrarCooperadoRequest(data: CooperadoFormData): any {
-  const payload: any = { ...data };
+export function toCadastrarCooperadoRequest(data: CooperadoFormData): CooperadoFormData {
+  const payload = { ...data };
 
   // Remove campos vazios para não falhar bind na API
-  Object.keys(payload).forEach(key => {
+  (Object.keys(payload) as (keyof CooperadoFormData)[]).forEach(key => {
     if (payload[key] === '' || payload[key] === null || payload[key] === undefined) {
       delete payload[key];
     }

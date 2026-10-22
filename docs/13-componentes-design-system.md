@@ -76,7 +76,12 @@ Botão interativo com suporte a variantes, tamanhos e estados.
 <Button variant="danger" onClick={handleDelete}>
   Excluir
 </Button>
+<Button variant="secondary" onClick={handleNovo}>
+  <PlusIcon size={16} aria-hidden="true" /> Novo
+</Button>
 ```
+
+Ícones são compostos em `children`. Use `loading` para desabilitar o botão e indicar processamento; `icon` e `isLoading` não pertencem ao contrato de `Button`.
 
 ---
 
@@ -145,8 +150,11 @@ Mensagem de feedback com variantes semânticas e ícones automáticos.
 </Alert>
 <Alert variant="error" onClose={() => setError(null)}>
   Falha ao conectar com o servidor.
+  <Button variant="secondary" size="small" onClick={retry}>Tentar novamente</Button>
 </Alert>
 ```
+
+Use `variant` para a semântica do feedback. Ações ficam em `children`; não existem propriedades `type` ou `action` no componente. Erros e avisos usam `role="alert"`; sucesso e informação usam `role="status"` por padrão.
 
 ---
 
@@ -366,10 +374,11 @@ Controle de paginação desacoplado.
   currentPage={pagina}
   totalPages={totalPaginas}
   onPageChange={(p) => setPagina(p)}
-  totalItems={total}
-  pageSize={10}
 />
+<ResultsSummary currentPage={pagina} totalItems={total} pageSize={10} />
 ```
+
+`Pagination` controla a navegação; as contagens ficam em `ResultsSummary`.
 
 ---
 
@@ -739,7 +748,7 @@ Padroniza ações por linha: botão primário visível + menu dropdown para aç�
 Popover posicionado para menus contextuais. Fecha ao clicar fora ou ao selecionar item.
 
 ```tsx
-<DropdownMenu align="right" trigger={<Button icon={<MoreVerticalIcon />} aria-label="Mais ações" />}>
+<DropdownMenu align="right" trigger={<Button aria-label="Mais ações"><MoreVerticalIcon /></Button>}>
   <DropdownMenuItem icon={<EditIcon />} onClick={handleEditar}>Editar</DropdownMenuItem>
   <DropdownMenuItem icon={<XCircleIcon />} className="row-actions-item-danger" onClick={handleInativar}>
     Inativar
@@ -784,3 +793,36 @@ Centralizados em `Icons.tsx`, todos em `currentColor`:
 | `XCircleIcon` | "Inativar" |
 | `UsersIcon` | Contexto de clientes |
 | `HomeIcon` | Navegação inicial |
+
+## FormField com campos controlados — 21/10/2026
+
+Com React Hook Form, coloque o `FormField` dentro do `render` do `Controller`, envolvendo diretamente o campo que encaminha os atributos ao HTML:
+
+```tsx
+<Controller
+  name="cnpj"
+  control={control}
+  render={({ field }) => (
+    <FormField label="CNPJ" error={errors.cnpj?.message}>
+      <CnpjInput {...field} value={field.value || ''} />
+    </FormField>
+  )}
+/>
+```
+
+Envolver o próprio `Controller` com `FormField` impede que o campo receba o ID associado ao rótulo, `aria-invalid` e `aria-describedby`. Verificar o nome acessível e a associação da mensagem de erro, inclusive em campos com máscara. Regressão: `apps/web/tests/forms/FormAccessibility.test.tsx`. Resultados no [registro de estabilização](29-estabilizacao-frontend.md).
+
+## Tipos de entrada e saída dos formulários — 21/10/2026
+
+Schemas com coerção, transformação ou valor padrão podem ter tipos diferentes antes e depois da validação. Use o tipo de entrada no estado/controladores e o tipo de saída no callback de envio:
+
+```tsx
+type FormInput = z.input<typeof schema>;
+type FormData = z.output<typeof schema>;
+
+const { control, handleSubmit } = useForm<FormInput, unknown, FormData>({
+  resolver: zodResolver(schema),
+});
+```
+
+Os componentes filhos que recebem `control` devem manter os mesmos três parâmetros de `Control`. `register` e `setValue` usam `FormInput`; erros de uma linha de coleção devem representar o schema da linha. Não force a saída sobre a entrada com casts do resolver ou `any`. Nas coerções numéricas de controles HTML, `z.coerce.number<string | number>()` descreve os valores digitados e os valores iniciais, sem alterar a conversão em execução. Ver exemplos reais e validações no [lote de formulários](32-estabilizacao-formularios.md).

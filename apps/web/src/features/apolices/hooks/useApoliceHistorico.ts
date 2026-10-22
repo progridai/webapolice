@@ -17,14 +17,16 @@ export function useApoliceHistorico(publicId: string | undefined, page: number =
         setIsLoading(true);
         setError(null);
         const result = await listarApoliceHistorico(publicId!, page, pageSize, controller.signal);
-        // eslint-disable-next-line react-hooks/set-state-in-effect
         setData(result);
-      } catch (err: any) {
-        if (err.name === 'AbortError') return;
-        // eslint-disable-next-line react-hooks/set-state-in-effect
-        setError(err);
+      } catch (err: unknown) {
+        if (
+          (err instanceof Error || err instanceof DOMException) &&
+          err.name === 'AbortError'
+        ) return;
+        setError(
+          err instanceof Error ? err : new Error('Erro ao carregar histórico da apólice'),
+        );
       } finally {
-        // eslint-disable-next-line react-hooks/set-state-in-effect
         setIsLoading(false);
       }
     }

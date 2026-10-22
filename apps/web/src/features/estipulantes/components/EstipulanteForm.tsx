@@ -20,7 +20,7 @@ const ESTADOS_BRASILEIROS = [
 
 const contatoSchema = z.object({
   tipoContato: z.string().min(1, 'Selecione o tipo de contato'),
-  valor: z.string().optional().or(z.literal('')),
+  valor: z.string().optional().or(z.literal('')).default(''),
   principal: z.boolean().default(false),
 }).superRefine((data, ctx) => {
   if (!data.valor || data.valor.trim() === '') return;
@@ -50,7 +50,7 @@ const estipulanteSchema = z.object({
     complemento: z.string().max(100, 'Máximo de 100 caracteres').optional().or(z.literal('')),
     bairro: z.string().max(100, 'Máximo de 100 caracteres').optional().or(z.literal('')),
     uf: z.string().max(2).optional().or(z.literal('')),
-    cidadeId: z.coerce.number().optional().or(z.literal(0)),
+    cidadeId: z.coerce.number<string | number>().optional().or(z.literal(0)),
   }).optional(),
   
   contatos: z.array(contatoSchema),
@@ -79,7 +79,8 @@ const estipulanteSchema = z.object({
   }),
 });
 
-export type EstipulanteFormData = z.infer<typeof estipulanteSchema>;
+type EstipulanteFormInput = z.input<typeof estipulanteSchema>;
+export type EstipulanteFormData = z.output<typeof estipulanteSchema>;
 
 interface EstipulanteFormProps {
   initialData?: Partial<EstipulanteFormData>;
@@ -105,7 +106,7 @@ export const EstipulanteForm: React.FC<EstipulanteFormProps> = ({
     reset,
     setValue,
     formState: { errors },
-  } = useForm<EstipulanteFormData>({
+  } = useForm<EstipulanteFormInput, unknown, EstipulanteFormData>({
     resolver: zodResolver(estipulanteSchema),
     defaultValues: {
       razaoSocial: initialData?.razaoSocial || '',
@@ -266,7 +267,7 @@ export const EstipulanteForm: React.FC<EstipulanteFormProps> = ({
       .map(c => ({
         ...c,
         valor: (c.tipoContato === 'TELEFONE' || c.tipoContato === 'CELULAR') 
-          ? normalizePhone(c.valor!) 
+          ? normalizePhone(c.valor)
           : c.valor
       }));
       
@@ -351,19 +352,19 @@ export const EstipulanteForm: React.FC<EstipulanteFormProps> = ({
       <FormSection title="Endereço" icon={<HomeIcon size={20} />}>
         <FormGrid>
           <div className="lg:col-span-3">
-            <FormField label="CEP" error={errors.endereco?.cep?.message}>
-              <Controller
-                name="endereco.cep"
-                control={control}
-                render={({ field }) => (
+            <Controller
+              name="endereco.cep"
+              control={control}
+              render={({ field }) => (
+                <FormField label="CEP" error={errors.endereco?.cep?.message}>
                   <CepInput
                     {...field}
                     value={field.value || ''}
                     placeholder="00000-000"
                   />
-                )}
-              />
-            </FormField>
+                </FormField>
+              )}
+            />
           </div>
 
           <div className="lg:col-span-7">
@@ -402,11 +403,11 @@ export const EstipulanteForm: React.FC<EstipulanteFormProps> = ({
           </div>
 
           <div className="lg:col-span-3">
-            <FormField label="Cidade" error={errors.endereco?.cidadeId?.message}>
-              <Controller
-                name="endereco.cidadeId"
-                control={control}
-                render={({ field }) => (
+            <Controller
+              name="endereco.cidadeId"
+              control={control}
+              render={({ field }) => (
+                <FormField label="Cidade" error={errors.endereco?.cidadeId?.message}>
                   <Select 
                     {...field} 
                     value={field.value || ""} 
@@ -417,9 +418,9 @@ export const EstipulanteForm: React.FC<EstipulanteFormProps> = ({
                       <option key={c.id} value={c.id}>{c.nome}</option>
                     ))}
                   </Select>
-                )}
-              />
-            </FormField>
+                </FormField>
+              )}
+            />
           </div>
         </FormGrid>
       </FormSection>
@@ -500,7 +501,7 @@ export const EstipulanteForm: React.FC<EstipulanteFormProps> = ({
           <div className="flex justify-start mt-2">
             <Button
               type="button"
-              variant="outline"
+              variant="secondary"
               onClick={() => appendContato({ tipoContato: 'EMAIL', valor: '', principal: false })}
             >
               <PlusIcon size={16} className="mr-2" />
@@ -541,19 +542,19 @@ export const EstipulanteForm: React.FC<EstipulanteFormProps> = ({
                   </FormField>
                 </div>
                 <div className="lg:col-span-3">
-                  <FormField label="Telefone" error={errors.contatosInstitucionais?.[index]?.telefone?.message}>
-                    <Controller
-                      name={`contatosInstitucionais.${index}.telefone`}
-                      control={control}
-                      render={({ field: phoneInstField }) => (
+                  <Controller
+                    name={`contatosInstitucionais.${index}.telefone`}
+                    control={control}
+                    render={({ field: phoneInstField }) => (
+                      <FormField label="Telefone" error={errors.contatosInstitucionais?.[index]?.telefone?.message}>
                         <PhoneInput 
                           {...phoneInstField} 
                           value={phoneInstField.value || ''} 
                           placeholder="(00) 0000-0000" 
                         />
-                      )}
-                    />
-                  </FormField>
+                      </FormField>
+                    )}
+                  />
                 </div>
                 <div className="lg:col-span-3">
                   <FormField label="Ramal" error={errors.contatosInstitucionais?.[index]?.ramal?.message}>
@@ -566,7 +567,7 @@ export const EstipulanteForm: React.FC<EstipulanteFormProps> = ({
           <div className="flex justify-start mt-2">
             <Button
               type="button"
-              variant="outline"
+              variant="secondary"
               onClick={() => appendContatoInst({ nome: '', departamento: '', email: '', telefone: '', ramal: '' })}
             >
               <PlusIcon size={16} className="mr-2" />
@@ -579,34 +580,34 @@ export const EstipulanteForm: React.FC<EstipulanteFormProps> = ({
       <FormSection title="Configuração Operacional" icon={<BriefcaseIcon size={20} />}>
         <FormGrid>
           <div className="lg:col-span-6">
-            <FormField label="Início de Vigência" required error={errors.configuracao?.dataInicioVigencia?.message}>
-              <Controller
-                name="configuracao.dataInicioVigencia"
-                control={control}
-                render={({ field: dateInitField }) => (
+            <Controller
+              name="configuracao.dataInicioVigencia"
+              control={control}
+              render={({ field: dateInitField }) => (
+                <FormField label="Início de Vigência" required error={errors.configuracao?.dataInicioVigencia?.message}>
                   <DateInput 
                     {...dateInitField} 
                     value={dateInitField.value || ''} 
                     placeholder="DD/MM/YYYY" 
                   />
-                )}
-              />
-            </FormField>
+                </FormField>
+              )}
+            />
           </div>
           <div className="lg:col-span-6">
-            <FormField label="Fim de Vigência" error={errors.configuracao?.dataFimVigencia?.message}>
-              <Controller
-                name="configuracao.dataFimVigencia"
-                control={control}
-                render={({ field: dateFimField }) => (
+            <Controller
+              name="configuracao.dataFimVigencia"
+              control={control}
+              render={({ field: dateFimField }) => (
+                <FormField label="Fim de Vigência" error={errors.configuracao?.dataFimVigencia?.message}>
                   <DateInput 
                     {...dateFimField} 
                     value={dateFimField.value || ''} 
                     placeholder="DD/MM/YYYY" 
                   />
-                )}
-              />
-            </FormField>
+                </FormField>
+              )}
+            />
           </div>
         </FormGrid>
       </FormSection>

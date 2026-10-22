@@ -30,13 +30,13 @@ export const ClientesTable: React.FC<ClientesTableProps> = ({
   const navigate = useNavigate();
   const location = useLocation();
 
-  const handleVerDetalhes = (id: number) => {
-    navigate(createPath(ROUTES.CLIENTE_DETALHES, { id: String(id) }), {
+  const handleVerDetalhes = (id: ClienteListItem['id']) => {
+    navigate(createPath(ROUTES.CLIENTE_DETALHES, { id }), {
       state: { fromListagem: true, search: location.search },
     });
   };
 
-  const handleEditar = (id: number) => {
+  const handleEditar = (id: ClienteListItem['id']) => {
     navigate(`/clientes/${id}/editar`);
   };
 

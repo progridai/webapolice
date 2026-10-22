@@ -1,4 +1,4 @@
-import React, { forwardRef } from 'react';
+import { forwardRef } from 'react';
 import ReactAsyncSelect from 'react-select/async';
 import type { GroupBase, StylesConfig } from 'react-select';
 

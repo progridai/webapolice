@@ -1,6 +1,6 @@
 import React from 'react';
 import { Select, Button, FilterBar, SearchField } from '../../../components/ui';
-import type { ClientesQuery, StatusClienteEnum } from '../types/cliente.types';
+import type { ClientesQuery } from '../types/cliente.types';
 import './ClientesFilters.css';
 
 interface ClientesFiltersProps {
@@ -58,7 +58,7 @@ export const ClientesFilters: React.FC<ClientesFiltersProps> = ({
           value={filters.status || ''}
           onChange={(event) =>
             onFilterChange({ 
-              status: event.target.value as unknown as StatusClienteEnum | '',
+              status: event.target.value === '1' ? 1 : event.target.value === '2' ? 2 : '',
               page: 1 // Reset to first page on filter change
             })
           }

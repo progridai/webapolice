@@ -17,7 +17,7 @@ const ESTADOS_BRASILEIROS = [
 ];
 
 const formSchema = z.object({
-  tipo: z.coerce.number().min(1).max(2),
+  tipo: z.coerce.number<string | number>().min(1).max(2).pipe(z.union([z.literal(1), z.literal(2)])),
   nome: z.string().min(3, 'Nome é obrigatório e deve ter no mínimo 3 caracteres'),
   cpf: z.string().refine(isValidCpf, 'CPF inválido'),
   dataNascimento: z.string().optional().or(z.literal('')),
@@ -40,19 +40,18 @@ const formSchema = z.object({
   complemento: z.string().optional().or(z.literal('')),
   bairro: z.string().optional().or(z.literal('')),
   uf: z.string().max(2).optional().or(z.literal('')),
-  cidadeId: z.coerce.number().optional().or(z.literal(0)),
+  cidadeId: z.coerce.number<string | number>().optional().or(z.literal(0)),
   
-  numeroDependentes: z.coerce.number().optional(),
+  numeroDependentes: z.coerce.number<string | number>().optional(),
   dataInscricao: z.string().optional().or(z.literal('')),
   credenciado: z.boolean().default(false),
   
-  bancoId: z.coerce.number().optional().or(z.literal(0)),
+  bancoId: z.coerce.number<string | number>().optional().or(z.literal(0)),
   agencia: z.string().trim().max(10, 'Máximo 10 caracteres').regex(/^[a-zA-Z0-9-]*$/, 'Formato inválido').optional().or(z.literal('')),
   contaCorrente: z.string().trim().max(20, 'Máximo 20 caracteres').regex(/^[a-zA-Z0-9-]*$/, 'Formato inválido').optional().or(z.literal('')),
   
   observacao: z.string().optional().or(z.literal('')),
 }).superRefine((data, ctx) => {
-  console.log('Zod superRefine payload:', data);
   if (data.tipo === 1 && !data.coordenadorId) {
     ctx.addIssue({
       path: ['coordenadorId'],
@@ -62,7 +61,8 @@ const formSchema = z.object({
   }
 });
 
-type FormSchemaType = z.infer<typeof formSchema>;
+type FormSchemaInput = z.input<typeof formSchema>;
+type FormSchemaType = z.output<typeof formSchema>;
 
 interface CooperadoFormProps {
   initialData?: CooperadoFormData;
@@ -85,7 +85,7 @@ export const CooperadoForm: React.FC<CooperadoFormProps> = ({
   const [pendingCidadeId, setPendingCidadeId] = useState<number | null>(null);
   const lastFetchedCepRef = useRef<string | null>(initialData?.cep || null);
 
-  const { register, control, handleSubmit, formState: { errors }, watch, setValue, setError, clearErrors } = useForm<FormSchemaType>({
+  const { register, control, handleSubmit, formState: { errors }, watch, setValue, setError, clearErrors } = useForm<FormSchemaInput, unknown, FormSchemaType>({
     resolver: zodResolver(formSchema),
     defaultValues: initialData || {
       tipo: 1,
@@ -203,7 +203,7 @@ export const CooperadoForm: React.FC<CooperadoFormProps> = ({
 
   const handleFormSubmit = async (data: FormSchemaType) => {
     const payload = toCadastrarCooperadoRequest(data);
-    await onSubmit(payload as CooperadoFormData);
+    await onSubmit(payload);
   };
 
   return (
@@ -221,9 +221,11 @@ export const CooperadoForm: React.FC<CooperadoFormProps> = ({
             <Input {...register('codigo')} placeholder="Código interno" />
           </FormField>
 
-          <FormField label="Nome" required error={errors.nome?.message} className="md:col-span-2">
-            <Input {...register('nome')} placeholder="Nome completo" />
-          </FormField>
+          <div className="md:col-span-2">
+            <FormField label="Nome" required error={errors.nome?.message}>
+              <Input {...register('nome')} placeholder="Nome completo" />
+            </FormField>
+          </div>
 
           <FormField label="CPF" required error={errors.cpf?.message}>
             <CpfInput {...register('cpf')} placeholder="000.000.000-00" />
@@ -234,14 +236,16 @@ export const CooperadoForm: React.FC<CooperadoFormProps> = ({
           </FormField>
 
           {tipoSelecionado === 1 && (
-            <FormField label="Coordenador responsável" required error={errors.coordenadorId?.message} className="md:col-span-2">
-              <Select {...register('coordenadorId')}>
-                <option value="">Selecione um coordenador...</option>
-                {coordenadores.map(c => (
-                  <option key={c.publicId} value={c.publicId}>{c.nome}</option>
-                ))}
-              </Select>
-            </FormField>
+            <div className="md:col-span-2">
+              <FormField label="Coordenador responsável" required error={errors.coordenadorId?.message}>
+                <Select {...register('coordenadorId')}>
+                  <option value="">Selecione um coordenador...</option>
+                  {coordenadores.map(c => (
+                    <option key={c.publicId} value={c.publicId}>{c.nome}</option>
+                  ))}
+                </Select>
+              </FormField>
+            </div>
           )}
         </FormGrid>
       </FormSection>
@@ -285,9 +289,11 @@ export const CooperadoForm: React.FC<CooperadoFormProps> = ({
           <FormField label={`CEP${isBuscandoCep ? ' (Buscando...)' : ''}`} error={errors.cep?.message}>
             <CepInput {...register('cep')} placeholder="00000-000" />
           </FormField>
-          <FormField label="Logradouro" className="md:col-span-2" error={errors.logradouro?.message}>
-            <Input {...register('logradouro')} placeholder="Rua, Avenida, etc." />
-          </FormField>
+          <div className="md:col-span-2">
+            <FormField label="Logradouro" error={errors.logradouro?.message}>
+              <Input {...register('logradouro')} placeholder="Rua, Avenida, etc." />
+            </FormField>
+          </div>
           <FormField label="Número" error={errors.numero?.message}>
             <Input {...register('numero')} placeholder="Número" />
           </FormField>
@@ -305,14 +311,16 @@ export const CooperadoForm: React.FC<CooperadoFormProps> = ({
               ))}
             </Select>
           </FormField>
-          <FormField label="Cidade" error={errors.cidadeId?.message} className="md:col-span-2">
-            <Select {...register('cidadeId')} disabled={loadingCidades || !ufSelecionada}>
-              <option value="">{loadingCidades ? 'Carregando...' : 'Selecione uma cidade...'}</option>
-              {cidades.map(c => (
-                <option key={c.id} value={c.id}>{c.nome}</option>
-              ))}
-            </Select>
-          </FormField>
+          <div className="md:col-span-2">
+            <FormField label="Cidade" error={errors.cidadeId?.message}>
+              <Select {...register('cidadeId')} disabled={loadingCidades || !ufSelecionada}>
+                <option value="">{loadingCidades ? 'Carregando...' : 'Selecione uma cidade...'}</option>
+                {cidades.map(c => (
+                  <option key={c.id} value={c.id}>{c.nome}</option>
+                ))}
+              </Select>
+            </FormField>
+          </div>
         </FormGrid>
       </FormSection>
 
@@ -343,9 +351,11 @@ export const CooperadoForm: React.FC<CooperadoFormProps> = ({
 
       <FormSection title="Dados Bancários" description="Informações para repasse financeiro.">
         <FormGrid>
-          <FormField label="Banco" error={errors.bancoId?.message} className="md:col-span-2">
-            <Input type="number" {...register('bancoId')} placeholder="ID do Banco" />
-          </FormField>
+          <div className="md:col-span-2">
+            <FormField label="Banco" error={errors.bancoId?.message}>
+              <Input type="number" {...register('bancoId')} placeholder="ID do Banco" />
+            </FormField>
+          </div>
           <FormField label="Agência" error={errors.agencia?.message}>
             <Input {...register('agencia')} placeholder="Número da agência" />
           </FormField>
@@ -356,7 +366,7 @@ export const CooperadoForm: React.FC<CooperadoFormProps> = ({
       </FormSection>
 
       <FormSection title="Observações" description="Informações adicionais.">
-        <FormField error={errors.observacao?.message}>
+        <FormField label="Observações" error={errors.observacao?.message}>
           <Textarea {...register('observacao')} placeholder="Observações..." rows={4} />
         </FormField>
       </FormSection>

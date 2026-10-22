@@ -18,7 +18,7 @@ export interface ClienteEnderecoResponse {
   complemento: string;
   bairro: string;
   cidade: string;
-  cidadeId?: number;
+  cidadeId?: number | null;
   uf: string;
   principal: boolean;
   ativo: boolean;
@@ -41,7 +41,7 @@ export interface ClienteDependenteResponse {
 }
 
 export interface ClienteDetalheResponse {
-  id: number;
+  id: string;
   nome: string;
   documento: string;
   documentoMascarado: string;

@@ -14,7 +14,7 @@ import { SeguradoraFormPage } from '../pages/SeguradoraFormPage';
 export const SeguradorasRoutes = (
   <Route
     element={
-      <PermissionProtectedRoute permissoes={['seguradoras.visualizar']}>
+      <PermissionProtectedRoute permissaoCodigo="seguradoras.visualizar">
         <AuthenticatedLayout />
       </PermissionProtectedRoute>
     }
@@ -23,7 +23,7 @@ export const SeguradorasRoutes = (
     <Route
       path={ROUTES.SEGURADORA_NOVA}
       element={
-        <PermissionProtectedRoute permissoes={['seguradoras.inserir']}>
+        <PermissionProtectedRoute permissaoCodigo="seguradoras.inserir">
           <SeguradoraFormPage />
         </PermissionProtectedRoute>
       }
@@ -31,7 +31,7 @@ export const SeguradorasRoutes = (
     <Route
       path={ROUTES.SEGURADORA_EDITAR}
       element={
-        <PermissionProtectedRoute permissoes={['seguradoras.alterar']}>
+        <PermissionProtectedRoute permissaoCodigo="seguradoras.alterar">
           <SeguradoraFormPage />
         </PermissionProtectedRoute>
       }

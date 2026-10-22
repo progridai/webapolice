@@ -68,7 +68,7 @@ export const ModulosPage: React.FC = () => {
                       <span style={{ fontWeight: '600', fontSize: '1.125rem', color: 'var(--cor-texto-principal)' }}>
                         {modulo.nome}
                       </span>
-                      {isSeguranca && <Badge variant="primary">Essencial</Badge>}
+                      {isSeguranca && <Badge variant="brand">Essencial</Badge>}
                     </div>
                   </div>
                   {recursosOpcionais.length > 0 && (

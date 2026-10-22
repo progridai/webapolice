@@ -38,7 +38,7 @@ describe('Convênio do Subgrupo', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.mocked(catalogosApi.conveniosSubgrupo).mockResolvedValue([]);
-    vi.mocked(criarApoliceSubgrupo).mockResolvedValue('novo');
+    vi.mocked(criarApoliceSubgrupo).mockResolvedValue({ subgrupoPublicId: 'novo' });
     vi.mocked(alterarApoliceSubgrupo).mockResolvedValue(undefined);
   });
 

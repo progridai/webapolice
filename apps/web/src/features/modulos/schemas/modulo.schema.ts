@@ -12,4 +12,5 @@ export const moduloFormSchema = z.object({
   ativo: z.boolean().default(true),
 });
 
-export type ModuloFormData = z.infer<typeof moduloFormSchema>;
+export type ModuloFormInput = z.input<typeof moduloFormSchema>;
+export type ModuloFormData = z.output<typeof moduloFormSchema>;

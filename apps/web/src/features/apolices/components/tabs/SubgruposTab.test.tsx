@@ -1,9 +1,9 @@
-import { vi } from 'vitest';
-import React from 'react';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { SubgruposTab } from './SubgruposTab';
 import { useApoliceSubgrupos } from '../../hooks/useApoliceSubgrupos';
 import { useAuthorization } from '../../../../auth/AuthorizationProvider';
+import { makeAuthorization } from '../../../../../tests/helpers/authorization';
 import { inativarApoliceSubgrupo } from '../../api/apolices.api';
 
 // Mock dos hooks e API
@@ -12,29 +12,31 @@ vi.mock('../../../../auth/AuthorizationProvider');
 vi.mock('../../api/apolices.api');
 
 vi.mock('../modals/SubgrupoApoliceModal', () => ({
-  SubgrupoApoliceModal: ({ aberto }: { aberto: boolean }) => (
-    aberto ? <div data-testid="mock-modal-aberto">MODAL ABERTO</div> : null
-  )
+  SubgrupoApoliceModal: ({ aberto }: { aberto: boolean }) =>
+    aberto ? <div data-testid="mock-modal-aberto">MODAL ABERTO</div> : null,
 }));
 
-const mockUseApoliceSubgrupos = useApoliceSubgrupos as any;
-const mockUseAuthorization = useAuthorization as any;
-const mockInativarApoliceSubgrupo = inativarApoliceSubgrupo as any;
+const mockUseApoliceSubgrupos = vi.mocked(useApoliceSubgrupos);
+const mockUseAuthorization = vi.mocked(useAuthorization);
+const mockInativarApoliceSubgrupo = vi.mocked(inativarApoliceSubgrupo);
 
 const renderComponent = () => {
-  return render(
-    <SubgruposTab publicId="apolice-123" />
-  );
+  return render(<SubgruposTab publicId="apolice-123" />);
 };
 
 describe('SubgruposTab', () => {
-  const mockPossuiPermissao = vi.fn();
-  const mockRefetch = vi.fn();
+  const mockPossuiPermissao =
+    vi.fn<ReturnType<typeof useAuthorization>['possuiPermissao']>();
+  const mockRefetch = vi
+    .fn<ReturnType<typeof useApoliceSubgrupos>['refetch']>()
+    .mockResolvedValue(undefined);
 
   beforeEach(() => {
     vi.clearAllMocks();
-    mockUseAuthorization.mockReturnValue({ possuiPermissao: mockPossuiPermissao });
-    
+    mockUseAuthorization.mockReturnValue(
+      makeAuthorization({ possuiPermissao: mockPossuiPermissao }),
+    );
+
     // Default mock implementation para o hook
     mockUseApoliceSubgrupos.mockReturnValue({
       data: [],
@@ -56,7 +58,9 @@ describe('SubgruposTab', () => {
   });
 
   it('renderiza o estado vazio com botão se tiver permissão de inserir', () => {
-    mockPossuiPermissao.mockImplementation((perm: string) => perm === 'apolices.subgrupos.inserir');
+    mockPossuiPermissao.mockImplementation(
+      (perm: string) => perm === 'apolices.subgrupos.inserir',
+    );
     renderComponent();
     expect(screen.getByText('Nenhum Subgrupo cadastrado')).toBeTruthy();
     expect(screen.getByText('Adicionar Subgrupo')).toBeTruthy();
@@ -74,9 +78,9 @@ describe('SubgruposTab', () => {
         {
           subgrupoPublicId: 'sub-2',
           nome: 'Filial 1',
-          observacao: null,
+          observacao: undefined,
           ativo: false,
-        }
+        },
       ],
       isLoading: false,
       error: null,
@@ -87,20 +91,22 @@ describe('SubgruposTab', () => {
     expect(screen.getByText('Matriz')).toBeTruthy();
     expect(screen.getByText('Sede central')).toBeTruthy();
     expect(screen.getByText('Filial 1')).toBeTruthy();
-    expect(screen.getByText('—')).toBeTruthy(); // observacao nula agora usa dash m-dash
-    
+    expect(screen.getByText('—')).toBeTruthy(); // Observação ausente usa travessão.
+
     // Status badges
     expect(screen.getByText('Ativo')).toBeTruthy();
     expect(screen.getByText('Inativo')).toBeTruthy();
   });
 
   it('abre modal ao clicar em Adicionar Subgrupo', async () => {
-    mockPossuiPermissao.mockImplementation((perm: string) => perm === 'apolices.subgrupos.inserir');
+    mockPossuiPermissao.mockImplementation(
+      (perm: string) => perm === 'apolices.subgrupos.inserir',
+    );
     renderComponent();
-    
+
     const addButton = screen.getByText('Adicionar Subgrupo');
     fireEvent.click(addButton);
-    
+
     await waitFor(() => {
       expect(screen.getByTestId('mock-modal-aberto')).toBeTruthy();
     });
@@ -113,7 +119,7 @@ describe('SubgruposTab', () => {
           subgrupoPublicId: 'sub-1',
           nome: 'Matriz',
           ativo: true,
-        }
+        },
       ],
       isLoading: false,
       error: null,
@@ -126,25 +132,27 @@ describe('SubgruposTab', () => {
     expect(screen.queryByText('Inativar')).toBeNull();
 
     // Com permissões
-    mockPossuiPermissao.mockImplementation((perm: string) => 
-      perm === 'apolices.subgrupos.alterar' || perm === 'apolices.subgrupos.inativar'
+    mockPossuiPermissao.mockImplementation(
+      (perm: string) =>
+        perm === 'apolices.subgrupos.alterar' ||
+        perm === 'apolices.subgrupos.inativar',
     );
-    rerender(
-      <SubgruposTab publicId="apolice-123" />
-    );
+    rerender(<SubgruposTab publicId="apolice-123" />);
     expect(screen.getByText('Editar')).toBeTruthy();
     expect(screen.getByText('Inativar')).toBeTruthy();
   });
 
   it('simula a inativação de um subgrupo ativo', async () => {
-    mockPossuiPermissao.mockImplementation((perm: string) => perm === 'apolices.subgrupos.inativar');
+    mockPossuiPermissao.mockImplementation(
+      (perm: string) => perm === 'apolices.subgrupos.inativar',
+    );
     mockUseApoliceSubgrupos.mockReturnValue({
       data: [
         {
           subgrupoPublicId: 'sub-1',
           nome: 'Matriz',
           ativo: true,
-        }
+        },
       ],
       isLoading: false,
       error: null,
@@ -152,7 +160,7 @@ describe('SubgruposTab', () => {
     });
 
     renderComponent();
-    
+
     // Clicar Inativar
     fireEvent.click(screen.getByText('Inativar'));
 
@@ -163,12 +171,17 @@ describe('SubgruposTab', () => {
     mockInativarApoliceSubgrupo.mockResolvedValueOnce(undefined);
 
     // Confirmar inativação (botão Inativar do modal)
-    const inativarButtons = screen.getAllByText('Inativar').filter((el: any) => el.tagName === 'BUTTON');
+    const inativarButtons = screen
+      .getAllByText('Inativar')
+      .filter((el) => el.tagName === 'BUTTON');
     const confirmButton = inativarButtons[inativarButtons.length - 1]; // O último é o do modal
     fireEvent.click(confirmButton!);
 
     await waitFor(() => {
-      expect(mockInativarApoliceSubgrupo).toHaveBeenCalledWith('apolice-123', 'sub-1');
+      expect(mockInativarApoliceSubgrupo).toHaveBeenCalledWith(
+        'apolice-123',
+        'sub-1',
+      );
       expect(mockRefetch).toHaveBeenCalled();
       // O dialog deve ter sumido (ou ao menos o título mudado/escondido)
       expect(screen.queryByText(/Deseja inativar este Subgrupo/)).toBeNull();

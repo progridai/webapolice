@@ -23,6 +23,18 @@ export interface ApolicesQuery {
   vigenciaDataReferencia?: string;
 }
 
+/** Contrato atual de POST/PUT da base da Apólice; as referências ainda são numéricas. */
+export interface SalvarApoliceRequest {
+  estipulanteId: number;
+  seguradoraId: number;
+  corretoraId: number | null;
+  nome: string;
+  dataInicioVigencia: string;
+  dataFimVigencia: string | null;
+  dataAniversario: string | null;
+  observacao?: string;
+}
+
 export interface PagedResult<T> {
   items: T[];
   totalCount: number;

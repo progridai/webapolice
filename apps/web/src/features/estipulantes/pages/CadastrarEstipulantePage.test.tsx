@@ -1,4 +1,3 @@
-import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
 import { vi, describe, it, expect, beforeEach } from 'vitest';
@@ -59,7 +58,7 @@ describe('CadastrarEstipulantePage', () => {
     );
 
     fireEvent.change(screen.getByLabelText(/Razão Social/i), { target: { value: 'Empresa Teste' } });
-    fireEvent.change(screen.getByLabelText(/CNPJ/i), { target: { value: '12.345.678/0001-90' } });
+    fireEvent.input(screen.getByLabelText(/CNPJ/i), { target: { value: '61.198.164/0001-60' } });
     fireEvent.change(screen.getByLabelText(/Início de Vigência/i), { target: { value: '2026-01-01' } });
 
     fireEvent.click(screen.getByRole('button', { name: /Salvar Estipulante/i }));
@@ -68,7 +67,7 @@ describe('CadastrarEstipulantePage', () => {
       expect(api.cadastrarEstipulante).toHaveBeenCalledWith({
         razaoSocial: 'Empresa Teste',
         nomeFantasia: '',
-        cnpj: '12345678000190',
+        cnpj: '61198164000160',
         codigo: '',
         observacao: '',
         configuracao: {
@@ -94,7 +93,7 @@ describe('CadastrarEstipulantePage', () => {
     );
 
     fireEvent.change(screen.getByLabelText(/Razão Social/i), { target: { value: 'Empresa Teste' } });
-    fireEvent.change(screen.getByLabelText(/CNPJ/i), { target: { value: '12.345.678/0001-90' } });
+    fireEvent.input(screen.getByLabelText(/CNPJ/i), { target: { value: '61.198.164/0001-60' } });
     fireEvent.change(screen.getByLabelText(/Início de Vigência/i), { target: { value: '2026-01-01' } });
 
     fireEvent.click(screen.getByRole('button', { name: /Salvar Estipulante/i }));
@@ -114,7 +113,7 @@ describe('CadastrarEstipulantePage', () => {
     );
 
     fireEvent.change(screen.getByLabelText(/Razão Social/i), { target: { value: 'Empresa Teste' } });
-    fireEvent.change(screen.getByLabelText(/CNPJ/i), { target: { value: '12.345.678/0001-90' } });
+    fireEvent.input(screen.getByLabelText(/CNPJ/i), { target: { value: '61.198.164/0001-60' } });
     fireEvent.change(screen.getByLabelText(/Início de Vigência/i), { target: { value: '2026-01-01' } });
 
     fireEvent.click(screen.getByRole('button', { name: /Salvar Estipulante/i }));

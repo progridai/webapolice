@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { UsuarioForm, type UsuarioFormData } from '../components/UsuarioForm';
+import { UsuarioForm, type CriarUsuarioFormData } from '../components/UsuarioForm';
 import { criarUsuario } from '../api/usuariosApi';
 import { listarPerfis } from '../api/perfisApi';
 import { Alert, PageHeader, Breadcrumbs, Spinner } from '../../../components/ui';
@@ -28,7 +28,7 @@ export const CadastrarUsuarioPage: React.FC = () => {
     fetch();
   }, []);
 
-  const handleSubmit = async (data: UsuarioFormData) => {
+  const handleSubmit = async (data: CriarUsuarioFormData) => {
     setIsSubmitting(true);
     setError(null);
     try {
@@ -36,7 +36,7 @@ export const CadastrarUsuarioPage: React.FC = () => {
         username: data.username,
         nome: data.nome,
         email: data.email,
-        senhaTemporaria: data.senhaTemporaria || '', // existirá pq é criação
+        senhaTemporaria: data.senhaTemporaria,
         ativo: data.ativo,
         perfilPublicIds: data.perfilPublicIds,
       });
@@ -55,7 +55,7 @@ export const CadastrarUsuarioPage: React.FC = () => {
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-64">
-        <Spinner size="lg" />
+        <Spinner size="large" />
       </div>
     );
   }

@@ -8,7 +8,7 @@ import type {
   EstipulanteListItem, EstipulantesQuery, PagedResult, 
   CriarEstipulanteRequest, EstipulanteResponse,
   AtualizarEstipulanteRequest, EstipulanteDetalheResponse,
-  EstipulanteConfiguracaoRequest, EstipulanteConfiguracaoResponse 
+  EstipulanteConfiguracaoResponse
 } from '../types/estipulante.types';
 
 /**
@@ -54,7 +54,9 @@ export async function listarEstipulantes(
   const params = new URLSearchParams();
 
   if (query.page) params.append('pagina', query.page.toString());
-  if (query.pageSize) params.append('tamanho_pagina', query.pageSize.toString());
+  if (query.pageSize) params.append('tamanhoPagina', query.pageSize.toString());
+  if (query.nome) params.append('nome', query.nome);
+  if (query.cnpj) params.append('cnpj', query.cnpj);
   if (query.busca) params.append('busca', query.busca);
   if (query.status) params.append('status', query.status.toString());
   if (query.sortBy) params.append('ordenar_por', query.sortBy);

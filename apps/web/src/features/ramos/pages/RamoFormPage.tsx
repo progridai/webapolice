@@ -74,7 +74,7 @@ export const RamoFormPage: React.FC = () => {
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-64">
-        <Spinner size="lg" />
+        <Spinner size="large" />
       </div>
     );
   }
@@ -83,11 +83,11 @@ export const RamoFormPage: React.FC = () => {
     <div className="flex flex-col gap-6">
       <PageHeader 
         title={isEdit ? 'Editar Ramo' : 'Novo Ramo'} 
-        subtitle="Preencha os dados abaixo para o cadastro de Ramo"
+        description="Preencha os dados abaixo para o cadastro de Ramo"
       />
 
       {error && (
-        <Alert type="error" title="Erro ao salvar" onClose={() => setError(null)}>
+        <Alert variant="error" title="Erro ao salvar" onClose={() => setError(null)}>
           {error}
         </Alert>
       )}

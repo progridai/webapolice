@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { DataTable, StatusBadge, RowActions, Button, ConfirmDialog, XCircleIcon, CheckCircleIcon, EditIcon, EyeIcon } from '../../../components/ui';
 import type { Column } from '../../../components/ui/DataTable/DataTable';
+import type { RowActionItem } from '../../../components/ui/RowActions/RowActions';
 import type { EstipulanteListItem } from '../types/estipulante.types';
 
 interface EstipulantesTableProps {
@@ -107,7 +108,7 @@ export const EstipulantesTable: React.FC<EstipulantesTableProps> = ({
       label: 'Ações',
       align: 'right',
       render: (est) => {
-        const actions = [];
+        const actions: RowActionItem[] = [];
         if (podeAlterar && onEditar) {
           actions.push({
             label: 'Editar',
@@ -120,7 +121,7 @@ export const EstipulantesTable: React.FC<EstipulantesTableProps> = ({
             label: 'Inativar',
             icon: <XCircleIcon />,
             onClick: () => handleInativarClick(est),
-            danger: true,
+            variant: 'danger',
           });
         }
         if (!est.ativo && podeReativar) {
@@ -173,18 +174,18 @@ export const EstipulantesTable: React.FC<EstipulantesTableProps> = ({
       />
 
       <ConfirmDialog
-        isOpen={confirmDialog.isOpen}
+        aberto={confirmDialog.isOpen}
         title={confirmDialog.action === 'inativar' ? 'Inativar Estipulante?' : 'Reativar Estipulante?'}
         description={
           confirmDialog.action === 'inativar'
             ? `O estipulante ${confirmDialog.estipulante?.razaoSocial} deixará de ficar disponível para uso operacional, mas seus dados serão preservados.`
             : `O estipulante ${confirmDialog.estipulante?.razaoSocial} voltará a ficar disponível para uso operacional.`
         }
-        confirmLabel={confirmDialog.action === 'inativar' ? 'Inativar' : 'Reativar'}
-        cancelLabel="Cancelar"
+        confirmText={confirmDialog.action === 'inativar' ? 'Inativar' : 'Reativar'}
+        cancelText="Cancelar"
         variant={confirmDialog.action === 'inativar' ? 'danger' : 'primary'}
         onConfirm={confirmAction}
-        onCancel={() => setConfirmDialog({ isOpen: false, action: 'inativar', estipulante: null })}
+        onClose={() => setConfirmDialog({ isOpen: false, action: 'inativar', estipulante: null })}
       />
     </>
   );

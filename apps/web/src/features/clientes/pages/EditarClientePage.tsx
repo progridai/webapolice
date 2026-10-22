@@ -35,12 +35,12 @@ export const EditarClientePage: React.FC = () => {
           re: data.re || '',
           falecido: data.falecido || false,
           dataObito: data.dataObito ? new Date(data.dataObito).toISOString().split('T')[0] : '',
-          contatos: data.contatos?.map((c: { tipo: string; valor: string; principal: boolean }) => ({
+          contatos: data.contatos?.map(c => ({
             tipoContato: c.tipo,
             valor: c.valor,
             principal: c.principal,
           })) || [],
-          enderecos: data.enderecos?.map((e: Record<string, string>) => ({
+          enderecos: data.enderecos?.map(e => ({
             tipoEndereco: e.tipo || 'RESIDENCIAL',
             cep: e.cep || '',
             logradouro: e.logradouro || '',
@@ -117,7 +117,7 @@ export const EditarClientePage: React.FC = () => {
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-64">
-        <Spinner size="lg" />
+        <Spinner size="large" />
       </div>
     );
   }

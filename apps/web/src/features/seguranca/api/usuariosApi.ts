@@ -42,10 +42,9 @@ export async function criarUsuario(data: CriarUsuarioRequest): Promise<{ id: str
 export async function atualizarUsuario(
   publicId: string,
   data: AtualizarUsuarioRequest
-): Promise<UsuarioDetalheDto> {
-  const response = await httpClient.put<UsuarioDetalheDto>(
+): Promise<void> {
+  await httpClient.put<void>(
     `/api/seguranca/usuarios/${publicId}`,
     data
   );
-  return response.data;
 }

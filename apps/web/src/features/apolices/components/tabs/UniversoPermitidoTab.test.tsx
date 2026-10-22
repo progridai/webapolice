@@ -2,20 +2,15 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { UniversoPermitidoTab } from './UniversoPermitidoTab';
 import { useApoliceUniversoPermitido } from '../../hooks/useApoliceUniversoPermitido';
-import { useAuthorization } from '../../../../auth/AuthorizationProvider';
 import { alterarPremiosApolice } from '../../api/apolices.api';
 
 vi.mock('../../hooks/useApoliceUniversoPermitido');
-vi.mock('../../../../auth/AuthorizationProvider');
 vi.mock('../../api/apolices.api');
 const refetch = vi.fn().mockResolvedValue(undefined);
 
 describe('Prêmios no Universo Permitido', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.mocked(useAuthorization).mockReturnValue({
-      possuiPermissao: () => true,
-    } as ReturnType<typeof useAuthorization>);
     vi.mocked(useApoliceUniversoPermitido).mockReturnValue({
       isLoading: false,
       error: null,
@@ -63,10 +58,7 @@ describe('Prêmios no Universo Permitido', () => {
     expect(alterarPremiosApolice).not.toHaveBeenCalled();
   });
 
-  it('exibe os prêmios e oculta o ajuste quando não há permissão de alterar', () => {
-    vi.mocked(useAuthorization).mockReturnValue({
-      possuiPermissao: () => false,
-    } as ReturnType<typeof useAuthorization>);
+  it('preserva valores zero e herdados sem oferecer mutação no Universo anterior', () => {
     render(<UniversoPermitidoTab publicId="apolice-uuid" />);
     expect(screen.getByText(/Prêmio cônjuge:/).textContent).toContain('5,00');
     expect(

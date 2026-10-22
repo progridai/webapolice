@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { PageHeader, Alert } from '../../../components/ui';
-import { ApoliceForm } from '../components/forms/ApoliceForm';
+import { PageHeader, Alert, Button } from '../../../components/ui';
+import { ApoliceForm, type ApoliceFormInitialData } from '../components/forms/ApoliceForm';
 import { obterApolice, criarApolice, alterarApolice } from '../api/apolices.api';
 import type { ApoliceFormValues } from '../schemas/apoliceForm.schema';
 import { PageLoading } from '../../../components/application/PageLoading';
@@ -11,7 +11,7 @@ export const ApoliceFormPage: React.FC = () => {
   const isEdicao = Boolean(publicId);
   const navigate = useNavigate();
 
-  const [initialData, setInitialData] = useState<Partial<ApoliceFormValues> | undefined>(undefined);
+  const [initialData, setInitialData] = useState<ApoliceFormInitialData | undefined>(undefined);
   const [isLoadingData, setIsLoadingData] = useState(isEdicao);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -35,7 +35,7 @@ export const ApoliceFormPage: React.FC = () => {
           _seguradoraNome: apolice.seguradoraNome,
           _corretoraNome: apolice.corretoraNome,
         });
-      } catch (err: any) {
+      } catch {
         setError('Não foi possível carregar os dados da apólice.');
         // navigate('/apolices');
       } finally {
@@ -58,8 +58,8 @@ export const ApoliceFormPage: React.FC = () => {
         alert('Apólice criada com sucesso.');
         navigate(`/apolices/${result.publicId}`);
       }
-    } catch (err: any) {
-      setError(err?.response?.data?.message || 'Ocorreu um erro ao salvar a apólice. Verifique os dados.');
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Ocorreu um erro ao salvar a apólice. Verifique os dados.');
     } finally {
       setIsSaving(false);
     }
@@ -74,8 +74,7 @@ export const ApoliceFormPage: React.FC = () => {
       <PageHeader
         title={isEdicao ? 'Editar Apólice' : 'Nova Apólice'}
         description={isEdicao ? 'Altere os dados básicos da apólice' : 'Crie uma nova apólice vinculada a um estipulante'}
-        showBackButton
-        onBackClick={() => navigate(-1)}
+        actions={<Button variant="secondary" onClick={() => navigate(-1)}>Voltar</Button>}
       />
       <div className="max-w-4xl">
         {error && (

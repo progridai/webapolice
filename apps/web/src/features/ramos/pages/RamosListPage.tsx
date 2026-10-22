@@ -230,8 +230,6 @@ export const RamosListPage: React.FC = () => {
           <Pagination
             currentPage={pagina}
             totalPages={Math.ceil(total / tamanhoPagina)}
-            totalItems={total}
-            pageSize={tamanhoPagina}
             onPageChange={setPagina}
           />
         )}

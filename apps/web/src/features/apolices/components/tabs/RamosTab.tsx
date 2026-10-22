@@ -48,10 +48,13 @@ export const RamosTab: React.FC<RamosTabProps> = ({ apolice, onMutateSucesso }) 
       setFeedback({ type: 'success', message: 'Vínculo inativado com sucesso.' });
       setInativarRamoId(null);
       if (onMutateSucesso) onMutateSucesso();
-    } catch (error: any) {
+    } catch (error: unknown) {
       setFeedback({
         type: 'error',
-        message: error.response?.data?.message || 'Ocorreu um erro inesperado.',
+        message:
+          error instanceof Error && error.message
+            ? error.message
+            : 'Ocorreu um erro inesperado.',
       });
     } finally {
       setInativando(false);
@@ -78,7 +81,7 @@ export const RamosTab: React.FC<RamosTabProps> = ({ apolice, onMutateSucesso }) 
 
       {feedback && (
         <Alert 
-          type={feedback.type} 
+          variant={feedback.type}
           title={feedback.type === 'success' ? 'Sucesso' : 'Erro'} 
           onClose={() => setFeedback(null)}
           className="mb-4"

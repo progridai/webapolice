@@ -1,9 +1,10 @@
-import { vi } from 'vitest';
-import React from 'react';
+import type { ApoliceModuloResult } from '../../types/apolice.types';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { ModulosTab } from './ModulosTab';
 import { useApoliceModulos } from '../../hooks/useApoliceModulos';
 import { useAuthorization } from '../../../../auth/AuthorizationProvider';
+import { makeAuthorization } from '../../../../../tests/helpers/authorization';
 import { inativarApoliceModulo } from '../../api/apolices.api';
 
 // ── Mocks ─────────────────────────────────────────────────────────────────────
@@ -16,14 +17,14 @@ vi.mock('../modals/ModuloApoliceModal', () => ({
     aberto ? <div data-testid="mock-modal-aberto">MODAL ABERTO</div> : null,
 }));
 
-const mockUseApoliceModulos = useApoliceModulos as any;
-const mockUseAuthorization = useAuthorization as any;
-const mockInativarApoliceModulo = inativarApoliceModulo as any;
+const mockUseApoliceModulos = vi.mocked(useApoliceModulos);
+const mockUseAuthorization = vi.mocked(useAuthorization);
+const mockInativarApoliceModulo = vi.mocked(inativarApoliceModulo);
 
 // ── Fixtures ──────────────────────────────────────────────────────────────────
 // Distinção explícita: publicId = apoliceModuloPublicId, moduloPublicId = cadastro.modulo
-const moduloAtivo = {
-  publicId: 'vinculo-uuid-ativo',         // apoliceModuloPublicId (seguro.apolice_modulo)
+const moduloAtivo: ApoliceModuloResult = {
+  publicId: 'vinculo-uuid-ativo', // apoliceModuloPublicId (seguro.apolice_modulo)
   moduloPublicId: 'modulo-global-uuid-1', // publicId do cadastro.modulo
   nome: 'Módulo Funeral',
   descricao: 'Cobertura funeral familiar',
@@ -33,9 +34,9 @@ const moduloAtivo = {
   ativo: true,
 };
 
-const moduloInativo = {
-  publicId: 'vinculo-uuid-inativo',        // apoliceModuloPublicId
-  moduloPublicId: 'modulo-global-uuid-2',  // publicId do cadastro.modulo
+const moduloInativo: ApoliceModuloResult = {
+  publicId: 'vinculo-uuid-inativo', // apoliceModuloPublicId
+  moduloPublicId: 'modulo-global-uuid-2', // publicId do cadastro.modulo
   nome: 'Módulo Odonto',
   descricao: undefined,
   dataInicio: undefined,
@@ -48,12 +49,17 @@ const renderComponent = () => render(<ModulosTab publicId="apolice-abc-123" />);
 
 // ── Testes ────────────────────────────────────────────────────────────────────
 describe('ModulosTab', () => {
-  const mockPossuiPermissao = vi.fn();
-  const mockRefetch = vi.fn();
+  const mockPossuiPermissao =
+    vi.fn<ReturnType<typeof useAuthorization>['possuiPermissao']>();
+  const mockRefetch = vi
+    .fn<ReturnType<typeof useApoliceModulos>['refetch']>()
+    .mockResolvedValue(undefined);
 
   beforeEach(() => {
     vi.clearAllMocks();
-    mockUseAuthorization.mockReturnValue({ possuiPermissao: mockPossuiPermissao });
+    mockUseAuthorization.mockReturnValue(
+      makeAuthorization({ possuiPermissao: mockPossuiPermissao }),
+    );
 
     mockUseApoliceModulos.mockReturnValue({
       data: [],
@@ -75,12 +81,14 @@ describe('ModulosTab', () => {
 
   it('renderiza estado vazio COM botão quando possui permissão de inserir', () => {
     mockPossuiPermissao.mockImplementation(
-      (perm: string) => perm === 'apolices.modulos.inserir'
+      (perm: string) => perm === 'apolices.modulos.inserir',
     );
     renderComponent();
     expect(screen.getByText('Nenhum módulo vinculado')).toBeTruthy();
     // Botão no header e no EmptyState
-    expect(screen.getAllByText('Vincular Módulo').length).toBeGreaterThanOrEqual(1);
+    expect(
+      screen.getAllByText('Vincular Módulo').length,
+    ).toBeGreaterThanOrEqual(1);
   });
 
   // ── Renderização da tabela ──────────────────────────────────────────────────
@@ -117,7 +125,7 @@ describe('ModulosTab', () => {
 
   it('exibe botão Editar apenas com permissão apolices.modulos.alterar', () => {
     mockPossuiPermissao.mockImplementation(
-      (perm: string) => perm === 'apolices.modulos.alterar'
+      (perm: string) => perm === 'apolices.modulos.alterar',
     );
     mockUseApoliceModulos.mockReturnValue({
       data: [moduloAtivo],
@@ -133,7 +141,7 @@ describe('ModulosTab', () => {
 
   it('exibe botão Inativar apenas com permissão apolices.modulos.inativar', () => {
     mockPossuiPermissao.mockImplementation(
-      (perm: string) => perm === 'apolices.modulos.inativar'
+      (perm: string) => perm === 'apolices.modulos.inativar',
     );
     mockUseApoliceModulos.mockReturnValue({
       data: [moduloAtivo],
@@ -164,7 +172,7 @@ describe('ModulosTab', () => {
   // ── Abertura do modal ───────────────────────────────────────────────────────
   it('abre modal ao clicar em Vincular Módulo (com permissão de inserir)', async () => {
     mockPossuiPermissao.mockImplementation(
-      (perm: string) => perm === 'apolices.modulos.inserir'
+      (perm: string) => perm === 'apolices.modulos.inserir',
     );
     renderComponent();
 
@@ -177,7 +185,7 @@ describe('ModulosTab', () => {
 
   it('abre modal ao clicar em Editar (com permissão de alterar)', async () => {
     mockPossuiPermissao.mockImplementation(
-      (perm: string) => perm === 'apolices.modulos.alterar'
+      (perm: string) => perm === 'apolices.modulos.alterar',
     );
     mockUseApoliceModulos.mockReturnValue({
       data: [moduloAtivo],
@@ -199,7 +207,7 @@ describe('ModulosTab', () => {
   // (apoliceModuloPublicId = 'vinculo-uuid-ativo'), NÃO com moduloPublicId do cadastro
   it('chama inativarApoliceModulo com apoliceModuloPublicId (publicId do vínculo)', async () => {
     mockPossuiPermissao.mockImplementation(
-      (perm: string) => perm === 'apolices.modulos.inativar'
+      (perm: string) => perm === 'apolices.modulos.inativar',
     );
     mockUseApoliceModulos.mockReturnValue({
       data: [moduloAtivo],
@@ -217,7 +225,7 @@ describe('ModulosTab', () => {
 
     const botoesInativar = screen
       .getAllByText('Inativar')
-      .filter((el: any) => el.tagName === 'BUTTON');
+      .filter((el) => el.tagName === 'BUTTON');
     const confirmButton = botoesInativar[botoesInativar.length - 1];
     fireEvent.click(confirmButton!);
 
@@ -225,12 +233,12 @@ describe('ModulosTab', () => {
       // Deve usar publicId do VÍNCULO ('vinculo-uuid-ativo'), nunca moduloPublicId
       expect(mockInativarApoliceModulo).toHaveBeenCalledWith(
         'apolice-abc-123',
-        'vinculo-uuid-ativo'  // apoliceModuloPublicId
+        'vinculo-uuid-ativo', // apoliceModuloPublicId
       );
       // Nunca deve usar o moduloPublicId do cadastro global nesta chamada
       expect(mockInativarApoliceModulo).not.toHaveBeenCalledWith(
         'apolice-abc-123',
-        'modulo-global-uuid-1'  // moduloPublicId — ERRADO para inativação
+        'modulo-global-uuid-1', // moduloPublicId — ERRADO para inativação
       );
       expect(mockRefetch).toHaveBeenCalled();
     });
@@ -238,7 +246,7 @@ describe('ModulosTab', () => {
 
   it('exibe erro de inativação e mantém modal fechado', async () => {
     mockPossuiPermissao.mockImplementation(
-      (perm: string) => perm === 'apolices.modulos.inativar'
+      (perm: string) => perm === 'apolices.modulos.inativar',
     );
     mockUseApoliceModulos.mockReturnValue({
       data: [moduloAtivo],
@@ -251,12 +259,12 @@ describe('ModulosTab', () => {
     fireEvent.click(screen.getByText('Inativar'));
 
     mockInativarApoliceModulo.mockRejectedValueOnce(
-      new Error('Vínculo não encontrado.')
+      new Error('Vínculo não encontrado.'),
     );
 
     const botoesInativar = screen
       .getAllByText('Inativar')
-      .filter((el: any) => el.tagName === 'BUTTON');
+      .filter((el) => el.tagName === 'BUTTON');
     fireEvent.click(botoesInativar[botoesInativar.length - 1]!);
 
     await waitFor(() => {

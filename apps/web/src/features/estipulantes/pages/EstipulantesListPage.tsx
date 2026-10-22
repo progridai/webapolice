@@ -10,7 +10,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { ROUTES, createPath } from '../../../app/routes/routePaths';
 import {
   Pagination, EmptyState, Alert, Button, Skeleton, ResultsSummary,
-  PageHeader, Breadcrumbs, BriefcaseIcon, PlusIcon
+  PageHeader, Breadcrumbs, PlusIcon
 } from '../../../components/ui';
 
 export const EstipulantesListPage: React.FC = () => {
@@ -93,7 +93,8 @@ export const EstipulantesListPage: React.FC = () => {
         }
         actions={
           podeInserir ? (
-            <Button onClick={() => navigate('/estipulantes/novo')} icon={<PlusIcon size={16} />}>
+            <Button onClick={() => navigate('/estipulantes/novo')}>
+              <PlusIcon size={16} aria-hidden="true" />
               Novo Estipulante
             </Button>
           ) : undefined

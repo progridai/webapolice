@@ -44,8 +44,10 @@ export const SubestipulantesTab: React.FC<SubestipulantesTabProps> = ({ publicId
       await inativarSubestipulanteApolice(publicId, inativarSubId);
       setInativarSubId(null);
       refetch();
-    } catch (err: any) {
-      setInativarErro(err.response?.data?.message || 'Ocorreu um erro ao inativar o vínculo.');
+    } catch (err: unknown) {
+      setInativarErro(
+        err instanceof Error && err.message ? err.message : 'Ocorreu um erro ao inativar o vínculo.',
+      );
     } finally {
       setInativando(false);
     }
@@ -87,7 +89,7 @@ export const SubestipulantesTab: React.FC<SubestipulantesTabProps> = ({ publicId
     {
       key: 'status',
       label: 'Status do Vínculo',
-      render: (item) => <StatusBadge status={item.ativo ? 'ativo' : 'inativo'} label={item.ativo ? 'Ativo' : 'Inativo'} />,
+      render: (item) => <StatusBadge status={item.ativo ? 'ativo' : 'inativo'} />,
     },
     {
       key: 'acoes',

@@ -79,7 +79,7 @@ export const DetalhesPerfilPage: React.FC = () => {
   if (error || !perfil) {
     return (
       <main ref={mainRef} tabIndex={-1} className="flex flex-col gap-6 w-full max-w-[1440px] mx-auto p-0 focus:outline-none">
-        <Button variant="ghost" onClick={() => navigate('/seguranca/perfis')} className="mb-4">
+        <Button variant="text" onClick={() => navigate('/seguranca/perfis')} className="mb-4">
           ← Voltar para perfis
         </Button>
         <EmptyState
@@ -110,7 +110,7 @@ export const DetalhesPerfilPage: React.FC = () => {
         }
         actions={
           <div className="flex flex-wrap gap-2">
-            <Button variant="ghost" onClick={() => navigate('/seguranca/perfis')}>
+            <Button variant="text" onClick={() => navigate('/seguranca/perfis')}>
               Voltar
             </Button>
             {podeEditar && !perfil.perfilSistema && (

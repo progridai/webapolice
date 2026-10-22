@@ -1,5 +1,7 @@
 # Módulo Clientes: Detalhes
 
+Estado conferido no código em 21/10/2026. Validações gerais em [29 — Estabilização do Frontend](29-estabilizacao-frontend.md) e correções de identificadores, endereços e filtros em [34 — Estabilização de Clientes e Apólices](34-estabilizacao-clientes-referencias-apolices.md).
+
 ## Objetivo
 O objetivo da tela de Detalhes do Cliente é fornecer uma visão abrangente dos dados associados a um cliente de forma segura. A interface exibe:
 - Resumo do cliente (Nome, documento mascarado, status)
@@ -10,26 +12,29 @@ O objetivo da tela de Detalhes do Cliente é fornecer uma visão abrangente dos 
 - Dependentes
 
 ## Decisão de Arquitetura (Identificador)
-Apesar da modelagem ideal (vide `18-modelagem-clientes-core-cadastro.md`) sugerir o uso de `public_id`, o modelo de dados real atual da aplicação baseia-se unicamente em `id` (`long`). Em respeito à restrição de não alterar a modelagem de banco de dados e as migrations nesta etapa, o identificador adotado para rota e chamadas de API foi o `id` interno.
+O parâmetro denominado `id` na rota é um UUID público. O controller recebe `Guid`, a consulta filtra `Cliente.PublicId` e a resposta C# usa `Guid`. PKs numéricas permanecem internas. `ClienteDetalheResponse.id` e os callbacks de navegação de tabela/mobile usam texto, preservando o UUID até os endpoints de consulta e edição.
 
 - **Rota Front-end:** `/#/clientes/:id`
 - **Endpoint Back-end:** `GET /api/clientes/{id}`
 
-## Omissões por Privacidade
-Para respeitar as diretrizes de privacidade e LGPD, as seguintes informações NÃO são exibidas ou trafegadas na tela de Detalhes do Cliente:
-- `documento_principal_limpo` e `cpf_limpo` (removidos do DTO).
-- `legado_id` (removido do contrato).
-- Documentos completos sem máscara (utiliza-se a versão ofuscada do backend `***.***.***-99`).
+## Documentos e dados técnicos
+- A página utiliza `documentoMascarado` para a exibição do documento principal e dos dependentes.
+- O contrato atual também retorna `documento` completo, utilizado para preencher a edição. Portanto, a máscara de apresentação não significa que o contrato trafegue somente o valor mascarado.
+- Chaves normalizadas de busca e `legado_id` não fazem parte do contrato do detalhe.
 
 ## Tratamento de Dados (Vínculos, Endereços e Dependentes)
-No atual estado da modelagem em C# (`WebApolice.Modulos.Clientes.Domain`), as tabelas satélites de vínculos, endereços e dependentes ainda não estão persistidas nas consultas ativas de Cliente. Para evitar quebra de contrato:
-- O contrato TypeScript prevê as arrays de tipagem completa para esses itens (Ex: `enderecos`, `vinculos`, `dependentes`).
-- O back-end provê essas listas vazias inicialmente. Quando a equipe evoluir o repositório/banco para incluir essas informações associadas, o front-end já estará preparado para desenhar os Cards perfeitamente, graças aos componentes `ClienteVinculosCard`, `ClienteDependentesCard` e `ClienteEnderecosCard`.
+A implementação atual está no módulo Cadastro, em `Infrastructure/Persistence/Queries/ClientesQueries.cs`. As listas são consultadas no banco e não são placeholders:
+
+- Contatos e endereços ativos da pessoa.
+- Vínculos ativos do cliente, com nomes de estipulante/grupo quando resolvidos.
+- Dependentes do cliente, com nome, relação, CPF mascarado e nascimento.
+
+A consulta ainda devolve nomes de cidade, subgrupo e lotação como strings vazias. O contrato de detalhe também não expõe todos os dados pessoais/bancários existentes nos modelos e na migração. Cadastro e edição atuais mantêm dados principais, contatos e endereços; manutenção de vínculos e dependentes precisa de entrega própria, orientada pelas rotinas do legado.
 
 ## Status HTTP Trataveis
 - `200 OK`: Renderização normal da página com todos os cards.
 - `404 Not Found`: Exibição do componente `EmptyState`, informando que o cliente não existe ou foi excluído.
-- `403 Forbidden`: Exibição de um `Alert` de erro, bloqueando a visão caso o usuário não tenha permissão de Gestão ou visualização daquele nível.
+- `403 Forbidden`: Exibição de um `Alert` de erro quando o backend nega a permissão de visualização.
 - `Erro Genérico/500/Rede`: Exibição de um `Alert` contendo a mensagem normalizada, junto com um botão de **Tentar Novamente**.
 
 ## Integração com a Listagem
@@ -37,8 +42,10 @@ Foi adicionada a coluna **Ações** na `ClientesTable` e aprimorada a navegaçã
 Ao clicar em "Detalhes", a rota envia via estado de histórico (`location.state`) um sinalizador de navegação que preserva os filtros atuais da listagem (`search`), garantindo que o botão "Voltar" não perca a experiência de usabilidade prévia.
 
 ## Testes
-Foram validados os contratos visuais, o hook de busca, e o estado de carregamento. No back-end, os testes de listagem e controlador asseguram que as requisições autenticadas respondem de acordo com a regra de negócio.
+Há testes de listagem, cadastro e edição no frontend e de consulta/autorização no backend. Na etapa de 21/10/2026 foi executada somente a suíte do frontend, com 228 testes aprovados. Não foi realizada homologação visual autenticada ou reexecução dos testes do backend nessa etapa.
 
 ## Pendências para Próximas Etapas
-- Preencher as tabelas e modelos de EF Core de Endereços e Vínculos para que sejam povoados com informações reais.
+- Alinhar tipos do frontend aos contratos reais da API.
+- Completar a resolução de nomes e os campos necessários à operação.
+- Implementar manutenção de vínculos, dependentes/cônjuge e demais dados pessoais necessários após levantar as rotinas do legado.
 - Adicionar abas ou painéis de expansão caso os arrays de Vínculos fiquem demasiadamente extensos.

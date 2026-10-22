@@ -11,7 +11,7 @@ import {
   FormSection,
   FormActions
 } from '../../../components/ui';
-import { moduloFormSchema, type ModuloFormData } from '../schemas/modulo.schema';
+import { moduloFormSchema, type ModuloFormData, type ModuloFormInput } from '../schemas/modulo.schema';
 
 export interface ModuloFormProps {
   initialData?: Partial<ModuloFormData>;
@@ -31,7 +31,7 @@ export const ModuloForm: React.FC<ModuloFormProps> = ({
     handleSubmit,
     control,
     formState: { errors },
-  } = useForm<ModuloFormData>({
+  } = useForm<ModuloFormInput, unknown, ModuloFormData>({
     resolver: zodResolver(moduloFormSchema),
     defaultValues: {
       nome: initialData?.nome || '',
@@ -51,20 +51,22 @@ export const ModuloForm: React.FC<ModuloFormProps> = ({
             />
           </FormField>
 
-          <FormField label="Status" className="flex items-center pt-8">
+          <div className="flex items-center pt-8">
             <Controller
               name="ativo"
               control={control}
               render={({ field }) => (
-                <Checkbox
-                  id="ativo"
-                  label="Módulo Ativo"
-                  checked={field.value}
-                  onChange={(e) => field.onChange(e.target.checked)}
-                />
+                <FormField label="Status">
+                  <Checkbox
+                    id="ativo"
+                    label="Módulo Ativo"
+                    checked={field.value}
+                    onChange={(e) => field.onChange(e.target.checked)}
+                  />
+                </FormField>
               )}
             />
-          </FormField>
+          </div>
         </FormGrid>
 
         <FormField label="Descrição" error={errors.descricao?.message}>
@@ -88,7 +90,7 @@ export const ModuloForm: React.FC<ModuloFormProps> = ({
         <Button 
           type="submit" 
           variant="primary" 
-          isLoading={isSubmitting}
+          loading={isSubmitting}
         >
           Salvar
         </Button>

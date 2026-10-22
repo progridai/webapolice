@@ -136,11 +136,9 @@ export const CooperadosListPage: React.FC = () => {
           {hasData && data && (
             <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-2">
               <ResultsSummary
-                total={data.totalItens}
+                totalItems={data.totalItens}
                 currentPage={data.paginaAtual}
                 pageSize={data.tamanhoPagina}
-                itemName="cooperado"
-                itemNamePlural="cooperados"
               />
               <Pagination
                 currentPage={data.paginaAtual}

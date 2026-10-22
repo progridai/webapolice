@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import React from 'react';
 import { MemoryRouter, Routes, Route } from 'react-router-dom';
 import { SubestipulanteFormPage } from './SubestipulanteFormPage';
 import * as api from '../api/subestipulantes.api';
@@ -74,7 +73,7 @@ describe('SubestipulanteFormPage', () => {
     fireEvent.change(screen.getByLabelText(/Nome \/ Razão Social/i), {
       target: { value: 'Subestipulante Teste' },
     });
-    fireEvent.change(screen.getByLabelText(/CNPJ/i), {
+    fireEvent.input(screen.getByLabelText(/CNPJ/i), {
       target: { value: '92.682.038/0001-00' },
     });
     fireEvent.change(screen.getByLabelText(/Código Interno/i), {
@@ -87,7 +86,7 @@ describe('SubestipulanteFormPage', () => {
     await waitFor(() => {
       expect(api.subestipulantesApi.criar).toHaveBeenCalledWith({
         nome: 'Subestipulante Teste',
-        cnpj: '92.682.038/0001-00',
+        cnpj: '92682038000100',
         codigo: 'SUB-01',
         observacao: undefined,
       });

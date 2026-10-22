@@ -15,7 +15,8 @@ export function useClientesFilters() {
     const pageSize = parseInt(searchParams.get('pageSize') || '20', 10);
     const nome = searchParams.get('nome') || '';
     const cpf = searchParams.get('cpf') || '';
-    const status = searchParams.get('status') as unknown as StatusClienteEnum | '' || '';
+    const statusParam = searchParams.get('status');
+    const status: StatusClienteEnum | '' = statusParam === '1' ? 1 : statusParam === '2' ? 2 : '';
     const sortBy = searchParams.get('sortBy') || '';
     const direction = searchParams.get('direction') as 'asc' | 'desc' | null || 'asc';
 

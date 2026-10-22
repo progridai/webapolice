@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Controller } from 'react-hook-form';
 import type { Control } from 'react-hook-form';
-import { Input, Spinner } from '../../../../components/ui';
+import type { ApoliceFormValues } from '../../schemas/apoliceForm.schema';
+import { Alert, Button, Input, Spinner } from '../../../../components/ui';
 
 function useDebounce<T>(value: T, delay: number): T {
   const [debouncedValue, setDebouncedValue] = useState<T>(value);
@@ -17,8 +18,9 @@ export interface AsyncEntityOption {
   label: string;
 }
 
-interface EntitySearchFieldProps {
-  id?: string;
+type FieldAccessibilityProps = Pick<React.InputHTMLAttributes<HTMLInputElement>, 'id' | 'aria-describedby' | 'aria-invalid'>;
+
+interface EntitySearchFieldProps extends FieldAccessibilityProps {
   placeholder?: string;
   error?: boolean;
   disabled?: boolean;
@@ -39,15 +41,20 @@ const EntitySearchField: React.FC<EntitySearchFieldProps> = ({
   onChange,
   onBlur,
   searcher,
+  ...accessibilityProps
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [options, setOptions] = useState<AsyncEntityOption[]>([]);
   const [loading, setLoading] = useState(false);
+  const [searchError, setSearchError] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [selectedLabel, setSelectedLabel] = useState<string | null>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
   const debouncedSearch = useDebounce(searchTerm, 350);
   const initialised = useRef(false);
+  const searchRequestId = useRef(0);
+
+  useEffect(() => () => { searchRequestId.current += 1; }, []);
 
   // Set label when editing (initialLabel provided from parent, no API call needed)
   useEffect(() => {
@@ -56,22 +63,27 @@ const EntitySearchField: React.FC<EntitySearchFieldProps> = ({
       setSearchTerm(initialLabel);
       initialised.current = true;
     }
-    if (!value) {
+    if (!value && selectedLabel) {
       setSelectedLabel(null);
       setSearchTerm('');
       initialised.current = false;
     }
-  }, [value, initialLabel]);
+  }, [value, initialLabel, selectedLabel]);
 
   const fetchOptions = useCallback(async (term: string) => {
+    const requestId = ++searchRequestId.current;
     setLoading(true);
+    setSearchError(false);
     try {
       const result = await searcher(term);
-      setOptions(result);
+      if (requestId === searchRequestId.current) setOptions(result);
     } catch {
-      setOptions([]);
+      if (requestId === searchRequestId.current) {
+        setOptions([]);
+        setSearchError(true);
+      }
     } finally {
-      setLoading(false);
+      if (requestId === searchRequestId.current) setLoading(false);
     }
   }, [searcher]);
 
@@ -127,6 +139,7 @@ const EntitySearchField: React.FC<EntitySearchFieldProps> = ({
       <div className="relative">
         <Input
           id={id}
+          {...accessibilityProps}
           type="text"
           placeholder={placeholder || 'Buscar...'}
           value={searchTerm}
@@ -147,7 +160,14 @@ const EntitySearchField: React.FC<EntitySearchFieldProps> = ({
 
       {isOpen && !disabled && (
         <div className="absolute z-50 w-full mt-1 bg-fundo-elevado border border-borda rounded shadow-lg max-h-60 overflow-y-auto">
-          {options.length === 0 && !loading ? (
+          {searchError ? (
+            <Alert variant="error" title="Erro ao buscar registros">
+              Não foi possível carregar as opções.
+              <Button type="button" variant="secondary" size="small" onClick={() => fetchOptions(debouncedSearch)}>
+                Tentar novamente
+              </Button>
+            </Alert>
+          ) : options.length === 0 && !loading ? (
             <div className="p-3 text-sm text-texto-secundario text-center">
               Nenhum resultado encontrado.
             </div>
@@ -175,10 +195,10 @@ const EntitySearchField: React.FC<EntitySearchFieldProps> = ({
   );
 };
 
-interface AsyncEntityFieldProps {
-  name: string;
-  control: Control<any>;
-  label?: string;
+interface AsyncEntityFieldProps extends FieldAccessibilityProps {
+  name: 'estipulanteId' | 'seguradoraId' | 'corretoraId';
+  control: Control<ApoliceFormValues, unknown, ApoliceFormValues>;
+  disabled?: boolean;
   placeholder?: string;
   initialLabel?: string;
   searcher: (term: string) => Promise<AsyncEntityOption[]>;
@@ -190,6 +210,9 @@ export const AsyncEntityField: React.FC<AsyncEntityFieldProps> = ({
   placeholder,
   initialLabel,
   searcher,
+  disabled,
+  id,
+  ...accessibilityProps
 }) => {
   return (
     <Controller
@@ -197,7 +220,9 @@ export const AsyncEntityField: React.FC<AsyncEntityFieldProps> = ({
       control={control}
       render={({ field, fieldState }) => (
         <EntitySearchField
-          id={name}
+          id={id || name}
+          {...accessibilityProps}
+          disabled={disabled}
           placeholder={placeholder}
           error={!!fieldState.error}
           value={field.value || ''}

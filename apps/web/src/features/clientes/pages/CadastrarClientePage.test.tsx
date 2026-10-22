@@ -1,9 +1,13 @@
-import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
-import { vi } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { CadastrarClientePage } from './CadastrarClientePage';
 import * as clienteWriteApi from '../api/clienteWriteApi';
+import { makeAuthorization } from '../../../../tests/helpers/authorization';
+
+vi.mock('../../../auth/AuthorizationProvider', () => ({
+  useAuthorization: () => makeAuthorization(),
+}));
 
 vi.mock('../api/clienteWriteApi', () => ({
   cadastrarCliente: vi.fn(),
@@ -32,7 +36,7 @@ describe('CadastrarClientePage', () => {
     );
 
     fireEvent.change(screen.getByLabelText(/Nome Completo/i), { target: { value: 'João da Silva' } });
-    fireEvent.change(screen.getByLabelText(/Documento/i), { target: { value: '03619574044' } });
+    fireEvent.input(screen.getByLabelText(/Documento/i), { target: { value: '52998224725' } });
     fireEvent.change(screen.getByLabelText(/Data de Nascimento/i), { target: { value: '1990-01-01' } });
 
     fireEvent.click(screen.getByRole('button', { name: /Salvar Cliente/i }));

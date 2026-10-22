@@ -68,3 +68,9 @@ Checklist:
 - testar preflight `OPTIONS /api/clientes`;
 - confirmar que a API retorna CORS tambem em 401/403;
 - confirmar que o token Bearer esta sendo enviado sem registra-lo em logs.
+
+## Verificações e estabilização — 21/10/2026
+
+`npm run typecheck` utiliza `tsc -b --pretty false` para verificar os projetos referenciados pelo `tsconfig.json`. Executar somente `tsc --noEmit` na raiz não verifica esses projetos quando a configuração possui `files: []`.
+
+A suíte de testes foi recuperada, mas a estabilização geral ainda tem pendências de tipos, lint e design system. Resultados e próximos passos estão no [registro de estabilização](29-estabilizacao-frontend.md). Build do Vite aprovado não equivale a TypeScript aprovado.

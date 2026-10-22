@@ -1,4 +1,3 @@
-import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
 import { vi, describe, it, expect, beforeEach } from 'vitest';
@@ -29,7 +28,7 @@ describe('EditarEstipulantePage', () => {
     publicId: 'estip-123',
     razaoSocial: 'Estipulante Teste',
     nomeFantasia: 'Teste',
-    cnpj: '12345678000190',
+    cnpj: '61198164000160',
     codigo: '123',
     grupoPublicId: '',
     seguradoraPublicId: '',
@@ -63,7 +62,7 @@ describe('EditarEstipulantePage', () => {
     });
 
     // Validar carregamento do CNPJ imutável no formato formatado
-    expect(screen.getByDisplayValue('12.345.678/0001-90')).toBeTruthy();
+    expect(screen.getByDisplayValue('61.198.164/0001-60')).toBeTruthy();
     // Validar preenchimento da Razão Social
     expect(screen.getByDisplayValue('Estipulante Teste')).toBeTruthy();
   });
@@ -85,7 +84,7 @@ describe('EditarEstipulantePage', () => {
     });
   });
 
-  it('deve permitir submissão com sucesso chamando as duas APIs sequencialmente', async () => {
+  it('deve permitir submissão com sucesso enviando os dados e a configuração', async () => {
     (api.obterEstipulante as ReturnType<typeof vi.fn>).mockResolvedValue(mockEstipulante);
     (api.obterConfiguracao as ReturnType<typeof vi.fn>).mockResolvedValue(mockConfiguracao);
     (api.alterarEstipulante as ReturnType<typeof vi.fn>).mockResolvedValue(undefined);

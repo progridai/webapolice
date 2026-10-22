@@ -29,6 +29,8 @@ export interface PagedResult<T> {
 }
 
 export interface EstipulantesQuery {
+  nome?: string;
+  cnpj?: string;
   page?: number;
   pageSize?: number;
   busca?: string; // Razão Social, Nome Fantasia, CNPJ ou Código

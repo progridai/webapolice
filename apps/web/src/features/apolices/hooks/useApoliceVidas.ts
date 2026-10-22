@@ -3,6 +3,7 @@ import { listarApoliceVidas } from '../api/apolices.api';
 import type { PagedResult, ApoliceVidaListItem } from '../types/apolice.types';
 
 export function useApoliceVidas(publicId: string | undefined, query: import('../types/apolice.types').ApoliceVidaQuery) {
+  const { page, pageSize, busca, status, apoliceSubgrupoPublicId, apoliceModuloPublicId, vigenciaDataReferencia } = query;
   const [data, setData] = useState<PagedResult<ApoliceVidaListItem> | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
@@ -13,16 +14,18 @@ export function useApoliceVidas(publicId: string | undefined, query: import('../
     setIsLoading(true);
     setError(null);
     try {
-      const result = await listarApoliceVidas(publicId, query, abortSignal);
-      setData(result);
-    } catch (err: any) {
-      if (err.name !== 'AbortError' && err.name !== 'CanceledError') {
-        setError(err instanceof Error ? err : new Error(err.message || 'Erro ao carregar vidas da apólice'));
+      const result = await listarApoliceVidas(publicId, {
+        page, pageSize, busca, status, apoliceSubgrupoPublicId, apoliceModuloPublicId, vigenciaDataReferencia,
+      }, abortSignal);
+      if (!abortSignal?.aborted) setData(result);
+    } catch (err: unknown) {
+      if (!abortSignal?.aborted && !(err instanceof Error && (err.name === 'AbortError' || err.name === 'CanceledError'))) {
+        setError(err instanceof Error ? err : new Error('Erro ao carregar vidas da apólice'));
       }
     } finally {
-      setIsLoading(false);
+      if (!abortSignal?.aborted) setIsLoading(false);
     }
-  }, [publicId, query.page, query.pageSize, query.busca, query.status, query.subestipulantePublicId, query.moduloPublicId]);
+  }, [publicId, page, pageSize, busca, status, apoliceSubgrupoPublicId, apoliceModuloPublicId, vigenciaDataReferencia]);
 
   useEffect(() => {
     const controller = new AbortController();

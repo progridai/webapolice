@@ -11,7 +11,7 @@ import type {
   CriarCorretoraRequest,
   AlterarCorretoraRequest,
   PagedResult,
-} from './types/corretora.types';
+} from '../types/corretora.types';
 
 const BASE_URL = '/api/corretoras';
 
@@ -20,8 +20,13 @@ export const corretorasApi = {
    * Lista corretoras de forma paginada.
    */
   listar: async (query?: ListarCorretorasQuery): Promise<PagedResult<CorretoraListItem>> => {
+    const params: Record<string, string | number | boolean> = {};
+    if (query?.pagina !== undefined) params.pagina = query.pagina;
+    if (query?.tamanhoPagina !== undefined) params.tamanhoPagina = query.tamanhoPagina;
+    if (query?.busca !== undefined) params.busca = query.busca;
+    if (query?.ativo !== undefined) params.ativo = query.ativo;
     const res = await httpClient.get<PagedResult<CorretoraListItem>>(BASE_URL, {
-      params: query,
+      params,
     });
     return res.data;
   },

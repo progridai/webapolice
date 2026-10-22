@@ -5,13 +5,16 @@
  */
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { AuthContext } from '../../src/auth/AuthContext';
 import { ThemeProvider } from '../../src/shared/theme/ThemeContext';
 import { AuthenticatedLayout } from '../../src/layouts/AuthenticatedLayout/AuthenticatedLayout';
 import type { AuthContextValue } from '../../src/auth/auth.types';
 import { APP_ROLES } from '../../src/auth/roles';
+import { useAuthorization } from '../../src/auth/AuthorizationProvider';
+import { makeAuthorization } from '../helpers/authorization';
+
+vi.mock('../../src/auth/AuthorizationProvider', () => ({ useAuthorization: vi.fn() }));
 
 vi.mock('../../src/app/config/env', () => ({
   ENV: {
@@ -28,6 +31,8 @@ vi.mock('../../src/app/config/env', () => ({
 
 const mockLogout = vi.fn();
 
+const adminRoles: string[] = [APP_ROLES.ADMIN];
+
 const authenticatedAuth: AuthContextValue = {
   status: 'authenticated',
   isLoading: false,
@@ -43,9 +48,9 @@ const authenticatedAuth: AuthContextValue = {
   login: vi.fn(),
   logout: mockLogout,
   refreshToken: vi.fn().mockResolvedValue(true),
-  hasRole: (role: string) => [APP_ROLES.ADMIN].includes(role),
-  hasAnyRole: (roles: string[]) => roles.some((r) => [APP_ROLES.ADMIN].includes(r)),
-  hasAllRoles: (roles: string[]) => roles.every((r) => [APP_ROLES.ADMIN].includes(r)),
+  hasRole: (role: string) => adminRoles.includes(role),
+  hasAnyRole: (roles: string[]) => roles.some((r) => adminRoles.includes(r)),
+  hasAllRoles: (roles: string[]) => roles.every((r) => adminRoles.includes(r)),
 };
 
 const renderLayout = () =>
@@ -62,6 +67,7 @@ const renderLayout = () =>
 describe('AuthenticatedLayout', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.mocked(useAuthorization).mockReturnValue(makeAuthorization());
     vi.stubGlobal('matchMedia', vi.fn().mockImplementation((query) => ({
       matches: false, media: query, onchange: null,
       addListener: vi.fn(), removeListener: vi.fn(),

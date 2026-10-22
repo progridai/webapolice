@@ -8,8 +8,5 @@ export { AuthProvider } from './AuthProvider';
 export { AuthContext } from './AuthContext';
 export { useAuth } from './useAuth';
 export { APP_ROLES, hasRole, hasAnyRole, hasAllRoles } from './roles';
-export { 
-  type AuthContextValue, 
-  type UserProfile, 
-  RoleEnum 
-} from './auth.types';
+export type { AuthContextValue, AuthUser, AuthStatus } from './auth.types';
+export type { AppRole } from './roles';

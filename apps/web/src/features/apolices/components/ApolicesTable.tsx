@@ -68,7 +68,7 @@ export const ApolicesTable: React.FC<ApolicesTableProps> = ({
     {
       key: 'status',
       label: 'Status',
-      render: (apolice) => <StatusBadge status={apolice.ativo ? 'ativo' : 'inativo'} label={apolice.status} />,
+      render: (apolice) => <StatusBadge status={apolice.ativo ? 'ativo' : 'inativo'} />,
     },
     {
       key: 'acoes',

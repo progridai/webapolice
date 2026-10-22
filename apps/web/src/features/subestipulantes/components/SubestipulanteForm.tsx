@@ -83,20 +83,20 @@ export const SubestipulanteForm: React.FC<SubestipulanteFormProps> = ({
           </div>
 
           <div className="lg:col-span-4">
-            <FormField label="CNPJ" error={errors.cnpj?.message}>
-              <Controller
-                name="cnpj"
-                control={control}
-                render={({ field }) => (
+            <Controller
+              name="cnpj"
+              control={control}
+              render={({ field }) => (
+                <FormField label="CNPJ" error={errors.cnpj?.message}>
                   <CnpjInput
                     {...field}
                     value={field.value || ''}
                     id="subestipulante-cnpj"
                     placeholder="Ex: 61.198.164/0001-60"
                   />
-                )}
-              />
-            </FormField>
+                </FormField>
+              )}
+            />
           </div>
 
           <div className="lg:col-span-6">
@@ -129,7 +129,7 @@ export const SubestipulanteForm: React.FC<SubestipulanteFormProps> = ({
       <FormActions>
         <Button
           type="button"
-          variant="outline"
+          variant="secondary"
           onClick={onCancel}
           disabled={isSubmitting}
         >

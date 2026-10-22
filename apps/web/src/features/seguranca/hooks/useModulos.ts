@@ -3,7 +3,7 @@
  */
 import { useState, useCallback, useEffect } from 'react';
 import { listarModulos, alterarHabilitacaoModulo, alterarHabilitacaoRecurso } from '../api/modulosApi';
-import type { ModuloDto } from '../types/seguranca.types';
+import type { ModuloDto } from '../api/modulosApi';
 import { useAuthorization } from '../../../auth/AuthorizationProvider';
 
 export function useModulos() {

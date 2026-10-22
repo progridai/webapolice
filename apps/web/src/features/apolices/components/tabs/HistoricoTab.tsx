@@ -8,6 +8,8 @@ interface HistoricoTabProps {
   publicId: string;
 }
 
+type LinhaHistorico = ApoliceHistoricoResult & { chaveLinha: string };
+
 export const HistoricoTab: React.FC<HistoricoTabProps> = ({ publicId }) => {
   const [page, setPage] = useState(1);
   const pageSize = 15;
@@ -37,7 +39,12 @@ export const HistoricoTab: React.FC<HistoricoTabProps> = ({ publicId }) => {
     );
   }
 
-  const columns: Column<ApoliceHistoricoResult>[] = [
+  // O contrato histórico não expõe ID. A chave é local à página, sem alterar a evidência recebida.
+  const registros: LinhaHistorico[] = (data?.items || []).map((item, index) => ({
+    ...item,
+    chaveLinha: `${publicId}-${data?.page ?? page}-${index}`,
+  }));
+  const columns: Column<LinhaHistorico>[] = [
     {
       key: 'acao',
       label: 'Ação',
@@ -73,9 +80,9 @@ export const HistoricoTab: React.FC<HistoricoTabProps> = ({ publicId }) => {
   return (
     <div className="flex flex-col gap-4">
       <DataTable
-        data={data?.items || []}
+        data={registros}
         columns={columns}
-        keyExtractor={(item, index) => `${item.dataAcao}-${index}`}
+        keyExtractor={(item) => item.chaveLinha}
         isLoading={isLoading}
         aria-label="Histórico da Apólice"
       />

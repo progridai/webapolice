@@ -63,6 +63,7 @@ describe('SeguradorasListPage', () => {
     const mockData = {
       itens: [
         {
+          id: 1,
           publicId: 's-1',
           nome: 'Porto Seguro Cia',
           codigo: 'SEG-001',
@@ -145,6 +146,7 @@ describe('SeguradorasListPage', () => {
     const mockData = {
       itens: [
         {
+          id: 2,
           publicId: 's-123',
           nome: 'Allianz Seguros',
           codigo: 'ALL-10',

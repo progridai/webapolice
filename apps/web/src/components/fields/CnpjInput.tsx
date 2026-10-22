@@ -10,7 +10,7 @@ export const CnpjInput = forwardRef<HTMLInputElement, InputProps>(
         unmask={false}
         inputRef={ref}
         className={`form-input ${error ? 'input-erro' : ''} ${className}`}
-        onAccept={(value, mask) => {
+        onAccept={(value) => {
           if (onChange) {
             onChange({ target: { name: props.name, value } } as React.ChangeEvent<HTMLInputElement>);
           }

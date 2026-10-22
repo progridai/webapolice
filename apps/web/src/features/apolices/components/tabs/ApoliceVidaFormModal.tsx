@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { 
@@ -40,8 +40,6 @@ export const ApoliceVidaFormModal: React.FC<ApoliceVidaFormModalProps> = ({
   const {
     control,
     handleSubmit,
-    watch,
-    setValue,
     reset,
     formState: { errors }
   } = useForm<ApoliceVidaFormValues>({
@@ -55,9 +53,6 @@ export const ApoliceVidaFormModal: React.FC<ApoliceVidaFormModalProps> = ({
       observacao: ''
     }
   });
-
-  const apoliceSubgrupoPublicId = watch('apoliceSubgrupoPublicId');
-  const apoliceModuloPublicId = watch('apoliceModuloPublicId');
 
   useEffect(() => {
     if (isOpen) {
@@ -90,16 +85,20 @@ export const ApoliceVidaFormModal: React.FC<ApoliceVidaFormModalProps> = ({
   return (
     <Modal
       aberto={isOpen}
-      onClose={isSubmitting ? undefined : onClose}
+      onClose={() => {
+        if (!isSubmitting) onClose();
+      }}
       title={isEdit ? 'Editar Participação de Vida' : 'Adicionar Vida'}
       size="large"
     >
       <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-6" noValidate>
         <div className="flex flex-col gap-4">
           <h3 className="text-sm font-medium text-texto-secundario uppercase tracking-wider mb-2">Identificação do Cliente</h3>
-          <FormGrid columns={1}>
+          <div>
             {isEdit && initialData ? (
-              <ReadOnlyField label="Cliente" value={initialData.clienteNome} />
+              <FormField label="Cliente">
+                <ReadOnlyField value={initialData.clienteNome} />
+              </FormField>
             ) : (
               <FormField label="Cliente" required error={errors.clientePublicId?.message}>
                 <Controller
@@ -116,10 +115,10 @@ export const ApoliceVidaFormModal: React.FC<ApoliceVidaFormModalProps> = ({
                 />
               </FormField>
             )}
-          </FormGrid>
+          </div>
           
           <h3 className="text-sm font-medium text-texto-secundario uppercase tracking-wider mt-4 mb-2">Vínculo na Apólice</h3>
-          <FormGrid columns={2}>
+          <FormGrid>
             <FormField label="Subgrupo da Apólice" error={errors.apoliceSubgrupoPublicId?.message}>
               <Controller
                 name="apoliceSubgrupoPublicId"
@@ -164,7 +163,7 @@ export const ApoliceVidaFormModal: React.FC<ApoliceVidaFormModalProps> = ({
 
         <div className="flex flex-col gap-4 border-t border-borda pt-4">
           <h3 className="text-sm font-medium text-texto-secundario uppercase tracking-wider mb-2">Período e Observações</h3>
-          <FormGrid columns={2}>
+          <FormGrid>
             <FormField label="Data de Início" error={errors.dataInicioVigencia?.message}>
               <Controller
                 name="dataInicioVigencia"
@@ -186,7 +185,7 @@ export const ApoliceVidaFormModal: React.FC<ApoliceVidaFormModalProps> = ({
             </FormField>
           </FormGrid>
 
-          <FormGrid columns={1}>
+          <div>
             <FormField label="Observação" error={errors.observacao?.message}>
               <Controller
                 name="observacao"
@@ -196,11 +195,11 @@ export const ApoliceVidaFormModal: React.FC<ApoliceVidaFormModalProps> = ({
                 )}
               />
             </FormField>
-          </FormGrid>
+          </div>
         </div>
 
         <div className="flex justify-end gap-2 mt-4 pt-4 border-t border-borda">
-          <Button type="button" variant="ghost" onClick={onClose} disabled={isSubmitting}>
+          <Button type="button" variant="text" onClick={onClose} disabled={isSubmitting}>
             Cancelar
           </Button>
           <Button type="submit" variant="primary" loading={isSubmitting}>

@@ -15,7 +15,13 @@ export interface ListarModulosResponse {
 
 export const modulosApi = {
   listar: async (params: ListarModulosParams): Promise<ListarModulosResponse> => {
-    const { data } = await httpClient.get<ListarModulosResponse>('/api/modulos', { params });
+    const queryParams: Record<string, string | number | boolean> = {
+      pagina: params.pagina,
+      tamanhoPagina: params.tamanhoPagina,
+    };
+    if (params.busca !== undefined) queryParams.busca = params.busca;
+    if (params.ativo !== undefined) queryParams.ativo = params.ativo;
+    const { data } = await httpClient.get<ListarModulosResponse>('/api/modulos', { params: queryParams });
     return data;
   },
 

@@ -550,8 +550,6 @@ export const DesignSystemPage: React.FC = () => {
                 currentPage={paginaAtual}
                 totalPages={2}
                 onPageChange={(p) => setPaginaAtual(p)}
-                totalItems={clientesFiltrados.length}
-                pageSize={5}
               />
             </div>
           </CardContent>

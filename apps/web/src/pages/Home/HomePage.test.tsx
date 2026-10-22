@@ -5,6 +5,10 @@ import { HomePage } from './HomePage';
 import { AuthContext } from '../../auth/AuthContext';
 import { APP_ROLES } from '../../auth/roles';
 import type { AuthContextValue } from '../../auth/auth.types';
+import { useAuthorization } from '../../auth/AuthorizationProvider';
+import { makeAuthorization } from '../../../tests/helpers/authorization';
+
+vi.mock('../../auth/AuthorizationProvider', () => ({ useAuthorization: vi.fn() }));
 
 const navigateMock = vi.fn();
 
@@ -52,6 +56,7 @@ function authValue(roles: string[]): AuthContextValue {
 }
 
 function renderHome(roles: string[]) {
+  vi.mocked(useAuthorization).mockReturnValue(makeAuthorization());
   return render(
     <MemoryRouter>
       <AuthContext.Provider value={authValue(roles)}>

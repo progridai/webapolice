@@ -2,7 +2,6 @@ import React from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useNavigate } from 'react-router-dom';
-import { ROUTES } from '../../../../app/routes/routePaths';
 import { Button, Input, FormField, Card, CardHeader, CardContent, FormGrid } from '../../../../components/ui';
 import { apoliceFormSchema, type ApoliceFormValues } from '../../schemas/apoliceForm.schema';
 import { listarEstipulantes } from '../../../estipulantes/api/estipulantes.api';
@@ -10,8 +9,14 @@ import { seguradorasApi } from '../../../seguradoras/api/seguradoras.api';
 import { corretorasApi } from '../../../corretoras/api/corretoras.api';
 import { AsyncEntityField } from './AsyncEntityField';
 
+export type ApoliceFormInitialData = Partial<ApoliceFormValues> & {
+  _estipulanteNome?: string;
+  _seguradoraNome?: string;
+  _corretoraNome?: string;
+};
+
 interface ApoliceFormProps {
-  initialData?: Partial<ApoliceFormValues>;
+  initialData?: ApoliceFormInitialData;
   onSubmit: (data: ApoliceFormValues) => Promise<void>;
   isLoading?: boolean;
 }
@@ -19,7 +24,7 @@ interface ApoliceFormProps {
 export const ApoliceForm: React.FC<ApoliceFormProps> = ({ initialData, onSubmit, isLoading }) => {
   const navigate = useNavigate();
 
-  const { register, handleSubmit, control, formState: { errors } } = useForm<ApoliceFormValues>({
+  const { register, handleSubmit, control, formState: { errors } } = useForm<ApoliceFormValues, unknown, ApoliceFormValues>({
     resolver: zodResolver(apoliceFormSchema),
     defaultValues: {
       nome: initialData?.nome || '',
@@ -38,18 +43,18 @@ export const ApoliceForm: React.FC<ApoliceFormProps> = ({ initialData, onSubmit,
   };
 
   const loadEstipulantes = async (inputValue: string) => {
-    const result = await listarEstipulantes({ busca: inputValue, page: 1, pageSize: 20 });
-    return result.itens.map(item => ({ value: String(item.id), label: item.razaoSocial || item.nomeFantasia || item.nome || 'Sem Nome' }));
+    const result = await listarEstipulantes({ nome: inputValue, page: 1, pageSize: 20 });
+    return result.itens.map(item => ({ value: String(item.id), label: item.razaoSocial || item.nomeFantasia || 'Sem Nome' }));
   };
 
   const loadSeguradoras = async (inputValue: string) => {
-    const result = await seguradorasApi.listar({ busca: inputValue, page: 1, pageSize: 20 });
-    return result.itens.map(item => ({ value: String(item.id), label: item.razaoSocial || item.nomeFantasia || item.nome || 'Sem Nome' }));
+    const result = await seguradorasApi.listar({ busca: inputValue, pagina: 1, tamanhoPagina: 20 });
+    return result.itens.map(item => ({ value: String(item.id), label: item.nome || 'Sem Nome' }));
   };
 
   const loadCorretoras = async (inputValue: string) => {
-    const result = await corretorasApi.listar({ busca: inputValue, page: 1, pageSize: 20 });
-    return result.itens.map(item => ({ value: String(item.id), label: item.razaoSocial || item.nomeFantasia || item.nome || 'Sem Nome' }));
+    const result = await corretorasApi.listar({ busca: inputValue, pagina: 1, tamanhoPagina: 20 });
+    return result.itens.map(item => ({ value: String(item.id), label: item.nome || 'Sem Nome' }));
   };
 
   return (
@@ -76,10 +81,10 @@ export const ApoliceForm: React.FC<ApoliceFormProps> = ({ initialData, onSubmit,
                 <AsyncEntityField
                   name="estipulanteId"
                   control={control}
-                  label="Estipulante"
+                  disabled={isLoading}
                   placeholder="Selecione ou busque o estipulante"
                   searcher={loadEstipulantes}
-                  initialLabel={(initialData as any)?._estipulanteNome}
+                  initialLabel={initialData?._estipulanteNome}
                 />
               </FormField>
             </div>
@@ -89,10 +94,10 @@ export const ApoliceForm: React.FC<ApoliceFormProps> = ({ initialData, onSubmit,
                 <AsyncEntityField
                   name="seguradoraId"
                   control={control}
-                  label="Seguradora"
+                  disabled={isLoading}
                   placeholder="Selecione ou busque a seguradora"
                   searcher={loadSeguradoras}
-                  initialLabel={(initialData as any)?._seguradoraNome}
+                  initialLabel={initialData?._seguradoraNome}
                 />
               </FormField>
             </div>
@@ -102,10 +107,10 @@ export const ApoliceForm: React.FC<ApoliceFormProps> = ({ initialData, onSubmit,
                 <AsyncEntityField
                   name="corretoraId"
                   control={control}
-                  label="Corretora"
+                  disabled={isLoading}
                   placeholder="Selecione ou busque a corretora (Opcional)"
                   searcher={loadCorretoras}
-                  initialLabel={(initialData as any)?._corretoraNome}
+                  initialLabel={initialData?._corretoraNome}
                 />
               </FormField>
             </div>
@@ -154,7 +159,7 @@ export const ApoliceForm: React.FC<ApoliceFormProps> = ({ initialData, onSubmit,
       </Card>
 
       <div className="flex justify-end gap-3 pt-4 border-t border-borda">
-        <Button type="button" variant="outline" onClick={handleVoltar} disabled={isLoading}>
+        <Button type="button" variant="secondary" onClick={handleVoltar} disabled={isLoading}>
           Cancelar
         </Button>
         <Button type="submit" disabled={isLoading} className="min-w-[120px]">

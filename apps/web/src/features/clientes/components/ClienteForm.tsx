@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useForm, Controller, useFieldArray, useWatch, type UseFormRegister, type Control, type FieldErrors } from 'react-hook-form';
+import { useForm, Controller, useFieldArray, useWatch, type UseFormRegister, type UseFormSetValue, type Control, type FieldErrors } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { FormField } from '../../../components/ui/FormField';
@@ -24,7 +24,7 @@ const ESTADOS_BRASILEIROS = [
 // Esquemas de Validação
 const contatoSchema = z.object({
   tipoContato: z.string().min(1, 'Selecione o tipo de contato'),
-  valor: z.string().trim().optional().or(z.literal('')),
+  valor: z.string().trim().optional().or(z.literal('')).default(''),
   principal: z.boolean().default(false),
 }).superRefine((data, ctx) => {
   if (!data.valor) return;
@@ -48,7 +48,7 @@ const enderecoSchema = z.object({
   numero: z.string().trim().optional().or(z.literal('')),
   complemento: z.string().trim().optional().or(z.literal('')),
   bairro: z.string().trim().optional().or(z.literal('')),
-  cidadeId: z.coerce.number().optional().or(z.literal(0)),
+  cidadeId: z.coerce.number<string | number>().optional().or(z.literal(0)),
   uf: z.string().max(2).optional().or(z.literal('')),
   principal: z.boolean().default(false),
 });
@@ -62,11 +62,11 @@ const isNotFutureDate = (dateString?: string | null) => {
 };
 
 const clienteSchema = z.object({
-  tipoPessoa: z.coerce.number().min(1, 'Selecione o tipo de pessoa').max(2),
+  tipoPessoa: z.coerce.number<string | number>().min(1, 'Selecione o tipo de pessoa').max(2),
   nome: z.string().trim().min(3, 'O nome deve ter no mínimo 3 caracteres'),
   documento: z.string().trim().min(11, 'Documento inválido'),
   dataNascimento: z.string().min(1, 'A data de nascimento é obrigatória').refine(isNotFutureDate, { message: 'A data não pode estar no futuro' }),
-  sexo: z.coerce.number().optional(),
+  sexo: z.coerce.number<string | number>().optional(),
   re: z.string().trim().max(32, 'O RE pode ter no máximo 32 caracteres').optional().or(z.literal('')),
   observacao: z.string().trim().optional(),
   falecido: z.boolean().default(false),
@@ -93,17 +93,18 @@ const clienteSchema = z.object({
   }
 });
 
-export type ClienteFormData = z.infer<typeof clienteSchema>;
+type ClienteFormInput = z.input<typeof clienteSchema>;
+export type ClienteFormData = z.output<typeof clienteSchema>;
 
 interface EnderecoRowProps {
   index: number;
-  register: UseFormRegister<ClienteFormData>;
-  control: Control<ClienteFormData>;
-  errors: FieldErrors<ClienteFormData>;
+  register: UseFormRegister<ClienteFormInput>;
+  control: Control<ClienteFormInput, unknown, ClienteFormData>;
+  errors?: FieldErrors<z.input<typeof enderecoSchema>>;
   onRemove: () => void;
   canRemove: boolean;
   onMakePrincipal: () => void;
-  setValue: (name: any, value: any, options?: any) => void;
+  setValue: UseFormSetValue<ClienteFormInput>;
 }
 
 const EnderecoRow: React.FC<EnderecoRowProps> = ({
@@ -153,8 +154,8 @@ const EnderecoRow: React.FC<EnderecoRowProps> = ({
       try {
         const dadosCep = await consultarCep(apenasNumeros);
         if (dadosCep) {
-          setValue(`enderecos.${index}.logradouro`, dadosCep.logradouro, { shouldValidate: true });
-          setValue(`enderecos.${index}.bairro`, dadosCep.bairro, { shouldValidate: true });
+          setValue(`enderecos.${index}.logradouro`, dadosCep.logradouro ?? '', { shouldValidate: true });
+          setValue(`enderecos.${index}.bairro`, dadosCep.bairro ?? '', { shouldValidate: true });
           setValue(`enderecos.${index}.uf`, dadosCep.uf, { shouldValidate: true });
           
           if (dadosCep.cidadeId) {
@@ -233,11 +234,11 @@ const EnderecoRow: React.FC<EnderecoRowProps> = ({
         </div>
 
         <div className="lg:col-span-4">
-          <FormField label="Cidade" error={errors?.cidadeId?.message}>
-            <Controller
-              name={`enderecos.${index}.cidadeId`}
-              control={control}
-              render={({ field }) => (
+          <Controller
+            name={`enderecos.${index}.cidadeId`}
+            control={control}
+            render={({ field }) => (
+              <FormField label="Cidade" error={errors?.cidadeId?.message}>
                 <Select 
                   {...field} 
                   value={field.value || ""} 
@@ -248,9 +249,9 @@ const EnderecoRow: React.FC<EnderecoRowProps> = ({
                     <option key={c.id} value={c.id}>{c.nome}</option>
                   ))}
                 </Select>
-              )}
-            />
-          </FormField>
+              </FormField>
+            )}
+          />
         </div>
 
         <div className="lg:col-span-2 flex items-center pt-6">
@@ -313,8 +314,9 @@ export const ClienteForm: React.FC<ClienteFormProps> = ({
     watch,
     reset,
     setValue,
+    getValues,
     formState: { errors },
-  } = useForm<ClienteFormData>({
+  } = useForm<ClienteFormInput, unknown, ClienteFormData>({
     resolver: zodResolver(clienteSchema),
     defaultValues: {
       tipoPessoa: initialData?.tipoPessoa || 1,
@@ -365,11 +367,15 @@ export const ClienteForm: React.FC<ClienteFormProps> = ({
 
   // eslint-disable-next-line react-hooks/incompatible-library
   const isFalecido = watch('falecido');
-  const tipoPessoa = watch('tipoPessoa');
+  const tipoPessoa = Number(watch('tipoPessoa'));
 
   const handleMakeContatoPrincipal = (index: number) => {
-    contatoFields.forEach((_, idx) => {
-      setValue(`contatos.${idx}.principal`, idx === index);
+    const contatos = getValues('contatos');
+    const isEmail = contatos[index].tipoContato === 'EMAIL';
+    contatos.forEach((contato, idx) => {
+      if ((contato.tipoContato === 'EMAIL') === isEmail) {
+        setValue(`contatos.${idx}.principal`, idx === index, { shouldDirty: true });
+      }
     });
   };
 
@@ -385,7 +391,7 @@ export const ClienteForm: React.FC<ClienteFormProps> = ({
       .map(c => ({
         ...c,
         valor: (c.tipoContato === 'TELEFONE' || c.tipoContato === 'CELULAR') 
-          ? normalizePhone(c.valor!) 
+          ? normalizePhone(c.valor)
           : c.valor
       }));
       
@@ -410,8 +416,8 @@ export const ClienteForm: React.FC<ClienteFormProps> = ({
     onSubmit({
       ...data,
       documento: documentoFormatado,
-      contatos: contatosFiltrados as typeof data.contatos,
-      enderecos: enderecosFiltrados as typeof data.enderecos,
+      contatos: contatosFiltrados,
+      enderecos: enderecosFiltrados,
     });
   };
 
@@ -481,7 +487,13 @@ export const ClienteForm: React.FC<ClienteFormProps> = ({
               <FormGrid>
                 <div className="lg:col-span-3">
                   <FormField label="Tipo de Contato" required error={errors.contatos?.[index]?.tipoContato?.message}>
-                    <Select {...register(`contatos.${index}.tipoContato`)}>
+                    <Select {...register(`contatos.${index}.tipoContato`, {
+                      onChange: () => {
+                        if (getValues(`contatos.${index}.principal`)) {
+                          handleMakeContatoPrincipal(index);
+                        }
+                      },
+                    })}>
                       <option value="EMAIL">E-mail</option>
                       <option value="TELEFONE">Telefone</option>
                       <option value="CELULAR">Celular</option>
@@ -534,7 +546,7 @@ export const ClienteForm: React.FC<ClienteFormProps> = ({
           <div className="flex justify-start">
             <Button
               type="button"
-              variant="outline"
+              variant="secondary"
               onClick={() => appendContato({ tipoContato: 'EMAIL', valor: '', principal: false })}
             >
               <PlusIcon size={16} className="mr-2" />
@@ -562,7 +574,7 @@ export const ClienteForm: React.FC<ClienteFormProps> = ({
           <div className="flex justify-start">
             <Button
               type="button"
-              variant="outline"
+              variant="secondary"
               onClick={() => appendEndereco({ tipoEndereco: 'RESIDENCIAL', cep: '', logradouro: '', numero: '', complemento: '', bairro: '', cidadeId: undefined, uf: '', principal: false })}
             >
               <PlusIcon size={16} className="mr-2" />

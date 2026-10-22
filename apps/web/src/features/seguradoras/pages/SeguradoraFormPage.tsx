@@ -92,7 +92,7 @@ export const SeguradoraFormPage: React.FC = () => {
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-64" aria-label="Carregando seguradora">
-        <Spinner size="lg" />
+        <Spinner size="large" />
       </div>
     );
   }

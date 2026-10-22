@@ -1,10 +1,17 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { ClientesListPage } from './ClientesListPage';
 import * as api from '../api/clientesApi';
+import { makeAuthorization } from '../../../../tests/helpers/authorization';
+
+vi.mock('../../../auth/AuthorizationProvider', () => ({
+  useAuthorization: () => makeAuthorization({
+    modulosHabilitados: ['CLIENTES'], permissoes: ['clientes.visualizar'],
+  }),
+}));
 
 vi.mock('../api/clientesApi', () => ({
   listarClientes: vi.fn(),
@@ -64,7 +71,7 @@ describe('ClientesListPage', () => {
     });
     
     expect(screen.getByText('111.123.456-11')).not.toBeNull();
-    expect(screen.getByText('Ativo')).not.toBeNull();
+    expect(within(screen.getByRole('table', { name: /lista de clientes/i })).getByText('Ativo')).not.toBeNull();
     // Deve ter a tabela renderizada
     expect(screen.getByRole('table', { name: /lista de clientes/i })).not.toBeNull();
   });

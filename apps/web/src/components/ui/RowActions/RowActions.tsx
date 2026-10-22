@@ -1,4 +1,4 @@
-import React, { ReactNode } from 'react';
+import React, { type ReactNode } from 'react';
 import { Button } from '../Button';
 import { DropdownMenu, DropdownMenuItem } from '../DropdownMenu';
 import { MoreVerticalIcon } from '../Icons';

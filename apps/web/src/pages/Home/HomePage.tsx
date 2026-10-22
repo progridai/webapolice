@@ -27,8 +27,6 @@ export const HomePage: React.FC = () => {
     APP_ROLES.OPERADOR,
   ]);
   const { possuiPermissao } = useAuthorization();
-  const canAccessApolices = possuiPermissao('apolices.visualizar');
-  const canAccessRamos = possuiPermissao('ramos.visualizar');
   const canAccessSeguradoras = possuiPermissao('seguradoras.visualizar');
   const canAccessCorretoras = possuiPermissao('corretoras.visualizar');
   const canAccessCooperados = possuiPermissao('cooperados.visualizar');

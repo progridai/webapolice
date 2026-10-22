@@ -1,4 +1,4 @@
-import React, { forwardRef } from 'react';
+import { forwardRef } from 'react';
 import { Input } from '../ui/Input';
 import type { InputProps } from '../ui/Input';
 

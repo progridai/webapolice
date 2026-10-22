@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Input } from '../Input';
-import { SearchIcon } from '../Icons';
 import './SearchField.css';
 
 export interface SearchFieldProps {
@@ -78,7 +77,6 @@ export const SearchField: React.FC<SearchFieldProps> = ({
         value={localValue}
         onChange={handleChange}
         disabled={disabled}
-        icon={<SearchIcon />}
         aria-label={ariaLabel || placeholder}
       />
       {localValue && !disabled && (

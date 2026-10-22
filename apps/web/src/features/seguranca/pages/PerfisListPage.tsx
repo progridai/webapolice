@@ -71,7 +71,7 @@ export const PerfisListPage: React.FC = () => {
       key: 'tipo',
       label: 'Tipo',
       render: (p) => (
-        <Badge variant={p.perfilSistema ? 'primary' : 'neutral'}>
+        <Badge variant={p.perfilSistema ? 'brand' : 'neutral'}>
           {p.perfilSistema ? 'Sistema' : 'Customizado'}
         </Badge>
       ),

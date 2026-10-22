@@ -1,5 +1,5 @@
 /* eslint-disable react-refresh/only-export-components */
-import React, { Suspense, lazy } from 'react';
+import { Suspense, lazy } from 'react';
 import { Route } from 'react-router-dom';
 import { ROUTES } from '../../../app/routes/routePaths';
 import { PermissionProtectedRoute } from '../../../app/routes/PermissionProtectedRoute';

@@ -43,7 +43,7 @@ export const ApolicesMobileList: React.FC<ApolicesMobileListProps> = ({
                 </p>
               )}
             </div>
-            <StatusBadge status={apolice.ativo ? 'ativo' : 'inativo'} label={apolice.status} />
+            <StatusBadge status={apolice.ativo ? 'ativo' : 'inativo'} />
           </CardHeader>
           <CardContent className="pt-0">
             <div className="flex justify-between items-end mt-4">

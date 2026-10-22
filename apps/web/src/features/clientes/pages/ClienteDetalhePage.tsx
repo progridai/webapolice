@@ -72,7 +72,7 @@ export const ClienteDetalhePage: React.FC = () => {
       if (httpError.status === 404) {
         return (
           <main ref={mainRef} tabIndex={-1} className="p-6 max-w-7xl mx-auto focus:outline-none">
-            <Button variant="ghost" onClick={handleVoltar} className="mb-4" aria-label="Voltar para listagem">
+            <Button variant="text" onClick={handleVoltar} className="mb-4" aria-label="Voltar para listagem">
               &larr; Voltar para clientes
             </Button>
             <EmptyState
@@ -85,7 +85,7 @@ export const ClienteDetalhePage: React.FC = () => {
       if (httpError.status === 403) {
         return (
           <main ref={mainRef} tabIndex={-1} className="p-6 max-w-7xl mx-auto focus:outline-none">
-            <Button variant="ghost" onClick={handleVoltar} className="mb-4" aria-label="Voltar para listagem">
+            <Button variant="text" onClick={handleVoltar} className="mb-4" aria-label="Voltar para listagem">
               &larr; Voltar para clientes
             </Button>
             <Alert variant="error" title="Acesso negado" role="alert">
@@ -98,20 +98,18 @@ export const ClienteDetalhePage: React.FC = () => {
 
     return (
       <main ref={mainRef} tabIndex={-1} className="p-6 max-w-7xl mx-auto focus:outline-none">
-        <Button variant="ghost" onClick={handleVoltar} className="mb-4" aria-label="Voltar para listagem">
+        <Button variant="text" onClick={handleVoltar} className="mb-4" aria-label="Voltar para listagem">
           &larr; Voltar para clientes
         </Button>
         <Alert
           variant="error"
           title="Erro ao carregar detalhes"
           role="alert"
-          action={
-            <Button variant="primary" size="sm" onClick={retry}>
-              Tentar novamente
-            </Button>
-          }
         >
           {error.message || 'Não foi possível carregar os dados do cliente.'}
+          <Button variant="primary" size="small" onClick={retry}>
+            Tentar novamente
+          </Button>
         </Alert>
       </main>
     );
@@ -136,7 +134,7 @@ export const ClienteDetalhePage: React.FC = () => {
         }
         actions={
           <div className="flex gap-2">
-            <Button variant="ghost" onClick={handleVoltar}>Voltar</Button>
+            <Button variant="text" onClick={handleVoltar}>Voltar</Button>
             {podeAlterar && (
               <Button variant="primary" onClick={() => navigate(`/clientes/${id}/editar`)}>Editar Cliente</Button>
             )}
@@ -192,7 +190,7 @@ export const ClienteDetalhePage: React.FC = () => {
                     <p className="text-base text-texto-principal">{formatarValorContato(contato.tipo, contato.valor)}</p>
                   </div>
                   {contato.principal && (
-                    <Badge variant="neutral" className="bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-800">
+                    <Badge variant="info">
                       Principal
                     </Badge>
                   )}
@@ -208,7 +206,7 @@ export const ClienteDetalhePage: React.FC = () => {
                   <div className="flex items-center gap-2 pl-1">
                     <span className="text-[10px] font-medium text-texto-secundario uppercase tracking-wider">{endereco.tipo}</span>
                     {endereco.principal && (
-                      <Badge variant="neutral" className="bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-800">
+                      <Badge variant="info">
                         Principal
                       </Badge>
                     )}

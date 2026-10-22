@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { useApoliceVidas } from '../../hooks/useApoliceVidas';
-import { DataTable, StatusBadge, Pagination, Alert, Button, EmptyState, ConfirmDialog, Badge } from '../../../../components/ui';
+import { DataTable, StatusBadge, Pagination, Alert, Button, EmptyState, ConfirmDialog } from '../../../../components/ui';
 import type { Column } from '../../../../components/ui/DataTable/DataTable';
 import type { ApoliceVidaListItem, ApoliceVidaQuery } from '../../types/apolice.types';
 import { useAuthorization } from '../../../../auth/AuthorizationProvider';
@@ -132,7 +132,7 @@ export const VidasTab: React.FC<VidasTabProps> = ({ publicId }) => {
       {
         key: 'status',
         label: 'Status',
-        render: (vida) => <StatusBadge status={vida.ativo ? 'ativo' : 'inativo'} label={vida.status || (vida.ativo ? 'Ativa' : 'Encerrada')} />,
+        render: (vida) => <StatusBadge status={vida.ativo ? 'ativo' : 'inativo'} />,
       },
     ];
 
@@ -143,10 +143,10 @@ export const VidasTab: React.FC<VidasTabProps> = ({ publicId }) => {
         render: (vida) => (
           <div className="flex items-center justify-end gap-2">
             {podeAlterar && (
-              <Button variant="ghost" size="small" onClick={() => handleEdit(vida)}>Editar</Button>
+              <Button variant="text" size="small" onClick={() => handleEdit(vida)}>Editar</Button>
             )}
             {podeInativar && vida.ativo && (
-              <Button variant="ghost" size="small" className="text-error hover:bg-error/10" onClick={() => handleEncerrarClick(vida.apoliceVidaPublicId)}>
+              <Button variant="text" size="small" className="text-error hover:bg-error/10" onClick={() => handleEncerrarClick(vida.apoliceVidaPublicId)}>
                 Encerrar
               </Button>
             )}

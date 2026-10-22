@@ -9,8 +9,7 @@ import {
   PageHeader,
   DetailsSection,
   DescriptionList,
-  StatusBadge,
-  Badge
+  StatusBadge
 } from '../../../components/ui';
 import { DescriptionItem } from '../../../components/ui/DescriptionList';
 import { useEstipulanteDetalhe } from '../hooks/useEstipulanteDetalhe';
@@ -78,7 +77,7 @@ export const EstipulanteDetalhePage: React.FC = () => {
     if (errorResponse?.status === 404) {
       return (
         <main ref={mainRef} tabIndex={-1} className="p-6 max-w-7xl mx-auto focus:outline-none">
-          <Button variant="ghost" onClick={handleVoltar} className="mb-4" aria-label="Voltar para listagem">
+          <Button variant="text" onClick={handleVoltar} className="mb-4" aria-label="Voltar para listagem">
             &larr; Voltar para estipulantes
           </Button>
           <EmptyState
@@ -92,7 +91,7 @@ export const EstipulanteDetalhePage: React.FC = () => {
     if (errorResponse?.status === 403) {
       return (
         <main ref={mainRef} tabIndex={-1} className="p-6 max-w-7xl mx-auto focus:outline-none">
-          <Button variant="ghost" onClick={handleVoltar} className="mb-4" aria-label="Voltar para listagem">
+          <Button variant="text" onClick={handleVoltar} className="mb-4" aria-label="Voltar para listagem">
             &larr; Voltar para estipulantes
           </Button>
           <Alert variant="error" title="Acesso negado" role="alert">
@@ -104,20 +103,18 @@ export const EstipulanteDetalhePage: React.FC = () => {
 
     return (
       <main ref={mainRef} tabIndex={-1} className="p-6 max-w-7xl mx-auto focus:outline-none">
-        <Button variant="ghost" onClick={handleVoltar} className="mb-4" aria-label="Voltar para listagem">
+        <Button variant="text" onClick={handleVoltar} className="mb-4" aria-label="Voltar para listagem">
           &larr; Voltar para estipulantes
         </Button>
         <Alert
           variant="error"
           title="Erro ao carregar detalhes"
           role="alert"
-          action={
-            <Button variant="primary" size="sm" onClick={retry}>
-              Tentar novamente
-            </Button>
-          }
         >
           {error.message || 'Não foi possível carregar os dados do estipulante.'}
+          <Button variant="primary" size="small" onClick={retry}>
+            Tentar novamente
+          </Button>
         </Alert>
       </main>
     );
@@ -154,7 +151,7 @@ export const EstipulanteDetalhePage: React.FC = () => {
         }
         actions={
           <div className="flex gap-2">
-            <Button variant="ghost" onClick={handleVoltar}>Voltar</Button>
+            <Button variant="text" onClick={handleVoltar}>Voltar</Button>
             {podeAlterar && (
               <Button variant="primary" onClick={() => navigate(`/estipulantes/${publicId}/editar`)}>Editar Estipulante</Button>
             )}
@@ -208,13 +205,13 @@ export const EstipulanteDetalhePage: React.FC = () => {
               {contatosAtivos.map((contato, index) => (
                 <DescriptionItem 
                   key={index} 
-                  label={
+                  label={contato.tipoContato}
+                  value={
                     <span className="flex items-center gap-2">
-                      {contato.tipoContato}
+                      {formatarValorContato(contato.tipoContato, contato.valor)}
                       {contato.principal && <span className="bg-marca-principal/10 text-marca-principal px-1 rounded text-[9px] font-bold">PRINCIPAL</span>}
                     </span>
                   } 
-                  value={formatarValorContato(contato.tipoContato, contato.valor)} 
                   className={contato.tipoContato.toUpperCase() === 'EMAIL' ? 'sm:col-span-2' : 'sm:col-span-1'}
                 />
               ))}

@@ -17,7 +17,7 @@
     "test:run": "vitest run",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc -b --pretty false"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.4.0",

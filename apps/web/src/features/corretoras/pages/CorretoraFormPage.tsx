@@ -54,7 +54,6 @@ export const CorretoraFormPage: React.FC = () => {
 
       if (isEdit && publicId) {
         await corretorasApi.alterar(publicId, {
-          publicId,
           nome: data.nome,
           codigo: data.codigo || undefined,
           codigoProtheus: data.codigoProtheus || undefined,
@@ -87,7 +86,7 @@ export const CorretoraFormPage: React.FC = () => {
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-64" aria-label="Carregando corretora">
-        <Spinner size="lg" />
+        <Spinner size="large" />
       </div>
     );
   }

@@ -15,8 +15,10 @@ export function useApoliceDetalhe(publicId: string | undefined) {
     try {
       const result = await obterApolice(publicId);
       setData(result);
-    } catch (err: any) {
-      setError(err instanceof Error ? err : new Error(err.message || 'Erro ao carregar detalhes da apólice'));
+    } catch (err: unknown) {
+      setError(
+        err instanceof Error ? err : new Error('Erro ao carregar detalhes da apólice'),
+      );
     } finally {
       setIsLoading(false);
     }

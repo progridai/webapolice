@@ -1,4 +1,5 @@
 import { httpClient } from '../../../services/http/httpClient';
+import type { ApoliceFormValues } from '../schemas/apoliceForm.schema';
 import type { PremiosCobertura } from '../../cadastros-seguro/api/catalogos.api';
 
 export async function alterarPremiosApolice(apolicePublicId: string, vinculoPublicId: string, dados: PremiosCobertura): Promise<void> {
@@ -6,7 +7,7 @@ export async function alterarPremiosApolice(apolicePublicId: string, vinculoPubl
 }
 import type { 
   ApoliceListItem, ApolicesQuery, PagedResult, 
-  ApoliceDetalheResponse, ApoliceVidaListItem
+  ApoliceDetalheResponse, ApoliceVidaListItem, SalvarApoliceRequest
 } from '../types/apolice.types';
 
 export async function listarApolices(
@@ -23,6 +24,7 @@ export async function listarApolices(
   if (query.estipulanteId) params.append('estipulanteId', query.estipulanteId);
   if (query.seguradoraId) params.append('seguradoraId', query.seguradoraId);
   if (query.tipoRamo) params.append('tipoRamo', query.tipoRamo);
+  if (query.vigenciaDataReferencia) params.append('vigenciaDataReferencia', query.vigenciaDataReferencia);
 
   const queryString = params.toString();
   const url = queryString ? `/api/apolices?${queryString}` : '/api/apolices';
@@ -36,38 +38,27 @@ export async function obterApolice(publicId: string): Promise<ApoliceDetalheResp
   return response.data;
 }
 
-export async function criarApolice(data: import('../schemas/apoliceForm.schema').ApoliceFormValues): Promise<{ publicId: string }> {
-  const payload = {
-    ...data,
+function toSalvarApoliceRequest(data: ApoliceFormValues): SalvarApoliceRequest {
+  return {
+    nome: data.nome,
     estipulanteId: Number(data.estipulanteId),
     seguradoraId: Number(data.seguradoraId),
     corretoraId: data.corretoraId ? Number(data.corretoraId) : null,
     dataFimVigencia: data.dataFimVigencia || null,
     dataAniversario: data.dataAniversario || null,
-    ramos: data.ramos?.map(r => ({
-      tipoRamo: r.tipoRamo,
-      numeroApolice: r.numeroApolice || null,
-      iofPercentual: r.iofPercentual ?? null,
-    }))
+    dataInicioVigencia: data.dataInicioVigencia,
+    observacao: data.observacao,
   };
+}
+
+export async function criarApolice(data: ApoliceFormValues): Promise<{ publicId: string }> {
+  const payload = toSalvarApoliceRequest(data);
   const response = await httpClient.post<{ publicId: string }>('/api/apolices', payload);
   return response.data;
 }
 
-export async function alterarApolice(publicId: string, data: import('../schemas/apoliceForm.schema').ApoliceFormValues): Promise<void> {
-  const payload = {
-    ...data,
-    estipulanteId: Number(data.estipulanteId),
-    seguradoraId: Number(data.seguradoraId),
-    corretoraId: data.corretoraId ? Number(data.corretoraId) : null,
-    dataFimVigencia: data.dataFimVigencia || null,
-    dataAniversario: data.dataAniversario || null,
-    ramos: data.ramos?.map(r => ({
-      tipoRamo: r.tipoRamo,
-      numeroApolice: r.numeroApolice || null,
-      iofPercentual: r.iofPercentual ?? null,
-    }))
-  };
+export async function alterarApolice(publicId: string, data: ApoliceFormValues): Promise<void> {
+  const payload = toSalvarApoliceRequest(data);
   await httpClient.put(`/api/apolices/${publicId}`, payload);
 }
 
@@ -82,8 +73,8 @@ export async function listarApoliceVidas(
   if (query.pageSize) params.append('tamanhoPagina', query.pageSize.toString());
   if (query.busca) params.append('busca', query.busca);
   if (query.status) params.append('status', query.status.toString());
-  if (query.subestipulantePublicId) params.append('subestipulantePublicId', query.subestipulantePublicId);
-  if (query.moduloPublicId) params.append('moduloPublicId', query.moduloPublicId);
+  if (query.apoliceSubgrupoPublicId) params.append('apoliceSubgrupoPublicId', query.apoliceSubgrupoPublicId);
+  if (query.apoliceModuloPublicId) params.append('apoliceModuloPublicId', query.apoliceModuloPublicId);
   if (query.vigenciaDataReferencia) params.append('vigenciaDataReferencia', query.vigenciaDataReferencia);
 
   const queryString = params.toString();

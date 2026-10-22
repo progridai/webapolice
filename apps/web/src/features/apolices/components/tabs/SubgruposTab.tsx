@@ -51,12 +51,10 @@ export const SubgruposTab: React.FC<SubgruposTabProps> = ({ publicId }) => {
       await inativarApoliceSubgrupo(publicId, subgrupoInativacao.subgrupoPublicId);
       setSubgrupoInativacao(null);
       refetch();
-    } catch (err: any) {
-      if (err.response?.data?.detail) {
-        setInativarErro(err.response.data.detail);
-      } else {
-        setInativarErro(err.message || 'Erro ao inativar o subgrupo.');
-      }
+    } catch (err: unknown) {
+      setInativarErro(
+        err instanceof Error && err.message ? err.message : 'Erro ao inativar o subgrupo.',
+      );
     } finally {
       setInativando(false);
     }
@@ -89,7 +87,7 @@ export const SubgruposTab: React.FC<SubgruposTabProps> = ({ publicId }) => {
       key: 'status',
       label: 'Status',
       render: (row) => (
-        <StatusBadge status={row.ativo ? 'ativo' : 'inativo'} label={row.ativo ? 'Ativo' : 'Inativo'} />
+        <StatusBadge status={row.ativo ? 'ativo' : 'inativo'} />
       ),
     },
     {

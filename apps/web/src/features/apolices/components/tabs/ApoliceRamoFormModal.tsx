@@ -10,10 +10,11 @@ import type { ApoliceRamoResult } from '../../types/apolice.types';
 const ramoFormSchema = z.object({
   ramoPublicId: z.string().min(1, 'Selecione um Ramo'),
   numeroApolice: z.string().optional(),
-  iofPercentual: z.coerce.number().min(0).max(100).optional().or(z.literal('')),
+  iofPercentual: z.coerce.number<string | number>().min(0).max(100).optional().or(z.literal('')),
 });
 
-export type ApoliceRamoFormData = z.infer<typeof ramoFormSchema>;
+type ApoliceRamoFormInput = z.input<typeof ramoFormSchema>;
+export type ApoliceRamoFormData = z.output<typeof ramoFormSchema>;
 
 interface ApoliceRamoFormModalProps {
   aberto: boolean;
@@ -43,7 +44,7 @@ export const ApoliceRamoFormModal: React.FC<ApoliceRamoFormModalProps> = ({
     control,
     reset,
     formState: { errors },
-  } = useForm<ApoliceRamoFormData>({
+  } = useForm<ApoliceRamoFormInput, unknown, ApoliceRamoFormData>({
     resolver: zodResolver(ramoFormSchema),
     defaultValues: {
       ramoPublicId: '',
@@ -81,7 +82,7 @@ export const ApoliceRamoFormModal: React.FC<ApoliceRamoFormModalProps> = ({
         value: r.publicId,
         label: `${r.codigo} — ${r.nome}`
       })));
-    } catch (err) {
+    } catch {
       setError('Erro ao carregar Ramos. Tente novamente.');
     } finally {
       setCarregandoRamos(false);
@@ -106,8 +107,10 @@ export const ApoliceRamoFormModal: React.FC<ApoliceRamoFormModalProps> = ({
       }
       onSucesso();
       onClose();
-    } catch (error: any) {
-      setError(error.response?.data?.message || error.message || 'Erro inesperado.');
+    } catch (error: unknown) {
+      setError(
+        error instanceof Error && error.message ? error.message : 'Erro inesperado.',
+      );
     } finally {
       setSalvando(false);
     }
@@ -122,16 +125,15 @@ export const ApoliceRamoFormModal: React.FC<ApoliceRamoFormModalProps> = ({
     >
       <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4 py-2">
         {error && (
-          <Alert type="error" title="Falha ao salvar" onClose={() => setError(null)}>
+          <Alert variant="error" title="Falha ao salvar" onClose={() => setError(null)}>
             {error}
           </Alert>
         )}
         <div className="grid grid-cols-1 gap-4">
           {isEdicao && ramoEdicao ? (
-            <ReadOnlyField 
-              label="Ramo" 
-              value={`${ramoEdicao.ramoCodigo} — ${ramoEdicao.ramoNome}`} 
-            />
+            <FormField label="Ramo">
+              <ReadOnlyField value={`${ramoEdicao.ramoCodigo} — ${ramoEdicao.ramoNome}`} />
+            </FormField>
           ) : (
             <Controller
               name="ramoPublicId"

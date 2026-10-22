@@ -13,9 +13,14 @@ export function useApolices(query: ApolicesQuery, refreshTrigger: number = 0) {
     try {
       const result = await listarApolices(query, abortSignal);
       setData(result);
-    } catch (err: any) {
-      if (err.name !== 'AbortError' && err.name !== 'CanceledError') {
-        setError(err instanceof Error ? err : new Error(err.message || 'Erro ao carregar apólices'));
+    } catch (err: unknown) {
+      if (!(
+        (err instanceof Error || err instanceof DOMException) &&
+        (err.name === 'AbortError' || err.name === 'CanceledError')
+      )) {
+        setError(
+          err instanceof Error ? err : new Error('Erro ao carregar apólices'),
+        );
       }
     } finally {
       setIsLoading(false);

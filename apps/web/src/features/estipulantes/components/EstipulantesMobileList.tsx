@@ -106,7 +106,7 @@ export const EstipulantesMobileList: React.FC<EstipulantesMobileListProps> = ({
                         label: 'Inativar',
                         icon: <XCircleIcon />,
                         onClick: () => handleInativarClick(est),
-                        danger: true,
+                        variant: 'danger' as const,
                       }] : []),
                       ...(!est.ativo && podeReativar ? [{
                         label: 'Reativar',
@@ -124,18 +124,18 @@ export const EstipulantesMobileList: React.FC<EstipulantesMobileListProps> = ({
       </div>
 
       <ConfirmDialog
-        isOpen={confirmDialog.isOpen}
+        aberto={confirmDialog.isOpen}
         title={confirmDialog.action === 'inativar' ? 'Inativar Estipulante?' : 'Reativar Estipulante?'}
         description={
           confirmDialog.action === 'inativar'
             ? `O estipulante ${confirmDialog.estipulante?.razaoSocial} deixará de ficar disponível para uso operacional, mas seus dados serão preservados.`
             : `O estipulante ${confirmDialog.estipulante?.razaoSocial} voltará a ficar disponível para uso operacional.`
         }
-        confirmLabel={confirmDialog.action === 'inativar' ? 'Inativar' : 'Reativar'}
-        cancelLabel="Cancelar"
+        confirmText={confirmDialog.action === 'inativar' ? 'Inativar' : 'Reativar'}
+        cancelText="Cancelar"
         variant={confirmDialog.action === 'inativar' ? 'danger' : 'primary'}
         onConfirm={confirmAction}
-        onCancel={() => setConfirmDialog({ isOpen: false, action: 'inativar', estipulante: null })}
+        onClose={() => setConfirmDialog({ isOpen: false, action: 'inativar', estipulante: null })}
       />
     </>
   );

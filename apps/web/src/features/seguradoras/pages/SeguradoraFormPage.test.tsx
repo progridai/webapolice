@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import React from 'react';
 import { MemoryRouter, Routes, Route } from 'react-router-dom';
 import { SeguradoraFormPage } from './SeguradoraFormPage';
 import * as api from '../api/seguradoras.api';
@@ -75,7 +74,7 @@ describe('SeguradoraFormPage', () => {
     fireEvent.change(screen.getByLabelText(/Nome \/ Razão Social/i), {
       target: { value: 'Bradesco Auto/RE Companhia de Seguros' },
     });
-    fireEvent.change(screen.getByLabelText(/CNPJ/i), {
+    fireEvent.input(screen.getByLabelText(/CNPJ/i), {
       target: { value: '92.682.038/0001-00' },
     });
     fireEvent.change(screen.getByLabelText(/Código Interno/i), {
@@ -91,7 +90,7 @@ describe('SeguradoraFormPage', () => {
     await waitFor(() => {
       expect(api.seguradorasApi.criar).toHaveBeenCalledWith({
         nome: 'Bradesco Auto/RE Companhia de Seguros',
-        cnpj: '92.682.038/0001-00',
+        cnpj: '92682038000100',
         codigo: 'BRD-01',
         susep: '05312',
         observacao: undefined,
@@ -129,7 +128,7 @@ describe('SeguradoraFormPage', () => {
     expect((screen.getByLabelText(/Nome \/ Razão Social/i) as HTMLInputElement).value).toBe('Mapfre Seguros');
     expect((screen.getByLabelText(/Código Interno/i) as HTMLInputElement).value).toBe('MPF-99');
     expect((screen.getByLabelText(/Código SUSEP/i) as HTMLInputElement).value).toBe('06238');
-    expect((screen.getByLabelText(/CNPJ/i) as HTMLInputElement).value).toBe('61074175000138');
+    expect((screen.getByLabelText(/CNPJ/i) as HTMLInputElement).value).toBe('61.074.175/0001-38');
     expect((screen.getByLabelText(/Observação/i) as HTMLTextAreaElement).value).toBe('Parceiro estratégico');
   });
 

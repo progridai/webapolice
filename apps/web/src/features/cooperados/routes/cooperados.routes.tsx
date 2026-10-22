@@ -1,4 +1,4 @@
-import React, { lazy } from 'react';
+import { lazy } from 'react';
 import { Route } from 'react-router-dom';
 import { ROUTES } from '../../../app/routes/routePaths';
 import { PermissionProtectedRoute } from '../../../app/routes/PermissionProtectedRoute';
@@ -22,7 +22,7 @@ export const CooperadosRoutes = (
     <Route
       index
       element={
-        <PermissionProtectedRoute permissao="cooperados.visualizar">
+        <PermissionProtectedRoute permissaoCodigo="cooperados.visualizar">
           <CooperadosListPage />
         </PermissionProtectedRoute>
       }
@@ -30,7 +30,7 @@ export const CooperadosRoutes = (
     <Route
       path="novo"
       element={
-        <PermissionProtectedRoute permissao="cooperados.inserir">
+        <PermissionProtectedRoute permissaoCodigo="cooperados.inserir">
           <NovoCooperadoPage />
         </PermissionProtectedRoute>
       }
@@ -38,7 +38,7 @@ export const CooperadosRoutes = (
     <Route
       path=":id"
       element={
-        <PermissionProtectedRoute permissao="cooperados.visualizar">
+        <PermissionProtectedRoute permissaoCodigo="cooperados.visualizar">
           <CooperadoDetalhePage />
         </PermissionProtectedRoute>
       }
@@ -46,7 +46,7 @@ export const CooperadosRoutes = (
     <Route
       path=":id/editar"
       element={
-        <PermissionProtectedRoute permissao="cooperados.alterar">
+        <PermissionProtectedRoute permissaoCodigo="cooperados.alterar">
           <EditarCooperadoPage />
         </PermissionProtectedRoute>
       }

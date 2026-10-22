@@ -192,8 +192,6 @@ export function CatalogoListPage({ config }: { config: ConfigCatalogo }) {
         <Pagination
           currentPage={pagina}
           totalPages={Math.ceil(total / 20)}
-          totalItems={total}
-          pageSize={20}
           onPageChange={(page) => {
             setLoading(true);
             setError('');

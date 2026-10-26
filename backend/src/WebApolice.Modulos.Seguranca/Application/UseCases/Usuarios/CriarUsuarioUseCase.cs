@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
@@ -45,6 +46,16 @@ public class CriarUsuarioUseCase
         if (string.IsNullOrWhiteSpace(nome)) throw new UsuarioInvalidoException("Nome é obrigatório");
         if (string.IsNullOrWhiteSpace(email)) throw new UsuarioInvalidoException("E-mail é obrigatório");
         if (string.IsNullOrWhiteSpace(senhaTemporaria)) throw new UsuarioInvalidoException("Senha temporária é obrigatória");
+
+        username = username.Trim();
+        nome = nome.Trim();
+        email = email.Trim();
+
+        if (!Regex.IsMatch(username, "^[A-Za-z0-9._-]+$"))
+        {
+            throw new UsuarioInvalidoException(
+                "Username inválido. Use apenas letras, números, ponto, hífen ou sublinhado, sem espaços.");
+        }
 
         var perfisParaAtribuir = await _dbContext.Perfis
             .Where(p => perfilPublicIds.Contains(p.PublicId) && p.Ativo)

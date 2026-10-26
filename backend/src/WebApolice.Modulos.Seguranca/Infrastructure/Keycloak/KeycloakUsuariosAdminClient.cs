@@ -262,7 +262,20 @@ public class KeycloakUsuariosAdminClient : IKeycloakUsuariosAdminClient
                 errorMessageElement.ValueKind == JsonValueKind.String &&
                 !string.IsNullOrWhiteSpace(errorMessageElement.GetString()))
             {
-                return $"O Keycloak recusou o cadastro: {errorMessageElement.GetString()}";
+                var errorMessage = errorMessageElement.GetString()!;
+
+                return errorMessage switch
+                {
+                    "error-username-invalid-character" =>
+                        "Username inválido. Use apenas letras, números, ponto, hífen ou sublinhado, sem espaços.",
+                    "error-person-name-invalid-character" =>
+                        "O nome contém um caractere não permitido pelo provedor de identidade.",
+                    "error-invalid-email" =>
+                        "O e-mail informado não é aceito pelo provedor de identidade.",
+                    "error-user-attribute-required" =>
+                        "O provedor de identidade exige um atributo obrigatório que não foi informado.",
+                    _ => $"O Keycloak recusou o cadastro: {errorMessage}"
+                };
             }
 
             if (root.TryGetProperty("error", out var errorElement) &&

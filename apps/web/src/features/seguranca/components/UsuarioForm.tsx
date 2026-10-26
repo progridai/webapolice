@@ -16,7 +16,15 @@ import type { PerfilDto } from '../types/seguranca.types';
 
 // O schema se adapta se for edição (não exige senhas)
 const baseSchema = z.object({
-  username: z.string().min(1, 'Username é obrigatório').max(100),
+  username: z
+    .string()
+    .trim()
+    .min(1, 'Username é obrigatório')
+    .max(100)
+    .regex(
+      /^[A-Za-z0-9._-]+$/,
+      'Use apenas letras, números, ponto, hífen ou sublinhado, sem espaços',
+    ),
   nome: z.string().min(1, 'Nome é obrigatório').max(150),
   email: z.string().email('E-mail inválido').max(150),
   ativo: z.boolean(),
@@ -25,16 +33,21 @@ const baseSchema = z.object({
 
 const getUsuarioSchema = (isEdit: boolean) => {
   if (isEdit) return baseSchema;
-  
+
   return baseSchema
     .extend({
-      senhaTemporaria: z.string().min(6, 'Senha deve ter pelo menos 6 caracteres'),
+      senhaTemporaria: z
+        .string()
+        .min(6, 'Senha deve ter pelo menos 6 caracteres'),
       confirmacaoSenhaTemporaria: z.string(),
     })
-    .refine((data) => data.senhaTemporaria === data.confirmacaoSenhaTemporaria, {
-      message: 'As senhas não coincidem',
-      path: ['confirmacaoSenhaTemporaria'],
-    });
+    .refine(
+      (data) => data.senhaTemporaria === data.confirmacaoSenhaTemporaria,
+      {
+        message: 'As senhas não coincidem',
+        path: ['confirmacaoSenhaTemporaria'],
+      },
+    );
 };
 
 export type UsuarioFormData = z.infer<ReturnType<typeof getUsuarioSchema>>;
@@ -82,8 +95,15 @@ export const UsuarioForm: React.FC<UsuarioFormProps> = ({
   }, [initialData, reset]);
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-6" noValidate>
-      <FormSection title="Dados Gerais" description="Informações de acesso do usuário.">
+    <form
+      onSubmit={handleSubmit(onSubmit)}
+      className="flex flex-col gap-6"
+      noValidate
+    >
+      <FormSection
+        title="Dados Gerais"
+        description="Informações de acesso do usuário."
+      >
         <FormGrid>
           <FormField label="Username" error={errors.username?.message} required>
             <Input
@@ -93,8 +113,12 @@ export const UsuarioForm: React.FC<UsuarioFormProps> = ({
               error={!!errors.username}
             />
           </FormField>
-          
-          <FormField label="Nome Completo" error={errors.nome?.message} required>
+
+          <FormField
+            label="Nome Completo"
+            error={errors.nome?.message}
+            required
+          >
             <Input
               {...register('nome')}
               disabled={isSubmitting}
@@ -102,7 +126,7 @@ export const UsuarioForm: React.FC<UsuarioFormProps> = ({
               error={!!errors.nome}
             />
           </FormField>
-          
+
           <FormField label="E-mail" error={errors.email?.message} required>
             <Input
               type="email"
@@ -115,7 +139,11 @@ export const UsuarioForm: React.FC<UsuarioFormProps> = ({
 
           {!isEdit && (
             <>
-              <FormField label="Senha Temporária" error={errors.senhaTemporaria?.message} required>
+              <FormField
+                label="Senha Temporária"
+                error={errors.senhaTemporaria?.message}
+                required
+              >
                 <Input
                   type="password"
                   {...register('senhaTemporaria')}
@@ -123,8 +151,12 @@ export const UsuarioForm: React.FC<UsuarioFormProps> = ({
                   error={!!errors.senhaTemporaria}
                 />
               </FormField>
-              
-              <FormField label="Confirmar Senha" error={errors.confirmacaoSenhaTemporaria?.message} required>
+
+              <FormField
+                label="Confirmar Senha"
+                error={errors.confirmacaoSenhaTemporaria?.message}
+                required
+              >
                 <Input
                   type="password"
                   {...register('confirmacaoSenhaTemporaria')}
@@ -135,7 +167,10 @@ export const UsuarioForm: React.FC<UsuarioFormProps> = ({
             </>
           )}
 
-          <FormField label="Status" className="sm:col-span-full lg:col-span-full">
+          <FormField
+            label="Status"
+            className="sm:col-span-full lg:col-span-full"
+          >
             <Controller
               name="ativo"
               control={control}
@@ -153,7 +188,10 @@ export const UsuarioForm: React.FC<UsuarioFormProps> = ({
         </FormGrid>
       </FormSection>
 
-      <FormSection title="Perfis de Acesso" description="Atribua papéis de segurança a este usuário.">
+      <FormSection
+        title="Perfis de Acesso"
+        description="Atribua papéis de segurança a este usuário."
+      >
         <Controller
           name="perfilPublicIds"
           control={control}
@@ -169,7 +207,12 @@ export const UsuarioForm: React.FC<UsuarioFormProps> = ({
       </FormSection>
 
       <FormActions>
-        <Button type="button" variant="ghost" onClick={onCancel} disabled={isSubmitting}>
+        <Button
+          type="button"
+          variant="ghost"
+          onClick={onCancel}
+          disabled={isSubmitting}
+        >
           Cancelar
         </Button>
         <Button type="submit" variant="primary" loading={isSubmitting}>

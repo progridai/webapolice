@@ -114,8 +114,34 @@ public class KeycloakUsuariosAdminClientTests
         // Assert
         var exception = await action.Should().ThrowAsync<KeycloakUsuarioAdminException>();
         exception.Which.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-        exception.Which.Message.Should().Contain("error-user-attribute-required");
+        exception.Which.Message.Should().Be(
+            "O provedor de identidade exige um atributo obrigatório que não foi informado.");
         exception.Which.ProviderResponse.Should().Contain("department");
+    }
+
+    [Fact]
+    public async Task CriarUsuarioAsync_DeveTraduzirErroDeCaractereInvalidoNoUsername()
+    {
+        // Arrange
+        var tokenResponse = new { access_token = "fake-token", expires_in = 3600 };
+        SetupHttpResponse("https://auth.bravida.com.br/realms/WebApolice/protocol/openid-connect/token", HttpStatusCode.OK, JsonSerializer.Serialize(tokenResponse));
+        SetupHttpResponse(
+            "https://auth.bravida.com.br/admin/realms/WebApolice/users",
+            HttpStatusCode.BadRequest,
+            "{\"errorMessage\":\"error-username-invalid-character\",\"field\":\"username\"}");
+
+        // Act
+        var action = () => _client.CriarUsuarioAsync(
+            "invalid username",
+            "new@test.com",
+            "New User",
+            true,
+            CancellationToken.None);
+
+        // Assert
+        var exception = await action.Should().ThrowAsync<KeycloakUsuarioAdminException>();
+        exception.Which.Message.Should().Be(
+            "Username inválido. Use apenas letras, números, ponto, hífen ou sublinhado, sem espaços.");
     }
 
     [Fact]

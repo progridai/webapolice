@@ -2,18 +2,17 @@ using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using WebApolice.Modulos.Cadastro.Domain.Exceptions;
 using WebApolice.Modulos.Seguranca.Domain.Exceptions;
+using WebApolice.Modulos.Seguranca.Infrastructure.Keycloak;
 
 namespace WebApolice.Api.Infrastructure.Errors;
 
 public class GlobalExceptionHandler : IExceptionHandler
 {
     private readonly ILogger<GlobalExceptionHandler> _logger;
-    private readonly IWebHostEnvironment _env;
 
-    public GlobalExceptionHandler(ILogger<GlobalExceptionHandler> logger, IWebHostEnvironment env)
+    public GlobalExceptionHandler(ILogger<GlobalExceptionHandler> logger)
     {
         _logger = logger;
-        _env = env;
     }
 
     public async ValueTask<bool> TryHandleAsync(HttpContext httpContext, Exception exception, CancellationToken cancellationToken)
@@ -98,6 +97,30 @@ public class GlobalExceptionHandler : IExceptionHandler
                 Detail = exception.Message,
                 Instance = context.Request.Path
             },
+            KeycloakUsuarioAdminException { StatusCode: System.Net.HttpStatusCode.Conflict } => new ProblemDetails
+            {
+                Type = "https://webapolice/errors/conflito",
+                Title = "Conflito",
+                Status = StatusCodes.Status409Conflict,
+                Detail = exception.Message,
+                Instance = context.Request.Path
+            },
+            KeycloakUsuarioAdminException { StatusCode: System.Net.HttpStatusCode.BadRequest } => new ProblemDetails
+            {
+                Type = "https://webapolice/errors/regra-de-negocio",
+                Title = "Dados recusados pelo provedor de identidade",
+                Status = StatusCodes.Status422UnprocessableEntity,
+                Detail = exception.Message,
+                Instance = context.Request.Path
+            },
+            KeycloakUsuarioAdminException => new ProblemDetails
+            {
+                Type = "https://webapolice/errors/provedor-identidade-indisponivel",
+                Title = "Falha no provedor de identidade",
+                Status = StatusCodes.Status502BadGateway,
+                Detail = "Não foi possível concluir a operação no provedor de identidade.",
+                Instance = context.Request.Path
+            },
             WebApolice.SharedKernel.Application.Exceptions.ValidacaoException => new ProblemDetails
             {
                 Type = "https://webapolice/errors/regra-de-negocio",
@@ -111,7 +134,7 @@ public class GlobalExceptionHandler : IExceptionHandler
                 Type = "https://webapolice/errors/erro-interno",
                 Title = "Ocorreu um erro inesperado no servidor.",
                 Status = StatusCodes.Status500InternalServerError,
-                Detail = exception.ToString(),
+                Detail = "Consulte os logs para obter mais informações.",
                 Instance = context.Request.Path
             }
         };

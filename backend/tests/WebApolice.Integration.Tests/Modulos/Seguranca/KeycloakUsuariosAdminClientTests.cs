@@ -21,6 +21,7 @@ public class KeycloakUsuariosAdminClientTests
     private readonly Mock<HttpMessageHandler> _httpMessageHandlerMock;
     private readonly KeycloakUsuariosAdminClient _client;
     private readonly KeycloakAdminOptions _options;
+    private readonly Mock<ILogger<KeycloakUsuariosAdminClient>> _loggerMock;
 
     public KeycloakUsuariosAdminClientTests()
     {
@@ -42,9 +43,9 @@ public class KeycloakUsuariosAdminClientTests
         var optionsMock = new Mock<IOptions<KeycloakAdminOptions>>();
         optionsMock.Setup(o => o.Value).Returns(_options);
 
-        var loggerMock = new Mock<ILogger<KeycloakUsuariosAdminClient>>();
+        _loggerMock = new Mock<ILogger<KeycloakUsuariosAdminClient>>();
 
-        _client = new KeycloakUsuariosAdminClient(httpClient, optionsMock.Object);
+        _client = new KeycloakUsuariosAdminClient(httpClient, optionsMock.Object, _loggerMock.Object);
     }
 
     [Fact]
@@ -85,10 +86,36 @@ public class KeycloakUsuariosAdminClientTests
             .ReturnsAsync(responseMsg);
 
         // Act
-        var id = await _client.CriarUsuarioAsync("newuser", "New User", "new@test.com", true, CancellationToken.None);
+        var id = await _client.CriarUsuarioAsync("newuser", "new@test.com", "New User", true, CancellationToken.None);
 
         // Assert
         id.Should().Be("12345-67890");
+    }
+
+    [Fact]
+    public async Task CriarUsuarioAsync_DevePreservarDetalheDoKeycloak_QuandoDadosForemRecusados()
+    {
+        // Arrange
+        var tokenResponse = new { access_token = "fake-token", expires_in = 3600 };
+        SetupHttpResponse("https://auth.bravida.com.br/realms/WebApolice/protocol/openid-connect/token", HttpStatusCode.OK, JsonSerializer.Serialize(tokenResponse));
+        SetupHttpResponse(
+            "https://auth.bravida.com.br/admin/realms/WebApolice/users",
+            HttpStatusCode.BadRequest,
+            "{\"errorMessage\":\"error-user-attribute-required\",\"field\":\"department\"}");
+
+        // Act
+        var action = () => _client.CriarUsuarioAsync(
+            "newuser",
+            "new@test.com",
+            "New User",
+            true,
+            CancellationToken.None);
+
+        // Assert
+        var exception = await action.Should().ThrowAsync<KeycloakUsuarioAdminException>();
+        exception.Which.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        exception.Which.Message.Should().Contain("error-user-attribute-required");
+        exception.Which.ProviderResponse.Should().Contain("department");
     }
 
     [Fact]

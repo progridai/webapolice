@@ -6,7 +6,7 @@ using WebApolice.Integration.Tests.Setup;
 using WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Application.UseCases.Apolices.CriarModuloApolice;
 using WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Application.UseCases.Apolices.AlterarModuloApolice;
 using WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Application.UseCases.Apolices.InativarModuloApolice;
-using WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models;
+using WebApolice.Modulos.Seguro.Domain.Modelos;
 using WebApolice.SharedKernel.Application.Exceptions;
 using Xunit;
 
@@ -25,6 +25,8 @@ public class ApolicesModulosTests : IClassFixture<SeguroIntegrationTestFixture>,
 
     public async Task InitializeAsync()
     {
+        _fixture.DbContext.ChangeTracker.Clear();
+        _fixture.Cadastro.ChangeTracker.Clear();
         // Limpar tabelas para isolamento entre testes
         await _fixture.DbContext.Database.ExecuteSqlRawAsync("TRUNCATE TABLE seguro.apolice_modulo CASCADE;");
         await _fixture.DbContext.Database.ExecuteSqlRawAsync("TRUNCATE TABLE seguro.apolice CASCADE;");
@@ -55,17 +57,14 @@ public class ApolicesModulosTests : IClassFixture<SeguroIntegrationTestFixture>,
     {
         // Insere fisicamente na tabela cadastro.modulo pois o DbContext de Seguro não gerencia essa escrita
         var moduloPublicId = Guid.NewGuid();
-        var sql = $@"
-            INSERT INTO cadastro.modulo (public_id, codigo, nome, descricao, icone, ordem, ativo, habilitado, created_at, updated_at)
-            VALUES ('{moduloPublicId}', 'TESTE_{Guid.NewGuid().ToString().Substring(0,4)}', 'Módulo de Teste', 'Desc', 'icon', 1, {(ativo ? "true" : "false")}, true, now(), now())
-            RETURNING id;
-        ";
-        
-        await using var command = _fixture.DbContext.Database.GetDbConnection().CreateCommand();
-        command.CommandText = sql;
-        await _fixture.DbContext.Database.OpenConnectionAsync();
-        var id = Assert.IsType<long>(await command.ExecuteScalarAsync());
-        
+        var modulo = new WebApolice.Modulos.Cadastro.Domain.Modelos.ModuloModel
+        {
+            PublicId = moduloPublicId, Nome = "Módulo de Teste", Descricao = "Desc", Ativo = ativo,
+            CreatedAt = DateTimeOffset.UtcNow, UpdatedAt = DateTimeOffset.UtcNow
+        };
+        _fixture.Cadastro.Modulos.Add(modulo);
+        await _fixture.Cadastro.SaveChangesAsync();
+        var id = modulo.Id;
         return (id, moduloPublicId);
     }
 
@@ -75,7 +74,7 @@ public class ApolicesModulosTests : IClassFixture<SeguroIntegrationTestFixture>,
         var apolice = await CriarApoliceValidaAsync();
         var moduloGlobal = await CriarModuloGlobalAsync();
 
-        var handler = new CriarModuloApoliceHandler(_fixture.DbContext);
+        var handler = new CriarModuloApoliceHandler(new WebApolice.Modulos.Seguro.Infrastructure.Persistence.Repositories.ApoliceVinculosRepository(_fixture.DbContext), WebApolice.Integration.Tests.Setup.SeguroPersistenciaTestes.ConsultasCadastro(_fixture.DbContext));
         var command = new CriarModuloApoliceCommand
         {
             ApolicePublicId = apolice.PublicId,
@@ -105,7 +104,7 @@ public class ApolicesModulosTests : IClassFixture<SeguroIntegrationTestFixture>,
         var apolice = await CriarApoliceValidaAsync();
         var moduloInativo = await CriarModuloGlobalAsync(ativo: false);
 
-        var handler = new CriarModuloApoliceHandler(_fixture.DbContext);
+        var handler = new CriarModuloApoliceHandler(new WebApolice.Modulos.Seguro.Infrastructure.Persistence.Repositories.ApoliceVinculosRepository(_fixture.DbContext), WebApolice.Integration.Tests.Setup.SeguroPersistenciaTestes.ConsultasCadastro(_fixture.DbContext));
         var command = new CriarModuloApoliceCommand
         {
             ApolicePublicId = apolice.PublicId,
@@ -123,7 +122,7 @@ public class ApolicesModulosTests : IClassFixture<SeguroIntegrationTestFixture>,
         var apolice = await CriarApoliceValidaAsync();
         var modulo = await CriarModuloGlobalAsync();
 
-        var handler = new CriarModuloApoliceHandler(_fixture.DbContext);
+        var handler = new CriarModuloApoliceHandler(new WebApolice.Modulos.Seguro.Infrastructure.Persistence.Repositories.ApoliceVinculosRepository(_fixture.DbContext), WebApolice.Integration.Tests.Setup.SeguroPersistenciaTestes.ConsultasCadastro(_fixture.DbContext));
         var command = new CriarModuloApoliceCommand
         {
             ApolicePublicId = apolice.PublicId,
@@ -145,8 +144,8 @@ public class ApolicesModulosTests : IClassFixture<SeguroIntegrationTestFixture>,
         var apolice = await CriarApoliceValidaAsync();
         var modulo = await CriarModuloGlobalAsync();
 
-        var handlerCriar = new CriarModuloApoliceHandler(_fixture.DbContext);
-        var handlerInativar = new InativarModuloApoliceHandler(_fixture.DbContext);
+        var handlerCriar = new CriarModuloApoliceHandler(new WebApolice.Modulos.Seguro.Infrastructure.Persistence.Repositories.ApoliceVinculosRepository(_fixture.DbContext), WebApolice.Integration.Tests.Setup.SeguroPersistenciaTestes.ConsultasCadastro(_fixture.DbContext));
+        var handlerInativar = new InativarModuloApoliceHandler(new WebApolice.Modulos.Seguro.Infrastructure.Persistence.Repositories.ApoliceVinculosRepository(_fixture.DbContext), WebApolice.Integration.Tests.Setup.SeguroPersistenciaTestes.ConsultasCadastro(_fixture.DbContext));
 
         var apoliceModuloPublicId = await handlerCriar.Handle(new CriarModuloApoliceCommand
         {
@@ -200,7 +199,7 @@ public class ApolicesModulosTests : IClassFixture<SeguroIntegrationTestFixture>,
         var apoliceB = await CriarApoliceValidaAsync();
         var modulo = await CriarModuloGlobalAsync();
 
-        var handlerCriar = new CriarModuloApoliceHandler(_fixture.DbContext);
+        var handlerCriar = new CriarModuloApoliceHandler(new WebApolice.Modulos.Seguro.Infrastructure.Persistence.Repositories.ApoliceVinculosRepository(_fixture.DbContext), WebApolice.Integration.Tests.Setup.SeguroPersistenciaTestes.ConsultasCadastro(_fixture.DbContext));
         var vinculoId_A = await handlerCriar.Handle(new CriarModuloApoliceCommand
         {
             ApolicePublicId = apoliceA.PublicId,
@@ -209,7 +208,7 @@ public class ApolicesModulosTests : IClassFixture<SeguroIntegrationTestFixture>,
         }, CancellationToken.None);
 
         // Tentar alterar vínculo X usando a URL da Apólice B
-        var handlerAlterar = new AlterarModuloApoliceHandler(_fixture.DbContext);
+        var handlerAlterar = new AlterarModuloApoliceHandler(new WebApolice.Modulos.Seguro.Infrastructure.Persistence.Repositories.ApoliceVinculosRepository(_fixture.DbContext), WebApolice.Integration.Tests.Setup.SeguroPersistenciaTestes.ConsultasCadastro(_fixture.DbContext));
         var exAlterar = await Assert.ThrowsAsync<ValidacaoException>(() => handlerAlterar.Handle(new AlterarModuloApoliceCommand
         {
             ApolicePublicId = apoliceB.PublicId,
@@ -219,7 +218,7 @@ public class ApolicesModulosTests : IClassFixture<SeguroIntegrationTestFixture>,
         Assert.Contains("não pertence à Apólice", exAlterar.Message);
 
         // Tentar inativar vínculo X usando a URL da Apólice B
-        var handlerInativar = new InativarModuloApoliceHandler(_fixture.DbContext);
+        var handlerInativar = new InativarModuloApoliceHandler(new WebApolice.Modulos.Seguro.Infrastructure.Persistence.Repositories.ApoliceVinculosRepository(_fixture.DbContext), WebApolice.Integration.Tests.Setup.SeguroPersistenciaTestes.ConsultasCadastro(_fixture.DbContext));
         var exInativar = await Assert.ThrowsAsync<ValidacaoException>(() => handlerInativar.Handle(new InativarModuloApoliceCommand
         {
             ApolicePublicId = apoliceB.PublicId,

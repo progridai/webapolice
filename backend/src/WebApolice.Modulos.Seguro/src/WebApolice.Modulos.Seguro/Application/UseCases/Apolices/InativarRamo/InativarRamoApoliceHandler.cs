@@ -2,32 +2,30 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
-using WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence;
-using WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models;
+using WebApolice.Modulos.Seguro.Application.Ports;
+using WebApolice.Modulos.Seguro.Domain.Modelos;
 using WebApolice.SharedKernel.Application.Exceptions;
 
 namespace WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Application.UseCases.Apolices.InativarRamo;
 
 public class InativarRamoApoliceHandler : IRequestHandler<InativarRamoApoliceCommand, bool>
 {
-    private readonly SeguroDbContext _dbContext;
+    private readonly IApoliceVinculosRepository _repository;
 
-    public InativarRamoApoliceHandler(SeguroDbContext dbContext)
+    public InativarRamoApoliceHandler(IApoliceVinculosRepository dbContext)
     {
-        _dbContext = dbContext;
+        _repository = dbContext;
     }
 
     public async Task<bool> Handle(InativarRamoApoliceCommand request, CancellationToken cancellationToken)
     {
-        var apolice = await _dbContext.Apolices.FirstOrDefaultAsync(a => a.PublicId == request.ApolicePublicId, cancellationToken);
+        var apolice = await _repository.ObterApoliceAsync(request.ApolicePublicId, true, cancellationToken);
         if (apolice == null) throw new ValidacaoException("Apólice não encontrada.");
 
-        var ramo = await _dbContext.Ramos.FirstOrDefaultAsync(r => r.PublicId == request.RamoPublicId, cancellationToken);
+        var ramo = await _repository.ObterRamoAsync(request.RamoPublicId, cancellationToken);
         if (ramo == null) throw new ValidacaoException("Ramo não encontrado.");
 
-        var vinculo = await _dbContext.ApoliceRamos
-            .FirstOrDefaultAsync(ar => ar.ApoliceId == apolice.Id && ar.RamoId == ramo.Id, cancellationToken);
+        var vinculo = await _repository.ObterVinculoRamoAsync(apolice.Id, ramo.Id, cancellationToken);
 
         if (vinculo == null || !vinculo.Ativo)
         {
@@ -37,7 +35,7 @@ public class InativarRamoApoliceHandler : IRequestHandler<InativarRamoApoliceCom
         vinculo.Ativo = false;
         vinculo.UpdatedAt = DateTimeOffset.UtcNow;
 
-        _dbContext.ApoliceRamos.Update(vinculo);
+        _repository.AtualizarRamo(vinculo);
 
         // WORKAROUND: Tabela seguro.apolice_historico não existe no banco de dados atual
         // var historico = new ApoliceHistoricoModel
@@ -49,9 +47,9 @@ public class InativarRamoApoliceHandler : IRequestHandler<InativarRamoApoliceCom
         //     DataAcao = DateTimeOffset.UtcNow,
         //     CreatedAt = DateTimeOffset.UtcNow
         // };
-        // _dbContext.ApoliceHistoricos.Add(historico);
+        // _repository.AdicionarHistorico(historico);
 
-        await _dbContext.SaveChangesAsync(cancellationToken);
+        await _repository.SalvarAlteracoesAsync(cancellationToken);
 
         return true;
     }

@@ -1,60 +1,71 @@
-using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
+using Npgsql;
 using Testcontainers.PostgreSql;
+using WebApolice.Auditoria.Contracts;
+using WebApolice.Auditoria.Infrastructure;
+using WebApolice.Modulos.Cadastro.Infrastructure.Persistence;
+using WebApolice.Modulos.Financeiro.Contracts;
+using WebApolice.Modulos.Financeiro.Infrastructure;
+using WebApolice.Modulos.Financeiro.src.WebApolice.Modulos.Financeiro.Infrastructure.Persistence;
+using WebApolice.Modulos.Seguro.Application.Ports;
+using WebApolice.Modulos.Seguro.Infrastructure.Persistence.Repositories;
 using WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence;
-using Xunit;
 
 namespace WebApolice.Integration.Tests.Setup;
 
+/// <summary>Base vazia própria: modelo Cadastro atual e migrations de Financeiro/Auditoria/Seguro.</summary>
 public class SeguroIntegrationTestFixture : IAsyncLifetime
 {
-    private readonly PostgreSqlContainer _postgreSqlContainer = new PostgreSqlBuilder("postgres:18.4")
-        .Build();
+    private readonly PostgreSqlContainer _container = new PostgreSqlBuilder("postgres:18.4").Build();
+    private readonly string? _migrationAlvo;
+    public SeguroIntegrationTestFixture() { }
+    internal SeguroIntegrationTestFixture(string migrationAlvo) => _migrationAlvo = migrationAlvo;
 
-    private WebApolice.Modulos.Financeiro.src.WebApolice.Modulos.Financeiro.Infrastructure.Persistence.FinanceiroDbContext _financeiro = default!;
-    private WebApolice.Auditoria.Infrastructure.AuditoriaDbContext _auditoria = default!;
-    private Npgsql.NpgsqlConnection _connection = default!;
-    public Guid ConvenioPublicId { get; } = Guid.NewGuid();
-    public WebApolice.Modulos.Seguro.Application.Ports.ISubgruposCadastro SubgruposCadastro { get; private set; } = default!;
+    internal string ConnectionString => _container.GetConnectionString();
+    public NpgsqlConnection Connection { get; private set; } = default!;
+    public CadastroDbContext Cadastro { get; private set; } = default!;
+    public FinanceiroDbContext Financeiro { get; private set; } = default!;
+    public AuditoriaDbContext Auditoria { get; private set; } = default!;
     public SeguroDbContext DbContext { get; private set; } = default!;
+    public Guid ConvenioPublicId { get; } = Guid.NewGuid();
+    public IConveniosCobrancaConsulta ConveniosConsulta { get; private set; } = default!;
+    public ISubgruposCadastro SubgruposCadastro { get; private set; } = default!;
 
     public async Task InitializeAsync()
     {
-        await _postgreSqlContainer.StartAsync();
-
-        var connectionString = _postgreSqlContainer.GetConnectionString();
-
-        _connection = new Npgsql.NpgsqlConnection(connectionString);
-        await _connection.OpenAsync();
-        await using(var cmd = new Npgsql.NpgsqlCommand("CREATE SCHEMA IF NOT EXISTS core; CREATE TABLE core.banco(id bigint PRIMARY KEY,codigo varchar(3),nome text);",_connection)) await cmd.ExecuteNonQueryAsync();
-        var financeiro = new WebApolice.Modulos.Financeiro.src.WebApolice.Modulos.Financeiro.Infrastructure.Persistence.FinanceiroDbContext(new DbContextOptionsBuilder<WebApolice.Modulos.Financeiro.src.WebApolice.Modulos.Financeiro.Infrastructure.Persistence.FinanceiroDbContext>().UseNpgsql(_connection,o=>o.MigrationsHistoryTable("__EFMigrationsHistory","financeiro")).UseSnakeCaseNamingConvention().Options);
-        _financeiro = financeiro;
-        await financeiro.Database.MigrateAsync();
-        financeiro.ConvenioCobrancas.Add(new(){PublicId=ConvenioPublicId,Nome="Convênio Teste",CreatedAt=DateTime.UtcNow,UpdatedAt=DateTime.UtcNow});
-        await financeiro.SaveChangesAsync();
-        var auditDb=new WebApolice.Auditoria.Infrastructure.AuditoriaDbContext(new DbContextOptionsBuilder<WebApolice.Auditoria.Infrastructure.AuditoriaDbContext>().UseNpgsql(_connection,o=>o.MigrationsHistoryTable("__EFMigrationsHistory","auditoria")).UseSnakeCaseNamingConvention().Options);
-        _auditoria = auditDb;
-        await auditDb.Database.MigrateAsync();
-        var operacao=new WebApolice.Auditoria.Infrastructure.OperacaoAuditada(auditDb,new WebApolice.Auditoria.Infrastructure.RegistradorAuditoria(auditDb),new Moq.Mock<WebApolice.Auditoria.Contracts.IContextoAuditoria>().Object);
-        var convenios=new WebApolice.Modulos.Financeiro.Infrastructure.ConveniosCobrancaRepository(financeiro,operacao);
-        var options = new DbContextOptionsBuilder<SeguroDbContext>()
-            .UseNpgsql(_connection,o=>o.MigrationsHistoryTable("__EFMigrationsHistory","seguro"))
-            .UseSnakeCaseNamingConvention()
-            .Options;
-
-        DbContext = new SeguroDbContext(options);
-        
-        // Aplica todas as Migrations do projeto Seguro automaticamente no container Postgres
-        await DbContext.Database.MigrateAsync();
-        SubgruposCadastro=new WebApolice.Modulos.Seguro.Infrastructure.Persistence.Repositories.SubgruposCadastroRepository(DbContext,convenios,operacao);
+        await _container.StartAsync();
+        Connection = new NpgsqlConnection(_container.GetConnectionString());
+        await Connection.OpenAsync();
+        Cadastro = new CadastroEfemeroDbContext(new DbContextOptionsBuilder<CadastroDbContext>()
+            .UseNpgsql(Connection).UseSnakeCaseNamingConvention().Options);
+        await Cadastro.Database.EnsureCreatedAsync();
+        await Cadastro.Database.ExecuteSqlRawAsync("INSERT INTO cadastro.cliente_status(id,codigo,nome,ativo) VALUES (1,'ativo','Ativo',true),(2,'inativo','Inativo',true)");
+        Financeiro = new FinanceiroDbContext(new DbContextOptionsBuilder<FinanceiroDbContext>()
+            .UseNpgsql(Connection, o => o.MigrationsHistoryTable("__EFMigrationsHistory", "financeiro")).UseSnakeCaseNamingConvention().Options);
+        await Financeiro.Database.MigrateAsync();
+        Financeiro.ConvenioCobrancas.Add(new() { PublicId = ConvenioPublicId, Nome = "Convênio Teste", CreatedAt = DateTime.UtcNow, UpdatedAt = DateTime.UtcNow });
+        await Financeiro.SaveChangesAsync();
+        Auditoria = new AuditoriaDbContext(new DbContextOptionsBuilder<AuditoriaDbContext>()
+            .UseNpgsql(Connection, o => o.MigrationsHistoryTable("__EFMigrationsHistory", "auditoria")).UseSnakeCaseNamingConvention().Options);
+        await Auditoria.Database.MigrateAsync();
+        var operacao = new OperacaoAuditada(Auditoria, new RegistradorAuditoria(Auditoria), new Moq.Mock<IContextoAuditoria>().Object);
+        var convenios = new ConveniosCobrancaRepository(Financeiro, operacao);
+        ConveniosConsulta = convenios;
+        DbContext = new SeguroDbContext(new DbContextOptionsBuilder<SeguroDbContext>()
+            .UseNpgsql(Connection, o => o.MigrationsHistoryTable("__EFMigrationsHistory", "seguro")).UseSnakeCaseNamingConvention().Options);
+        await DbContext.GetService<IMigrator>().MigrateAsync(_migrationAlvo);
+        SubgruposCadastro = new SubgruposCadastroRepository(DbContext, convenios, operacao);
     }
 
     public async Task DisposeAsync()
     {
-        await DbContext.DisposeAsync();
-        await _financeiro.DisposeAsync();
-        await _auditoria.DisposeAsync();
-        await _connection.DisposeAsync();
-        await _postgreSqlContainer.DisposeAsync();
+        if (DbContext is not null) await DbContext.DisposeAsync();
+        if (Auditoria is not null) await Auditoria.DisposeAsync();
+        if (Financeiro is not null) await Financeiro.DisposeAsync();
+        if (Cadastro is not null) await Cadastro.DisposeAsync();
+        if (Connection is not null) await Connection.DisposeAsync();
+        await _container.DisposeAsync();
     }
 }

@@ -3,18 +3,18 @@ using System.Threading;
 using System.Threading.Tasks;
 using WebApolice.Modulos.Seguro.Application.DTOs;
 using WebApolice.Modulos.Seguro.Application.Mappers;
-using WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence;
-using WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models;
+using WebApolice.Modulos.Seguro.Application.Ports;
+using WebApolice.Modulos.Seguro.Domain.Modelos;
 
 namespace WebApolice.Modulos.Seguro.Application.UseCases.Ramos.CriarRamo;
 
 public class CriarRamoHandler
 {
-    private readonly SeguroDbContext _context;
+    private readonly IRamosRepository _repository;
 
-    public CriarRamoHandler(SeguroDbContext context)
+    public CriarRamoHandler(IRamosRepository context)
     {
-        _context = context;
+        _repository = context;
     }
 
     public async Task<RamoDto> Handle(CriarRamoCommand command, CancellationToken cancellationToken)
@@ -30,8 +30,8 @@ public class CriarRamoHandler
             UpdatedAt = DateTimeOffset.UtcNow
         };
 
-        _context.Ramos.Add(model);
-        await _context.SaveChangesAsync(cancellationToken);
+        _repository.Adicionar(model);
+        await _repository.SalvarAlteracoesAsync(cancellationToken);
 
         return model.ToDto();
     }

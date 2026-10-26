@@ -4,21 +4,19 @@ using System.Linq;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
 using WebApolice.Modulos.Seguranca.Application.Ports;
 using WebApolice.Modulos.Seguranca.Domain;
-using WebApolice.Modulos.Seguranca.Infrastructure.Persistence;
 
 namespace WebApolice.Modulos.Seguranca.Application.UseCases.Perfis;
 
 public class CriarPerfilUseCase
 {
-    private readonly SegurancaDbContext _dbContext;
+    private readonly ISegurancaAdministracaoRepository _repository;
     private readonly IContextoUsuarioAutenticado _contexto;
 
-    public CriarPerfilUseCase(SegurancaDbContext dbContext, IContextoUsuarioAutenticado contexto)
+    public CriarPerfilUseCase(ISegurancaAdministracaoRepository dbContext, IContextoUsuarioAutenticado contexto)
     {
-        _dbContext = dbContext;
+        _repository = dbContext;
         _contexto = contexto;
     }
 
@@ -33,27 +31,25 @@ public class CriarPerfilUseCase
         if (string.IsNullOrWhiteSpace(codigo)) throw new ArgumentException("Código é obrigatório");
         if (string.IsNullOrWhiteSpace(nome)) throw new ArgumentException("Nome é obrigatório");
 
-        var duplicado = await _dbContext.Perfis.AnyAsync(p => p.Codigo == codigo, cancellationToken);
+        var duplicado = await _repository.CodigoPerfilExisteAsync(codigo, cancellationToken);
         if (duplicado) throw new InvalidOperationException("Já existe um perfil com esse código.");
 
-        var permissoesAtribuir = await _dbContext.Permissoes
-            .Where(p => permissaoPublicIds.Contains(p.PublicId) && p.Ativo)
-            .ToListAsync(cancellationToken);
+        var permissoesAtribuir = await _repository.ObterPermissoesAsync(permissaoPublicIds, true, cancellationToken);
 
         if (permissoesAtribuir.Count != permissaoPublicIds.Count)
         {
             throw new InvalidOperationException("Uma ou mais permissões são inválidas ou estão inativas.");
         }
 
-        using var transaction = await _dbContext.Database.BeginTransactionAsync(cancellationToken);
+        using var transaction = await _repository.BeginTransactionAsync(cancellationToken);
 
-        var executor = await _dbContext.Usuarios.FirstOrDefaultAsync(u => u.KeycloakSub == _contexto.KeycloakSub, cancellationToken);
+        var executor = await _repository.ObterUsuarioPorSubAsync(_contexto.KeycloakSub, cancellationToken);
         var executorId = executor?.Id;
 
         var novoPerfil = new Perfil(codigo, nome, descricao, ativo, false, false);
 
-        _dbContext.Perfis.Add(novoPerfil);
-        await _dbContext.SaveChangesAsync(cancellationToken);
+        _repository.AdicionarPerfil(novoPerfil);
+        await _repository.SalvarAlteracoesAsync(cancellationToken);
 
         foreach (var permissao in permissoesAtribuir)
         {
@@ -72,9 +68,9 @@ public class CriarPerfilUseCase
             usuarioExecutorId: executorId,
             dadosNovos: JsonSerializer.SerializeToDocument(new { codigo, nome, descricao, ativo, permissoes = permissoesAtribuir.Select(p => p.Codigo) })
         );
-        _dbContext.AuditoriaPermissoes.Add(auditoria);
+        _repository.AdicionarAuditoria(auditoria);
 
-        await _dbContext.SaveChangesAsync(cancellationToken);
+        await _repository.SalvarAlteracoesAsync(cancellationToken);
         await transaction.CommitAsync(cancellationToken);
 
         return novoPerfil.PublicId;

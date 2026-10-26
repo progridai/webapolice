@@ -82,3 +82,8 @@ Ao projetar um módulo de negócio (ex: Cadastro de Clientes):
 1. **Na camada Application/Domain**: Avalie que tipo de falha a operação representa e lance a exceção base apropriada (ou extenda-a, se desejar um bloco catch específico no controller).
 2. Não dependa de tipos HTTP no domínio.
 3. Se você lançar um `RecursoNaoEncontradoException("Cliente não encontrado.")`, a camada de API através do `GlobalExceptionHandler` interceptará e devolverá automaticamente um 404 Problem Details com a respectiva mensagem.
+
+
+## Erros do Provedor de Identidade — 26/10/2026
+
+A integração dos commits de main preserva conflito de usuário no Keycloak como 409, dados rejeitados como 422 e demais falhas administrativas como 502. Somente códigos conhecidos são traduzidos em mensagens públicas fixas; conteúdo desconhecido, JSON não objeto ou resposta não estruturada recebe mensagem genérica. O corpo bruto não é devolvido ao cliente nem incluído no warning do cliente administrativo. A exceção conserva a resposta internamente para diagnóstico controlado. Não registrar senhas/tokens nem interpretar mensagens arbitrárias do provedor como texto seguro para a API. Regressões usam respostas artificiais, sem acessar o Keycloak real.

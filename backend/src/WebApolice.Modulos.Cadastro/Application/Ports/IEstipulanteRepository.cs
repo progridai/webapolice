@@ -2,8 +2,8 @@ using WebApolice.Modulos.Cadastro.Domain.Clientes;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using WebApolice.Modulos.Cadastro.Infrastructure.Persistence.Models;
-using WebApolice.Modulos.Cadastro.Infrastructure.Persistence.Models.Vinculos;
+using WebApolice.Modulos.Cadastro.Domain.Modelos;
+using WebApolice.Modulos.Cadastro.Domain.Modelos.Vinculos;
 
 namespace WebApolice.Modulos.Cadastro.Application.Ports;
 
@@ -34,5 +34,5 @@ public interface IEstipulanteRepository
     void AdicionarConfiguracao(EstipulanteConfiguracaoModel configuracao);
 
     Task SalvarAlteracoesAsync(CancellationToken cancellationToken);
-    Task<Microsoft.EntityFrameworkCore.Storage.IDbContextTransaction> BeginTransactionAsync(CancellationToken cancellationToken);
+    Task<WebApolice.SharedKernel.Application.Persistence.ITransacaoPersistencia> BeginTransactionAsync(CancellationToken cancellationToken);
 }

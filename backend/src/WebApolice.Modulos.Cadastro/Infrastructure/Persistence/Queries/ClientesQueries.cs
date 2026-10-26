@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using WebApolice.Modulos.Cadastro.Application.Ports;
 using WebApolice.Modulos.Cadastro.Application.UseCases.ConsultarCliente;
 using WebApolice.Modulos.Cadastro.Application.UseCases.ListarClientes;
-using WebApolice.Modulos.Cadastro.Infrastructure.Persistence.Models;
+using WebApolice.Modulos.Cadastro.Domain.Modelos;
 
 namespace WebApolice.Modulos.Cadastro.Infrastructure.Persistence.Queries;
 

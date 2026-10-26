@@ -8,7 +8,7 @@ using WebApolice.Modulos.Seguro.Application.UseCases.Propostas.ListarPropostas;
 using WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Application.UseCases.Propostas.AdicionarItem;
 using WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Application.UseCases.Propostas.CriarProposta;
 using WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence;
-using WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models;
+using WebApolice.Modulos.Seguro.Domain.Modelos;
 using WebApolice.SharedKernel.Application.Exceptions;
 
 namespace WebApolice.Integration.Tests.Modulos.Seguro;
@@ -58,7 +58,7 @@ public class PropostasConsolidacaoTests
         await db.SaveChangesAsync();
         db.ApolicePlanos.Add(new ApolicePlanoModel { ApoliceProdutoId = produto.Id, PlanoId = 200 });
         await db.SaveChangesAsync();
-        var handler = new AdicionarPropostaItemHandler(db, new OperacaoSemPersistencia());
+        var handler = new AdicionarPropostaItemHandler(new WebApolice.Modulos.Seguro.Infrastructure.Persistence.Repositories.PropostasRepository(db), new OperacaoSemPersistencia());
         var command = new AdicionarPropostaItemCommand { PropostaId = proposta.PublicId, ProdutoId = 100, PlanoId = 200 };
         var primeiro = await handler.Handle(command, default);
         var segundo = await handler.Handle(command, default);
@@ -77,14 +77,14 @@ public class PropostasConsolidacaoTests
     public async Task PaginacaoInvalidaEhRejeitada(int pagina, int tamanho)
     {
         await using var db = CriarDb();
-        await Assert.ThrowsAsync<ValidacaoException>(() => new ObterPropostasHandler(db).Handle(
+        await Assert.ThrowsAsync<ValidacaoException>(() => new ObterPropostasHandler(new WebApolice.Modulos.Seguro.Infrastructure.Persistence.Repositories.PropostasRepository(db)).Handle(
             new ObterPropostasQuery { Pagina = pagina, TamanhoPagina = tamanho }, default));
     }
 
     private static SeguroDbContext CriarDb() => new(new DbContextOptionsBuilder<SeguroDbContext>()
         .UseInMemoryDatabase(Guid.NewGuid().ToString()).Options);
 
-    private static CriarPropostaHandler CriarHandler(SeguroDbContext db, IClientesPropostas clientes) => new(db, clientes,
+    private static CriarPropostaHandler CriarHandler(SeguroDbContext db, IClientesPropostas clientes) => new(new WebApolice.Modulos.Seguro.Infrastructure.Persistence.Repositories.PropostasRepository(db), clientes,
         Options.Create(new ConfiguracaoPropostas { StatusInicialCodigo = "STATUS_DE_TESTE" }), new OperacaoSemPersistencia());
 
     private static async Task<ApoliceVidaModel> PrepararVidaAsync(SeguroDbContext db, long? vinculo)

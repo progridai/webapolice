@@ -2,37 +2,20 @@ using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
 using WebApolice.Modulos.Seguranca.Application.DTOs;
-using WebApolice.Modulos.Seguranca.Infrastructure.Persistence;
+using WebApolice.Modulos.Seguranca.Application.Ports;
 
 namespace WebApolice.Modulos.Seguranca.Application.UseCases.Auditoria;
 
 public class ObterAuditoriaUseCase
 {
-    private readonly SegurancaDbContext _dbContext;
+    private readonly IConsultasSeguranca _consultas;
 
-    public ObterAuditoriaUseCase(SegurancaDbContext dbContext)
+    public ObterAuditoriaUseCase(IConsultasSeguranca dbContext)
     {
-        _dbContext = dbContext;
+        _consultas = dbContext;
     }
 
-    public async Task<AuditoriaDto?> ExecuteAsync(Guid publicId, CancellationToken cancellationToken)
-    {
-        var auditoria = await _dbContext.AuditoriaPermissoes
-            .AsNoTracking()
-            .FirstOrDefaultAsync(a => a.PublicId == publicId, cancellationToken);
-
-        if (auditoria == null) return null;
-
-        return new AuditoriaDto(
-            auditoria.PublicId,
-            auditoria.Acao,
-            auditoria.EntidadeTipo,
-            auditoria.EntidadeId.ToString(),
-            auditoria.CreatedAt,
-            auditoria.DadosAnteriores,
-            auditoria.DadosNovos
-        );
-    }
+    public Task<AuditoriaDto?> ExecuteAsync(Guid publicId, CancellationToken cancellationToken)
+        => _consultas.ObterAuditoriaAsync(publicId, cancellationToken);
 }

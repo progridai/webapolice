@@ -9,7 +9,7 @@ using WebApolice.Modulos.Seguro.Application.UseCases.Apolices.ListarApolices;
 
 using WebApolice.Modulos.Seguro.Application.UseCases.Apolices.ListarSubgrupos;
 using WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence;
-using WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models;
+using WebApolice.Modulos.Seguro.Domain.Modelos;
 using WebApolice.SharedKernel.Application.Models;
 using System.Data.Common;
 

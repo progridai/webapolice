@@ -2,9 +2,8 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 using WebApolice.Modulos.Cadastro.Domain.Exceptions;
-using WebApolice.Modulos.Cadastro.Infrastructure.Persistence;
+using WebApolice.Modulos.Cadastro.Application.Ports;
 using WebApolice.SharedKernel.Application.Exceptions;
 using WebApolice.Modulos.Cadastro.Application.UseCases.Modulos;
 
@@ -12,22 +11,22 @@ namespace WebApolice.Modulos.Cadastro.Application.UseCases.Modulos.AtualizarModu
 
 public class AtualizarModuloHandler : IRequestHandler<AtualizarModuloCommand, ModuloDto>
 {
-    private readonly CadastroDbContext _dbContext;
+    private readonly IModulosCadastroRepository _dbContext;
 
-    public AtualizarModuloHandler(CadastroDbContext dbContext)
+    public AtualizarModuloHandler(IModulosCadastroRepository dbContext)
     {
         _dbContext = dbContext;
     }
 
     public async Task<ModuloDto> Handle(AtualizarModuloCommand request, CancellationToken cancellationToken)
     {
-        var modulo = await _dbContext.Modulos.FirstOrDefaultAsync(m => m.PublicId == request.PublicId && m.DeletedAt == null, cancellationToken);
+        var modulo = await _dbContext.ObterAsync(request.PublicId, cancellationToken);
         if (modulo == null)
         {
             throw new ModuloNaoEncontradoException("Módulo não encontrado no catálogo.");
         }
 
-        var existeOutroComNome = await _dbContext.Modulos.AnyAsync(m => m.Id != modulo.Id && m.Nome.ToLower() == request.Nome.ToLower() && m.DeletedAt == null, cancellationToken);
+        var existeOutroComNome = await _dbContext.NomeExisteAsync(request.Nome, modulo.Id, cancellationToken);
         if (existeOutroComNome)
         {
             throw new ValidacaoException("Já existe outro Módulo com este nome no catálogo.");
@@ -38,8 +37,8 @@ public class AtualizarModuloHandler : IRequestHandler<AtualizarModuloCommand, Mo
         modulo.Ativo = request.Ativo;
         modulo.UpdatedAt = DateTimeOffset.UtcNow;
 
-        _dbContext.Modulos.Update(modulo);
-        await _dbContext.SaveChangesAsync(cancellationToken);
+        _dbContext.Atualizar(modulo);
+        await _dbContext.SalvarAlteracoesAsync(cancellationToken);
 
         return new ModuloDto(
             modulo.PublicId,

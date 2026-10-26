@@ -50,7 +50,7 @@ jobs:
           if (-not $reports) { throw 'Nenhum relatório de testes encontrado.' }
           foreach ($report in $reports) {
             [xml]$trx = Get-Content -Raw $report.FullName
-            if ([int]$trx.TestRun.ResultSummary.Counters.notExecuted -gt 0) { throw "Testes ignorados: $($report.Name)" }
+            if ([int]$trx.TestRun.ResultSummary.Counters.notExecuted -gt 0 -or @($trx.TestRun.Results.UnitTestResult | Where-Object outcome -eq NotExecuted).Count -gt 0) { throw "Testes ignorados: $($report.Name)" }
           }
       - run: dotnet list backend/WebApolice.slnx package --vulnerable --include-transitive --format json --no-restore > nuget-audit.json
       - name: Impedir vulnerabilidades NuGet

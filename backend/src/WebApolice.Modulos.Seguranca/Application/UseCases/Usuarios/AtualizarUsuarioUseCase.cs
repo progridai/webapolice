@@ -4,29 +4,27 @@ using System.Linq;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using WebApolice.Modulos.Seguranca.Application.Ports;
 using WebApolice.Modulos.Seguranca.Domain;
 using WebApolice.Modulos.Seguranca.Domain.Exceptions;
-using WebApolice.Modulos.Seguranca.Infrastructure.Persistence;
 
 namespace WebApolice.Modulos.Seguranca.Application.UseCases.Usuarios;
 
 public class AtualizarUsuarioUseCase
 {
-    private readonly SegurancaDbContext _dbContext;
+    private readonly ISegurancaAdministracaoRepository _repository;
     private readonly IKeycloakUsuariosAdminClient _keycloakClient;
     private readonly IContextoUsuarioAutenticado _contexto;
     private readonly ILogger<AtualizarUsuarioUseCase> _logger;
 
     public AtualizarUsuarioUseCase(
-        SegurancaDbContext dbContext,
+        ISegurancaAdministracaoRepository dbContext,
         IKeycloakUsuariosAdminClient keycloakClient,
         IContextoUsuarioAutenticado contexto,
         ILogger<AtualizarUsuarioUseCase> logger)
     {
-        _dbContext = dbContext;
+        _repository = dbContext;
         _keycloakClient = keycloakClient;
         _contexto = contexto;
         _logger = logger;
@@ -40,18 +38,13 @@ public class AtualizarUsuarioUseCase
         List<Guid> perfilPublicIds,
         CancellationToken cancellationToken)
     {
-        var usuario = await _dbContext.Usuarios
-            .Include(u => u.Perfis)
-            .ThenInclude(up => up.Perfil)
-            .FirstOrDefaultAsync(u => u.PublicId == publicId, cancellationToken);
+        var usuario = await _repository.ObterUsuarioComPerfisAsync(publicId, cancellationToken);
 
         if (usuario == null) throw new UsuarioInvalidoException("Usuário não encontrado.");
         if (string.IsNullOrWhiteSpace(nome)) throw new UsuarioInvalidoException("Nome é obrigatório");
         if (string.IsNullOrWhiteSpace(email)) throw new UsuarioInvalidoException("E-mail é obrigatório");
 
-        var perfisParaAtribuir = await _dbContext.Perfis
-            .Where(p => perfilPublicIds.Contains(p.PublicId))
-            .ToListAsync(cancellationToken);
+        var perfisParaAtribuir = await _repository.ObterPerfisAsync(perfilPublicIds, false, cancellationToken);
 
         if (perfisParaAtribuir.Any(p => !p.Ativo && !usuario.Perfis.Any(up => up.PerfilId == p.Id)))
         {
@@ -63,10 +56,10 @@ public class AtualizarUsuarioUseCase
 
         await _keycloakClient.AtualizarUsuarioAsync(usuario.KeycloakSub, email, nome, ativo, cancellationToken);
 
-        var executor = await _dbContext.Usuarios.FirstOrDefaultAsync(u => u.KeycloakSub == _contexto.KeycloakSub, cancellationToken);
+        var executor = await _repository.ObterUsuarioPorSubAsync(_contexto.KeycloakSub, cancellationToken);
         var executorId = executor?.Id;
 
-        using var transaction = await _dbContext.Database.BeginTransactionAsync(cancellationToken);
+        using var transaction = await _repository.BeginTransactionAsync(cancellationToken);
         try
         {
             var dadosAnteriores = JsonSerializer.SerializeToDocument(new { nome = usuario.Nome, email = usuario.Email, ativo = usuario.Ativo, perfis = usuario.Perfis.Select(p => p.Perfil.Codigo) });
@@ -100,14 +93,14 @@ public class AtualizarUsuarioUseCase
                 dadosAnteriores: dadosAnteriores,
                 dadosNovos: dadosNovos
             );
-            _dbContext.AuditoriaPermissoes.Add(auditoria);
+            _repository.AdicionarAuditoria(auditoria);
 
-            await _dbContext.SaveChangesAsync(cancellationToken);
+            await _repository.SalvarAlteracoesAsync(cancellationToken);
             await transaction.CommitAsync(cancellationToken);
         }
         catch (Exception)
         {
-            await transaction.RollbackAsync(cancellationToken);
+            await transaction.RollbackAsync(CancellationToken.None);
             try
             {
                 using var compensacaoCts = new CancellationTokenSource(TimeSpan.FromSeconds(15));

@@ -8,8 +8,8 @@ using WebApolice.Auditoria.Contracts;
 using WebApolice.Auditoria.Domain;
 using WebApolice.Modulos.Cadastro.Application.Ports;
 using WebApolice.Modulos.Cadastro.Domain.Exceptions;
-using WebApolice.Modulos.Cadastro.Infrastructure.Persistence.Models;
-using WebApolice.Modulos.Cadastro.Infrastructure.Persistence.Models.Vinculos;
+using WebApolice.Modulos.Cadastro.Domain.Modelos;
+using WebApolice.Modulos.Cadastro.Domain.Modelos.Vinculos;
 
 namespace WebApolice.Modulos.Cadastro.Application.UseCases.CriarEstipulante;
 

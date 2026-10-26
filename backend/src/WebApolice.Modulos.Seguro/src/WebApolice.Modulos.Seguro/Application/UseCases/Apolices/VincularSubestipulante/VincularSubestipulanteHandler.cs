@@ -2,29 +2,27 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
-using WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence;
-using WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models;
+using WebApolice.Modulos.Seguro.Application.Ports;
+using WebApolice.Modulos.Seguro.Domain.Modelos;
 using WebApolice.SharedKernel.Application.Exceptions;
 
 namespace WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Application.UseCases.Apolices.VincularSubestipulante;
 
 public class VincularSubestipulanteHandler : IRequestHandler<VincularSubestipulanteCommand, long>
 {
-    private readonly SeguroDbContext _dbContext;
+    private readonly IApoliceVinculosRepository _repository;
 
-    public VincularSubestipulanteHandler(SeguroDbContext dbContext)
+    public VincularSubestipulanteHandler(IApoliceVinculosRepository dbContext)
     {
-        _dbContext = dbContext;
+        _repository = dbContext;
     }
 
     public async Task<long> Handle(VincularSubestipulanteCommand request, CancellationToken cancellationToken)
     {
-        var apoliceExiste = await _dbContext.Apolices.AnyAsync(a => a.Id == request.ApoliceId, cancellationToken);
+        var apoliceExiste = await _repository.ApoliceExisteAsync(request.ApoliceId, cancellationToken);
         if (!apoliceExiste) throw new ValidacaoException("Apólice não encontrada.");
 
-        var vinculoExistente = await _dbContext.ApoliceSubestipulantes
-            .FirstOrDefaultAsync(s => s.ApoliceId == request.ApoliceId && s.SubestipulanteId == request.SubestipulanteId, cancellationToken);
+        var vinculoExistente = await _repository.ObterVinculoSubestipulanteAsync(request.ApoliceId, request.SubestipulanteId, cancellationToken);
         
         if (vinculoExistente != null && vinculoExistente.Ativo)
         {
@@ -39,7 +37,7 @@ public class VincularSubestipulanteHandler : IRequestHandler<VincularSubestipula
             vinculoExistente.Ativo = true;
             vinculoExistente.UpdatedAt = DateTimeOffset.UtcNow;
             subestipulanteVinculo = vinculoExistente;
-            _dbContext.ApoliceSubestipulantes.Update(vinculoExistente);
+            _repository.AtualizarSubestipulante(vinculoExistente);
         }
         else
         {
@@ -52,7 +50,7 @@ public class VincularSubestipulanteHandler : IRequestHandler<VincularSubestipula
                 CreatedAt = DateTimeOffset.UtcNow,
                 UpdatedAt = DateTimeOffset.UtcNow
             };
-            _dbContext.ApoliceSubestipulantes.Add(subestipulanteVinculo);
+            _repository.AdicionarSubestipulante(subestipulanteVinculo);
         }
 
         // Adiciona rastro no Histórico
@@ -65,9 +63,9 @@ public class VincularSubestipulanteHandler : IRequestHandler<VincularSubestipula
             DataAcao = DateTimeOffset.UtcNow,
             CreatedAt = DateTimeOffset.UtcNow
         };
-        _dbContext.ApoliceHistoricos.Add(historico);
+        _repository.AdicionarHistorico(historico);
 
-        await _dbContext.SaveChangesAsync(cancellationToken);
+        await _repository.SalvarAlteracoesAsync(cancellationToken);
 
         return subestipulanteVinculo.Id;
     }

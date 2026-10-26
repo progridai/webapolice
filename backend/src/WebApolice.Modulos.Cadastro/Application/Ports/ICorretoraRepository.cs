@@ -1,7 +1,7 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using WebApolice.Modulos.Cadastro.Infrastructure.Persistence.Models.Vinculos;
+using WebApolice.Modulos.Cadastro.Domain.Modelos.Vinculos;
 
 namespace WebApolice.Modulos.Cadastro.Application.Ports;
 

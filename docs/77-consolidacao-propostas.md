@@ -24,4 +24,9 @@ Preservar os UUIDs públicos de Proposta/Apólice/Vida e o retorno `ItemId` como
 
 Paginação: página a partir de 1, tamanho de 1 a 100 e offset representável por inteiro; valores fora do intervalo são rejeitados antes da consulta. Cancelamento HTTP deve chegar ao mediator/EF.
 
-São requisitos pendentes de liberação: informar status inicial, aplicar migrations em ambiente isolado, comprovar autenticação/permissões/negações por HTTP, integridade das associações e retorno persistido do item, atomicidade e comparação funcional com o legado. Testes com provider em memória não substituem PostgreSQL/Keycloak reais. A matriz aprovada permite implementar as barreiras; não representa homologação financeira ou operacional.
+Permanecem requisitos de liberação: informar o código real do status inicial, homologar autenticação/permissões com o IdP e ambiente de destino, definir as regras financeiras/operacionais pendentes e comparar o fluxo com o legado. As verificações locais de migrations, associações, UUID persistido e rollback em PostgreSQL foram executadas na continuidade de 26/10 abaixo. Testes com provider em memória não substituem PostgreSQL/Keycloak reais. A matriz aprovada permite implementar as barreiras; não representa homologação financeira ou operacional.
+
+
+## Continuidade — 26/10/2026
+
+A migration estrutural foi aplicada em PostgreSQL 18.4 efêmero. PropostasPostgresTests confirmou gravações nativas sem IDs legados artificiais, resolução real de Cliente/Pessoa/vínculo, UUIDs de item persistidos e rollback por falha de auditoria, com leitura em outra conexão. Os códigos/IDs de status desses testes são artificiais e não autorizam a liberação do fluxo. Ainda faltam o código real do status inicial e as demais homologações/regras de negócio indicadas acima. Nenhuma migration foi aplicada a bases existentes.

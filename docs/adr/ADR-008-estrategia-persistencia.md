@@ -19,3 +19,8 @@ O projeto WebApólice adotará um modelo arquitetural de **Monólito Modular** u
 ## Estado da Implementação — 23/10/2026
 
 A decisão permanece em vigor. PostgreSQL/EF Core já estão implementados; Application ainda contém violações registradas na revisão 76. O recorte de Clientes foi corrigido para depender de portas e tipos de Domain.Clientes. As portas de operação auditada são específicas do módulo e seus adaptadores reutilizam OperacaoAuditada com uma conexão/transação física compartilhada. Isso não autoriza ler tabelas de outro módulo diretamente nem cria exceção ao limite de EF em Infrastructure. Testes arquiteturais agora carregam os módulos e falham nas dependências remanescentes. Atomicidade real requer executar as integrações PostgreSQL isoladas.
+
+
+## Continuidade — 26/10/2026
+
+Resolvidas as dependências detectadas em Application com portas específicas de Cadastro/Segurança/Seguro, consultas EF em Infrastructure e entidades POCO em Domain. O contrato neutro de transação substitui IDbContextTransaction nas portas; o adaptador envolve a mesma transação EF, sem nova conexão. ICadastroSeguroQueries remove o SQL direto de Cadastro dos handlers de vínculos de Seguro. Não houve novo projeto, biblioteca, schema ou alteração das propriedades das entidades. O teste adicional de portas impede expor IQueryable nos contratos. As regras existentes não foram excluídas ou relaxadas. Evidências e limites na revisão 79.

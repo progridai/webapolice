@@ -10,6 +10,7 @@ using WebApolice.Integration.Tests.Setup;
 using WebApolice.Modulos.Seguranca.Application.Ports;
 using WebApolice.Modulos.Seguranca.Application.UseCases.Usuarios;
 using WebApolice.Modulos.Seguranca.Domain;
+using WebApolice.Modulos.Seguranca.Domain.Exceptions;
 using WebApolice.Modulos.Seguranca.Infrastructure.Persistence;
 using Xunit;
 
@@ -35,7 +36,7 @@ public class CriarUsuarioUseCaseTests : IClassFixture<SegurancaIntegrationTestFi
         _contextoMock = new Mock<IContextoUsuarioAutenticado>();
         _loggerMock = new Mock<ILogger<CriarUsuarioUseCase>>();
 
-        _sut = new CriarUsuarioUseCase(_dbContext, _keycloakClientMock.Object, _contextoMock.Object, _loggerMock.Object);
+        _sut = new CriarUsuarioUseCase(new WebApolice.Modulos.Seguranca.Infrastructure.Persistence.Repositories.SegurancaAdministracaoRepository(_dbContext), _keycloakClientMock.Object, _contextoMock.Object, _loggerMock.Object);
     }
 
     public Task InitializeAsync() 
@@ -81,6 +82,53 @@ public class CriarUsuarioUseCaseTests : IClassFixture<SegurancaIntegrationTestFi
         
         _keycloakClientMock.Verify(x => x.DefinirSenhaTemporariaAsync(sub, "senha", It.IsAny<CancellationToken>()), Times.Once);
         _keycloakClientMock.Verify(x => x.RemoverUsuarioAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task DeveRemoverEspacosExternosAntesDeCriarUsuario()
+    {
+        var runId = Guid.NewGuid();
+        var username = $"teste_{runId}";
+        var email = $"teste_{runId}@exemplo.local";
+        var sub = Guid.NewGuid().ToString();
+
+        _keycloakClientMock.Setup(x => x.ExisteUsernameAsync(username, It.IsAny<CancellationToken>())).ReturnsAsync(false);
+        _keycloakClientMock.Setup(x => x.ExisteEmailAsync(email, It.IsAny<CancellationToken>())).ReturnsAsync(false);
+        _keycloakClientMock.Setup(x => x.CriarUsuarioAsync(username, email, "Nome Teste", true, It.IsAny<CancellationToken>())).ReturnsAsync(sub);
+
+        var publicId = await _sut.ExecuteAsync(
+            $"  {username}  ",
+            "  Nome Teste  ",
+            $"  {email}  ",
+            "senha",
+            true,
+            new List<Guid>(),
+            CancellationToken.None);
+
+        _usuariosCriados.Add(publicId);
+
+        var usuario = await _dbContext.Usuarios.FirstAsync(u => u.PublicId == publicId);
+        Assert.Equal(username, usuario.Username);
+        Assert.Equal(email, usuario.Email);
+        Assert.Equal("Nome Teste", usuario.Nome);
+    }
+
+    [Fact]
+    public async Task DeveRejeitarUsernameComCaractereNaoPermitidoAntesDeChamarKeycloak()
+    {
+        var action = () => _sut.ExecuteAsync(
+            "daniele passos",
+            "Daniele Passos",
+            "daniele@example.com",
+            "senha",
+            true,
+            new List<Guid>(),
+            CancellationToken.None);
+
+        var exception = await Assert.ThrowsAsync<UsuarioInvalidoException>(action);
+
+        Assert.Contains("Username inválido", exception.Message);
+        _keycloakClientMock.VerifyNoOtherCalls();
     }
 
     [Fact]

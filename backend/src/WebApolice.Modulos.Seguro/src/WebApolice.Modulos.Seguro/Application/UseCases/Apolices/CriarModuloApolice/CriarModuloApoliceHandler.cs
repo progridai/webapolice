@@ -1,21 +1,23 @@
+using WebApolice.Modulos.Cadastro.Contracts;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
-using WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence;
-using WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models;
+using WebApolice.Modulos.Seguro.Application.Ports;
+using WebApolice.Modulos.Seguro.Domain.Modelos;
 using WebApolice.SharedKernel.Application.Exceptions;
 
 namespace WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Application.UseCases.Apolices.CriarModuloApolice;
 
 public class CriarModuloApoliceHandler : IRequestHandler<CriarModuloApoliceCommand, Guid>
 {
-    private readonly SeguroDbContext _dbContext;
+    private readonly IApoliceVinculosRepository _repository;
+    private readonly ICadastroSeguroQueries _cadastro;
 
-    public CriarModuloApoliceHandler(SeguroDbContext dbContext)
+    public CriarModuloApoliceHandler(IApoliceVinculosRepository dbContext, ICadastroSeguroQueries cadastro)
     {
-        _dbContext = dbContext;
+        _repository = dbContext;
+        _cadastro = cadastro;
     }
 
     public async Task<Guid> Handle(CriarModuloApoliceCommand request, CancellationToken cancellationToken)
@@ -27,8 +29,7 @@ public class CriarModuloApoliceHandler : IRequestHandler<CriarModuloApoliceComma
         }
 
         // 2. Localizar Apólice
-        var apolice = await _dbContext.Apolices
-            .FirstOrDefaultAsync(a => a.PublicId == request.ApolicePublicId && a.DeletedAt == null, cancellationToken);
+        var apolice = await _repository.ObterApoliceAsync(request.ApolicePublicId, false, cancellationToken);
             
         if (apolice == null)
             throw new ValidacaoException("Apólice não encontrada.");
@@ -46,9 +47,7 @@ public class CriarModuloApoliceHandler : IRequestHandler<CriarModuloApoliceComma
             throw new ValidacaoException($"A data de fim do Módulo não pode ser posterior à data de fim de vigência da Apólice ({apolice.DataFimVigencia}).");
 
         // 3. Resolver Módulo Global via SQL (cross-module)
-        var modulo = await _dbContext.Database
-            .SqlQuery<ModuloGlobalDto>($"SELECT id, nome, descricao, ativo FROM cadastro.modulo WHERE public_id = {request.ModuloPublicId} AND deleted_at IS NULL")
-            .FirstOrDefaultAsync(cancellationToken);
+        var modulo = await _cadastro.ObterModuloAsync(request.ModuloPublicId, cancellationToken);
 
         if (modulo == null)
             throw new ValidacaoException("Módulo não encontrado no Cadastro Global.");
@@ -57,11 +56,7 @@ public class CriarModuloApoliceHandler : IRequestHandler<CriarModuloApoliceComma
             throw new ValidacaoException("O Módulo Global está inativo. Não é possível vincular um Módulo inativo.");
 
         // 4. Verificar duplicidade (inclui inativos não deletados)
-        var vinculoExistente = await _dbContext.ApoliceModulos
-            .FirstOrDefaultAsync(m =>
-                m.ApoliceId == apolice.Id &&
-                m.ModuloId == modulo.Id &&
-                m.DeletedAt == null, cancellationToken);
+        var vinculoExistente = await _repository.ObterVinculoModuloAsync(apolice.Id, modulo.Id, cancellationToken);
 
         if (vinculoExistente != null)
         {
@@ -84,10 +79,10 @@ public class CriarModuloApoliceHandler : IRequestHandler<CriarModuloApoliceComma
             UpdatedAt = DateTimeOffset.UtcNow
         };
         
-        _dbContext.ApoliceModulos.Add(novoVinculo);
+        _repository.AdicionarModulo(novoVinculo);
 
         // 6. Registrar Histórico Funcional
-        _dbContext.ApoliceHistoricos.Add(new ApoliceHistoricoModel
+        _repository.AdicionarHistorico(new ApoliceHistoricoModel
         {
             ApoliceId = apolice.Id,
             Acao = "Vínculo de Módulo",
@@ -97,17 +92,8 @@ public class CriarModuloApoliceHandler : IRequestHandler<CriarModuloApoliceComma
             CreatedAt = DateTimeOffset.UtcNow
         });
 
-        await _dbContext.SaveChangesAsync(cancellationToken);
+        await _repository.SalvarAlteracoesAsync(cancellationToken);
 
         return novoVinculo.PublicId;
     }
-}
-
-/// <summary>DTO interno para leitura cross-module do Cadastro Global de Módulos.</summary>
-internal class ModuloGlobalDto
-{
-    public long Id { get; set; }
-    public string Nome { get; set; } = null!;
-    public string? Descricao { get; set; }
-    public bool Ativo { get; set; }
 }

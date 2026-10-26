@@ -3,7 +3,7 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using WebApolice.Modulos.Cadastro.Domain;
-using WebApolice.Modulos.Cadastro.Infrastructure.Persistence.Models;
+using WebApolice.Modulos.Cadastro.Domain.Modelos;
 
 namespace WebApolice.Modulos.Cadastro.Application.Ports;
 

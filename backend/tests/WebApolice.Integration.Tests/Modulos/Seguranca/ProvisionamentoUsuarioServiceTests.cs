@@ -145,7 +145,7 @@ public class ProvisionamentoUsuarioServiceTests
     }
 
     [Fact]
-    public async Task Concorrencia_DbUpdateException_Violacao_KeycloakSub_Deve_Ser_Tratada()
+    public async Task Concorrencia_Provisionamento_Deve_Ser_Tratada()
     {
         _contextoMock.Setup(c => c.EstaAutenticado).Returns(true);
         _contextoMock.Setup(c => c.KeycloakSub).Returns("123");
@@ -158,19 +158,8 @@ public class ProvisionamentoUsuarioServiceTests
             .ReturnsAsync((Usuario?)null)
             .ReturnsAsync(usuarioRecemCriado);
 
-        // Usar reflection para criar a PostgresException
-        var pgExType = typeof(Npgsql.PostgresException);
-        var pgEx = (Npgsql.PostgresException)System.Runtime.CompilerServices.RuntimeHelpers.GetUninitializedObject(pgExType);
-        
-        foreach (var field in pgExType.GetFields(System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Public))
-        {
-            if (field.Name.Contains("SqlState", System.StringComparison.OrdinalIgnoreCase))
-                field.SetValue(pgEx, "23505");
-            if (field.Name.Contains("ConstraintName", System.StringComparison.OrdinalIgnoreCase))
-                field.SetValue(pgEx, "ix_usuario_keycloak_sub");
-        }
-
-        var dbEx = new Microsoft.EntityFrameworkCore.DbUpdateException("Erro", pgEx);
+        var dbEx = new WebApolice.Modulos.Seguranca.Domain.Exceptions.ConcorrenciaProvisionamentoException(
+            new System.InvalidOperationException("Conflito concorrente artificial do adaptador."));
 
         _repositoryMock.SetupSequence(r => r.SalvarAlteracoesAsync(It.IsAny<CancellationToken>()))
             .Throws(dbEx) // Falha no primeiro SalvarAlteracoesAsync

@@ -2,9 +2,7 @@ using System;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
 using WebApolice.Auditoria.Contracts;
-using WebApolice.Modulos.Seguranca.Infrastructure.Persistence;
 using WebApolice.Modulos.Seguranca.Application.Ports;
 
 namespace WebApolice.Modulos.Seguranca.Application.UseCases.Recursos;
@@ -13,22 +11,20 @@ public record AlterarHabilitacaoRecursoCommand(Guid PublicId, bool Habilitado);
 
 public class AlterarHabilitacaoRecursoUseCase
 {
-    private readonly SegurancaDbContext _dbContext;
+    private readonly ISegurancaAdministracaoRepository _repository;
     private readonly IOperacaoSegurancaAuditada _operacao;
     private readonly IContextoUsuarioAutenticado _contexto;
 
-    public AlterarHabilitacaoRecursoUseCase(SegurancaDbContext dbContext, IOperacaoSegurancaAuditada operacao, IContextoUsuarioAutenticado contexto)
+    public AlterarHabilitacaoRecursoUseCase(ISegurancaAdministracaoRepository dbContext, IOperacaoSegurancaAuditada operacao, IContextoUsuarioAutenticado contexto)
     {
-        _dbContext = dbContext;
+        _repository = dbContext;
         _operacao = operacao;
         _contexto = contexto;
     }
 
     public async Task ExecuteAsync(AlterarHabilitacaoRecursoCommand command, CancellationToken cancellationToken)
     {
-        var recurso = await _dbContext.Recursos
-            .Include(r => r.Modulo)
-            .FirstOrDefaultAsync(r => r.PublicId == command.PublicId, cancellationToken);
+        var recurso = await _repository.ObterRecursoAsync(command.PublicId, cancellationToken);
             
         if (recurso == null)
             throw new InvalidOperationException($"Recurso {command.PublicId} não encontrado.");
@@ -43,7 +39,7 @@ public class AlterarHabilitacaoRecursoUseCase
         else recurso.Desabilitar();
 
 
-        var executor = await _dbContext.Usuarios.FirstOrDefaultAsync(u => u.KeycloakSub == _contexto.KeycloakSub, cancellationToken);
+        var executor = await _repository.ObterUsuarioPorSubAsync(_contexto.KeycloakSub, cancellationToken);
         var auditoriaInterna = new WebApolice.Modulos.Seguranca.Domain.Auditoria.AuditoriaPermissao(
             acao: evento,
             entidadeTipo: "RECURSO",
@@ -51,9 +47,9 @@ public class AlterarHabilitacaoRecursoUseCase
             usuarioExecutorId: executor?.Id,
             dadosNovos: JsonSerializer.SerializeToDocument(new { recurso.Codigo, recurso.Nome, recurso.Habilitado, ModuloCodigo = recurso.Modulo.Codigo })
         );
-        _dbContext.AuditoriaPermissoes.Add(auditoriaInterna);
+        _repository.AdicionarAuditoria(auditoriaInterna);
 
-        await _dbContext.SaveChangesAsync(cancellationToken);
+        await _repository.SalvarAlteracoesAsync(cancellationToken);
         return (true, recurso.PublicId.ToString(), null, JsonSerializer.SerializeToDocument(new { recurso.Codigo, recurso.Nome, recurso.Habilitado, ModuloCodigo = recurso.Modulo.Codigo }));
         }, cancellationToken);
     }

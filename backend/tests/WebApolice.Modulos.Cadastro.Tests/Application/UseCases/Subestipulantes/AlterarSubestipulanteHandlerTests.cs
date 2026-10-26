@@ -5,8 +5,8 @@ using System.Threading.Tasks;
 using Moq;
 using WebApolice.Modulos.Cadastro.Application.Ports;
 using WebApolice.Modulos.Cadastro.Application.UseCases.AlterarSubestipulante;
-using WebApolice.Modulos.Cadastro.Infrastructure.Persistence.Models;
-using WebApolice.Modulos.Cadastro.Infrastructure.Persistence.Models.Vinculos;
+using WebApolice.Modulos.Cadastro.Domain.Modelos;
+using WebApolice.Modulos.Cadastro.Domain.Modelos.Vinculos;
 using Xunit;
 
 namespace WebApolice.Modulos.Cadastro.Tests.Application.UseCases.Subestipulantes;

@@ -1,10 +1,10 @@
+using WebApolice.Modulos.Cadastro.Contracts;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
-using WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence;
-using WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models;
+using WebApolice.Modulos.Seguro.Application.Ports;
+using WebApolice.Modulos.Seguro.Domain.Modelos;
 using WebApolice.SharedKernel.Application.Exceptions;
 using System.Linq;
 
@@ -12,11 +12,13 @@ namespace WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Application.Us
 
 public class VincularSubestipulanteApoliceHandler : IRequestHandler<VincularSubestipulanteApoliceCommand, long>
 {
-    private readonly SeguroDbContext _dbContext;
+    private readonly IApoliceVinculosRepository _repository;
+    private readonly ICadastroSeguroQueries _cadastro;
 
-    public VincularSubestipulanteApoliceHandler(SeguroDbContext dbContext)
+    public VincularSubestipulanteApoliceHandler(IApoliceVinculosRepository dbContext, ICadastroSeguroQueries cadastro)
     {
-        _dbContext = dbContext;
+        _repository = dbContext;
+        _cadastro = cadastro;
     }
 
     public async Task<long> Handle(VincularSubestipulanteApoliceCommand request, CancellationToken cancellationToken)
@@ -26,26 +28,15 @@ public class VincularSubestipulanteApoliceHandler : IRequestHandler<VincularSube
             throw new ValidacaoException("A data de fim de vigência não pode ser menor que a data de início.");
         }
 
-        var apolice = await _dbContext.Apolices.FirstOrDefaultAsync(a => a.PublicId == request.ApolicePublicId, cancellationToken);
+        var apolice = await _repository.ObterApoliceAsync(request.ApolicePublicId, true, cancellationToken);
         if (apolice == null) throw new ValidacaoException("Apólice não encontrada.");
 
-        // Resolve SubestipulanteId directly from the DB
-        var subestipulanteId = await _dbContext.Database
-            .SqlQuery<long>($"SELECT id AS \"Value\" FROM cadastro.subestipulante WHERE public_id = {request.SubestipulantePublicId} AND ativo = true")
-            .FirstOrDefaultAsync(cancellationToken);
-
-        if (subestipulanteId == 0)
-        {
-            // Checa se existe inativo ou se não existe
-            var existeInativo = await _dbContext.Database
-                .SqlQuery<bool>($"SELECT ativo AS \"Value\" FROM cadastro.subestipulante WHERE public_id = {request.SubestipulantePublicId}")
-                .FirstOrDefaultAsync(cancellationToken);
-            
+        var subestipulante = await _cadastro.ObterSubestipulanteAsync(request.SubestipulantePublicId, cancellationToken);
+        if (subestipulante == null || !subestipulante.Ativo)
             throw new ValidacaoException("Subestipulante não encontrado ou está inativo.");
-        }
+        var subestipulanteId = subestipulante.Id;
 
-        var vinculoExistente = await _dbContext.ApoliceSubestipulantes
-            .FirstOrDefaultAsync(ar => ar.ApoliceId == apolice.Id && ar.SubestipulanteId == subestipulanteId, cancellationToken);
+        var vinculoExistente = await _repository.ObterVinculoSubestipulanteAsync(apolice.Id, subestipulanteId, cancellationToken);
         
         if (vinculoExistente != null && vinculoExistente.Ativo)
         {
@@ -67,9 +58,9 @@ public class VincularSubestipulanteApoliceHandler : IRequestHandler<VincularSube
             CreatedAt = DateTimeOffset.UtcNow,
             UpdatedAt = DateTimeOffset.UtcNow
         };
-        _dbContext.ApoliceSubestipulantes.Add(vinculo);
+        _repository.AdicionarSubestipulante(vinculo);
 
-        await _dbContext.SaveChangesAsync(cancellationToken);
+        await _repository.SalvarAlteracoesAsync(cancellationToken);
 
         return vinculo.Id;
     }

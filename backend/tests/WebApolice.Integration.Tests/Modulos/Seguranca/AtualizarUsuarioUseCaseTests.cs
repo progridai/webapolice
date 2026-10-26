@@ -34,7 +34,7 @@ public class AtualizarUsuarioUseCaseTests : IClassFixture<SegurancaIntegrationTe
         _contextoMock = new Mock<IContextoUsuarioAutenticado>();
         _loggerMock = new Mock<ILogger<AtualizarUsuarioUseCase>>();
 
-        _sut = new AtualizarUsuarioUseCase(_dbContext, _keycloakClientMock.Object, _contextoMock.Object, _loggerMock.Object);
+        _sut = new AtualizarUsuarioUseCase(new WebApolice.Modulos.Seguranca.Infrastructure.Persistence.Repositories.SegurancaAdministracaoRepository(_dbContext), _keycloakClientMock.Object, _contextoMock.Object, _loggerMock.Object);
     }
 
     public Task InitializeAsync() 

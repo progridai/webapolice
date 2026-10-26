@@ -40,3 +40,8 @@ A suíte ClienteAuditadoPostgresTests cobre sucesso e reversão por falha/cancel
 - Não implementamos purge automático ou particionamento de tabelas.
 - O IP usa o request após forwarded headers restritos aos proxies configurados. A lista de confiança e a borda implantada precisam homologação; nunca confiar em X-Forwarded-For arbitrário.
 - Não existe frontend / painel administrativo construído para exibir os eventos gravados (apenas via acesso de banco de dados).
+
+
+## Continuidade — 26/10/2026
+
+O Docker foi iniciado e as regressões físicas de Clientes (sucesso, falha/cancelamento da auditoria), Auditoria e Propostas foram executadas e aprovadas em PostgreSQL 18.4 efêmero. As verificações de rollback consultam o estado em nova conexão. O teste de histórico funcional de vínculo de Ramo voltou a gravar o evento na mesma chamada de SaveChanges do vínculo: o workaround antigo que o desabilitava não se aplica ao schema migrado. Isso não encerra a pendência de uniformizar os demais escritores mencionados acima nem cria atomicidade distribuída com o Keycloak. O documento 79 registra os resultados completos.

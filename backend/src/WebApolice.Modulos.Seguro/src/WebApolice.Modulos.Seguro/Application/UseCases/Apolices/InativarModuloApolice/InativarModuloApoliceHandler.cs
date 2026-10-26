@@ -1,35 +1,35 @@
+using WebApolice.Modulos.Cadastro.Contracts;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
-using WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence;
-using WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models;
+using WebApolice.Modulos.Seguro.Application.Ports;
+using WebApolice.Modulos.Seguro.Domain.Modelos;
 using WebApolice.SharedKernel.Application.Exceptions;
 
 namespace WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Application.UseCases.Apolices.InativarModuloApolice;
 
 public class InativarModuloApoliceHandler : IRequestHandler<InativarModuloApoliceCommand, Unit>
 {
-    private readonly SeguroDbContext _dbContext;
+    private readonly IApoliceVinculosRepository _repository;
+    private readonly ICadastroSeguroQueries _cadastro;
 
-    public InativarModuloApoliceHandler(SeguroDbContext dbContext)
+    public InativarModuloApoliceHandler(IApoliceVinculosRepository dbContext, ICadastroSeguroQueries cadastro)
     {
-        _dbContext = dbContext;
+        _repository = dbContext;
+        _cadastro = cadastro;
     }
 
     public async Task<Unit> Handle(InativarModuloApoliceCommand request, CancellationToken cancellationToken)
     {
         // 1. Localizar Apólice
-        var apolice = await _dbContext.Apolices
-            .FirstOrDefaultAsync(a => a.PublicId == request.ApolicePublicId && a.DeletedAt == null, cancellationToken);
+        var apolice = await _repository.ObterApoliceAsync(request.ApolicePublicId, false, cancellationToken);
             
         if (apolice == null)
             throw new ValidacaoException("Apólice não encontrada.");
             
         // 2. Localizar Vínculo e garantir isolamento
-        var vinculo = await _dbContext.ApoliceModulos
-            .FirstOrDefaultAsync(m => m.PublicId == request.ApoliceModuloPublicId && m.DeletedAt == null, cancellationToken);
+        var vinculo = await _repository.ObterModuloAsync(request.ApoliceModuloPublicId, false, cancellationToken);
 
         if (vinculo == null)
             throw new ValidacaoException("Vínculo do Módulo não encontrado.");
@@ -46,11 +46,9 @@ public class InativarModuloApoliceHandler : IRequestHandler<InativarModuloApolic
 
         // 4. Histórico
         // Buscar nome do Módulo
-        var moduloNome = await _dbContext.Database
-            .SqlQuery<string>($"SELECT nome AS \"Value\" FROM cadastro.modulo WHERE id = {vinculo.ModuloId}")
-            .FirstOrDefaultAsync(cancellationToken);
+        var moduloNome = (await _cadastro.ObterModuloPorIdAsync(vinculo.ModuloId, cancellationToken))?.Nome;
 
-        _dbContext.ApoliceHistoricos.Add(new ApoliceHistoricoModel
+        _repository.AdicionarHistorico(new ApoliceHistoricoModel
         {
             ApoliceId = apolice.Id,
             Acao = "Inativação de Vínculo de Módulo",
@@ -60,7 +58,7 @@ public class InativarModuloApoliceHandler : IRequestHandler<InativarModuloApolic
             CreatedAt = DateTimeOffset.UtcNow
         });
 
-        await _dbContext.SaveChangesAsync(cancellationToken);
+        await _repository.SalvarAlteracoesAsync(cancellationToken);
 
         return Unit.Value;
     }

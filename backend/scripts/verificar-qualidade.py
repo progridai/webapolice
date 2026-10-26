@@ -1,6 +1,7 @@
 """Gate completo local. Exige Docker e bases efêmeras; qualquer falha mantém exit code 1."""
 from pathlib import Path
 import json
+import argparse
 import os
 import subprocess
 import sys
@@ -8,6 +9,11 @@ import time
 import xml.etree.ElementTree as ET
 
 ROOT = Path(__file__).resolve().parents[2]
+parser = argparse.ArgumentParser(description=__doc__)
+parser.add_argument("--output-path", help="Saída alternativa relativa de binários .NET, por exemplo bin/Consolidacao/.")
+args = parser.parse_args()
+if args.output_path and (not args.output_path.startswith("bin/") or ".." in Path(args.output_path).parts or ":" in args.output_path):
+    parser.error("A saída deve ficar em bin/<pasta>, sem caminhos absolutos ou subida de diretório.")
 LOGS = ROOT / "scratch" / "qualidade"
 LOGS.mkdir(parents=True, exist_ok=True)
 npm = "npm.cmd" if os.name == "nt" else "npm"
@@ -22,6 +28,11 @@ steps += [
     ("nuget-audit", ["dotnet", "list", "backend/WebApolice.slnx", "package", "--vulnerable", "--include-transitive", "--format", "json", "--no-restore"], ROOT),
 ]
 
+if args.output_path:
+    for name, command, _ in steps:
+        if name in ("backend-build", "backend-tests"):
+            command.append("-p:OutputPath=" + args.output_path)
+
 # Nunca reutilizar uma conexão externa opcional dos testes de catálogos.
 env = dict(os.environ)
 env.pop("WEBAPOLICE_CATALOGOS_TEST_CONNECTION", None)
@@ -35,7 +46,11 @@ for name, command, cwd in steps:
     code = process.returncode
     if name == "backend-tests" and code == 0:
         reports = [p for p in ROOT.glob("backend/tests/*/TestResults/*.trx") if p.stat().st_mtime >= started]
-        if not reports or any(int(ET.parse(p).find(".//{*}Counters").get("notExecuted", "0")) for p in reports):
+        if not reports or any(
+            int(ET.parse(p).find(".//{*}Counters").get("notExecuted", "0"))
+            or any(r.get("outcome") == "NotExecuted" for r in ET.parse(p).findall(".//{*}UnitTestResult"))
+            for p in reports
+        ):
             code = 1  # Integração ignorada não aprova o gate completo.
     if name == "nuget-audit" and code == 0:
         try:

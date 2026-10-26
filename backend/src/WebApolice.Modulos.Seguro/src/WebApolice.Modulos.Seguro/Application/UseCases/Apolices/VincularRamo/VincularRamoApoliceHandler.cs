@@ -2,33 +2,31 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
-using WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence;
-using WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models;
+using WebApolice.Modulos.Seguro.Application.Ports;
+using WebApolice.Modulos.Seguro.Domain.Modelos;
 using WebApolice.SharedKernel.Application.Exceptions;
 
 namespace WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Application.UseCases.Apolices.VincularRamo;
 
 public class VincularRamoApoliceHandler : IRequestHandler<VincularRamoApoliceCommand, long>
 {
-    private readonly SeguroDbContext _dbContext;
+    private readonly IApoliceVinculosRepository _repository;
 
-    public VincularRamoApoliceHandler(SeguroDbContext dbContext)
+    public VincularRamoApoliceHandler(IApoliceVinculosRepository dbContext)
     {
-        _dbContext = dbContext;
+        _repository = dbContext;
     }
 
     public async Task<long> Handle(VincularRamoApoliceCommand request, CancellationToken cancellationToken)
     {
-        var apolice = await _dbContext.Apolices.FirstOrDefaultAsync(a => a.PublicId == request.ApolicePublicId, cancellationToken);
+        var apolice = await _repository.ObterApoliceAsync(request.ApolicePublicId, true, cancellationToken);
         if (apolice == null) throw new ValidacaoException("Apólice não encontrada.");
 
-        var ramo = await _dbContext.Ramos.FirstOrDefaultAsync(r => r.PublicId == request.RamoPublicId, cancellationToken);
+        var ramo = await _repository.ObterRamoAsync(request.RamoPublicId, cancellationToken);
         if (ramo == null) throw new ValidacaoException("Ramo não encontrado.");
         if (!ramo.Ativo) throw new ValidacaoException("Não é possível vincular um Ramo inativo.");
 
-        var vinculoExistente = await _dbContext.ApoliceRamos
-            .FirstOrDefaultAsync(ar => ar.ApoliceId == apolice.Id && ar.RamoId == ramo.Id, cancellationToken);
+        var vinculoExistente = await _repository.ObterVinculoRamoAsync(apolice.Id, ramo.Id, cancellationToken);
         
         if (vinculoExistente != null && vinculoExistente.Ativo)
         {
@@ -51,21 +49,21 @@ public class VincularRamoApoliceHandler : IRequestHandler<VincularRamoApoliceCom
             CreatedAt = DateTimeOffset.UtcNow,
             UpdatedAt = DateTimeOffset.UtcNow
         };
-        _dbContext.ApoliceRamos.Add(ramoVinculo);
+        _repository.AdicionarRamo(ramoVinculo);
 
-        // WORKAROUND: Tabela seguro.apolice_historico não existe no banco de dados atual
-        // var historico = new ApoliceHistoricoModel
-        // {
-        //     ApoliceId = apolice.Id,
-        //     Acao = "Vínculo de Ramo",
-        //     Descricao = $"Ramo {ramo.Codigo} ({ramo.Nome}) foi vinculado à apólice.",
-        //     UsuarioPublicId = request.UsuarioPublicId,
-        //     DataAcao = DateTimeOffset.UtcNow,
-        //     CreatedAt = DateTimeOffset.UtcNow
-        // };
-        // _dbContext.ApoliceHistoricos.Add(historico);
+        var historico = new ApoliceHistoricoModel
+        {
+            ApoliceId = apolice.Id,
+            Acao = "Vínculo de Ramo",
+            Descricao = $"Ramo {ramo.Codigo} ({ramo.Nome}) foi vinculado à apólice.",
+            UsuarioPublicId = request.UsuarioPublicId,
+            DataAcao = DateTimeOffset.UtcNow,
+            CreatedAt = DateTimeOffset.UtcNow
+        };
+        _repository.AdicionarHistorico(historico);
 
-        await _dbContext.SaveChangesAsync(cancellationToken);
+
+        await _repository.SalvarAlteracoesAsync(cancellationToken);
 
         return ramoVinculo.Id;
     }

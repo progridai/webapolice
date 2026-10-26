@@ -1,8 +1,8 @@
 using WebApolice.Modulos.Cadastro.Domain.Clientes;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using WebApolice.Modulos.Cadastro.Infrastructure.Persistence.Models;
-using WebApolice.Modulos.Cadastro.Infrastructure.Persistence.Models.Vinculos;
+using WebApolice.Modulos.Cadastro.Domain.Modelos;
+using WebApolice.Modulos.Cadastro.Domain.Modelos.Vinculos;
 
 namespace WebApolice.Modulos.Cadastro.Infrastructure.Persistence.Configurations;
 

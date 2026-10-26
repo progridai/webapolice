@@ -1,9 +1,9 @@
+using WebApolice.Modulos.Cadastro.Contracts;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
-using WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence;
-using WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models;
+using WebApolice.Modulos.Seguro.Application.Ports;
+using WebApolice.Modulos.Seguro.Domain.Modelos;
 using WebApolice.SharedKernel.Application.Exceptions;
 
 namespace WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Application.UseCases.Apolices.CriarApoliceVida;
@@ -22,11 +22,13 @@ namespace WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Application.Us
 /// </summary>
 public class CriarApoliceVidaHandler
 {
-    private readonly SeguroDbContext _dbContext;
+    private readonly IApoliceVinculosRepository _repository;
+    private readonly ICadastroSeguroQueries _cadastro;
 
-    public CriarApoliceVidaHandler(SeguroDbContext dbContext)
+    public CriarApoliceVidaHandler(IApoliceVinculosRepository dbContext, ICadastroSeguroQueries cadastro)
     {
-        _dbContext = dbContext;
+        _repository = dbContext;
+        _cadastro = cadastro;
     }
 
     public async Task<Guid> Handle(CriarApoliceVidaCommand request, CancellationToken cancellationToken)
@@ -39,16 +41,12 @@ public class CriarApoliceVidaHandler
         }
 
         // 2. Localizar Apólice
-        var apolice = await _dbContext.Apolices
-            .FirstOrDefaultAsync(a => a.PublicId == request.ApolicePublicId && a.DeletedAt == null, cancellationToken);
+        var apolice = await _repository.ObterApoliceAsync(request.ApolicePublicId, false, cancellationToken);
         if (apolice == null)
             throw new ValidacaoException("Apólice não encontrada.");
 
         // 3. Resolver Cliente
-        var clienteDto = await _dbContext.Database
-            .SqlQuery<ClienteGlobalDto>(
-                $"SELECT c.id, c.public_id, p.nome, p.documento_principal AS documento FROM cadastro.cliente c INNER JOIN core.pessoa p ON c.pessoa_id = p.id WHERE c.public_id = {request.ClientePublicId} AND c.deleted_at IS NULL")
-            .FirstOrDefaultAsync(cancellationToken);
+        var clienteDto = await _cadastro.ObterClienteAsync(request.ClientePublicId, cancellationToken);
 
         if (clienteDto == null)
             throw new ValidacaoException("Cliente não encontrado no Cadastro Global.");
@@ -63,8 +61,7 @@ public class CriarApoliceVidaHandler
         // 4. Resolver Subgrupo
         if (request.ApoliceSubgrupoPublicId.HasValue)
         {
-            var subgrupo = await _dbContext.ApoliceSubgrupos
-                .FirstOrDefaultAsync(s => s.PublicId == request.ApoliceSubgrupoPublicId.Value, cancellationToken);
+            var subgrupo = await _repository.ObterSubgrupoAsync(request.ApoliceSubgrupoPublicId.Value, cancellationToken);
 
             if (subgrupo == null)
                 throw new ValidacaoException("Subgrupo não encontrado.");
@@ -85,8 +82,7 @@ public class CriarApoliceVidaHandler
         // 5. Resolver Módulo
         if (request.ApoliceModuloPublicId.HasValue)
         {
-            var modulo = await _dbContext.ApoliceModulos
-                .FirstOrDefaultAsync(m => m.PublicId == request.ApoliceModuloPublicId.Value, cancellationToken);
+            var modulo = await _repository.ObterModuloAsync(request.ApoliceModuloPublicId.Value, true, cancellationToken);
 
             if (modulo == null)
                 throw new ValidacaoException("Módulo da Apólice não encontrado.");
@@ -105,9 +101,7 @@ public class CriarApoliceVidaHandler
             moduloDataFim = modulo.DataFim;
             
             // Busca nome do módulo cross-module
-            var nomeModulo = await _dbContext.Database
-                .SqlQuery<string>($"SELECT nome AS \"Value\" FROM cadastro.modulo WHERE id = {modulo.ModuloId}")
-                .FirstOrDefaultAsync(cancellationToken);
+            var nomeModulo = (await _cadastro.ObterModuloPorIdAsync(modulo.ModuloId, cancellationToken))?.Nome;
             infoModulo = nomeModulo ?? "Desconhecido";
         }
 
@@ -136,10 +130,10 @@ public class CriarApoliceVidaHandler
             CreatedAt = DateTimeOffset.UtcNow,
             UpdatedAt = DateTimeOffset.UtcNow
         };
-        _dbContext.ApoliceVidas.Add(novaVida);
+        _repository.AdicionarVida(novaVida);
 
         // 8. Registrar Histórico funcional
-        _dbContext.ApoliceHistoricos.Add(new ApoliceHistoricoModel
+        _repository.AdicionarHistorico(new ApoliceHistoricoModel
         {
             ApoliceId = apolice.Id,
             Acao = "Inclusão Vida",
@@ -149,7 +143,7 @@ public class CriarApoliceVidaHandler
             CreatedAt = DateTimeOffset.UtcNow
         });
 
-        await _dbContext.SaveChangesAsync(cancellationToken);
+        await _repository.SalvarAlteracoesAsync(cancellationToken);
 
         return vidaPublicId;
     }
@@ -173,13 +167,4 @@ public class CriarApoliceVidaHandler
                 $"A data de fim da Vida ({dataFim}) não pode ser posterior à data de fim de {nomeContexto} ({paiFim}).");
         }
     }
-}
-
-/// <summary>DTO interno para leitura cross-module do Cadastro Global de Clientes.</summary>
-internal class ClienteGlobalDto
-{
-    public long Id { get; set; }
-    public Guid PublicId { get; set; }
-    public string Nome { get; set; } = null!;
-    public string? Documento { get; set; }
 }

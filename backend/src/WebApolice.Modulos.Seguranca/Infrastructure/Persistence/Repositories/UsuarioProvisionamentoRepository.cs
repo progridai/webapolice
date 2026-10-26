@@ -6,7 +6,7 @@ using WebApolice.Modulos.Seguranca.Domain;
 
 namespace WebApolice.Modulos.Seguranca.Infrastructure.Persistence.Repositories;
 
-internal sealed class UsuarioProvisionamentoRepository : IUsuarioProvisionamentoRepository
+public sealed class UsuarioProvisionamentoRepository : IUsuarioProvisionamentoRepository
 {
     private readonly SegurancaDbContext _dbContext;
 
@@ -29,7 +29,15 @@ internal sealed class UsuarioProvisionamentoRepository : IUsuarioProvisionamento
 
     public async Task SalvarAlteracoesAsync(CancellationToken cancellationToken)
     {
-        await _dbContext.SaveChangesAsync(cancellationToken);
+        try
+        {
+            await _dbContext.SaveChangesAsync(cancellationToken);
+        }
+        catch (DbUpdateException ex) when (ex.InnerException is Npgsql.PostgresException pgEx
+            && pgEx.SqlState == "23505" && pgEx.ConstraintName == "ix_usuario_keycloak_sub")
+        {
+            throw new WebApolice.Modulos.Seguranca.Domain.Exceptions.ConcorrenciaProvisionamentoException(ex);
+        }
     }
 
     public void LimparRastreamento()

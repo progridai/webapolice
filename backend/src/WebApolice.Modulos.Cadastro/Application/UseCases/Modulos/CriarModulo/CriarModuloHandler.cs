@@ -2,9 +2,8 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
-using WebApolice.Modulos.Cadastro.Infrastructure.Persistence;
-using WebApolice.Modulos.Cadastro.Infrastructure.Persistence.Models;
+using WebApolice.Modulos.Cadastro.Application.Ports;
+using WebApolice.Modulos.Cadastro.Domain.Modelos;
 using WebApolice.SharedKernel.Application.Exceptions;
 using WebApolice.SharedKernel.Application.Security;
 
@@ -12,8 +11,8 @@ namespace WebApolice.Modulos.Cadastro.Application.UseCases.Modulos.CriarModulo;
 
 public class CriarModuloHandler : IRequestHandler<CriarModuloCommand, ModuloDto>
 {
-    private readonly CadastroDbContext _dbContext;
-    public CriarModuloHandler(CadastroDbContext dbContext)
+    private readonly IModulosCadastroRepository _dbContext;
+    public CriarModuloHandler(IModulosCadastroRepository dbContext)
     {
         _dbContext = dbContext;
     }
@@ -21,7 +20,7 @@ public class CriarModuloHandler : IRequestHandler<CriarModuloCommand, ModuloDto>
     public async Task<ModuloDto> Handle(CriarModuloCommand request, CancellationToken cancellationToken)
     {
         // Regra de negócio: Nome do módulo é único
-        var existe = await _dbContext.Modulos.AnyAsync(m => m.Nome.ToLower() == request.Nome.ToLower() && m.DeletedAt == null, cancellationToken);
+        var existe = await _dbContext.NomeExisteAsync(request.Nome, null, cancellationToken);
         if (existe)
         {
             throw new ValidacaoException("Já existe um Módulo com este nome no catálogo global.");
@@ -37,8 +36,8 @@ public class CriarModuloHandler : IRequestHandler<CriarModuloCommand, ModuloDto>
             UpdatedAt = DateTimeOffset.UtcNow
         };
 
-        _dbContext.Modulos.Add(modulo);
-        await _dbContext.SaveChangesAsync(cancellationToken);
+        _dbContext.Adicionar(modulo);
+        await _dbContext.SalvarAlteracoesAsync(cancellationToken);
 
         return new ModuloDto(
             modulo.PublicId,

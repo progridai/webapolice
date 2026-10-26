@@ -4,7 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using WebApolice.Modulos.Seguro.Application.Ports;
-using WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models;
+using WebApolice.Modulos.Seguro.Domain.Modelos;
 using WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence;
 
 namespace WebApolice.Modulos.Seguro.Infrastructure.Persistence.Repositories;
@@ -61,8 +61,8 @@ public class ApoliceRepository : IApoliceRepository
         await _dbContext.SaveChangesAsync(cancellationToken);
     }
 
-    public async Task<Microsoft.EntityFrameworkCore.Storage.IDbContextTransaction> BeginTransactionAsync(CancellationToken cancellationToken)
+    public async Task<WebApolice.SharedKernel.Application.Persistence.ITransacaoPersistencia> BeginTransactionAsync(CancellationToken cancellationToken)
     {
-        return await _dbContext.Database.BeginTransactionAsync(cancellationToken);
+        return new WebApolice.Shared.Infrastructure.Persistence.TransacaoEf(await _dbContext.Database.BeginTransactionAsync(cancellationToken));
     }
 }

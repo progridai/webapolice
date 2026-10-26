@@ -5,7 +5,7 @@ using Moq;
 using WebApolice.Modulos.Cadastro.Application.Ports;
 using WebApolice.Modulos.Cadastro.Application.UseCases.InativarSubestipulante;
 using WebApolice.Modulos.Cadastro.Application.UseCases.ReativarSubestipulante;
-using WebApolice.Modulos.Cadastro.Infrastructure.Persistence.Models.Vinculos;
+using WebApolice.Modulos.Cadastro.Domain.Modelos.Vinculos;
 using Xunit;
 
 namespace WebApolice.Modulos.Cadastro.Tests.Application.UseCases.Subestipulantes;

@@ -10,7 +10,7 @@ using WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Application.UseCas
 using WebApolice.Modulos.Seguro.Application.UseCases.Apolices.ListarVidas;
 using WebApolice.Modulos.Seguro.Application.UseCases.Apolices.ObterApoliceVida;
 using WebApolice.Modulos.Seguro.Application.Ports;
-using WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models;
+using WebApolice.Modulos.Seguro.Domain.Modelos;
 using WebApolice.Modulos.Seguro.Infrastructure.Persistence.Queries;
 using WebApolice.SharedKernel.Application.Exceptions;
 using Xunit;
@@ -48,23 +48,15 @@ public class ApoliceVidaTests : IClassFixture<SeguroIntegrationTestFixture>
         _fixture.DbContext.Apolices.Add(apolice);
         await _fixture.DbContext.SaveChangesAsync();
 
-        var conn = _fixture.DbContext.Database.GetDbConnection();
-        var wasOpen = conn.State == System.Data.ConnectionState.Open;
-        if (!wasOpen) await conn.OpenAsync();
-        try
-        {
-            using var cmd = conn.CreateCommand();
-            cmd.CommandText = $@"
-                INSERT INTO core.pessoa (id, tipo, nome, documento_principal, created_at, updated_at) VALUES (2001, 'F', 'Cliente Teste Vida', '12345678901', now(), now()) ON CONFLICT DO NOTHING;
-                INSERT INTO cadastro.cliente (id, pessoa_id, public_id, status_id, ativo, created_at, updated_at) VALUES (2001, 2001, '{clientePublicId}', 1, true, now(), now()) ON CONFLICT DO NOTHING;
-                
-                INSERT INTO cadastro.modulo (id, public_id, nome, ativo, created_at, updated_at) VALUES (2002, '{Guid.NewGuid()}', 'Módulo Teste Vida', true, now(), now()) ON CONFLICT DO NOTHING;";
-            await cmd.ExecuteNonQueryAsync();
-        }
-        finally
-        {
-            if (!wasOpen) await conn.CloseAsync();
-        }
+        var pessoa = new WebApolice.Modulos.Cadastro.Domain.Clientes.PessoaModel(1, "Cliente Teste Vida", "52998224725", "52998224725", true, null, null, null);
+        _fixture.Cadastro.Pessoas.Add(pessoa);
+        await _fixture.Cadastro.SaveChangesAsync();
+        var cliente = new WebApolice.Modulos.Cadastro.Domain.Cliente(pessoa.Id, 1);
+        typeof(WebApolice.Modulos.Cadastro.Domain.Cliente).GetProperty("PublicId")!.SetValue(cliente, clientePublicId);
+        _fixture.Cadastro.Clientes.Add(cliente);
+        var modulo = new WebApolice.Modulos.Cadastro.Domain.Modelos.ModuloModel { PublicId = Guid.NewGuid(), Nome = "Módulo Teste Vida", Ativo = true, CreatedAt = DateTimeOffset.UtcNow, UpdatedAt = DateTimeOffset.UtcNow };
+        _fixture.Cadastro.Modulos.Add(modulo);
+        await _fixture.Cadastro.SaveChangesAsync();
 
         var apoliceSubgrupo = new ApoliceSubgrupoModel
         {
@@ -80,7 +72,7 @@ public class ApoliceVidaTests : IClassFixture<SeguroIntegrationTestFixture>
         var apoliceModulo = new ApoliceModuloModel
         {
             ApoliceId = apolice.Id,
-            ModuloId = 2002,
+            ModuloId = modulo.Id,
             PublicId = moduloPublicId,
             DataInicio = new DateOnly(2025, 1, 1),
             DataFim = new DateOnly(2025, 12, 31),
@@ -99,7 +91,7 @@ public class ApoliceVidaTests : IClassFixture<SeguroIntegrationTestFixture>
     public async Task CriarVida_CombinacoesValidas()
     {
         var data = await SeedDataAsync();
-        var handler = new CriarApoliceVidaHandler(_fixture.DbContext);
+        var handler = new CriarApoliceVidaHandler(new WebApolice.Modulos.Seguro.Infrastructure.Persistence.Repositories.ApoliceVinculosRepository(_fixture.DbContext), WebApolice.Integration.Tests.Setup.SeguroPersistenciaTestes.ConsultasCadastro(_fixture.DbContext));
 
         // Direto
         var vidaDiretaId = await handler.Handle(new CriarApoliceVidaCommand
@@ -170,7 +162,7 @@ public class ApoliceVidaTests : IClassFixture<SeguroIntegrationTestFixture>
     public async Task CriarVida_SubgrupoOuModuloDeOutraApolice_RetornaErro()
     {
         var data = await SeedDataAsync();
-        var handler = new CriarApoliceVidaHandler(_fixture.DbContext);
+        var handler = new CriarApoliceVidaHandler(new WebApolice.Modulos.Seguro.Infrastructure.Persistence.Repositories.ApoliceVinculosRepository(_fixture.DbContext), WebApolice.Integration.Tests.Setup.SeguroPersistenciaTestes.ConsultasCadastro(_fixture.DbContext));
 
         var outraApolice = new ApoliceModel
         {
@@ -210,7 +202,7 @@ public class ApoliceVidaTests : IClassFixture<SeguroIntegrationTestFixture>
     public async Task CriarVida_ForaDaVigenciaDaApolice_RetornaErro()
     {
         var data = await SeedDataAsync();
-        var handler = new CriarApoliceVidaHandler(_fixture.DbContext);
+        var handler = new CriarApoliceVidaHandler(new WebApolice.Modulos.Seguro.Infrastructure.Persistence.Repositories.ApoliceVinculosRepository(_fixture.DbContext), WebApolice.Integration.Tests.Setup.SeguroPersistenciaTestes.ConsultasCadastro(_fixture.DbContext));
 
         var act = async () => await handler.Handle(new CriarApoliceVidaCommand
         {
@@ -227,7 +219,7 @@ public class ApoliceVidaTests : IClassFixture<SeguroIntegrationTestFixture>
     public async Task AlterarEInativarVida_FluxoCompleto()
     {
         var data = await SeedDataAsync();
-        var criarHandler = new CriarApoliceVidaHandler(_fixture.DbContext);
+        var criarHandler = new CriarApoliceVidaHandler(new WebApolice.Modulos.Seguro.Infrastructure.Persistence.Repositories.ApoliceVinculosRepository(_fixture.DbContext), WebApolice.Integration.Tests.Setup.SeguroPersistenciaTestes.ConsultasCadastro(_fixture.DbContext));
         
         var vidaId = await criarHandler.Handle(new CriarApoliceVidaCommand
         {
@@ -236,7 +228,7 @@ public class ApoliceVidaTests : IClassFixture<SeguroIntegrationTestFixture>
             UsuarioPublicId = Guid.NewGuid()
         }, CancellationToken.None);
 
-        var alterarHandler = new AlterarApoliceVidaHandler(_fixture.DbContext);
+        var alterarHandler = new AlterarApoliceVidaHandler(new WebApolice.Modulos.Seguro.Infrastructure.Persistence.Repositories.ApoliceVinculosRepository(_fixture.DbContext));
         await alterarHandler.Handle(new AlterarApoliceVidaCommand
         {
             ApolicePublicId = data.apolicePublicId,
@@ -268,7 +260,7 @@ public class ApoliceVidaTests : IClassFixture<SeguroIntegrationTestFixture>
         vidaAtualizada2!.ApoliceSubgrupoPublicId.Should().BeNull();
         vidaAtualizada2.ApoliceModuloPublicId.Should().Be(data.apoliceModuloPublicId);
 
-        var inativarHandler = new InativarApoliceVidaHandler(_fixture.DbContext);
+        var inativarHandler = new InativarApoliceVidaHandler(new WebApolice.Modulos.Seguro.Infrastructure.Persistence.Repositories.ApoliceVinculosRepository(_fixture.DbContext));
         await inativarHandler.Handle(new InativarApoliceVidaCommand
         {
             ApolicePublicId = data.apolicePublicId,

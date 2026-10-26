@@ -2,7 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Testcontainers.PostgreSql;
 using WebApolice.Integration.Tests.Setup;
 using WebApolice.Modulos.Cadastro.Infrastructure.Persistence;
-using WebApolice.Modulos.Cadastro.Infrastructure.Persistence.Models;
+using WebApolice.Modulos.Cadastro.Domain.Modelos;
 using WebApolice.Modulos.Cadastro.Infrastructure.Persistence.Queries;
 
 namespace WebApolice.Integration.Tests.Modulos.Estipulantes;

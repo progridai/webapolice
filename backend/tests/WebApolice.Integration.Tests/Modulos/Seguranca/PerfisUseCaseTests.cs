@@ -29,7 +29,7 @@ public class PerfisUseCaseTests : IClassFixture<SegurancaIntegrationTestFixture>
         _dbContext = fixture.DbContext;
         _contextoMock = new Mock<IContextoUsuarioAutenticado>();
         
-        _sutAtualizar = new AtualizarPerfilUseCase(_dbContext, _contextoMock.Object);
+        _sutAtualizar = new AtualizarPerfilUseCase(new WebApolice.Modulos.Seguranca.Infrastructure.Persistence.Repositories.SegurancaAdministracaoRepository(_dbContext), _contextoMock.Object);
     }
 
     public Task InitializeAsync() 

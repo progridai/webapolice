@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 using WebApolice.Integration.Tests.Setup;
-using WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models;
+using WebApolice.Modulos.Seguro.Domain.Modelos;
 using Xunit;
 
 namespace WebApolice.Integration.Tests.Modulos.Seguro;
@@ -32,15 +32,21 @@ public class ApoliceUniversoPermitidoTests : IClassFixture<SeguroIntegrationTest
         _fixture.DbContext.Apolices.Add(apolice);
         await _fixture.DbContext.SaveChangesAsync();
 
-        var produto = new ApoliceProdutoModel { ApoliceId = apolice.Id, ProdutoId = 1 };
+        var produtoGlobal = new Produto { Nome = "Produto da Fixture", Ativo = true, CreatedAt = DateTime.UtcNow, UpdatedAt = DateTime.UtcNow };
+        var planoGlobal = new Plano { PublicId = Guid.NewGuid(), Nome = "Plano da Fixture", Ativo = true, CreatedAt = DateTime.UtcNow, UpdatedAt = DateTime.UtcNow };
+        var coberturaGlobal = new Cobertura { PublicId = Guid.NewGuid(), Nome = "Cobertura da Fixture", Ativo = true, CreatedAt = DateTime.UtcNow, UpdatedAt = DateTime.UtcNow };
+        _fixture.DbContext.AddRange(produtoGlobal, planoGlobal, coberturaGlobal);
+        await _fixture.DbContext.SaveChangesAsync();
+
+        var produto = new ApoliceProdutoModel { ApoliceId = apolice.Id, ProdutoId = produtoGlobal.Id };
         _fixture.DbContext.ApoliceProdutos.Add(produto);
         await _fixture.DbContext.SaveChangesAsync();
 
-        var plano = new ApolicePlanoModel { ApoliceProdutoId = produto.Id, PlanoId = 1 };
+        var plano = new ApolicePlanoModel { ApoliceProdutoId = produto.Id, PlanoId = planoGlobal.Id };
         _fixture.DbContext.ApolicePlanos.Add(plano);
         await _fixture.DbContext.SaveChangesAsync();
 
-        var cobertura = new ApoliceCoberturaModel { ApolicePlanoId = plano.Id, CoberturaId = 1 };
+        var cobertura = new ApoliceCoberturaModel { ApolicePlanoId = plano.Id, CoberturaId = coberturaGlobal.Id };
         _fixture.DbContext.ApoliceCoberturas.Add(cobertura);
         
         var result = await _fixture.DbContext.SaveChangesAsync();

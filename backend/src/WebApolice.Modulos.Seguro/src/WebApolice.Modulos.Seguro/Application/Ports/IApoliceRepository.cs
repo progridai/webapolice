@@ -1,7 +1,7 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models;
+using WebApolice.Modulos.Seguro.Domain.Modelos;
 
 namespace WebApolice.Modulos.Seguro.Application.Ports;
 
@@ -17,5 +17,5 @@ public interface IApoliceRepository
     void Atualizar(ApoliceModel apolice);
 
     Task SalvarAlteracoesAsync(CancellationToken cancellationToken);
-    Task<Microsoft.EntityFrameworkCore.Storage.IDbContextTransaction> BeginTransactionAsync(CancellationToken cancellationToken);
+    Task<WebApolice.SharedKernel.Application.Persistence.ITransacaoPersistencia> BeginTransactionAsync(CancellationToken cancellationToken);
 }

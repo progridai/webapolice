@@ -1,6 +1,6 @@
 # WebApolice - ERP Web
 
-Revisão técnica atual, de 23/10/2026: consulte a [análise de arquitetura, segurança, qualidade e documentação](docs/76-revisao-arquitetura-seguranca-qualidade.md). Ela registra os achados pendentes e o alcance das validações atuais; afirmações históricas de conclusão abaixo não substituem essa avaliação.
+Revisão técnica original de 23/10/2026, atualizada na [preparação da integração de 26/10/2026](docs/79-preparacao-integracao-main.md): consulte a [análise de arquitetura, segurança, qualidade e documentação](docs/76-revisao-arquitetura-seguranca-qualidade.md). Ela registra os achados pendentes e o alcance das validações atuais; afirmações históricas de conclusão abaixo não substituem essa avaliação.
 
 ## Descrição Resumida
 O **WebApolice** é a nova versão web e responsiva do sistema de ERP, concebida para substituir progressivamente o sistema ERP legado em VB.NET com banco SQL Server. Ele servirá como o motor centralizado de dados e processos, operando de forma 100% web.
@@ -24,7 +24,7 @@ Para configurar sua máquina rapidamente, utilize os comandos recomendados abaix
   ```
 
 ### .NET SDK (Backend)
-* **Versão Oficial**: .NET SDK **10.0.400** (ou superior da mesma versão major).
+* **Versão Oficial**: .NET SDK **10.0.301**, conforme `global.json`, com avanço permitido apenas para patches da mesma faixa.
 * **Instalação (Winget)** *(abra o PowerShell como Administrador)*:
   ```powershell
   winget install Microsoft.DotNet.SDK.10

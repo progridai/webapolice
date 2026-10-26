@@ -200,7 +200,7 @@ namespace WebApolice.Modulos.Cadastro.Infrastructure.Migrations
                     b.ToTable("cliente", "cadastro");
                 });
 
-            modelBuilder.Entity("WebApolice.Modulos.Cadastro.Infrastructure.Persistence.Models.ClienteDependenteModel", b =>
+            modelBuilder.Entity("WebApolice.Modulos.Cadastro.Domain.Modelos.ClienteDependenteModel", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -286,7 +286,7 @@ namespace WebApolice.Modulos.Cadastro.Infrastructure.Migrations
                     b.ToTable("cliente_status", "cadastro");
                 });
 
-            modelBuilder.Entity("WebApolice.Modulos.Cadastro.Infrastructure.Persistence.Models.ClienteVinculoModel", b =>
+            modelBuilder.Entity("WebApolice.Modulos.Cadastro.Domain.Modelos.ClienteVinculoModel", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -349,7 +349,7 @@ namespace WebApolice.Modulos.Cadastro.Infrastructure.Migrations
                     b.ToTable("cliente_vinculo", "cadastro");
                 });
 
-            modelBuilder.Entity("WebApolice.Modulos.Cadastro.Infrastructure.Persistence.Models.EstipulanteConfiguracaoModel", b =>
+            modelBuilder.Entity("WebApolice.Modulos.Cadastro.Domain.Modelos.EstipulanteConfiguracaoModel", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -455,7 +455,7 @@ namespace WebApolice.Modulos.Cadastro.Infrastructure.Migrations
                         });
                 });
 
-            modelBuilder.Entity("WebApolice.Modulos.Cadastro.Infrastructure.Persistence.Models.EstipulanteModel", b =>
+            modelBuilder.Entity("WebApolice.Modulos.Cadastro.Domain.Modelos.EstipulanteModel", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -541,7 +541,7 @@ namespace WebApolice.Modulos.Cadastro.Infrastructure.Migrations
                         });
                 });
 
-            modelBuilder.Entity("WebApolice.Modulos.Cadastro.Infrastructure.Persistence.Models.ModuloModel", b =>
+            modelBuilder.Entity("WebApolice.Modulos.Cadastro.Domain.Modelos.ModuloModel", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -654,7 +654,7 @@ namespace WebApolice.Modulos.Cadastro.Infrastructure.Migrations
                         });
                 });
 
-            modelBuilder.Entity("WebApolice.Modulos.Cadastro.Infrastructure.Persistence.Models.PessoaDocumentoModel", b =>
+            modelBuilder.Entity("WebApolice.Modulos.Cadastro.Domain.Modelos.PessoaDocumentoModel", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -849,7 +849,7 @@ namespace WebApolice.Modulos.Cadastro.Infrastructure.Migrations
                         });
                 });
 
-            modelBuilder.Entity("WebApolice.Modulos.Cadastro.Infrastructure.Persistence.Models.Vinculos.BancoModel", b =>
+            modelBuilder.Entity("WebApolice.Modulos.Cadastro.Domain.Modelos.Vinculos.BancoModel", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -876,7 +876,7 @@ namespace WebApolice.Modulos.Cadastro.Infrastructure.Migrations
                         });
                 });
 
-            modelBuilder.Entity("WebApolice.Modulos.Cadastro.Infrastructure.Persistence.Models.Vinculos.CidadeModel", b =>
+            modelBuilder.Entity("WebApolice.Modulos.Cadastro.Domain.Modelos.Vinculos.CidadeModel", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -899,7 +899,7 @@ namespace WebApolice.Modulos.Cadastro.Infrastructure.Migrations
                         });
                 });
 
-            modelBuilder.Entity("WebApolice.Modulos.Cadastro.Infrastructure.Persistence.Models.Vinculos.CorretoraModel", b =>
+            modelBuilder.Entity("WebApolice.Modulos.Cadastro.Domain.Modelos.Vinculos.CorretoraModel", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -974,7 +974,7 @@ namespace WebApolice.Modulos.Cadastro.Infrastructure.Migrations
                     b.ToTable("corretora", "cadastro");
                 });
 
-            modelBuilder.Entity("WebApolice.Modulos.Cadastro.Infrastructure.Persistence.Models.Vinculos.GrupoModel", b =>
+            modelBuilder.Entity("WebApolice.Modulos.Cadastro.Domain.Modelos.Vinculos.GrupoModel", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -997,7 +997,7 @@ namespace WebApolice.Modulos.Cadastro.Infrastructure.Migrations
                         });
                 });
 
-            modelBuilder.Entity("WebApolice.Modulos.Cadastro.Infrastructure.Persistence.Models.Vinculos.LotacaoModel", b =>
+            modelBuilder.Entity("WebApolice.Modulos.Cadastro.Domain.Modelos.Vinculos.LotacaoModel", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -1020,7 +1020,7 @@ namespace WebApolice.Modulos.Cadastro.Infrastructure.Migrations
                         });
                 });
 
-            modelBuilder.Entity("WebApolice.Modulos.Cadastro.Infrastructure.Persistence.Models.Vinculos.PessoaContatoInstitucionalModel", b =>
+            modelBuilder.Entity("WebApolice.Modulos.Cadastro.Domain.Modelos.Vinculos.PessoaContatoInstitucionalModel", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -1072,7 +1072,7 @@ namespace WebApolice.Modulos.Cadastro.Infrastructure.Migrations
                         });
                 });
 
-            modelBuilder.Entity("WebApolice.Modulos.Cadastro.Infrastructure.Persistence.Models.Vinculos.SeguradoraModel", b =>
+            modelBuilder.Entity("WebApolice.Modulos.Cadastro.Domain.Modelos.Vinculos.SeguradoraModel", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -1134,7 +1134,7 @@ namespace WebApolice.Modulos.Cadastro.Infrastructure.Migrations
                     b.ToTable("seguradora", "cadastro");
                 });
 
-            modelBuilder.Entity("WebApolice.Modulos.Cadastro.Infrastructure.Persistence.Models.Vinculos.SubestipulanteModel", b =>
+            modelBuilder.Entity("WebApolice.Modulos.Cadastro.Domain.Modelos.Vinculos.SubestipulanteModel", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -1203,7 +1203,7 @@ namespace WebApolice.Modulos.Cadastro.Infrastructure.Migrations
                     b.ToTable("subestipulante", "cadastro");
                 });
 
-            modelBuilder.Entity("WebApolice.Modulos.Cadastro.Infrastructure.Persistence.Models.Vinculos.SubgrupoModel", b =>
+            modelBuilder.Entity("WebApolice.Modulos.Cadastro.Domain.Modelos.Vinculos.SubgrupoModel", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -1226,11 +1226,11 @@ namespace WebApolice.Modulos.Cadastro.Infrastructure.Migrations
                         });
                 });
 
-            modelBuilder.Entity("WebApolice.Modulos.Cadastro.Infrastructure.Persistence.Models.EstipulanteConfiguracaoModel", b =>
+            modelBuilder.Entity("WebApolice.Modulos.Cadastro.Domain.Modelos.EstipulanteConfiguracaoModel", b =>
                 {
-                    b.HasOne("WebApolice.Modulos.Cadastro.Infrastructure.Persistence.Models.EstipulanteModel", "Estipulante")
+                    b.HasOne("WebApolice.Modulos.Cadastro.Domain.Modelos.EstipulanteModel", "Estipulante")
                         .WithOne("Configuracao")
-                        .HasForeignKey("WebApolice.Modulos.Cadastro.Infrastructure.Persistence.Models.EstipulanteConfiguracaoModel", "EstipulanteId")
+                        .HasForeignKey("WebApolice.Modulos.Cadastro.Domain.Modelos.EstipulanteConfiguracaoModel", "EstipulanteId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_estipulante_configuracao_estipulantes_estipulante_id");
@@ -1238,7 +1238,7 @@ namespace WebApolice.Modulos.Cadastro.Infrastructure.Migrations
                     b.Navigation("Estipulante");
                 });
 
-            modelBuilder.Entity("WebApolice.Modulos.Cadastro.Infrastructure.Persistence.Models.EstipulanteModel", b =>
+            modelBuilder.Entity("WebApolice.Modulos.Cadastro.Domain.Modelos.EstipulanteModel", b =>
                 {
                     b.HasOne("WebApolice.Modulos.Cadastro.Domain.Clientes.PessoaModel", "Pessoa")
                         .WithMany()
@@ -1248,7 +1248,7 @@ namespace WebApolice.Modulos.Cadastro.Infrastructure.Migrations
                     b.Navigation("Pessoa");
                 });
 
-            modelBuilder.Entity("WebApolice.Modulos.Cadastro.Infrastructure.Persistence.Models.Vinculos.CorretoraModel", b =>
+            modelBuilder.Entity("WebApolice.Modulos.Cadastro.Domain.Modelos.Vinculos.CorretoraModel", b =>
                 {
                     b.HasOne("WebApolice.Modulos.Cadastro.Domain.Clientes.PessoaModel", "Pessoa")
                         .WithMany()
@@ -1260,7 +1260,7 @@ namespace WebApolice.Modulos.Cadastro.Infrastructure.Migrations
                     b.Navigation("Pessoa");
                 });
 
-            modelBuilder.Entity("WebApolice.Modulos.Cadastro.Infrastructure.Persistence.Models.Vinculos.SeguradoraModel", b =>
+            modelBuilder.Entity("WebApolice.Modulos.Cadastro.Domain.Modelos.Vinculos.SeguradoraModel", b =>
                 {
                     b.HasOne("WebApolice.Modulos.Cadastro.Domain.Clientes.PessoaModel", "Pessoa")
                         .WithMany()
@@ -1272,7 +1272,7 @@ namespace WebApolice.Modulos.Cadastro.Infrastructure.Migrations
                     b.Navigation("Pessoa");
                 });
 
-            modelBuilder.Entity("WebApolice.Modulos.Cadastro.Infrastructure.Persistence.Models.Vinculos.SubestipulanteModel", b =>
+            modelBuilder.Entity("WebApolice.Modulos.Cadastro.Domain.Modelos.Vinculos.SubestipulanteModel", b =>
                 {
                     b.HasOne("WebApolice.Modulos.Cadastro.Domain.Clientes.PessoaModel", "Pessoa")
                         .WithMany()
@@ -1284,7 +1284,7 @@ namespace WebApolice.Modulos.Cadastro.Infrastructure.Migrations
                     b.Navigation("Pessoa");
                 });
 
-            modelBuilder.Entity("WebApolice.Modulos.Cadastro.Infrastructure.Persistence.Models.EstipulanteModel", b =>
+            modelBuilder.Entity("WebApolice.Modulos.Cadastro.Domain.Modelos.EstipulanteModel", b =>
                 {
                     b.Navigation("Configuracao");
                 });

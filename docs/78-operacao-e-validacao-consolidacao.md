@@ -1,6 +1,6 @@
 # Operação e Validação da Consolidação — 23/10/2026
 
-Complementa a revisão 76 e o recorte de Propostas do documento 77. O gate completo não foi aprovado: há duas regras arquiteturais reprovadas e integrações indisponíveis. Os comandos foram executados individualmente conforme as evidências da revisão; o script agregado não foi executado integralmente nesta sessão. Não constitui autorização de implantação ou homologação com o legado.
+Complementa a revisão 76 e o recorte de Propostas do documento 77. **Este parágrafo registra a execução de 23/10; a continuidade atual está no documento 79.** O gate completo não foi aprovado: há duas regras arquiteturais reprovadas e integrações indisponíveis. Os comandos foram executados individualmente conforme as evidências da revisão; o script agregado não foi executado integralmente nesta sessão. Não constitui autorização de implantação ou homologação com o legado.
 
 ## Configuração Externa e Credenciais
 
@@ -42,7 +42,7 @@ Após migrations no destino, reaplicar os triggers Title Case conforme documento
 
 `python backend/scripts/verificar-qualidade.py` executa scanner, seis checks frontend, auditoria npm, restore/build/testes da solução e auditoria NuGet. Logs ficam em scratch/qualidade. Qualquer falha retorna código diferente de zero; integrações precisam de Docker. O processo remove a conexão externa opcional de catálogos, evitando reutilizar banco do host. O script não faz commit/push, migrations de produção ou implantação.
 
-O workflow `.github/workflows/qualidade.yml` registra os mesmos gates para GitHub Actions, com runner Linux e Testcontainers PostgreSQL isolados. Sua execução remota, proteção de branch e exigências de merge não foram verificadas. Testes de catálogos que exigem baseline externo continuam pendência explícita; testes ignorados não comprovam integração. Os testes arquiteturais agora detectam violações reais remanescentes e devem impedir aprovação enquanto elas existirem.
+O workflow `.github/workflows/qualidade.yml` registra os mesmos gates para GitHub Actions, com runner Linux e Testcontainers PostgreSQL isolados. Sua execução remota, proteção de branch e exigências de merge não foram verificadas. Na execução de 23/10, os testes de catálogos dependiam de baseline externo. Em 26/10 passaram a usar fixture própria e as dependências arquiteturais detectadas foram corrigidas; o gate completo passou, conforme documento 79. Testes ignorados e qualquer regressão arquitetural continuam impedindo aprovação.
 
 O gate completo reprova quando há testes ignorados. O antigo teste de consulta de Estipulantes deixou de acessar um banco fixo em localhost: agora cria registro e schema de teste em container efêmero. A fixture de Cadastro usa o modelo atual numa base vazia; isso não substitui validação do schema implantado. O teste de falha de endereço injeta um erro controlado de banco após gravações anteriores, sem presumir que o antigo SQL parcial da fixture demonstrava FKs do produto.
 
@@ -55,3 +55,8 @@ As duas suítes Testcontainers passaram a usar 4.13.0, com SSH.NET 2026.0.0 expl
 No frontend, Vitest 5.0.5 substitui 3.x para corrigir a cadeia de advisories do runner/mocker/pool. Vite recebe correção dentro de 8.x, React Router dentro de 7.x e transitivas de source maps/expansão recebem patches. Tailwind permanece 3.4; override de postcss-selector-parser 7.1.6 corrige sua transitiva sem migrar o design system para Tailwind 4 ou acrescentar outro plugin. Mocks de construtores e funções foram adequados aos contratos tipados do Vitest 5, mantendo asserções de comportamento e sem any/supressões. A compatibilidade é aferida pelas seis verificações e continua sujeita à homologação visual integrada.
 
 Fontes primárias: [advisory SSH.NET](https://github.com/sshnet/SSH.NET/security/advisories/GHSA-q939-rpr3-3284), [JWT Bearer Microsoft](https://learn.microsoft.com/en-us/aspnet/core/security/authentication/configure-jwt-bearer-authentication?view=aspnetcore-10.0), [imagens oficiais Node](https://github.com/docker-library/official-images/blob/master/library/node), [imagens oficiais Nginx](https://github.com/docker-library/official-images/blob/master/library/nginx). Resultados locais e limitações estão na revisão 76.
+
+
+## Continuidade — 26/10/2026
+
+Docker Desktop foi iniciado; integrações PostgreSQL 18.4 passaram a executar em containers efêmeros. Catálogos não dependem mais de baseline externo: a fixture cria Cadastro pelo modelo atual e aplica migrations, inclusive a transição do compartilhamento de coberturas com dados artificiais de regressão. O script test-catalogos-isolado.ps1 não lê .env, copia banco ou remove bases existentes. O gate admite --output-path bin/Consolidacao/ para binários isolados e reprova também resultados TRX individuais ignorados, mesmo quando o contador agregado está zerado. Zod recebeu patch corretivo para 4.6.6 após novo apontamento da auditoria. O documento 79 registra os resultados e limites desta continuidade; os números anteriores são históricos.

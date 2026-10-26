@@ -1,26 +1,24 @@
 using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 using WebApolice.Modulos.Cadastro.Application.UseCases.Modulos;
 using WebApolice.Modulos.Cadastro.Domain.Exceptions;
-using WebApolice.Modulos.Cadastro.Infrastructure.Persistence;
+using WebApolice.Modulos.Cadastro.Application.Ports;
 
 namespace WebApolice.Modulos.Cadastro.Application.UseCases.Modulos.ConsultarModulo;
 
 public class ConsultarModuloHandler : IRequestHandler<ConsultarModuloQuery, ModuloDto>
 {
-    private readonly CadastroDbContext _dbContext;
+    private readonly IModulosCadastroRepository _dbContext;
 
-    public ConsultarModuloHandler(CadastroDbContext dbContext)
+    public ConsultarModuloHandler(IModulosCadastroRepository dbContext)
     {
         _dbContext = dbContext;
     }
 
     public async Task<ModuloDto> Handle(ConsultarModuloQuery request, CancellationToken cancellationToken)
     {
-        var modulo = await _dbContext.Modulos
-            .FirstOrDefaultAsync(m => m.PublicId == request.PublicId && m.DeletedAt == null, cancellationToken);
+        var modulo = await _dbContext.ObterAsync(request.PublicId, cancellationToken);
 
         if (modulo == null)
         {

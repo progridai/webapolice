@@ -39,6 +39,8 @@ public static class CadastroModuleExtensions
 
         // Ports / Repositories
         services.AddScoped<IClienteRepository, ClienteRepository>();
+        services.AddScoped<WebApolice.Modulos.Cadastro.Contracts.ICadastroSeguroQueries, CadastroSeguroQueries>();
+        services.AddScoped<IModulosCadastroRepository, ModulosCadastroRepository>();
         services.AddScoped<IOperacaoCadastroAuditada, OperacaoCadastroAuditada>();
         services.AddScoped<IClientesQueries, ClientesQueries>();
         services.AddScoped<ICooperadoRepository, CooperadoRepository>();

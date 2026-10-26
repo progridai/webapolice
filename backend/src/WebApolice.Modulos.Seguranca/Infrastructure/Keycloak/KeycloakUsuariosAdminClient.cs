@@ -7,6 +7,7 @@ using System.Net.Http.Json;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using WebApolice.Modulos.Seguranca.Application.Ports;
 
@@ -16,14 +17,27 @@ public class KeycloakUsuariosAdminClient : IKeycloakUsuariosAdminClient
 {
     private readonly HttpClient _httpClient;
     private readonly KeycloakAdminOptions _options;
+    private readonly ILogger<KeycloakUsuariosAdminClient> _logger;
     private string? _cachedToken;
     private DateTime _tokenExpiry = DateTime.MinValue;
 
-    public KeycloakUsuariosAdminClient(HttpClient httpClient, IOptions<KeycloakAdminOptions> options)
+    public KeycloakUsuariosAdminClient(
+        HttpClient httpClient,
+        IOptions<KeycloakAdminOptions> options,
+        ILogger<KeycloakUsuariosAdminClient> logger)
     {
         _httpClient = httpClient;
         _options = options.Value;
-        
+        _logger = logger;
+
+        if (string.IsNullOrWhiteSpace(_options.BaseUrl))
+        {
+            throw new InvalidOperationException(
+                "A configuração 'KeycloakAdmin:BaseUrl' é obrigatória e está vazia. " +
+                "Defina a variável de ambiente 'KeycloakAdmin__BaseUrl' no servidor/container " +
+                "(ex: 'https://auth.bravida.com.br') ou adicione a seção 'KeycloakAdmin' no appsettings.json.");
+        }
+
         _httpClient.BaseAddress = new Uri(_options.BaseUrl.TrimEnd('/'));
     }
 
@@ -82,12 +96,20 @@ public class KeycloakUsuariosAdminClient : IKeycloakUsuariosAdminClient
         var usersUrl = $"/admin/realms/{_options.Realm}/users";
         var response = await _httpClient.PostAsJsonAsync(usersUrl, payload, cancellationToken);
 
-        if (response.StatusCode == System.Net.HttpStatusCode.Conflict)
+        if (!response.IsSuccessStatusCode)
         {
-            throw new InvalidOperationException("Usuário já existe no Keycloak.");
-        }
+            var providerResponse = await response.Content.ReadAsStringAsync(cancellationToken);
 
-        response.EnsureSuccessStatusCode();
+            _logger.LogWarning(
+                "Keycloak recusou a criação do usuário. StatusCode: {StatusCode}",
+                (int)response.StatusCode);
+
+            var message = response.StatusCode == System.Net.HttpStatusCode.Conflict
+                ? "Usuário já existe no Keycloak."
+                : CriarMensagemErroCadastro(providerResponse);
+
+            throw new KeycloakUsuarioAdminException(message, response.StatusCode, providerResponse);
+        }
 
         var location = response.Headers.Location?.ToString();
         if (string.IsNullOrEmpty(location))
@@ -218,5 +240,56 @@ public class KeycloakUsuariosAdminClient : IKeycloakUsuariosAdminClient
         var firstName = parts[0];
         var lastName = parts.Length > 1 ? parts[1] : "";
         return (firstName, lastName);
+    }
+
+    private static string CriarMensagemErroCadastro(string providerResponse)
+    {
+        const string mensagemPadrao =
+            "O provedor de identidade recusou os dados do usuário. Verifique as regras de cadastro configuradas no Keycloak.";
+
+        if (string.IsNullOrWhiteSpace(providerResponse))
+        {
+            return mensagemPadrao;
+        }
+
+        try
+        {
+            using var document = JsonDocument.Parse(providerResponse);
+            var root = document.RootElement;
+            if (root.ValueKind != JsonValueKind.Object) return mensagemPadrao;
+
+            if (root.TryGetProperty("errorMessage", out var errorMessageElement) &&
+                errorMessageElement.ValueKind == JsonValueKind.String &&
+                !string.IsNullOrWhiteSpace(errorMessageElement.GetString()))
+            {
+                var errorMessage = errorMessageElement.GetString()!;
+
+                return errorMessage switch
+                {
+                    "error-username-invalid-character" =>
+                        "Username inválido. Use apenas letras, números, ponto, hífen ou sublinhado, sem espaços.",
+                    "error-person-name-invalid-character" =>
+                        "O nome contém um caractere não permitido pelo provedor de identidade.",
+                    "error-invalid-email" =>
+                        "O e-mail informado não é aceito pelo provedor de identidade.",
+                    "error-user-attribute-required" =>
+                        "O provedor de identidade exige um atributo obrigatório que não foi informado.",
+                    _ => mensagemPadrao
+                };
+            }
+
+            if (root.TryGetProperty("error", out var errorElement) &&
+                errorElement.ValueKind == JsonValueKind.String &&
+                !string.IsNullOrWhiteSpace(errorElement.GetString()))
+            {
+                return mensagemPadrao;
+            }
+        }
+        catch (JsonException)
+        {
+            // Resposta não estruturada do provedor: usar a mensagem segura.
+        }
+
+        return mensagemPadrao;
     }
 }

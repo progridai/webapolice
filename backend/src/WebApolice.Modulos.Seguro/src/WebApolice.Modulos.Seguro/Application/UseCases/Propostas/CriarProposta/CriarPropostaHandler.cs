@@ -6,25 +6,23 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
-using WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence;
-using WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models;
+using WebApolice.Modulos.Seguro.Domain.Modelos;
 using WebApolice.SharedKernel.Application.Exceptions;
 
 namespace WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Application.UseCases.Propostas.CriarProposta;
 
 public class CriarPropostaHandler : IRequestHandler<CriarPropostaCommand, Guid>
 {
-    private readonly SeguroDbContext _dbContext;
+    private readonly IPropostasRepository _repository;
 
     private readonly IClientesPropostas _clientes;
     private readonly ConfiguracaoPropostas _configuracao;
     private readonly IOperacaoPropostas _operacao;
 
-    public CriarPropostaHandler(SeguroDbContext dbContext, IClientesPropostas clientes,
+    public CriarPropostaHandler(IPropostasRepository dbContext, IClientesPropostas clientes,
         IOptions<ConfiguracaoPropostas> configuracao, IOperacaoPropostas operacao)
     {
-        _dbContext = dbContext;
+        _repository = dbContext;
         _clientes = clientes;
         _configuracao = configuracao.Value;
         _operacao = operacao;
@@ -38,18 +36,15 @@ public class CriarPropostaHandler : IRequestHandler<CriarPropostaCommand, Guid>
             throw new ValidacaoException("O status inicial de Propostas ainda não foi definido.");
         return await _operacao.ExecutarAsync<Guid>("PROPOSTA_CRIADA", async ct =>
         {
-        var status = await _dbContext.PropostaStatuses.SingleOrDefaultAsync(
-            s => s.Codigo == _configuracao.StatusInicialCodigo, cancellationToken)
+        var status = await _repository.ObterStatusAsync(_configuracao.StatusInicialCodigo, cancellationToken)
             ?? throw new ValidacaoException("Status inicial de Propostas não encontrado no catálogo.");
         // 1. Carregar Entidades Mestre
-        var apolice = await _dbContext.Apolices
-            .FirstOrDefaultAsync(a => a.PublicId == request.ApoliceId, cancellationToken);
+        var apolice = await _repository.ObterApoliceAsync(request.ApoliceId, cancellationToken);
             
         if (apolice == null)
             throw new ValidacaoException("Apólice não encontrada.");
 
-        var apoliceVida = await _dbContext.ApoliceVidas
-            .FirstOrDefaultAsync(v => v.PublicId == request.ApoliceVidaId, cancellationToken);
+        var apoliceVida = await _repository.ObterVidaAsync(request.ApoliceVidaId, cancellationToken);
             
         if (apoliceVida == null)
             throw new ValidacaoException("ApoliceVida não encontrada.");
@@ -106,8 +101,8 @@ public class CriarPropostaHandler : IRequestHandler<CriarPropostaCommand, Guid>
             UpdatedAt = DateTime.UtcNow
         };
 
-        _dbContext.Proposta.Add(proposta);
-        await _dbContext.SaveChangesAsync(cancellationToken);
+        _repository.Adicionar(proposta);
+        await _repository.SalvarAlteracoesAsync(cancellationToken);
 
         return (proposta.PublicId, proposta.PublicId.ToString(), null, new { proposta.PublicId, proposta.ApoliceVidaId, proposta.ClienteId });
         }, cancellationToken);

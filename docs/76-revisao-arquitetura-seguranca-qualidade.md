@@ -2,6 +2,29 @@
 
 Data da análise original: 23/10/2026. Consolidação iniciada em 23/10/2026; acompanhamento abaixo. As evidências e os resultados da análise original foram preservados nas seções seguintes.
 
+## Situação Atual — 26/10/2026
+
+Continuidade autorizada para preparar a integração da fix em main, após o commit 891beb7. Os três commits recentes de main foram incorporados, as dependências arquiteturais corrigidas e o Docker iniciado para as integrações efêmeras. Detalhes, causas das falhas iniciais e evidências finais estão no [documento 79](79-preparacao-integracao-main.md). O acompanhamento de 23/10 abaixo foi preservado como registro daquela execução.
+
+| Achado | Situação atual e evidência adicional |
+|---|---|
+| A01 | Configuração externa e scanner mantidos. Lançador de catálogos deixou de ler .env/clonar bases. Rotação/revogação e histórico Git continuam a cargo dos responsáveis. |
+| A02 | Proteção de erros preservada ao incorporar main: mensagens Keycloak desconhecidas/JSON não objeto não são expostos; warning não registra corpo bruto. Regressões novas aprovadas. |
+| A03 | Configuração/JWT mantidos; 101 testes API aprovados. IdP implantado ainda exige homologação própria. |
+| A04 | Persistência de Propostas validada em PostgreSQL 18.4, com Cliente/Pessoa/vínculo reais, UUID de item, duas gravações nativas sem legado inventado e rollback por falha da auditoria em nova conexão. Código real do status inicial e regras de liberação continuam pendentes. |
+| A05 | Testes físicos de falha/cancelamento de auditoria de Clientes e falha de Propostas aprovados. A uniformização dos demais CRUD indicada abaixo continua pendência de código; não presumir cobertura universal. |
+| A06 | Dependências proibidas detectadas em Application foram corrigidas em Cadastro/Segurança/Seguro por portas específicas, queries/adaptadores EF e tipos Domain. Contratos não expõem EF ou IQueryable. Não equivale a revisão manual exaustiva de todo SQL e fronteira de negócio. |
+| A07 | 28 testes arquiteturais aprovados sobre os 14 assemblies, sem allowlist, exclusão ou relaxamento; as duas regras antes reprovadas passaram. |
+| A08 | Regras de CPF/CNPJ e preservação do legado mantidas; 50 testes Cadastro aprovados. Expectativas antigas de Title Case em outras integrações foram corrigidas sem mudar a política. |
+| A09 | Matriz de negação preservada; testes de catálogos reais também executam, sem ignorados por falta de conexão externa. |
+| A10 | Zod recebeu patch 4.6.6 pelo novo advisory alto; auditorias npm/NuGet aprovadas sem vulnerabilidades reportadas. Build sem avisos/erros. |
+| A11 | Gate completo executado com saída 0, 393 testes backend e 1.139 frontend. TRX individuais ignorados também reprovam o gate. Execução remota/proteções de branch ainda não conferidas. |
+| A12 | Docker/containers PostgreSQL efêmeros disponíveis e executados. Imagens de aplicação e infraestrutura real (TLS/proxy, backup, triggers no destino, carga, alertas) não homologadas. |
+| A13 | Documentos normativos, ADR 008 e guias atualizados para a integração, preservando histórico de testes e migrations. README alinhado ao SDK do global.json. |
+| A14 | Cancelamento HTTP mantido e suíte frontend completa aprovada novamente após merge e patch Zod. |
+
+A integração do código em main não libera Propostas nem implanta a aplicação. Permanecem as decisões de negócio, credenciais e homologações acima, além da auditoria uniforme dos escritores remanescentes. Nenhum dado de produção, registro de auditoria ou evidência original de migração foi modificado.
+
 ## Acompanhamento da Correção — 23/10/2026
 
 Execução sem commit/push e sem acesso a dados de produção. Alterações locais anteriores preservadas. O relatório original abaixo permanece como registro da análise; esta seção registra o resultado da implementação e distingue correção local de homologação. **A consolidação ainda tem pendências de código e de ambiente; não está integralmente aprovada.**

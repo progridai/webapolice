@@ -2,7 +2,7 @@
 
 ## 1. Visão Geral
 
-Estado em 23/10/2026: as restrições abaixo são a norma, não uma declaração de conformidade integral. A [revisão 76](76-revisao-arquitetura-seguranca-qualidade.md) registra dependências indevidas remanescentes e testes que agora as detectam. O recorte de Clientes usa portas/repositórios sem EF/Infrastructure em Application, modelos de Cliente/Pessoa em Domain.Clientes e contrato público de disponibilidade de Segurança. Adaptadores que dependem de HttpContext ficam em Api. A expansão para os demais fluxos é progressiva, sem liberar novas exceções às regras.
+Estado em 26/10/2026: a norma abaixo permanece. Os casos de uso de Cadastro, Segurança e Seguro passaram a usar portas de persistência sem EF/DbContext/IQueryable; consultas e adaptadores ficam em Infrastructure. Entidades POCO compartilhadas pelas portas ficam em Domain, mantendo os mapeamentos relacionais. TransacaoEf adapta a transação existente ao contrato neutro ITransacaoPersistencia, preservando commit/rollback/dispose na mesma conexão. Consultas entre os handlers de vínculos de Seguro e Cadastro usam ICadastroSeguroQueries. O serviço de provisionamento recebe uma exceção de concorrência neutra; somente o adaptador interpreta SQLSTATE/constraint. As regras arquiteturais passam localmente; isso não constitui revisão exaustiva de todo SQL, auditoria ou regra de negócio. Ver revisões [76](76-revisao-arquitetura-seguranca-qualidade.md) e [79](79-preparacao-integracao-main.md).
 
 O backend do WebApólice é projetado como um **Monólito Modular** em ASP.NET Core (.NET 10).
 Esta abordagem foi escolhida para balancear a simplicidade de implantação e operação com o rigor da separação lógica necessária para um ERP de seguros em crescimento.

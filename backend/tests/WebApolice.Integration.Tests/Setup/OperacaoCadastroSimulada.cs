@@ -6,7 +6,7 @@ using WebApolice.Modulos.Cadastro.Application.Ports;
 namespace WebApolice.Integration.Tests.Setup;
 
 // Apenas para testes de orquestração com repositórios substituídos. Não comprova atomicidade física.
-internal sealed class OperacaoCadastroSimulada(IRegistradorAuditoria registrador, IDbContextTransaction transacao) : IOperacaoCadastroAuditada
+internal sealed class OperacaoCadastroSimulada(IRegistradorAuditoria registrador, WebApolice.SharedKernel.Application.Persistence.ITransacaoPersistencia transacao) : IOperacaoCadastroAuditada
 {
     public async Task<T> ExecutarAsync<T>(string modulo, string recurso, string acao,
         Func<CancellationToken, Task<(T Resultado, string PublicId, object? Antes, object? Depois)>> executar,

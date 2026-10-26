@@ -1,3 +1,4 @@
+using WebApolice.Integration.Tests.Setup;
 using WebApolice.Modulos.Seguranca.Api.Authorization;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
@@ -22,14 +23,15 @@ using WebApolice.Modulos.Seguro.Application.UseCases.Apolices.PlanoModulo;
 using WebApolice.Modulos.Seguro.Infrastructure.Persistence.Queries;
 using WebApolice.Modulos.Seguro.Infrastructure.Persistence.Repositories;
 using WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence;
-using WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models;
+using WebApolice.Modulos.Seguro.Domain.Modelos;
 using WebApolice.SharedKernel.Application.Exceptions;
 
 namespace WebApolice.Integration.Tests.Modulos.Seguro;
 
-// Run through scripts/test-catalogos-isolado.ps1; never accepts the application database.
+// Executa sempre em container efêmero; nenhuma conexão externa é aceita.
 public sealed class CatalogosWorkflowTests : IAsyncLifetime
 {
+    private readonly SeguroIntegrationTestFixture _fixture = new("20261007010053_PlanoECoberturasExclusivosModuloApolice");
     private NpgsqlConnection _connection = null!;
     private FinanceiroDbContext _financeiro = null!;
     private SeguroDbContext _seguro = null!;
@@ -41,16 +43,11 @@ public sealed class CatalogosWorkflowTests : IAsyncLifetime
 
     public async Task InitializeAsync()
     {
-        var value = Environment.GetEnvironmentVariable("WEBAPOLICE_CATALOGOS_TEST_CONNECTION")
-            ?? throw new InvalidOperationException("Execute scripts/test-catalogos-isolado.ps1.");
-        var builder = new NpgsqlConnectionStringBuilder(value);
-        if (!System.Text.RegularExpressions.Regex.IsMatch(builder.Database!, "^webapolice_catalogos_[a-f0-9]{32}$"))
-            throw new InvalidOperationException("Testes exigem uma base temporária isolada.");
-        _connection = new(value);
-        await _connection.OpenAsync();
-        _financeiro = new(new DbContextOptionsBuilder<FinanceiroDbContext>().UseNpgsql(_connection, o => o.MigrationsHistoryTable("__EFMigrationsHistory", "financeiro")).UseSnakeCaseNamingConvention().Options);
-        _seguro = new(new DbContextOptionsBuilder<SeguroDbContext>().UseNpgsql(_connection, o => o.MigrationsHistoryTable("__EFMigrationsHistory", "seguro")).UseSnakeCaseNamingConvention().Options);
-        _audit = new(new DbContextOptionsBuilder<AuditoriaDbContext>().UseNpgsql(_connection, o => o.MigrationsHistoryTable("__EFMigrationsHistory", "auditoria")).UseSnakeCaseNamingConvention().Options);
+        await _fixture.InitializeAsync();
+        _connection = _fixture.Connection;
+        _financeiro = _fixture.Financeiro;
+        _seguro = _fixture.DbContext;
+        _audit = _fixture.Auditoria;
         _seguranca = new(new DbContextOptionsBuilder<SegurancaDbContext>().UseNpgsql(_connection, o => o.MigrationsHistoryTable("__EFMigrationsHistory", "seguranca")).UseSnakeCaseNamingConvention().Options);
         Assert.Same(_connection, _financeiro.Database.GetDbConnection());
         Assert.Same(_connection, _seguro.Database.GetDbConnection());
@@ -104,14 +101,14 @@ public sealed class CatalogosWorkflowTests : IAsyncLifetime
         _seguro.Add(e); await _seguro.SaveChangesAsync(); return e;
     }
 
-    [CatalogosFact]
+    [Fact]
     public async Task Convenio_CadastroCompleto_StatusEConsultaPublica()
     {
-        await _financeiro.Database.ExecuteSqlRawAsync("INSERT INTO core.banco(codigo,nome,created_at) VALUES ('987','Banco de teste',now()) ON CONFLICT DO NOTHING");
+        await _financeiro.Database.ExecuteSqlRawAsync("INSERT INTO core.banco(codigo,nome) VALUES ('987','Banco de Teste') ON CONFLICT DO NOTHING");
         Assert.Contains(await _convenios.BancosAsync(default), b => b.Codigo == "987");
         var dados = new ConvenioCobrancaDados
         {
-            Nome = "Completo " + Guid.NewGuid(),
+            Nome = "Cadastro Completo da Fixture",
             BancoCodigo = "987",
             Agencia = "001",
             ContaCorrente = "123-4",
@@ -151,7 +148,7 @@ public sealed class CatalogosWorkflowTests : IAsyncLifetime
         Assert.True(await _audit.RegistrosAuditoria.AnyAsync(e => e.RecursoId == dto.PublicId.ToString() && e.UsuarioIdExterno == "catalogos-test-user"));
     }
 
-    [CatalogosFact]
+    [Fact]
     public async Task Subgrupos_CompartilhamConvenio_MasPreservamIsolamentoDaApolice()
     {
         var convenio = await CriarConvenio(); var a = await CriarApolice(); var b = await CriarApolice();
@@ -165,7 +162,7 @@ public sealed class CatalogosWorkflowTests : IAsyncLifetime
         Assert.Null(await new ApolicesQueries(_seguro, _convenios).ObterSubgrupoPorPublicIdAsync(b.PublicId, primeiro, default));
     }
 
-    [CatalogosFact]
+    [Fact]
     public async Task Subgrupo_ExigeConvenioNovo_PreservaLegadoEReferenciaInativa()
     {
         var a = await CriarApolice(); var repo = new SubgruposCadastroRepository(_seguro, _convenios, _operacao);
@@ -182,7 +179,7 @@ public sealed class CatalogosWorkflowTests : IAsyncLifetime
         await Assert.ThrowsAsync<ValidacaoException>(() => handler.Handle(new() { ApolicePublicId = a.PublicId, Nome = "Inativo", ConvenioCobrancaPublicId = c.PublicId }, default));
     }
 
-    [CatalogosFact]
+    [Fact]
     public async Task PlanoCobertura_CompartilhamentoUnicidadeEInativacaoDoVinculo()
     {
         var handler = new CatalogosSeguroHandler(_catalogos);
@@ -204,7 +201,7 @@ public sealed class CatalogosWorkflowTests : IAsyncLifetime
         await handler.VincularAsync(a.PublicId, c.PublicId, true, default);
     }
 
-    [CatalogosFact]
+    [Fact]
     public async Task PremiosPlano_PersistemCentavosEValidamValoresSemAlterarVinculos()
     {
         var handler = new CatalogosSeguroHandler(_catalogos);
@@ -227,7 +224,7 @@ public sealed class CatalogosWorkflowTests : IAsyncLifetime
         Assert.Contains(audits, e => e.DadosPosteriores!.RootElement.GetProperty("PremioTitular").GetDecimal() == 1234.56m);
     }
 
-    [CatalogosFact]
+    [Fact]
     public async Task PremiosApolice_PadraoAjustesIndependentesZeroIsolamentoERollback()
     {
         var handler = new CatalogosSeguroHandler(_catalogos);
@@ -291,7 +288,7 @@ public sealed class CatalogosWorkflowTests : IAsyncLifetime
         _seguro.Add(e); await _seguro.SaveChangesAsync(); return e;
     }
 
-    [CatalogosFact]
+    [Fact]
     public async Task Modulo_PlanoUnicoECoberturaCompartilhadaComPremiosIndependentes()
     {
         var a = await CriarApolice(); var b = await CriarApolice();
@@ -309,12 +306,12 @@ public sealed class CatalogosWorkflowTests : IAsyncLifetime
         await Assert.ThrowsAsync<ValidacaoException>(() => handler.SalvarCoberturaAsync(a.PublicId, ma.PublicId, null, new() { CoberturaPublicId = baseCobertura.PublicId, PremioTitular = 5m, PremioConjuge = 0m }, default));
         Assert.Equal(30m, (await handler.ObterAsync(b.PublicId, mb.PublicId, default)).Plano!.Coberturas.Single().PremioTitular);
         await new CatalogosSeguroHandler(_catalogos).SalvarCoberturaAsync(baseCobertura.PublicId, new() { Nome = "Morte atualizada", NomeReduzido = "MA" }, default);
-        Assert.Equal("Morte atualizada", (await handler.ObterAsync(a.PublicId, ma.PublicId, default)).Plano!.Coberturas.Single().Nome);
-        Assert.Equal("Morte atualizada", (await handler.ObterAsync(b.PublicId, mb.PublicId, default)).Plano!.Coberturas.Single().Nome);
+        Assert.Equal("Morte Atualizada", (await handler.ObterAsync(a.PublicId, ma.PublicId, default)).Plano!.Coberturas.Single().Nome);
+        Assert.Equal("Morte Atualizada", (await handler.ObterAsync(b.PublicId, mb.PublicId, default)).Plano!.Coberturas.Single().Nome);
         var atualizado = await handler.SalvarPlanoAsync(a.PublicId, ma.PublicId, new() { Nome = "Plano atualizado", Paga = false }, default);
         Assert.Equal(p.PublicId, atualizado.PublicId); Assert.Single(atualizado.Coberturas);
         Assert.Equal(12.34m, atualizado.Coberturas.Single().PremioTitular); Assert.Equal(0m, atualizado.Coberturas.Single().PremioConjuge);
-        Assert.Equal("Plano A", (await handler.ObterAsync(b.PublicId, mb.PublicId, default)).Plano!.Nome);
+        Assert.Equal("Plano a", (await handler.ObterAsync(b.PublicId, mb.PublicId, default)).Plano!.Nome);
         await Assert.ThrowsAsync<ValidacaoException>(() => handler.ObterAsync(a.PublicId, mb.PublicId, default));
         await Assert.ThrowsAsync<ValidacaoException>(() => handler.SalvarPlanoAsync(b.PublicId, ma.PublicId, new() { Nome = "Invasão" }, default));
         await handler.SalvarPlanoAsync(a.PublicId, ma2.PublicId, new() { Nome = "Segundo Módulo" }, default);
@@ -330,7 +327,7 @@ public sealed class CatalogosWorkflowTests : IAsyncLifetime
         Assert.Contains(await _audit.RegistrosAuditoria.Where(e => e.RecursoId == c.PublicId.ToString()).ToListAsync(), e => e.DadosPosteriores!.RootElement.GetProperty("Dados").GetProperty("PremioTitular").GetDecimal() == 12.34m);
     }
 
-    [CatalogosFact]
+    [Fact]
     public async Task Modulo_ValidacaoPremiosStatusEConsultaHistorica()
     {
         var a = await CriarApolice(); var m = await CriarModulo(a);
@@ -370,7 +367,7 @@ public sealed class CatalogosWorkflowTests : IAsyncLifetime
         await Assert.ThrowsAsync<ValidacaoException>(() => handler.ObterAsync(a.PublicId, m.PublicId, default));
     }
 
-    [CatalogosFact]
+    [Fact]
     public async Task Modulo_VinculoNaoSubstituiCadastroENaoDuplicaMesmoInativo()
     {
         var a = await CriarApolice(); var b = await CriarApolice();
@@ -407,7 +404,7 @@ public sealed class CatalogosWorkflowTests : IAsyncLifetime
         Assert.Equal(vinculo.PublicId, (await handler.ObterAsync(a.PublicId, ma.PublicId, default)).Plano!.Coberturas.Single().PublicId);
     }
 
-    [CatalogosFact]
+    [Fact]
     public async Task Modulo_FalhaAuditoriaRevertePlanoECobertura()
     {
         var a = await CriarApolice(); var m = await CriarModulo(a);
@@ -428,7 +425,7 @@ public sealed class CatalogosWorkflowTests : IAsyncLifetime
         Assert.Equal("Plano", (await handler.ObterAsync(a.PublicId, m.PublicId, default)).Plano!.Nome);
     }
 
-    [CatalogosFact]
+    [Fact]
     public async Task AuditoriaFalha_ReverteCadastroInteiro()
     {
         var failed = new Mock<IRegistradorAuditoria>();
@@ -441,7 +438,7 @@ public sealed class CatalogosWorkflowTests : IAsyncLifetime
         Assert.False(await _financeiro.ConvenioCobrancas.AnyAsync(e => e.Nome == name));
     }
 
-    [CatalogosTheory]
+    [Theory]
     [InlineData(false, false, true, true, false)]
     [InlineData(true, false, true, true, true)]
     [InlineData(false, true, true, true, true)]
@@ -467,23 +464,7 @@ public sealed class CatalogosWorkflowTests : IAsyncLifetime
 
     public async Task DisposeAsync()
     {
-        await _financeiro.DisposeAsync(); await _seguro.DisposeAsync(); await _audit.DisposeAsync(); await _seguranca.DisposeAsync(); await _connection.DisposeAsync();
-    }
-}
-
-public sealed class CatalogosFactAttribute : FactAttribute
-{
-    public CatalogosFactAttribute()
-    {
-        if (Environment.GetEnvironmentVariable("WEBAPOLICE_CATALOGOS_TEST_CONNECTION") is null)
-            Skip = "Execute scripts/test-catalogos-isolado.ps1 para preparar a base isolada.";
-    }
-}
-public sealed class CatalogosTheoryAttribute : TheoryAttribute
-{
-    public CatalogosTheoryAttribute()
-    {
-        if (Environment.GetEnvironmentVariable("WEBAPOLICE_CATALOGOS_TEST_CONNECTION") is null)
-            Skip = "Execute scripts/test-catalogos-isolado.ps1 para preparar a base isolada.";
+        if (_seguranca is not null) await _seguranca.DisposeAsync();
+        await _fixture.DisposeAsync();
     }
 }

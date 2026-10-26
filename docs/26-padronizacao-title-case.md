@@ -35,3 +35,6 @@ Consolidação de 23/10/2026: mover os tipos de Pessoa/Cliente para Domain.Clien
 3. Herdar os novos contextos de negócio da base compartilhada; não usar DbContext diretamente.
 4. Reaplicar o script após migrations que adicionem tabelas/colunas humanas. SQL em lote não passa por SaveChanges e precisa dos triggers.
 5. Preservar valores originais de importações em campos próprios, sem reformatação.
+
+
+Consolidação de 26/10/2026: os demais POCOs usados pelas portas de Cadastro/Seguro foram movidos para Domain.Modelos sem alterar propriedades ou classificações. Snapshots atuais refletem os nomes CLR; designers históricos foram preservados. Não há nova coluna humana nem necessidade de reprocessar dados para essa reorganização. Testes antigos que esperavam observações/nomes sem Title Case foram corrigidos para a política vigente, sem alterar a lista compartilhada ou criar exceções para os testes.

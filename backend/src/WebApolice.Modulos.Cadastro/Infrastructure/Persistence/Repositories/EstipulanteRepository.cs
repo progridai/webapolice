@@ -6,8 +6,8 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using WebApolice.Modulos.Cadastro.Application.Ports;
 using WebApolice.Modulos.Cadastro.Domain;
-using WebApolice.Modulos.Cadastro.Infrastructure.Persistence.Models;
-using WebApolice.Modulos.Cadastro.Infrastructure.Persistence.Models.Vinculos;
+using WebApolice.Modulos.Cadastro.Domain.Modelos;
+using WebApolice.Modulos.Cadastro.Domain.Modelos.Vinculos;
 
 namespace WebApolice.Modulos.Cadastro.Infrastructure.Persistence.Repositories;
 
@@ -159,8 +159,8 @@ public class EstipulanteRepository : IEstipulanteRepository
         await _dbContext.SaveChangesAsync(cancellationToken);
     }
 
-    public async Task<Microsoft.EntityFrameworkCore.Storage.IDbContextTransaction> BeginTransactionAsync(CancellationToken cancellationToken)
+    public async Task<WebApolice.SharedKernel.Application.Persistence.ITransacaoPersistencia> BeginTransactionAsync(CancellationToken cancellationToken)
     {
-        return await _dbContext.Database.BeginTransactionAsync(cancellationToken);
+        return new WebApolice.Shared.Infrastructure.Persistence.TransacaoEf(await _dbContext.Database.BeginTransactionAsync(cancellationToken));
     }
 }

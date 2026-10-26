@@ -16,7 +16,15 @@ import type { PerfilDto } from '../types/seguranca.types';
 
 // O schema se adapta se for edição (não exige senhas)
 const baseSchema = z.object({
-  username: z.string().min(1, 'Username é obrigatório').max(100),
+  username: z
+    .string()
+    .trim()
+    .min(1, 'Username é obrigatório')
+    .max(100)
+    .regex(
+      /^[A-Za-z0-9._-]+$/,
+      'Use apenas letras, números, ponto, hífen ou sublinhado, sem espaços',
+    ),
   nome: z.string().min(1, 'Nome é obrigatório').max(150),
   email: z.string().email('E-mail inválido').max(150),
   ativo: z.boolean(),

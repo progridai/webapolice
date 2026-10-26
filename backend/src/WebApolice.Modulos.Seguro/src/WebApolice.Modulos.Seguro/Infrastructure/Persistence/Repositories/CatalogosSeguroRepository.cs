@@ -2,7 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using WebApolice.Auditoria.Infrastructure;
 using WebApolice.Modulos.Seguro.Application.Ports;
 using WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence;
-using WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models;
+using WebApolice.Modulos.Seguro.Domain.Modelos;
 using WebApolice.SharedKernel.Application.Exceptions;
 namespace WebApolice.Modulos.Seguro.Infrastructure.Persistence.Repositories;
 

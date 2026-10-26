@@ -21,6 +21,7 @@ public class KeycloakUsuariosAdminClientTests
     private readonly Mock<HttpMessageHandler> _httpMessageHandlerMock;
     private readonly KeycloakUsuariosAdminClient _client;
     private readonly KeycloakAdminOptions _options;
+    private readonly Mock<ILogger<KeycloakUsuariosAdminClient>> _loggerMock;
 
     public KeycloakUsuariosAdminClientTests()
     {
@@ -42,9 +43,9 @@ public class KeycloakUsuariosAdminClientTests
         var optionsMock = new Mock<IOptions<KeycloakAdminOptions>>();
         optionsMock.Setup(o => o.Value).Returns(_options);
 
-        var loggerMock = new Mock<ILogger<KeycloakUsuariosAdminClient>>();
+        _loggerMock = new Mock<ILogger<KeycloakUsuariosAdminClient>>();
 
-        _client = new KeycloakUsuariosAdminClient(httpClient, optionsMock.Object);
+        _client = new KeycloakUsuariosAdminClient(httpClient, optionsMock.Object, _loggerMock.Object);
     }
 
     [Fact]
@@ -85,10 +86,62 @@ public class KeycloakUsuariosAdminClientTests
             .ReturnsAsync(responseMsg);
 
         // Act
-        var id = await _client.CriarUsuarioAsync("newuser", "New User", "new@test.com", true, CancellationToken.None);
+        var id = await _client.CriarUsuarioAsync("newuser", "new@test.com", "New User", true, CancellationToken.None);
 
         // Assert
         id.Should().Be("12345-67890");
+    }
+
+    [Fact]
+    public async Task CriarUsuarioAsync_DevePreservarDetalheDoKeycloak_QuandoDadosForemRecusados()
+    {
+        // Arrange
+        var tokenResponse = new { access_token = "fake-token", expires_in = 3600 };
+        SetupHttpResponse("https://auth.bravida.com.br/realms/WebApolice/protocol/openid-connect/token", HttpStatusCode.OK, JsonSerializer.Serialize(tokenResponse));
+        SetupHttpResponse(
+            "https://auth.bravida.com.br/admin/realms/WebApolice/users",
+            HttpStatusCode.BadRequest,
+            "{\"errorMessage\":\"error-user-attribute-required\",\"field\":\"department\"}");
+
+        // Act
+        var action = () => _client.CriarUsuarioAsync(
+            "newuser",
+            "new@test.com",
+            "New User",
+            true,
+            CancellationToken.None);
+
+        // Assert
+        var exception = await action.Should().ThrowAsync<KeycloakUsuarioAdminException>();
+        exception.Which.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        exception.Which.Message.Should().Be(
+            "O provedor de identidade exige um atributo obrigatório que não foi informado.");
+        exception.Which.ProviderResponse.Should().Contain("department");
+    }
+
+    [Fact]
+    public async Task CriarUsuarioAsync_DeveTraduzirErroDeCaractereInvalidoNoUsername()
+    {
+        // Arrange
+        var tokenResponse = new { access_token = "fake-token", expires_in = 3600 };
+        SetupHttpResponse("https://auth.bravida.com.br/realms/WebApolice/protocol/openid-connect/token", HttpStatusCode.OK, JsonSerializer.Serialize(tokenResponse));
+        SetupHttpResponse(
+            "https://auth.bravida.com.br/admin/realms/WebApolice/users",
+            HttpStatusCode.BadRequest,
+            "{\"errorMessage\":\"error-username-invalid-character\",\"field\":\"username\"}");
+
+        // Act
+        var action = () => _client.CriarUsuarioAsync(
+            "invalid username",
+            "new@test.com",
+            "New User",
+            true,
+            CancellationToken.None);
+
+        // Assert
+        var exception = await action.Should().ThrowAsync<KeycloakUsuarioAdminException>();
+        exception.Which.Message.Should().Be(
+            "Username inválido. Use apenas letras, números, ponto, hífen ou sublinhado, sem espaços.");
     }
 
     [Fact]
@@ -114,6 +167,22 @@ public class KeycloakUsuariosAdminClientTests
 
         var exists = await _client.ExisteEmailAsync("notfound@test.com", CancellationToken.None);
         exists.Should().BeFalse();
+    }
+
+    [Theory]
+    [InlineData("{\"errorMessage\":\"internal-fixture-marker\"}")]
+    [InlineData("{\"error\":\"internal-fixture-marker\"}")]
+    [InlineData("internal-fixture-marker")]
+    [InlineData("[]")]
+    [InlineData("null")]
+    public async Task ErroDesconhecidoDoProvedorNaoVazaMensagemInterna(string body)
+    {
+        SetupHttpResponse("https://auth.bravida.com.br/realms/WebApolice/protocol/openid-connect/token", HttpStatusCode.OK,
+            JsonSerializer.Serialize(new { access_token = "fake-token", expires_in = 3600 }));
+        SetupHttpResponse("https://auth.bravida.com.br/admin/realms/WebApolice/users", HttpStatusCode.BadRequest, body);
+        var erro = await Assert.ThrowsAsync<KeycloakUsuarioAdminException>(() => _client.CriarUsuarioAsync("fixture", "fixture@example.com", "Fixture", true, default));
+        Assert.DoesNotContain("internal-fixture-marker", erro.Message);
+        Assert.Equal(body, erro.ProviderResponse);
     }
 
     private void SetupHttpResponse(string url, HttpStatusCode statusCode, string content)

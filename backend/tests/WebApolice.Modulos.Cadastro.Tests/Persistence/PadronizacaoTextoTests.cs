@@ -2,7 +2,7 @@ using WebApolice.Modulos.Cadastro.Domain.Clientes;
 using Microsoft.EntityFrameworkCore;
 using WebApolice.SharedKernel.Text;
 using WebApolice.Modulos.Cadastro.Infrastructure.Persistence;
-using WebApolice.Modulos.Cadastro.Infrastructure.Persistence.Models;
+using WebApolice.Modulos.Cadastro.Domain.Modelos;
 
 namespace WebApolice.Modulos.Cadastro.Tests.Persistence;
 

@@ -1,21 +1,23 @@
+using WebApolice.Modulos.Cadastro.Contracts;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
-using WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence;
-using WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models;
+using WebApolice.Modulos.Seguro.Application.Ports;
+using WebApolice.Modulos.Seguro.Domain.Modelos;
 using WebApolice.SharedKernel.Application.Exceptions;
 
 namespace WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Application.UseCases.Apolices.AlterarModuloApolice;
 
 public class AlterarModuloApoliceHandler : IRequestHandler<AlterarModuloApoliceCommand, Unit>
 {
-    private readonly SeguroDbContext _dbContext;
+    private readonly IApoliceVinculosRepository _repository;
+    private readonly ICadastroSeguroQueries _cadastro;
 
-    public AlterarModuloApoliceHandler(SeguroDbContext dbContext)
+    public AlterarModuloApoliceHandler(IApoliceVinculosRepository dbContext, ICadastroSeguroQueries cadastro)
     {
-        _dbContext = dbContext;
+        _repository = dbContext;
+        _cadastro = cadastro;
     }
 
     public async Task<Unit> Handle(AlterarModuloApoliceCommand request, CancellationToken cancellationToken)
@@ -27,8 +29,7 @@ public class AlterarModuloApoliceHandler : IRequestHandler<AlterarModuloApoliceC
         }
 
         // 2. Localizar Apólice
-        var apolice = await _dbContext.Apolices
-            .FirstOrDefaultAsync(a => a.PublicId == request.ApolicePublicId && a.DeletedAt == null, cancellationToken);
+        var apolice = await _repository.ObterApoliceAsync(request.ApolicePublicId, false, cancellationToken);
             
         if (apolice == null)
             throw new ValidacaoException("Apólice não encontrada.");
@@ -43,8 +44,7 @@ public class AlterarModuloApoliceHandler : IRequestHandler<AlterarModuloApoliceC
             throw new ValidacaoException($"A data de fim do Módulo não pode ser posterior à data de fim de vigência da Apólice ({apolice.DataFimVigencia}).");
 
         // 3. Localizar Vínculo e garantir isolamento
-        var vinculo = await _dbContext.ApoliceModulos
-            .FirstOrDefaultAsync(m => m.PublicId == request.ApoliceModuloPublicId && m.DeletedAt == null, cancellationToken);
+        var vinculo = await _repository.ObterModuloAsync(request.ApoliceModuloPublicId, false, cancellationToken);
 
         if (vinculo == null)
             throw new ValidacaoException("Vínculo do Módulo não encontrado.");
@@ -63,11 +63,9 @@ public class AlterarModuloApoliceHandler : IRequestHandler<AlterarModuloApoliceC
 
         // 5. Histórico
         // Buscar nome do Módulo para compor o histórico
-        var moduloNome = await _dbContext.Database
-            .SqlQuery<string>($"SELECT nome AS \"Value\" FROM cadastro.modulo WHERE id = {vinculo.ModuloId}")
-            .FirstOrDefaultAsync(cancellationToken);
+        var moduloNome = (await _cadastro.ObterModuloPorIdAsync(vinculo.ModuloId, cancellationToken))?.Nome;
 
-        _dbContext.ApoliceHistoricos.Add(new ApoliceHistoricoModel
+        _repository.AdicionarHistorico(new ApoliceHistoricoModel
         {
             ApoliceId = apolice.Id,
             Acao = "Alteração de Vínculo de Módulo",
@@ -77,7 +75,7 @@ public class AlterarModuloApoliceHandler : IRequestHandler<AlterarModuloApoliceC
             CreatedAt = DateTimeOffset.UtcNow
         });
 
-        await _dbContext.SaveChangesAsync(cancellationToken);
+        await _repository.SalvarAlteracoesAsync(cancellationToken);
 
         return Unit.Value;
     }

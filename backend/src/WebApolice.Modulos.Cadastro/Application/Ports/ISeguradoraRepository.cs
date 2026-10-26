@@ -1,8 +1,8 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore.Storage;
-using WebApolice.Modulos.Cadastro.Infrastructure.Persistence.Models.Vinculos;
+using WebApolice.SharedKernel.Application.Persistence;
+using WebApolice.Modulos.Cadastro.Domain.Modelos.Vinculos;
 
 namespace WebApolice.Modulos.Cadastro.Application.Ports;
 
@@ -16,5 +16,5 @@ public interface ISeguradoraRepository
     void Atualizar(SeguradoraModel seguradora);
     
     Task SalvarAlteracoesAsync(CancellationToken cancellationToken);
-    Task<IDbContextTransaction> BeginTransactionAsync(CancellationToken cancellationToken);
+    Task<ITransacaoPersistencia> BeginTransactionAsync(CancellationToken cancellationToken);
 }

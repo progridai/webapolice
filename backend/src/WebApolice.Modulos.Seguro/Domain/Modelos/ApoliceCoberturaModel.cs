@@ -1,0 +1,28 @@
+using System;
+
+namespace WebApolice.Modulos.Seguro.Domain.Modelos;
+
+public class ApoliceCoberturaModel
+{
+    public long Id { get; set; }
+    public Guid PublicId { get; set; }
+    public long ApolicePlanoId { get; set; }
+    
+    // FK Global
+    public long CoberturaId { get; set; }
+
+    // Opcional: Overrides de importâncias seguradas ou preços específicos por apólice
+    public decimal? ImportanciaSeguradaOverride { get; set; }
+    public decimal? PremioOverride { get; set; }
+    public decimal? PremioTitularOverride { get; set; }
+    public decimal? PremioConjugeOverride { get; set; }
+
+    public bool Ativo { get; set; }
+    
+    public DateTimeOffset CreatedAt { get; set; }
+    public DateTimeOffset UpdatedAt { get; set; }
+
+    // Navegações
+    public ApolicePlanoModel? ApolicePlano { get; set; }
+    public Cobertura? Cobertura { get; set; }
+}

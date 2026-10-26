@@ -1,9 +1,8 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
-using WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence;
-using WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models;
+using WebApolice.Modulos.Seguro.Application.Ports;
+using WebApolice.Modulos.Seguro.Domain.Modelos;
 using WebApolice.SharedKernel.Application.Exceptions;
 
 namespace WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Application.UseCases.Apolices.AlterarApoliceVida;
@@ -22,27 +21,22 @@ namespace WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Application.Us
 /// </summary>
 public class AlterarApoliceVidaHandler
 {
-    private readonly SeguroDbContext _dbContext;
+    private readonly IApoliceVinculosRepository _repository;
 
-    public AlterarApoliceVidaHandler(SeguroDbContext dbContext)
+    public AlterarApoliceVidaHandler(IApoliceVinculosRepository dbContext)
     {
-        _dbContext = dbContext;
+        _repository = dbContext;
     }
 
     public async Task Handle(AlterarApoliceVidaCommand request, CancellationToken cancellationToken)
     {
         // 1. Localizar Apólice
-        var apolice = await _dbContext.Apolices
-            .FirstOrDefaultAsync(a => a.PublicId == request.ApolicePublicId && a.DeletedAt == null, cancellationToken);
+        var apolice = await _repository.ObterApoliceAsync(request.ApolicePublicId, false, cancellationToken);
         if (apolice == null)
             throw new ValidacaoException("Apólice não encontrada.");
 
         // 2. Localizar Vida
-        var vida = await _dbContext.ApoliceVidas
-            .FirstOrDefaultAsync(v =>
-                v.PublicId == request.ApoliceVidaPublicId &&
-                v.ApoliceId == apolice.Id &&
-                v.DeletedAt == null, cancellationToken);
+        var vida = await _repository.ObterVidaAsync(request.ApoliceVidaPublicId, apolice.Id, false, cancellationToken);
 
         if (vida == null)
             throw new ValidacaoException("Vida não encontrada nesta Apólice.");
@@ -70,8 +64,7 @@ public class AlterarApoliceVidaHandler
 
         if (request.ApoliceSubgrupoPublicId.HasValue)
         {
-            var subgrupo = await _dbContext.ApoliceSubgrupos
-                .FirstOrDefaultAsync(s => s.PublicId == request.ApoliceSubgrupoPublicId.Value, cancellationToken);
+            var subgrupo = await _repository.ObterSubgrupoAsync(request.ApoliceSubgrupoPublicId.Value, cancellationToken);
 
             if (subgrupo == null) throw new ValidacaoException("Subgrupo não encontrado.");
             if (subgrupo.DeletedAt != null) throw new ValidacaoException("Subgrupo não encontrado.");
@@ -83,8 +76,7 @@ public class AlterarApoliceVidaHandler
 
         if (request.ApoliceModuloPublicId.HasValue)
         {
-            var modulo = await _dbContext.ApoliceModulos
-                .FirstOrDefaultAsync(m => m.PublicId == request.ApoliceModuloPublicId.Value, cancellationToken);
+            var modulo = await _repository.ObterModuloAsync(request.ApoliceModuloPublicId.Value, true, cancellationToken);
 
             if (modulo == null) throw new ValidacaoException("Módulo da Apólice não encontrado.");
             if (modulo.DeletedAt != null) throw new ValidacaoException("Módulo da Apólice não encontrado.");
@@ -116,7 +108,7 @@ public class AlterarApoliceVidaHandler
         // vida.ApoliceSubestipulanteId permanece como está.
 
         // 8. Registrar Histórico funcional
-        _dbContext.ApoliceHistoricos.Add(new ApoliceHistoricoModel
+        _repository.AdicionarHistorico(new ApoliceHistoricoModel
         {
             ApoliceId = apolice.Id,
             Acao = "Alteração Vida",
@@ -126,7 +118,7 @@ public class AlterarApoliceVidaHandler
             CreatedAt = DateTimeOffset.UtcNow
         });
 
-        await _dbContext.SaveChangesAsync(cancellationToken);
+        await _repository.SalvarAlteracoesAsync(cancellationToken);
     }
 
     private static void ValidarVigenciaDentroDoContextoPai(

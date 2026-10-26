@@ -1,25 +1,23 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
 using WebApolice.SharedKernel.Application.Exceptions;
-using WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence;
+using WebApolice.Modulos.Seguro.Application.Ports;
 
 namespace WebApolice.Modulos.Seguro.Application.UseCases.Ramos.AlterarStatusRamo;
 
 public class AlterarStatusRamoHandler
 {
-    private readonly SeguroDbContext _context;
+    private readonly IRamosRepository _repository;
 
-    public AlterarStatusRamoHandler(SeguroDbContext context)
+    public AlterarStatusRamoHandler(IRamosRepository context)
     {
-        _context = context;
+        _repository = context;
     }
 
     public async Task Handle(AlterarStatusRamoCommand command, CancellationToken cancellationToken)
     {
-        var model = await _context.Ramos
-            .FirstOrDefaultAsync(x => x.PublicId == command.PublicId, cancellationToken);
+        var model = await _repository.ObterAsync(command.PublicId, cancellationToken);
 
         if (model == null)
             throw new InvalidOperationException("Ramo não encontrado.");
@@ -27,7 +25,7 @@ public class AlterarStatusRamoHandler
         model.Ativo = command.Ativo;
         model.UpdatedAt = DateTimeOffset.UtcNow;
 
-        _context.Ramos.Update(model);
-        await _context.SaveChangesAsync(cancellationToken);
+        _repository.Atualizar(model);
+        await _repository.SalvarAlteracoesAsync(cancellationToken);
     }
 }

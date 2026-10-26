@@ -3,8 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
-using WebApolice.Modulos.Seguranca.Infrastructure.Persistence;
+using WebApolice.Modulos.Seguranca.Application.Ports;
 
 namespace WebApolice.Modulos.Seguranca.Application.UseCases.Modulos;
 
@@ -13,22 +12,13 @@ public record ModuloDto(Guid PublicId, string Codigo, string Nome, string? Descr
 
 public class ListarModulosUseCase
 {
-    private readonly SegurancaDbContext _dbContext;
+    private readonly IConsultasSeguranca _consultas;
 
-    public ListarModulosUseCase(SegurancaDbContext dbContext)
+    public ListarModulosUseCase(IConsultasSeguranca dbContext)
     {
-        _dbContext = dbContext;
+        _consultas = dbContext;
     }
 
-    public async Task<List<ModuloDto>> ExecuteAsync(CancellationToken cancellationToken)
-    {
-        return await _dbContext.Modulos
-            .Include(m => m.Recursos)
-            .OrderBy(m => m.Ordem)
-            .Select(m => new ModuloDto(
-                m.PublicId, m.Codigo, m.Nome, m.Descricao, m.Icone, m.Ordem, m.Ativo, m.Habilitado,
-                m.Recursos.Select(r => new RecursoDto(r.PublicId, r.Codigo, r.Nome, r.Ativo, r.Habilitado)).ToList()
-            ))
-            .ToListAsync(cancellationToken);
-    }
+    public Task<List<ModuloDto>> ExecuteAsync(CancellationToken cancellationToken)
+        => _consultas.ListarModulosAsync(cancellationToken);
 }

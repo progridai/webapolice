@@ -3,22 +3,20 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
-using WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence;
-using WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models;
+using WebApolice.Modulos.Seguro.Domain.Modelos;
 using WebApolice.SharedKernel.Application.Exceptions;
 
 namespace WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Application.UseCases.Propostas.AdicionarItem;
 
 public class AdicionarPropostaItemHandler : IRequestHandler<AdicionarPropostaItemCommand, Guid>
 {
-    private readonly SeguroDbContext _dbContext;
+    private readonly IPropostasRepository _repository;
 
     private readonly IOperacaoPropostas _operacao;
 
-    public AdicionarPropostaItemHandler(SeguroDbContext dbContext, IOperacaoPropostas operacao)
+    public AdicionarPropostaItemHandler(IPropostasRepository dbContext, IOperacaoPropostas operacao)
     {
-        _dbContext = dbContext;
+        _repository = dbContext;
         _operacao = operacao;
     }
 
@@ -27,8 +25,7 @@ public class AdicionarPropostaItemHandler : IRequestHandler<AdicionarPropostaIte
         return await _operacao.ExecutarAsync<Guid>("PROPOSTA_ITEM_ADICIONADO", async ct =>
         {
         // 1. Carregar a Proposta
-        var proposta = await _dbContext.Proposta
-            .FirstOrDefaultAsync(p => p.PublicId == request.PropostaId, cancellationToken);
+        var proposta = await _repository.ObterAsync(request.PropostaId, cancellationToken);
             
         if (proposta == null)
             throw new ValidacaoException("Proposta não encontrada.");
@@ -39,15 +36,13 @@ public class AdicionarPropostaItemHandler : IRequestHandler<AdicionarPropostaIte
 
         // 2. Validação de Universo Permitido da Apólice Mãe
         // O produto DEVE estar vinculado à Apólice
-        var produtoPermitido = await _dbContext.ApoliceProdutos
-            .FirstOrDefaultAsync(p => p.ApoliceId == proposta.ApoliceId && p.ProdutoId == request.ProdutoId, cancellationToken);
+        var produtoPermitido = await _repository.ObterProdutoPermitidoAsync(proposta.ApoliceId, request.ProdutoId, cancellationToken);
 
         if (produtoPermitido == null)
             throw new ValidacaoException("O Produto selecionado não pertence ao Universo Permitido desta Apólice.");
 
         // O plano DEVE estar vinculado ao ProdutoPermitido da Apólice
-        var planoPermitido = await _dbContext.ApolicePlanos
-            .FirstOrDefaultAsync(p => p.ApoliceProdutoId == produtoPermitido.Id && p.PlanoId == request.PlanoId, cancellationToken);
+        var planoPermitido = await _repository.ObterPlanoPermitidoAsync(produtoPermitido.Id, request.PlanoId, cancellationToken);
 
         if (planoPermitido == null)
             throw new ValidacaoException("O Plano selecionado não pertence ao Produto no Universo Permitido desta Apólice.");
@@ -65,8 +60,8 @@ public class AdicionarPropostaItemHandler : IRequestHandler<AdicionarPropostaIte
             UpdatedAt = DateTime.UtcNow
         };
 
-        _dbContext.PropostaItems.Add(item);
-        await _dbContext.SaveChangesAsync(cancellationToken);
+        _repository.AdicionarItem(item);
+        await _repository.SalvarAlteracoesAsync(cancellationToken);
 
         return (item.PublicId, proposta.PublicId.ToString(), null, new { ItemPublicId = item.PublicId, proposta.PublicId });
         }, cancellationToken);

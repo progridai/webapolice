@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using WebApolice.Modulos.Cadastro.Application.Ports;
 using WebApolice.Modulos.Cadastro.Application.UseCases.ConsultarSubestipulante;
 using WebApolice.Modulos.Cadastro.Application.UseCases.ListarSubestipulantes;
-using WebApolice.Modulos.Cadastro.Infrastructure.Persistence.Models.Vinculos;
+using WebApolice.Modulos.Cadastro.Domain.Modelos.Vinculos;
 
 namespace WebApolice.Modulos.Cadastro.Infrastructure.Persistence.Queries;
 

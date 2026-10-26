@@ -9,7 +9,7 @@ using WebApolice.Auditoria.Contracts;
 using WebApolice.Modulos.Cadastro.Application.Ports;
 using WebApolice.Modulos.Cadastro.Application.UseCases.InativarEstipulante;
 using WebApolice.Modulos.Cadastro.Application.UseCases.ReativarEstipulante;
-using WebApolice.Modulos.Cadastro.Infrastructure.Persistence.Models;
+using WebApolice.Modulos.Cadastro.Domain.Modelos;
 using Xunit;
 
 namespace WebApolice.Integration.Tests.Modulos.Estipulantes;
@@ -18,7 +18,7 @@ public class StatusEstipulanteHandlerTests
 {
     private readonly Mock<IEstipulanteRepository> _repositoryMock;
     private readonly Mock<IRegistradorAuditoria> _auditoriaMock;
-    private readonly Mock<IDbContextTransaction> _transactionMock;
+    private readonly Mock<WebApolice.SharedKernel.Application.Persistence.ITransacaoPersistencia> _transactionMock;
     private readonly InativarEstipulanteHandler _inativarHandler;
     private readonly ReativarEstipulanteHandler _reativarHandler;
 
@@ -26,7 +26,7 @@ public class StatusEstipulanteHandlerTests
     {
         _repositoryMock = new Mock<IEstipulanteRepository>();
         _auditoriaMock = new Mock<IRegistradorAuditoria>();
-        _transactionMock = new Mock<IDbContextTransaction>();
+        _transactionMock = new Mock<WebApolice.SharedKernel.Application.Persistence.ITransacaoPersistencia>();
 
         _repositoryMock.Setup(r => r.BeginTransactionAsync(It.IsAny<CancellationToken>())).ReturnsAsync(_transactionMock.Object);
 

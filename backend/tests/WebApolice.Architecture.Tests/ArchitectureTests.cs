@@ -358,4 +358,22 @@ public class ArchitectureTests
         }
         Assert.True(falhas.Count == 0, string.Join("\n", falhas.Distinct().Order()));
     }
+
+    [Fact]
+    public void PortasNaoExpoemConsultasDeProvider()
+    {
+        var portas = Assemblies.SelectMany(a => a.GetExportedTypes())
+            .Where(t => t.IsInterface && ((t.Namespace?.Contains(".Application.Ports", StringComparison.Ordinal) ?? false)
+                || (t.Namespace?.Contains(".Contracts", StringComparison.Ordinal) ?? false))).ToArray();
+        Assert.NotEmpty(portas);
+        var falhas = portas.SelectMany(t => t.GetMethods().Select(m => (Tipo: t, Metodo: m)))
+            .Where(x => ExpoeConsulta(x.Metodo.ReturnType) || x.Metodo.GetParameters().Any(p => ExpoeConsulta(p.ParameterType)))
+            .Select(x => x.Tipo.FullName + "." + x.Metodo.Name).ToArray();
+        Assert.Empty(falhas);
+
+        static bool ExpoeConsulta(Type tipo) => typeof(IQueryable).IsAssignableFrom(tipo)
+            || (tipo.HasElementType && ExpoeConsulta(tipo.GetElementType()!))
+            || (tipo.IsGenericType && tipo.GetGenericArguments().Any(ExpoeConsulta));
+    }
+
 }

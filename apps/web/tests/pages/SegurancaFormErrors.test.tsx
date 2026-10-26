@@ -358,3 +358,58 @@ it('mantém a proteção de edição do perfil ADMINISTRADOR', async () => {
   ).toBeNull();
   expect(perfis.atualizarPerfil).not.toHaveBeenCalled();
 });
+
+it.each(['nome com espaco', 'usuário', 'user@domain'])(
+  'rejeita username técnico inválido: %s',
+  async (username) => {
+    renderPage('usuarios', false);
+    fireEvent.change(await screen.findByLabelText(/Username/), {
+      target: { value: username },
+    });
+    fireEvent.change(screen.getByLabelText(/Nome Completo/), {
+      target: { value: 'Usuário Teste' },
+    });
+    fireEvent.change(screen.getByLabelText(/E-mail/), {
+      target: { value: 'usuario@example.com' },
+    });
+    fireEvent.change(screen.getByLabelText(/Senha Temporária/), {
+      target: { value: password },
+    });
+    fireEvent.change(screen.getByLabelText(/Confirmar Senha/), {
+      target: { value: password },
+    });
+    fireEvent.click(screen.getByRole('button', { name: 'Cadastrar Usuário' }));
+    expect(
+      await screen.findByText(
+        'Use apenas letras, números, ponto, hífen ou sublinhado, sem espaços',
+      ),
+    ).toBeTruthy();
+    expect(usuarios.criarUsuario).not.toHaveBeenCalled();
+  },
+);
+
+it('remove espaços externos do username sem alterar seu código técnico', async () => {
+  renderPage('usuarios', false);
+  fireEvent.change(await screen.findByLabelText(/Username/), {
+    target: { value: '  Operador.TESTE_1-2  ' },
+  });
+  fireEvent.change(screen.getByLabelText(/Nome Completo/), {
+    target: { value: 'Usuário Teste' },
+  });
+  fireEvent.change(screen.getByLabelText(/E-mail/), {
+    target: { value: 'usuario@example.com' },
+  });
+  fireEvent.change(screen.getByLabelText(/Senha Temporária/), {
+    target: { value: password },
+  });
+  fireEvent.change(screen.getByLabelText(/Confirmar Senha/), {
+    target: { value: password },
+  });
+  fireEvent.click(screen.getByRole('button', { name: 'Cadastrar Usuário' }));
+  await vi.waitFor(() =>
+    expect(usuarios.criarUsuario).toHaveBeenCalledTimes(1),
+  );
+  expect(usuarios.criarUsuario).toHaveBeenCalledWith(
+    expect.objectContaining({ username: 'Operador.TESTE_1-2' }),
+  );
+});

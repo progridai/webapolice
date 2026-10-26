@@ -11,7 +11,7 @@ using WebApolice.Modulos.Seguro.Application.UseCases.Apolices.InativarSubgrupo;
 using WebApolice.Modulos.Seguro.Application.UseCases.Apolices.ListarSubgrupos;
 using WebApolice.Modulos.Seguro.Application.UseCases.Apolices.ObterSubgrupo;
 using WebApolice.Modulos.Seguro.Infrastructure.Persistence.Queries;
-using WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models;
+using WebApolice.Modulos.Seguro.Domain.Modelos;
 using WebApolice.SharedKernel.Application.Exceptions;
 using Xunit;
 
@@ -96,7 +96,7 @@ public class ApoliceSubgrupoTests : IClassFixture<SeguroIntegrationTestFixture>
             .FirstOrDefaultAsync(s => s.PublicId == publicId);
 
         subgrupo!.Nome.Should().Be("Filial Centro");
-        subgrupo.Observacao.Should().Be("Filial localizada no centro da cidade.");
+        subgrupo.Observacao.Should().Be("Filial Localizada no Centro da Cidade.");
     }
 
     [Fact]
@@ -199,7 +199,7 @@ public class ApoliceSubgrupoTests : IClassFixture<SeguroIntegrationTestFixture>
             .FirstOrDefaultAsync(s => s.PublicId == publicId);
 
         subgrupo!.Nome.Should().Be("Nome Atualizado");
-        subgrupo.Observacao.Should().Be("Observação nova");
+        subgrupo.Observacao.Should().Be("Observação Nova");
     }
 
     [Fact]
@@ -308,19 +308,19 @@ public class ApoliceSubgrupoTests : IClassFixture<SeguroIntegrationTestFixture>
         var criarHandler = new CriarSubgrupoApoliceHandler(_fixture.SubgruposCadastro);
 
         // Subgrupos da Apólice A
-        await criarHandler.Handle(new CriarSubgrupoApoliceCommand { ApolicePublicId = apoliceA.PublicId, Nome = "Sub A1" }, CancellationToken.None);
-        await criarHandler.Handle(new CriarSubgrupoApoliceCommand { ApolicePublicId = apoliceA.PublicId, Nome = "Sub A2" }, CancellationToken.None);
+        await criarHandler.Handle(new CriarSubgrupoApoliceCommand { ConvenioCobrancaPublicId = _fixture.ConvenioPublicId, ApolicePublicId = apoliceA.PublicId, Nome = "Sub A1" }, CancellationToken.None);
+        await criarHandler.Handle(new CriarSubgrupoApoliceCommand { ConvenioCobrancaPublicId = _fixture.ConvenioPublicId, ApolicePublicId = apoliceA.PublicId, Nome = "Sub A2" }, CancellationToken.None);
 
         // Subgrupo da Apólice B — não deve aparecer na listagem de A
-        await criarHandler.Handle(new CriarSubgrupoApoliceCommand { ApolicePublicId = apoliceB.PublicId, Nome = "Sub B1" }, CancellationToken.None);
+        await criarHandler.Handle(new CriarSubgrupoApoliceCommand { ConvenioCobrancaPublicId = _fixture.ConvenioPublicId, ApolicePublicId = apoliceB.PublicId, Nome = "Sub B1" }, CancellationToken.None);
 
-        var queries = new ApolicesQueries(_fixture.DbContext);
+        var queries = new ApolicesQueries(_fixture.DbContext, _fixture.ConveniosConsulta);
         var handler = new ListarApoliceSubgruposHandler(queries);
 
         var result = await handler.Handle(new ListarApoliceSubgruposQuery(apoliceA.PublicId), CancellationToken.None);
 
         result.Should().HaveCount(2);
-        result.Select(s => s.Nome).Should().BeEquivalentTo(["Sub A1", "Sub A2"]);
+        result.Select(s => s.Nome).Should().BeEquivalentTo(["Sub a1", "Sub a2"]);
         result.All(s => s.Ativo).Should().BeTrue();
     }
 
@@ -339,7 +339,7 @@ public class ApoliceSubgrupoTests : IClassFixture<SeguroIntegrationTestFixture>
             Nome = "Folha"
         }, CancellationToken.None);
 
-        var queries = new ApolicesQueries(_fixture.DbContext);
+        var queries = new ApolicesQueries(_fixture.DbContext, _fixture.ConveniosConsulta);
         var handler = new ObterApoliceSubgrupoHandler(queries);
 
         var result = await handler.Handle(
@@ -369,7 +369,7 @@ public class ApoliceSubgrupoTests : IClassFixture<SeguroIntegrationTestFixture>
         }, CancellationToken.None);
 
         // Tenta obter Sub da A usando contexto da Apólice B
-        var queries = new ApolicesQueries(_fixture.DbContext);
+        var queries = new ApolicesQueries(_fixture.DbContext, _fixture.ConveniosConsulta);
         var handler = new ObterApoliceSubgrupoHandler(queries);
 
         var result = await handler.Handle(

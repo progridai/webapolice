@@ -1,9 +1,9 @@
+using WebApolice.Modulos.Cadastro.Contracts;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
-using WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence;
+using WebApolice.Modulos.Seguro.Application.Ports;
 using WebApolice.SharedKernel.Application.Exceptions;
 using System.Linq;
 
@@ -11,29 +11,28 @@ namespace WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Application.Us
 
 public class InativarSubestipulanteApoliceHandler : IRequestHandler<InativarSubestipulanteApoliceCommand>
 {
-    private readonly SeguroDbContext _dbContext;
+    private readonly IApoliceVinculosRepository _repository;
+    private readonly ICadastroSeguroQueries _cadastro;
 
-    public InativarSubestipulanteApoliceHandler(SeguroDbContext dbContext)
+    public InativarSubestipulanteApoliceHandler(IApoliceVinculosRepository dbContext, ICadastroSeguroQueries cadastro)
     {
-        _dbContext = dbContext;
+        _repository = dbContext;
+        _cadastro = cadastro;
     }
 
     public async Task Handle(InativarSubestipulanteApoliceCommand request, CancellationToken cancellationToken)
     {
-        var apolice = await _dbContext.Apolices.FirstOrDefaultAsync(a => a.PublicId == request.ApolicePublicId, cancellationToken);
+        var apolice = await _repository.ObterApoliceAsync(request.ApolicePublicId, true, cancellationToken);
         if (apolice == null) throw new ValidacaoException("Apólice não encontrada.");
 
-        var subestipulanteId = await _dbContext.Database
-            .SqlQuery<long>($"SELECT id AS \"Value\" FROM cadastro.subestipulante WHERE public_id = {request.SubestipulantePublicId}")
-            .FirstOrDefaultAsync(cancellationToken);
+        var subestipulanteId = (await _cadastro.ObterSubestipulanteAsync(request.SubestipulantePublicId, cancellationToken))?.Id ?? 0;
 
         if (subestipulanteId == 0)
         {
             throw new ValidacaoException("Subestipulante não encontrado.");
         }
 
-        var vinculoExistente = await _dbContext.ApoliceSubestipulantes
-            .FirstOrDefaultAsync(ar => ar.ApoliceId == apolice.Id && ar.SubestipulanteId == subestipulanteId, cancellationToken);
+        var vinculoExistente = await _repository.ObterVinculoSubestipulanteAsync(apolice.Id, subestipulanteId, cancellationToken);
         
         if (vinculoExistente == null)
         {
@@ -51,7 +50,7 @@ public class InativarSubestipulanteApoliceHandler : IRequestHandler<InativarSube
         vinculoExistente.Ativo = false;
         vinculoExistente.UpdatedAt = DateTimeOffset.UtcNow;
 
-        _dbContext.ApoliceSubestipulantes.Update(vinculoExistente);
-        await _dbContext.SaveChangesAsync(cancellationToken);
+        _repository.AtualizarSubestipulante(vinculoExistente);
+        await _repository.SalvarAlteracoesAsync(cancellationToken);
     }
 }

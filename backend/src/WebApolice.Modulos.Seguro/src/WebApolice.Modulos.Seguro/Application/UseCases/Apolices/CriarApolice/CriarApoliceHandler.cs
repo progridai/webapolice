@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using WebApolice.Auditoria.Contracts;
 using WebApolice.Auditoria.Domain;
 using WebApolice.Modulos.Seguro.Application.Ports;
-using WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models;
+using WebApolice.Modulos.Seguro.Domain.Modelos;
 
 namespace WebApolice.Modulos.Seguro.Application.UseCases.Apolices.CriarApolice;
 

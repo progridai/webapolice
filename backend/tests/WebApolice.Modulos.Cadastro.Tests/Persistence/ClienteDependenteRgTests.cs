@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Migrations.Operations;
 using Microsoft.EntityFrameworkCore.Metadata;
 using WebApolice.Modulos.Cadastro.Infrastructure.Persistence;
-using WebApolice.Modulos.Cadastro.Infrastructure.Persistence.Models;
+using WebApolice.Modulos.Cadastro.Domain.Modelos;
 
 namespace WebApolice.Modulos.Cadastro.Tests.Persistence;
 
@@ -50,7 +50,7 @@ public class ClienteDependenteRgTests
         }
         Assert.Equal(3, migration.DownOperations.Count);
         Assert.All(migration.DownOperations, operation => Assert.IsType<DropColumnOperation>(operation));
-        var target = migration.TargetModel.FindEntityType(typeof(ClienteDependenteModel).FullName!)!;
+        var target = Assert.Single(migration.TargetModel.GetEntityTypes(), e => e.GetSchema() == "cadastro" && e.GetTableName() == "cliente_dependente");
         Assert.NotNull(target.FindProperty("Rg"));
         Assert.NotNull(target.FindProperty("OrgaoRg"));
         Assert.NotNull(target.FindProperty("DataEmissaoRg"));

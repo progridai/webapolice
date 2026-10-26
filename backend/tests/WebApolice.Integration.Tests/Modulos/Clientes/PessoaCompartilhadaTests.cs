@@ -3,8 +3,8 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using FluentAssertions;
-using WebApolice.Modulos.Cadastro.Infrastructure.Persistence.Models.Vinculos;
-using WebApolice.Modulos.Cadastro.Infrastructure.Persistence.Models;
+using WebApolice.Modulos.Cadastro.Domain.Modelos.Vinculos;
+using WebApolice.Modulos.Cadastro.Domain.Modelos;
 using WebApolice.Modulos.Cadastro.Domain;
 using WebApolice.Modulos.Cadastro.Infrastructure.Persistence.Repositories;
 using WebApolice.Integration.Tests.Setup;
@@ -67,7 +67,7 @@ public class PessoaCompartilhadaTests : IClassFixture<ClientesIntegrationTestFix
         var corretora = new CorretoraModel();
         typeof(CorretoraModel).GetProperty("Id")?.SetValue(corretora, DateTime.Now.Ticks);
         typeof(CorretoraModel).GetProperty("PessoaId")?.SetValue(corretora, pessoaId);
-        typeof(CorretoraModel).GetProperty("DeletedAt")?.SetValue(corretora, DateTime.UtcNow); // ExcluÃ­do logicamente
+        typeof(CorretoraModel).GetProperty("DeletedAt")?.SetValue(corretora, DateTimeOffset.UtcNow); // ExcluÃ­do logicamente
         
         _fixture.DbContext.Corretoras.Add(corretora);
         await _fixture.DbContext.SaveChangesAsync();

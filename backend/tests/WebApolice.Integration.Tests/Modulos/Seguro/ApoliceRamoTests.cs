@@ -7,7 +7,7 @@ using WebApolice.Integration.Tests.Setup;
 using WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Application.UseCases.Apolices.VincularRamo;
 using WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Application.UseCases.Apolices.AtualizarRamo;
 using WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Application.UseCases.Apolices.InativarRamo;
-using WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models;
+using WebApolice.Modulos.Seguro.Domain.Modelos;
 using WebApolice.SharedKernel.Application.Exceptions;
 using Xunit;
 
@@ -50,7 +50,7 @@ public class ApoliceRamoTests : IClassFixture<SeguroIntegrationTestFixture>
         _fixture.DbContext.Ramos.Add(ramo);
         await _fixture.DbContext.SaveChangesAsync();
 
-        var handler = new VincularRamoApoliceHandler(_fixture.DbContext);
+        var handler = new VincularRamoApoliceHandler(new WebApolice.Modulos.Seguro.Infrastructure.Persistence.Repositories.ApoliceVinculosRepository(_fixture.DbContext));
         var command = new VincularRamoApoliceCommand
         {
             ApolicePublicId = apolicePublicId,
@@ -110,7 +110,7 @@ public class ApoliceRamoTests : IClassFixture<SeguroIntegrationTestFixture>
         _fixture.DbContext.ApoliceRamos.Add(vinculoAntigo);
         await _fixture.DbContext.SaveChangesAsync();
 
-        var handler = new VincularRamoApoliceHandler(_fixture.DbContext);
+        var handler = new VincularRamoApoliceHandler(new WebApolice.Modulos.Seguro.Infrastructure.Persistence.Repositories.ApoliceVinculosRepository(_fixture.DbContext));
         var command = new VincularRamoApoliceCommand
         {
             ApolicePublicId = apolicePublicId,

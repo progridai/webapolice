@@ -25,7 +25,7 @@ namespace WebApolice.Modulos.Seguro.Infrastructure.Migrations
             NpgsqlModelBuilderExtensions.HasPostgresExtension(modelBuilder, "unaccent");
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models.ApoliceCoberturaModel", b =>
+            modelBuilder.Entity("WebApolice.Modulos.Seguro.Domain.Modelos.ApoliceCoberturaModel", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -102,7 +102,7 @@ namespace WebApolice.Modulos.Seguro.Infrastructure.Migrations
                     b.ToTable("apolice_cobertura", "seguro");
                 });
 
-            modelBuilder.Entity("WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models.ApoliceConfiguracaoModel", b =>
+            modelBuilder.Entity("WebApolice.Modulos.Seguro.Domain.Modelos.ApoliceConfiguracaoModel", b =>
                 {
                     b.Property<long>("ApoliceId")
                         .HasColumnType("bigint")
@@ -169,7 +169,7 @@ namespace WebApolice.Modulos.Seguro.Infrastructure.Migrations
                     b.ToTable("apolice_configuracao", "seguro");
                 });
 
-            modelBuilder.Entity("WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models.ApoliceHistoricoModel", b =>
+            modelBuilder.Entity("WebApolice.Modulos.Seguro.Domain.Modelos.ApoliceHistoricoModel", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -218,7 +218,7 @@ namespace WebApolice.Modulos.Seguro.Infrastructure.Migrations
                     b.ToTable("apolice_historico", "seguro");
                 });
 
-            modelBuilder.Entity("WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models.ApoliceModel", b =>
+            modelBuilder.Entity("WebApolice.Modulos.Seguro.Domain.Modelos.ApoliceModel", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -337,7 +337,7 @@ namespace WebApolice.Modulos.Seguro.Infrastructure.Migrations
                     b.ToTable("apolice", "seguro");
                 });
 
-            modelBuilder.Entity("WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models.ApoliceModuloCoberturaModel", b =>
+            modelBuilder.Entity("WebApolice.Modulos.Seguro.Domain.Modelos.ApoliceModuloCoberturaModel", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -406,7 +406,7 @@ namespace WebApolice.Modulos.Seguro.Infrastructure.Migrations
                         });
                 });
 
-            modelBuilder.Entity("WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models.ApoliceModuloModel", b =>
+            modelBuilder.Entity("WebApolice.Modulos.Seguro.Domain.Modelos.ApoliceModuloModel", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -484,7 +484,7 @@ namespace WebApolice.Modulos.Seguro.Infrastructure.Migrations
                     b.ToTable("apolice_modulo", "seguro");
                 });
 
-            modelBuilder.Entity("WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models.ApoliceModuloPlanoModel", b =>
+            modelBuilder.Entity("WebApolice.Modulos.Seguro.Domain.Modelos.ApoliceModuloPlanoModel", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -555,7 +555,7 @@ namespace WebApolice.Modulos.Seguro.Infrastructure.Migrations
                         });
                 });
 
-            modelBuilder.Entity("WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models.ApolicePlanoModel", b =>
+            modelBuilder.Entity("WebApolice.Modulos.Seguro.Domain.Modelos.ApolicePlanoModel", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -609,7 +609,7 @@ namespace WebApolice.Modulos.Seguro.Infrastructure.Migrations
                     b.ToTable("apolice_plano", "seguro");
                 });
 
-            modelBuilder.Entity("WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models.ApoliceProdutoModel", b =>
+            modelBuilder.Entity("WebApolice.Modulos.Seguro.Domain.Modelos.ApoliceProdutoModel", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -656,7 +656,7 @@ namespace WebApolice.Modulos.Seguro.Infrastructure.Migrations
                     b.ToTable("apolice_produto", "seguro");
                 });
 
-            modelBuilder.Entity("WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models.ApoliceRamoModel", b =>
+            modelBuilder.Entity("WebApolice.Modulos.Seguro.Domain.Modelos.ApoliceRamoModel", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -722,7 +722,7 @@ namespace WebApolice.Modulos.Seguro.Infrastructure.Migrations
                     b.ToTable("apolice_ramo", "seguro");
                 });
 
-            modelBuilder.Entity("WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models.ApoliceSubestipulanteModel", b =>
+            modelBuilder.Entity("WebApolice.Modulos.Seguro.Domain.Modelos.ApoliceSubestipulanteModel", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -790,7 +790,7 @@ namespace WebApolice.Modulos.Seguro.Infrastructure.Migrations
                     b.ToTable("apolice_subestipulante", "seguro");
                 });
 
-            modelBuilder.Entity("WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models.ApoliceSubgrupoModel", b =>
+            modelBuilder.Entity("WebApolice.Modulos.Seguro.Domain.Modelos.ApoliceSubgrupoModel", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -861,7 +861,7 @@ namespace WebApolice.Modulos.Seguro.Infrastructure.Migrations
                     b.ToTable("apolice_subgrupo", "seguro");
                 });
 
-            modelBuilder.Entity("WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models.ApoliceVidaModel", b =>
+            modelBuilder.Entity("WebApolice.Modulos.Seguro.Domain.Modelos.ApoliceVidaModel", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -979,7 +979,7 @@ namespace WebApolice.Modulos.Seguro.Infrastructure.Migrations
                     b.ToTable("apolice_vida", "seguro");
                 });
 
-            modelBuilder.Entity("WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models.Cobertura", b =>
+            modelBuilder.Entity("WebApolice.Modulos.Seguro.Domain.Modelos.Cobertura", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -1060,7 +1060,7 @@ namespace WebApolice.Modulos.Seguro.Infrastructure.Migrations
                     b.ToTable("cobertura", "seguro");
                 });
 
-            modelBuilder.Entity("WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models.MovimentoTipo", b =>
+            modelBuilder.Entity("WebApolice.Modulos.Seguro.Domain.Modelos.MovimentoTipo", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -1138,7 +1138,7 @@ namespace WebApolice.Modulos.Seguro.Infrastructure.Migrations
                     b.ToTable("movimento_tipo", "seguro");
                 });
 
-            modelBuilder.Entity("WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models.Plano", b =>
+            modelBuilder.Entity("WebApolice.Modulos.Seguro.Domain.Modelos.Plano", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -1221,7 +1221,7 @@ namespace WebApolice.Modulos.Seguro.Infrastructure.Migrations
                     b.ToTable("plano", "seguro");
                 });
 
-            modelBuilder.Entity("WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models.PlanoCoberturaModel", b =>
+            modelBuilder.Entity("WebApolice.Modulos.Seguro.Domain.Modelos.PlanoCoberturaModel", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -1273,7 +1273,7 @@ namespace WebApolice.Modulos.Seguro.Infrastructure.Migrations
                     b.ToTable("plano_cobertura", "seguro");
                 });
 
-            modelBuilder.Entity("WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models.Produto", b =>
+            modelBuilder.Entity("WebApolice.Modulos.Seguro.Domain.Modelos.Produto", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -1359,7 +1359,7 @@ namespace WebApolice.Modulos.Seguro.Infrastructure.Migrations
                     b.ToTable("produto", "seguro");
                 });
 
-            modelBuilder.Entity("WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models.PropostaBeneficiario", b =>
+            modelBuilder.Entity("WebApolice.Modulos.Seguro.Domain.Modelos.PropostaBeneficiario", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -1471,7 +1471,7 @@ namespace WebApolice.Modulos.Seguro.Infrastructure.Migrations
                     b.ToTable("proposta_beneficiario", "seguro");
                 });
 
-            modelBuilder.Entity("WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models.PropostaCobertura", b =>
+            modelBuilder.Entity("WebApolice.Modulos.Seguro.Domain.Modelos.PropostaCobertura", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -1556,7 +1556,7 @@ namespace WebApolice.Modulos.Seguro.Infrastructure.Migrations
                     b.ToTable("proposta_cobertura", "seguro");
                 });
 
-            modelBuilder.Entity("WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models.PropostaHistorico", b =>
+            modelBuilder.Entity("WebApolice.Modulos.Seguro.Domain.Modelos.PropostaHistorico", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -1611,7 +1611,7 @@ namespace WebApolice.Modulos.Seguro.Infrastructure.Migrations
                     b.ToTable("proposta_historico", "seguro");
                 });
 
-            modelBuilder.Entity("WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models.PropostaItem", b =>
+            modelBuilder.Entity("WebApolice.Modulos.Seguro.Domain.Modelos.PropostaItem", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -1735,7 +1735,7 @@ namespace WebApolice.Modulos.Seguro.Infrastructure.Migrations
                     b.ToTable("proposta_item", "seguro");
                 });
 
-            modelBuilder.Entity("WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models.PropostaMovimento", b =>
+            modelBuilder.Entity("WebApolice.Modulos.Seguro.Domain.Modelos.PropostaMovimento", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -1983,7 +1983,7 @@ namespace WebApolice.Modulos.Seguro.Infrastructure.Migrations
                     b.ToTable("proposta_movimento", "seguro");
                 });
 
-            modelBuilder.Entity("WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models.PropostaStatus", b =>
+            modelBuilder.Entity("WebApolice.Modulos.Seguro.Domain.Modelos.PropostaStatus", b =>
                 {
                     b.Property<short>("Id")
                         .HasColumnType("smallint")
@@ -2027,7 +2027,7 @@ namespace WebApolice.Modulos.Seguro.Infrastructure.Migrations
                     b.ToTable("proposta_status", "seguro");
                 });
 
-            modelBuilder.Entity("WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models.Propostum", b =>
+            modelBuilder.Entity("WebApolice.Modulos.Seguro.Domain.Modelos.Propostum", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -2316,7 +2316,7 @@ namespace WebApolice.Modulos.Seguro.Infrastructure.Migrations
                     b.ToTable("proposta", "seguro");
                 });
 
-            modelBuilder.Entity("WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models.RamoModel", b =>
+            modelBuilder.Entity("WebApolice.Modulos.Seguro.Domain.Modelos.RamoModel", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -2372,7 +2372,7 @@ namespace WebApolice.Modulos.Seguro.Infrastructure.Migrations
                     b.ToTable("ramo", "seguro");
                 });
 
-            modelBuilder.Entity("WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models.TabelaPreco", b =>
+            modelBuilder.Entity("WebApolice.Modulos.Seguro.Domain.Modelos.TabelaPreco", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -2424,7 +2424,7 @@ namespace WebApolice.Modulos.Seguro.Infrastructure.Migrations
                     b.ToTable("tabela_preco", "seguro");
                 });
 
-            modelBuilder.Entity("WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models.TipoProduto", b =>
+            modelBuilder.Entity("WebApolice.Modulos.Seguro.Domain.Modelos.TipoProduto", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -2475,16 +2475,16 @@ namespace WebApolice.Modulos.Seguro.Infrastructure.Migrations
                     b.ToTable("tipo_produto", "seguro");
                 });
 
-            modelBuilder.Entity("WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models.ApoliceCoberturaModel", b =>
+            modelBuilder.Entity("WebApolice.Modulos.Seguro.Domain.Modelos.ApoliceCoberturaModel", b =>
                 {
-                    b.HasOne("WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models.ApolicePlanoModel", "ApolicePlano")
+                    b.HasOne("WebApolice.Modulos.Seguro.Domain.Modelos.ApolicePlanoModel", "ApolicePlano")
                         .WithMany("Coberturas")
                         .HasForeignKey("ApolicePlanoId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_apolice_cobertura_apolice_plano_apolice_plano_id");
 
-                    b.HasOne("WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models.Cobertura", "Cobertura")
+                    b.HasOne("WebApolice.Modulos.Seguro.Domain.Modelos.Cobertura", "Cobertura")
                         .WithMany()
                         .HasForeignKey("CoberturaId")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -2496,11 +2496,11 @@ namespace WebApolice.Modulos.Seguro.Infrastructure.Migrations
                     b.Navigation("Cobertura");
                 });
 
-            modelBuilder.Entity("WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models.ApoliceConfiguracaoModel", b =>
+            modelBuilder.Entity("WebApolice.Modulos.Seguro.Domain.Modelos.ApoliceConfiguracaoModel", b =>
                 {
-                    b.HasOne("WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models.ApoliceModel", "Apolice")
+                    b.HasOne("WebApolice.Modulos.Seguro.Domain.Modelos.ApoliceModel", "Apolice")
                         .WithOne("Configuracao")
-                        .HasForeignKey("WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models.ApoliceConfiguracaoModel", "ApoliceId")
+                        .HasForeignKey("WebApolice.Modulos.Seguro.Domain.Modelos.ApoliceConfiguracaoModel", "ApoliceId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_apolice_configuracao_apolice_apolice_id");
@@ -2508,9 +2508,9 @@ namespace WebApolice.Modulos.Seguro.Infrastructure.Migrations
                     b.Navigation("Apolice");
                 });
 
-            modelBuilder.Entity("WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models.ApoliceHistoricoModel", b =>
+            modelBuilder.Entity("WebApolice.Modulos.Seguro.Domain.Modelos.ApoliceHistoricoModel", b =>
                 {
-                    b.HasOne("WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models.ApoliceModel", "Apolice")
+                    b.HasOne("WebApolice.Modulos.Seguro.Domain.Modelos.ApoliceModel", "Apolice")
                         .WithMany("Historicos")
                         .HasForeignKey("ApoliceId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -2520,9 +2520,9 @@ namespace WebApolice.Modulos.Seguro.Infrastructure.Migrations
                     b.Navigation("Apolice");
                 });
 
-            modelBuilder.Entity("WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models.ApoliceModel", b =>
+            modelBuilder.Entity("WebApolice.Modulos.Seguro.Domain.Modelos.ApoliceModel", b =>
                 {
-                    b.HasOne("WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models.ApoliceModel", "ApoliceOrigem")
+                    b.HasOne("WebApolice.Modulos.Seguro.Domain.Modelos.ApoliceModel", "ApoliceOrigem")
                         .WithMany("Renovacoes")
                         .HasForeignKey("ApoliceOrigemId")
                         .OnDelete(DeleteBehavior.SetNull)
@@ -2531,16 +2531,16 @@ namespace WebApolice.Modulos.Seguro.Infrastructure.Migrations
                     b.Navigation("ApoliceOrigem");
                 });
 
-            modelBuilder.Entity("WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models.ApoliceModuloCoberturaModel", b =>
+            modelBuilder.Entity("WebApolice.Modulos.Seguro.Domain.Modelos.ApoliceModuloCoberturaModel", b =>
                 {
-                    b.HasOne("WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models.ApoliceModuloPlanoModel", "Plano")
+                    b.HasOne("WebApolice.Modulos.Seguro.Domain.Modelos.ApoliceModuloPlanoModel", "Plano")
                         .WithMany("Coberturas")
                         .HasForeignKey("ApoliceModuloPlanoId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
                         .HasConstraintName("fk_apolice_modulo_cobertura_apolice_modulo_plano_apolice_modul");
 
-                    b.HasOne("WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models.Cobertura", "Cobertura")
+                    b.HasOne("WebApolice.Modulos.Seguro.Domain.Modelos.Cobertura", "Cobertura")
                         .WithMany()
                         .HasForeignKey("CoberturaId")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -2552,9 +2552,9 @@ namespace WebApolice.Modulos.Seguro.Infrastructure.Migrations
                     b.Navigation("Plano");
                 });
 
-            modelBuilder.Entity("WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models.ApoliceModuloModel", b =>
+            modelBuilder.Entity("WebApolice.Modulos.Seguro.Domain.Modelos.ApoliceModuloModel", b =>
                 {
-                    b.HasOne("WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models.ApoliceModel", "Apolice")
+                    b.HasOne("WebApolice.Modulos.Seguro.Domain.Modelos.ApoliceModel", "Apolice")
                         .WithMany("Modulos")
                         .HasForeignKey("ApoliceId")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -2564,11 +2564,11 @@ namespace WebApolice.Modulos.Seguro.Infrastructure.Migrations
                     b.Navigation("Apolice");
                 });
 
-            modelBuilder.Entity("WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models.ApoliceModuloPlanoModel", b =>
+            modelBuilder.Entity("WebApolice.Modulos.Seguro.Domain.Modelos.ApoliceModuloPlanoModel", b =>
                 {
-                    b.HasOne("WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models.ApoliceModuloModel", "ApoliceModulo")
+                    b.HasOne("WebApolice.Modulos.Seguro.Domain.Modelos.ApoliceModuloModel", "ApoliceModulo")
                         .WithOne()
-                        .HasForeignKey("WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models.ApoliceModuloPlanoModel", "ApoliceModuloId")
+                        .HasForeignKey("WebApolice.Modulos.Seguro.Domain.Modelos.ApoliceModuloPlanoModel", "ApoliceModuloId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
                         .HasConstraintName("fk_apolice_modulo_plano_apolice_modulo_apolice_modulo_id");
@@ -2576,23 +2576,23 @@ namespace WebApolice.Modulos.Seguro.Infrastructure.Migrations
                     b.Navigation("ApoliceModulo");
                 });
 
-            modelBuilder.Entity("WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models.ApolicePlanoModel", b =>
+            modelBuilder.Entity("WebApolice.Modulos.Seguro.Domain.Modelos.ApolicePlanoModel", b =>
                 {
-                    b.HasOne("WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models.ApoliceProdutoModel", "ApoliceProduto")
+                    b.HasOne("WebApolice.Modulos.Seguro.Domain.Modelos.ApoliceProdutoModel", "ApoliceProduto")
                         .WithMany("Planos")
                         .HasForeignKey("ApoliceProdutoId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_apolice_plano_apolice_produto_apolice_produto_id");
 
-                    b.HasOne("WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models.Plano", "Plano")
+                    b.HasOne("WebApolice.Modulos.Seguro.Domain.Modelos.Plano", "Plano")
                         .WithMany()
                         .HasForeignKey("PlanoId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
                         .HasConstraintName("fk_apolice_plano_plano_plano_id");
 
-                    b.HasOne("WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models.TabelaPreco", "TabelaPreco")
+                    b.HasOne("WebApolice.Modulos.Seguro.Domain.Modelos.TabelaPreco", "TabelaPreco")
                         .WithMany()
                         .HasForeignKey("TabelaPrecoId")
                         .OnDelete(DeleteBehavior.SetNull)
@@ -2605,16 +2605,16 @@ namespace WebApolice.Modulos.Seguro.Infrastructure.Migrations
                     b.Navigation("TabelaPreco");
                 });
 
-            modelBuilder.Entity("WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models.ApoliceProdutoModel", b =>
+            modelBuilder.Entity("WebApolice.Modulos.Seguro.Domain.Modelos.ApoliceProdutoModel", b =>
                 {
-                    b.HasOne("WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models.ApoliceModel", "Apolice")
+                    b.HasOne("WebApolice.Modulos.Seguro.Domain.Modelos.ApoliceModel", "Apolice")
                         .WithMany("ApoliceProdutos")
                         .HasForeignKey("ApoliceId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_apolice_produto_apolice_apolice_id");
 
-                    b.HasOne("WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models.Produto", "Produto")
+                    b.HasOne("WebApolice.Modulos.Seguro.Domain.Modelos.Produto", "Produto")
                         .WithMany()
                         .HasForeignKey("ProdutoId")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -2626,16 +2626,16 @@ namespace WebApolice.Modulos.Seguro.Infrastructure.Migrations
                     b.Navigation("Produto");
                 });
 
-            modelBuilder.Entity("WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models.ApoliceRamoModel", b =>
+            modelBuilder.Entity("WebApolice.Modulos.Seguro.Domain.Modelos.ApoliceRamoModel", b =>
                 {
-                    b.HasOne("WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models.ApoliceModel", "Apolice")
+                    b.HasOne("WebApolice.Modulos.Seguro.Domain.Modelos.ApoliceModel", "Apolice")
                         .WithMany("Ramos")
                         .HasForeignKey("ApoliceId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_apolice_ramo_apolice_apolice_id");
 
-                    b.HasOne("WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models.RamoModel", "Ramo")
+                    b.HasOne("WebApolice.Modulos.Seguro.Domain.Modelos.RamoModel", "Ramo")
                         .WithMany()
                         .HasForeignKey("RamoId")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -2647,9 +2647,9 @@ namespace WebApolice.Modulos.Seguro.Infrastructure.Migrations
                     b.Navigation("Ramo");
                 });
 
-            modelBuilder.Entity("WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models.ApoliceSubestipulanteModel", b =>
+            modelBuilder.Entity("WebApolice.Modulos.Seguro.Domain.Modelos.ApoliceSubestipulanteModel", b =>
                 {
-                    b.HasOne("WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models.ApoliceModel", "Apolice")
+                    b.HasOne("WebApolice.Modulos.Seguro.Domain.Modelos.ApoliceModel", "Apolice")
                         .WithMany("Subestipulantes")
                         .HasForeignKey("ApoliceId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -2659,9 +2659,9 @@ namespace WebApolice.Modulos.Seguro.Infrastructure.Migrations
                     b.Navigation("Apolice");
                 });
 
-            modelBuilder.Entity("WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models.ApoliceSubgrupoModel", b =>
+            modelBuilder.Entity("WebApolice.Modulos.Seguro.Domain.Modelos.ApoliceSubgrupoModel", b =>
                 {
-                    b.HasOne("WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models.ApoliceModel", "Apolice")
+                    b.HasOne("WebApolice.Modulos.Seguro.Domain.Modelos.ApoliceModel", "Apolice")
                         .WithMany()
                         .HasForeignKey("ApoliceId")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -2671,22 +2671,22 @@ namespace WebApolice.Modulos.Seguro.Infrastructure.Migrations
                     b.Navigation("Apolice");
                 });
 
-            modelBuilder.Entity("WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models.ApoliceVidaModel", b =>
+            modelBuilder.Entity("WebApolice.Modulos.Seguro.Domain.Modelos.ApoliceVidaModel", b =>
                 {
-                    b.HasOne("WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models.ApoliceModel", "Apolice")
+                    b.HasOne("WebApolice.Modulos.Seguro.Domain.Modelos.ApoliceModel", "Apolice")
                         .WithMany("Vidas")
                         .HasForeignKey("ApoliceId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_apolice_vida_apolice_apolice_id");
 
-                    b.HasOne("WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models.ApoliceModuloModel", "ApoliceModulo")
+                    b.HasOne("WebApolice.Modulos.Seguro.Domain.Modelos.ApoliceModuloModel", "ApoliceModulo")
                         .WithMany("Vidas")
                         .HasForeignKey("ApoliceModuloId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .HasConstraintName("fk_apolice_vida_apolice_modulos_apolice_modulo_id");
 
-                    b.HasOne("WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models.ApoliceSubgrupoModel", "ApoliceSubgrupo")
+                    b.HasOne("WebApolice.Modulos.Seguro.Domain.Modelos.ApoliceSubgrupoModel", "ApoliceSubgrupo")
                         .WithMany("Vidas")
                         .HasForeignKey("ApoliceSubgrupoId")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -2699,16 +2699,16 @@ namespace WebApolice.Modulos.Seguro.Infrastructure.Migrations
                     b.Navigation("ApoliceSubgrupo");
                 });
 
-            modelBuilder.Entity("WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models.PlanoCoberturaModel", b =>
+            modelBuilder.Entity("WebApolice.Modulos.Seguro.Domain.Modelos.PlanoCoberturaModel", b =>
                 {
-                    b.HasOne("WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models.Cobertura", "Cobertura")
+                    b.HasOne("WebApolice.Modulos.Seguro.Domain.Modelos.Cobertura", "Cobertura")
                         .WithMany()
                         .HasForeignKey("CoberturaId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
                         .HasConstraintName("fk_plano_cobertura_cobertura_cobertura_id");
 
-                    b.HasOne("WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models.Plano", "Plano")
+                    b.HasOne("WebApolice.Modulos.Seguro.Domain.Modelos.Plano", "Plano")
                         .WithMany()
                         .HasForeignKey("PlanoId")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -2720,14 +2720,14 @@ namespace WebApolice.Modulos.Seguro.Infrastructure.Migrations
                     b.Navigation("Plano");
                 });
 
-            modelBuilder.Entity("WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models.Produto", b =>
+            modelBuilder.Entity("WebApolice.Modulos.Seguro.Domain.Modelos.Produto", b =>
                 {
-                    b.HasOne("WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models.Plano", "Plano")
+                    b.HasOne("WebApolice.Modulos.Seguro.Domain.Modelos.Plano", "Plano")
                         .WithMany("Produtos")
                         .HasForeignKey("PlanoId")
                         .HasConstraintName("produto_plano_id_fkey");
 
-                    b.HasOne("WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models.TabelaPreco", "TabelaPreco")
+                    b.HasOne("WebApolice.Modulos.Seguro.Domain.Modelos.TabelaPreco", "TabelaPreco")
                         .WithMany("Produtos")
                         .HasForeignKey("TabelaPrecoId")
                         .HasConstraintName("produto_tabela_preco_id_fkey");
@@ -2737,9 +2737,9 @@ namespace WebApolice.Modulos.Seguro.Infrastructure.Migrations
                     b.Navigation("TabelaPreco");
                 });
 
-            modelBuilder.Entity("WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models.PropostaBeneficiario", b =>
+            modelBuilder.Entity("WebApolice.Modulos.Seguro.Domain.Modelos.PropostaBeneficiario", b =>
                 {
-                    b.HasOne("WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models.Propostum", "Proposta")
+                    b.HasOne("WebApolice.Modulos.Seguro.Domain.Modelos.Propostum", "Proposta")
                         .WithMany("PropostaBeneficiarios")
                         .HasForeignKey("PropostaId")
                         .IsRequired()
@@ -2748,20 +2748,20 @@ namespace WebApolice.Modulos.Seguro.Infrastructure.Migrations
                     b.Navigation("Proposta");
                 });
 
-            modelBuilder.Entity("WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models.PropostaCobertura", b =>
+            modelBuilder.Entity("WebApolice.Modulos.Seguro.Domain.Modelos.PropostaCobertura", b =>
                 {
-                    b.HasOne("WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models.Cobertura", "Cobertura")
+                    b.HasOne("WebApolice.Modulos.Seguro.Domain.Modelos.Cobertura", "Cobertura")
                         .WithMany("PropostaCoberturas")
                         .HasForeignKey("CoberturaId")
                         .HasConstraintName("proposta_cobertura_cobertura_id_fkey");
 
-                    b.HasOne("WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models.Propostum", "Proposta")
+                    b.HasOne("WebApolice.Modulos.Seguro.Domain.Modelos.Propostum", "Proposta")
                         .WithMany("PropostaCoberturas")
                         .HasForeignKey("PropostaId")
                         .IsRequired()
                         .HasConstraintName("proposta_cobertura_proposta_id_fkey");
 
-                    b.HasOne("WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models.PropostaItem", "PropostaItem")
+                    b.HasOne("WebApolice.Modulos.Seguro.Domain.Modelos.PropostaItem", "PropostaItem")
                         .WithMany("PropostaCoberturas")
                         .HasForeignKey("PropostaItemId")
                         .HasConstraintName("proposta_cobertura_proposta_item_id_fkey");
@@ -2773,15 +2773,15 @@ namespace WebApolice.Modulos.Seguro.Infrastructure.Migrations
                     b.Navigation("PropostaItem");
                 });
 
-            modelBuilder.Entity("WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models.PropostaHistorico", b =>
+            modelBuilder.Entity("WebApolice.Modulos.Seguro.Domain.Modelos.PropostaHistorico", b =>
                 {
-                    b.HasOne("WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models.Propostum", "PropostaAnterior")
+                    b.HasOne("WebApolice.Modulos.Seguro.Domain.Modelos.Propostum", "PropostaAnterior")
                         .WithMany("PropostaHistoricoPropostaAnteriors")
                         .HasForeignKey("PropostaAnteriorId")
                         .IsRequired()
                         .HasConstraintName("proposta_historico_proposta_anterior_id_fkey");
 
-                    b.HasOne("WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models.Propostum", "PropostaNova")
+                    b.HasOne("WebApolice.Modulos.Seguro.Domain.Modelos.Propostum", "PropostaNova")
                         .WithMany("PropostaHistoricoPropostaNovas")
                         .HasForeignKey("PropostaNovaId")
                         .IsRequired()
@@ -2792,30 +2792,30 @@ namespace WebApolice.Modulos.Seguro.Infrastructure.Migrations
                     b.Navigation("PropostaNova");
                 });
 
-            modelBuilder.Entity("WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models.PropostaItem", b =>
+            modelBuilder.Entity("WebApolice.Modulos.Seguro.Domain.Modelos.PropostaItem", b =>
                 {
-                    b.HasOne("WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models.Plano", "Plano")
+                    b.HasOne("WebApolice.Modulos.Seguro.Domain.Modelos.Plano", "Plano")
                         .WithMany("PropostaItems")
                         .HasForeignKey("PlanoId")
                         .HasConstraintName("proposta_item_plano_id_fkey");
 
-                    b.HasOne("WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models.Produto", "Produto")
+                    b.HasOne("WebApolice.Modulos.Seguro.Domain.Modelos.Produto", "Produto")
                         .WithMany("PropostaItems")
                         .HasForeignKey("ProdutoId")
                         .HasConstraintName("proposta_item_produto_id_fkey");
 
-                    b.HasOne("WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models.Propostum", "Proposta")
+                    b.HasOne("WebApolice.Modulos.Seguro.Domain.Modelos.Propostum", "Proposta")
                         .WithMany("PropostaItems")
                         .HasForeignKey("PropostaId")
                         .IsRequired()
                         .HasConstraintName("proposta_item_proposta_id_fkey");
 
-                    b.HasOne("WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models.TabelaPreco", "TabelaPreco")
+                    b.HasOne("WebApolice.Modulos.Seguro.Domain.Modelos.TabelaPreco", "TabelaPreco")
                         .WithMany("PropostaItems")
                         .HasForeignKey("TabelaPrecoId")
                         .HasConstraintName("proposta_item_tabela_preco_id_fkey");
 
-                    b.HasOne("WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models.TipoProduto", "TipoProduto")
+                    b.HasOne("WebApolice.Modulos.Seguro.Domain.Modelos.TipoProduto", "TipoProduto")
                         .WithMany("PropostaItems")
                         .HasForeignKey("TipoProdutoId")
                         .HasConstraintName("proposta_item_tipo_produto_id_fkey");
@@ -2831,14 +2831,14 @@ namespace WebApolice.Modulos.Seguro.Infrastructure.Migrations
                     b.Navigation("TipoProduto");
                 });
 
-            modelBuilder.Entity("WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models.PropostaMovimento", b =>
+            modelBuilder.Entity("WebApolice.Modulos.Seguro.Domain.Modelos.PropostaMovimento", b =>
                 {
-                    b.HasOne("WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models.MovimentoTipo", "MovimentoTipo")
+                    b.HasOne("WebApolice.Modulos.Seguro.Domain.Modelos.MovimentoTipo", "MovimentoTipo")
                         .WithMany("PropostaMovimentos")
                         .HasForeignKey("MovimentoTipoId")
                         .HasConstraintName("proposta_movimento_movimento_tipo_id_fkey");
 
-                    b.HasOne("WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models.Propostum", "Proposta")
+                    b.HasOne("WebApolice.Modulos.Seguro.Domain.Modelos.Propostum", "Proposta")
                         .WithMany("PropostaMovimentos")
                         .HasForeignKey("PropostaId")
                         .HasConstraintName("proposta_movimento_proposta_id_fkey");
@@ -2848,26 +2848,26 @@ namespace WebApolice.Modulos.Seguro.Infrastructure.Migrations
                     b.Navigation("Proposta");
                 });
 
-            modelBuilder.Entity("WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models.Propostum", b =>
+            modelBuilder.Entity("WebApolice.Modulos.Seguro.Domain.Modelos.Propostum", b =>
                 {
-                    b.HasOne("WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models.ApoliceModel", "Apolice")
+                    b.HasOne("WebApolice.Modulos.Seguro.Domain.Modelos.ApoliceModel", "Apolice")
                         .WithMany("Propostas")
                         .HasForeignKey("ApoliceId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .HasConstraintName("proposta_apolice_id_fkey");
 
-                    b.HasOne("WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models.ApoliceVidaModel", "ApoliceVida")
+                    b.HasOne("WebApolice.Modulos.Seguro.Domain.Modelos.ApoliceVidaModel", "ApoliceVida")
                         .WithMany("Propostas")
                         .HasForeignKey("ApoliceVidaId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .HasConstraintName("proposta_apolice_vida_id_fkey");
 
-                    b.HasOne("WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models.Propostum", "PropostaOrigem")
+                    b.HasOne("WebApolice.Modulos.Seguro.Domain.Modelos.Propostum", "PropostaOrigem")
                         .WithMany("InversePropostaOrigem")
                         .HasForeignKey("PropostaOrigemId")
                         .HasConstraintName("proposta_proposta_origem_id_fkey");
 
-                    b.HasOne("WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models.PropostaStatus", "Status")
+                    b.HasOne("WebApolice.Modulos.Seguro.Domain.Modelos.PropostaStatus", "Status")
                         .WithMany("Proposta")
                         .HasForeignKey("StatusId")
                         .IsRequired()
@@ -2882,7 +2882,7 @@ namespace WebApolice.Modulos.Seguro.Infrastructure.Migrations
                     b.Navigation("Status");
                 });
 
-            modelBuilder.Entity("WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models.ApoliceModel", b =>
+            modelBuilder.Entity("WebApolice.Modulos.Seguro.Domain.Modelos.ApoliceModel", b =>
                 {
                     b.Navigation("ApoliceProdutos");
 
@@ -2903,69 +2903,69 @@ namespace WebApolice.Modulos.Seguro.Infrastructure.Migrations
                     b.Navigation("Vidas");
                 });
 
-            modelBuilder.Entity("WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models.ApoliceModuloModel", b =>
+            modelBuilder.Entity("WebApolice.Modulos.Seguro.Domain.Modelos.ApoliceModuloModel", b =>
                 {
                     b.Navigation("Vidas");
                 });
 
-            modelBuilder.Entity("WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models.ApoliceModuloPlanoModel", b =>
+            modelBuilder.Entity("WebApolice.Modulos.Seguro.Domain.Modelos.ApoliceModuloPlanoModel", b =>
                 {
                     b.Navigation("Coberturas");
                 });
 
-            modelBuilder.Entity("WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models.ApolicePlanoModel", b =>
+            modelBuilder.Entity("WebApolice.Modulos.Seguro.Domain.Modelos.ApolicePlanoModel", b =>
                 {
                     b.Navigation("Coberturas");
                 });
 
-            modelBuilder.Entity("WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models.ApoliceProdutoModel", b =>
+            modelBuilder.Entity("WebApolice.Modulos.Seguro.Domain.Modelos.ApoliceProdutoModel", b =>
                 {
                     b.Navigation("Planos");
                 });
 
-            modelBuilder.Entity("WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models.ApoliceSubgrupoModel", b =>
+            modelBuilder.Entity("WebApolice.Modulos.Seguro.Domain.Modelos.ApoliceSubgrupoModel", b =>
                 {
                     b.Navigation("Vidas");
                 });
 
-            modelBuilder.Entity("WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models.ApoliceVidaModel", b =>
+            modelBuilder.Entity("WebApolice.Modulos.Seguro.Domain.Modelos.ApoliceVidaModel", b =>
                 {
                     b.Navigation("Propostas");
                 });
 
-            modelBuilder.Entity("WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models.Cobertura", b =>
+            modelBuilder.Entity("WebApolice.Modulos.Seguro.Domain.Modelos.Cobertura", b =>
                 {
                     b.Navigation("PropostaCoberturas");
                 });
 
-            modelBuilder.Entity("WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models.MovimentoTipo", b =>
+            modelBuilder.Entity("WebApolice.Modulos.Seguro.Domain.Modelos.MovimentoTipo", b =>
                 {
                     b.Navigation("PropostaMovimentos");
                 });
 
-            modelBuilder.Entity("WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models.Plano", b =>
+            modelBuilder.Entity("WebApolice.Modulos.Seguro.Domain.Modelos.Plano", b =>
                 {
                     b.Navigation("Produtos");
 
                     b.Navigation("PropostaItems");
                 });
 
-            modelBuilder.Entity("WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models.Produto", b =>
+            modelBuilder.Entity("WebApolice.Modulos.Seguro.Domain.Modelos.Produto", b =>
                 {
                     b.Navigation("PropostaItems");
                 });
 
-            modelBuilder.Entity("WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models.PropostaItem", b =>
+            modelBuilder.Entity("WebApolice.Modulos.Seguro.Domain.Modelos.PropostaItem", b =>
                 {
                     b.Navigation("PropostaCoberturas");
                 });
 
-            modelBuilder.Entity("WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models.PropostaStatus", b =>
+            modelBuilder.Entity("WebApolice.Modulos.Seguro.Domain.Modelos.PropostaStatus", b =>
                 {
                     b.Navigation("Proposta");
                 });
 
-            modelBuilder.Entity("WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models.Propostum", b =>
+            modelBuilder.Entity("WebApolice.Modulos.Seguro.Domain.Modelos.Propostum", b =>
                 {
                     b.Navigation("InversePropostaOrigem");
 
@@ -2982,14 +2982,14 @@ namespace WebApolice.Modulos.Seguro.Infrastructure.Migrations
                     b.Navigation("PropostaMovimentos");
                 });
 
-            modelBuilder.Entity("WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models.TabelaPreco", b =>
+            modelBuilder.Entity("WebApolice.Modulos.Seguro.Domain.Modelos.TabelaPreco", b =>
                 {
                     b.Navigation("Produtos");
 
                     b.Navigation("PropostaItems");
                 });
 
-            modelBuilder.Entity("WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models.TipoProduto", b =>
+            modelBuilder.Entity("WebApolice.Modulos.Seguro.Domain.Modelos.TipoProduto", b =>
                 {
                     b.Navigation("PropostaItems");
                 });

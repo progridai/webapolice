@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using WebApolice.Modulos.Cadastro.Domain.Exceptions;
 using WebApolice.Modulos.Seguranca.Domain.Exceptions;
+using WebApolice.Modulos.Seguranca.Infrastructure.Keycloak;
 
 namespace WebApolice.Api.Infrastructure.Errors;
 
@@ -94,6 +95,30 @@ public class GlobalExceptionHandler : IExceptionHandler
                 Title = "Regra de negócio violada",
                 Status = StatusCodes.Status422UnprocessableEntity,
                 Detail = exception.Message,
+                Instance = context.Request.Path
+            },
+            KeycloakUsuarioAdminException { StatusCode: System.Net.HttpStatusCode.Conflict } => new ProblemDetails
+            {
+                Type = "https://webapolice/errors/conflito",
+                Title = "Conflito",
+                Status = StatusCodes.Status409Conflict,
+                Detail = exception.Message,
+                Instance = context.Request.Path
+            },
+            KeycloakUsuarioAdminException { StatusCode: System.Net.HttpStatusCode.BadRequest } => new ProblemDetails
+            {
+                Type = "https://webapolice/errors/regra-de-negocio",
+                Title = "Dados recusados pelo provedor de identidade",
+                Status = StatusCodes.Status422UnprocessableEntity,
+                Detail = exception.Message,
+                Instance = context.Request.Path
+            },
+            KeycloakUsuarioAdminException => new ProblemDetails
+            {
+                Type = "https://webapolice/errors/provedor-identidade-indisponivel",
+                Title = "Falha no provedor de identidade",
+                Status = StatusCodes.Status502BadGateway,
+                Detail = "Não foi possível concluir a operação no provedor de identidade.",
                 Instance = context.Request.Path
             },
             WebApolice.SharedKernel.Application.Exceptions.ValidacaoException => new ProblemDetails

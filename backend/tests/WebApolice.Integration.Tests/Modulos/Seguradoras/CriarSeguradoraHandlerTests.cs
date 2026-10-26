@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Storage;
 using Moq;
 using WebApolice.Modulos.Cadastro.Application.Ports;
 using WebApolice.Modulos.Cadastro.Application.UseCases.CriarSeguradora;
-using WebApolice.Modulos.Cadastro.Infrastructure.Persistence.Models.Vinculos;
+using WebApolice.Modulos.Cadastro.Domain.Modelos.Vinculos;
 using Xunit;
 
 namespace WebApolice.Integration.Tests.Modulos.Seguradoras;

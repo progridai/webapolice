@@ -2,31 +2,30 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using WebApolice.Modulos.Seguranca.Application.Ports;
 using WebApolice.Modulos.Seguranca.Domain;
 using WebApolice.Modulos.Seguranca.Domain.Exceptions;
-using WebApolice.Modulos.Seguranca.Infrastructure.Persistence;
 
 namespace WebApolice.Modulos.Seguranca.Application.UseCases.Usuarios;
 
 public class CriarUsuarioUseCase
 {
-    private readonly SegurancaDbContext _dbContext;
+    private readonly ISegurancaAdministracaoRepository _repository;
     private readonly IKeycloakUsuariosAdminClient _keycloakClient;
     private readonly IContextoUsuarioAutenticado _contexto;
     private readonly ILogger<CriarUsuarioUseCase> _logger;
 
     public CriarUsuarioUseCase(
-        SegurancaDbContext dbContext,
+        ISegurancaAdministracaoRepository dbContext,
         IKeycloakUsuariosAdminClient keycloakClient,
         IContextoUsuarioAutenticado contexto,
         ILogger<CriarUsuarioUseCase> logger)
     {
-        _dbContext = dbContext;
+        _repository = dbContext;
         _keycloakClient = keycloakClient;
         _contexto = contexto;
         _logger = logger;
@@ -46,16 +45,24 @@ public class CriarUsuarioUseCase
         if (string.IsNullOrWhiteSpace(email)) throw new UsuarioInvalidoException("E-mail é obrigatório");
         if (string.IsNullOrWhiteSpace(senhaTemporaria)) throw new UsuarioInvalidoException("Senha temporária é obrigatória");
 
-        var perfisParaAtribuir = await _dbContext.Perfis
-            .Where(p => perfilPublicIds.Contains(p.PublicId) && p.Ativo)
-            .ToListAsync(cancellationToken);
+        username = username.Trim();
+        nome = nome.Trim();
+        email = email.Trim();
+
+        if (!Regex.IsMatch(username, "^[A-Za-z0-9._-]+$"))
+        {
+            throw new UsuarioInvalidoException(
+                "Username inválido. Use apenas letras, números, ponto, hífen ou sublinhado, sem espaços.");
+        }
+
+        var perfisParaAtribuir = await _repository.ObterPerfisAsync(perfilPublicIds, true, cancellationToken);
 
         if (perfisParaAtribuir.Count != perfilPublicIds.Count)
         {
             throw new UsuarioInvalidoException("Um ou mais perfis informados são inválidos ou estão inativos.");
         }
 
-        var duplicado = await _dbContext.Usuarios.AnyAsync(u => u.Username == username || u.Email == email, cancellationToken);
+        var duplicado = await _repository.UsuarioDuplicadoAsync(username, email, cancellationToken);
         if (duplicado) throw new UsuarioInvalidoException("Username ou E-mail já cadastrado localmente.");
 
         if (await _keycloakClient.ExisteUsernameAsync(username, cancellationToken))
@@ -84,16 +91,16 @@ public class CriarUsuarioUseCase
             throw;
         }
 
-        var executor = await _dbContext.Usuarios.FirstOrDefaultAsync(u => u.KeycloakSub == _contexto.KeycloakSub, cancellationToken);
+        var executor = await _repository.ObterUsuarioPorSubAsync(_contexto.KeycloakSub, cancellationToken);
         var executorId = executor?.Id;
 
-        using var transaction = await _dbContext.Database.BeginTransactionAsync(cancellationToken);
+        using var transaction = await _repository.BeginTransactionAsync(cancellationToken);
         try
         {
             var novoUsuario = new Usuario(keycloakSub, username, nome, email, ativo);
 
-            _dbContext.Usuarios.Add(novoUsuario);
-            await _dbContext.SaveChangesAsync(cancellationToken);
+            _repository.AdicionarUsuario(novoUsuario);
+            await _repository.SalvarAlteracoesAsync(cancellationToken);
 
             foreach (var perfil in perfisParaAtribuir)
             {
@@ -112,16 +119,16 @@ public class CriarUsuarioUseCase
                 usuarioExecutorId: executorId,
                 dadosNovos: JsonSerializer.SerializeToDocument(new { username, nome, email, ativo, perfis = perfisParaAtribuir.Select(p => p.Codigo) })
             );
-            _dbContext.AuditoriaPermissoes.Add(auditoria);
+            _repository.AdicionarAuditoria(auditoria);
 
-            await _dbContext.SaveChangesAsync(cancellationToken);
+            await _repository.SalvarAlteracoesAsync(cancellationToken);
             await transaction.CommitAsync(cancellationToken);
 
             return novoUsuario.PublicId;
         }
         catch (Exception)
         {
-            await transaction.RollbackAsync(cancellationToken);
+            await transaction.RollbackAsync(CancellationToken.None);
             try
             {
                 using var compensacaoCts = new CancellationTokenSource(TimeSpan.FromSeconds(15));

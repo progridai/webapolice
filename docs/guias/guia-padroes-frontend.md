@@ -49,4 +49,6 @@ Atualizar a documentação funcional e técnica na mesma entrega, informando o q
 
 Os testes locais não substituem a homologação visual e dos fluxos autenticados em navegador. A obrigatoriedade deste guia e os scripts locais não equivalem a um bloqueio automático no CI; automações de repositório precisam estar efetivamente configuradas para isso.
 
+O workflow de qualidade e o lançador local usam valores públicos fictícios para as quatro entradas `VITE_*` obrigatórias, conforme o [documento 80](../80-correcao-configuracao-ci-frontend.md). Validar também sem o `.env` local ao alterar a configuração do gate. Preservar a recusa de configuração obrigatória ausente; builds de implantação precisam da configuração real do ambiente. Nunca colocar segredos em variáveis `VITE_*`.
+
 O [fechamento da formatação](../75-conclusao-formatacao-frontend.md) registra a base aprovada em 23/10/2026. Novas entregas devem manter os mesmos critérios de aprovação.

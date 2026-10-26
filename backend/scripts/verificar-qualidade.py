@@ -36,6 +36,13 @@ if args.output_path:
 # Nunca reutilizar uma conexão externa opcional dos testes de catálogos.
 env = dict(os.environ)
 env.pop("WEBAPOLICE_CATALOGOS_TEST_CONNECTION", None)
+env.update({
+    # Mesmas entradas públicas fictícias do workflow, sem depender do .env local.
+    "VITE_API_BASE_URL": "https://api.ci.invalid",
+    "VITE_KEYCLOAK_URL": "https://idp.ci.invalid",
+    "VITE_KEYCLOAK_REALM": "webapolice-ci",
+    "VITE_KEYCLOAK_CLIENT_ID": "webapolice-web-ci",
+})
 env["Logging__EventLog__LogLevel__Default"] = "None"  # Só no processo de testes, sem EventLog do Windows.
 results = []
 for name, command, cwd in steps:

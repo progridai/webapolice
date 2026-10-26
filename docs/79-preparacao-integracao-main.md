@@ -43,6 +43,8 @@ Gate completo aprovado com saída 0: `python backend/scripts/verificar-qualidade
 
 Logs: scratch/qualidade/resultados.json e arquivos por passo; TRX em backend/tests/<projeto>/TestResults, resumo scratch/pre-finish-backend-results.json. A primeira execução reprovada do gate foi preservada em scratch/pre-finish-gate-inicial. São artefatos locais ignorados pelo Git; os números e limites ficam preservados aqui. Os testes em memória/mocks continuam distintos das integrações reais e não homologam o IdP ou o legado.
 
+Verificação remota posterior: o CI de 8b20807 aprovou backend e segredos, mas reprovou os testes frontend por ausência de configuração `VITE_*` no runner. O gate local acima utilizava o `.env` ignorado; não comprovava a configuração remota. A correção e a validação sem esse arquivo são registradas no [documento 80](80-correcao-configuracao-ci-frontend.md), preservando o resultado histórico desta preparação.
+
 A preparação partiu da fix em 891beb7 e incorporou origin/main em fc72083 (também 14fb8c4 e 1edbc66), com conflitos conciliados nos dois arquivos frontend de usuários. Foram preservadas a validação técnica de username e a tradução de erros Keycloak, sem retornar mensagens arbitrárias do provedor. Não houve reescrita de histórico Git.
 
 

@@ -18,7 +18,7 @@ Continuidade autorizada para preparar a integração da fix em main, após o com
 | A08 | Regras de CPF/CNPJ e preservação do legado mantidas; 50 testes Cadastro aprovados. Expectativas antigas de Title Case em outras integrações foram corrigidas sem mudar a política. |
 | A09 | Matriz de negação preservada; testes de catálogos reais também executam, sem ignorados por falta de conexão externa. |
 | A10 | Zod recebeu patch 4.6.6 pelo novo advisory alto; auditorias npm/NuGet aprovadas sem vulnerabilidades reportadas. Build sem avisos/erros. |
-| A11 | Gate completo executado com saída 0, 393 testes backend e 1.139 frontend. TRX individuais ignorados também reprovam o gate. Execução remota/proteções de branch ainda não conferidas. |
+| A11 | Gate local completo aprovado com 393 testes backend e 1.139 frontend; TRX ignorados reprovam. O CI de 8b20807 aprovou backend/segredos e falhou no frontend pela ausência das quatro entradas VITE obrigatórias. Workflow e gate local agora fornecem valores públicos fictícios; seis checks passaram sem .env local. Evidências e conferência remota no [documento 80](80-correcao-configuracao-ci-frontend.md). Proteções de branch ainda não verificadas. |
 | A12 | Docker/containers PostgreSQL efêmeros disponíveis e executados. Imagens de aplicação e infraestrutura real (TLS/proxy, backup, triggers no destino, carga, alertas) não homologadas. |
 | A13 | Documentos normativos, ADR 008 e guias atualizados para a integração, preservando histórico de testes e migrations. README alinhado ao SDK do global.json. |
 | A14 | Cancelamento HTTP mantido e suíte frontend completa aprovada novamente após merge e patch Zod. |

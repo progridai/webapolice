@@ -8,6 +8,12 @@ permissions:
 jobs:
   frontend:
     runs-on: ubuntu-24.04
+    env:
+      # Configuração fictícia do gate; não representa endpoints de implantação.
+      VITE_API_BASE_URL: https://api.ci.invalid
+      VITE_KEYCLOAK_URL: https://idp.ci.invalid
+      VITE_KEYCLOAK_REALM: webapolice-ci
+      VITE_KEYCLOAK_CLIENT_ID: webapolice-web-ci
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4

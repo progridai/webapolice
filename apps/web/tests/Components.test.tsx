@@ -17,16 +17,19 @@ import {
 
 describe('UI Components Unit Tests', () => {
   beforeEach(() => {
-    vi.stubGlobal('matchMedia', vi.fn().mockImplementation((query) => ({
-      matches: false,
-      media: query,
-      onchange: null,
-      addListener: vi.fn(),
-      removeListener: vi.fn(),
-      addEventListener: vi.fn(),
-      removeEventListener: vi.fn(),
-      dispatchEvent: vi.fn(),
-    })));
+    vi.stubGlobal(
+      'matchMedia',
+      vi.fn().mockImplementation((query) => ({
+        matches: false,
+        media: query,
+        onchange: null,
+        addListener: vi.fn(),
+        removeListener: vi.fn(),
+        addEventListener: vi.fn(),
+        removeEventListener: vi.fn(),
+        dispatchEvent: vi.fn(),
+      })),
+    );
   });
 
   // 1. Button Tests
@@ -38,41 +41,57 @@ describe('UI Components Unit Tests', () => {
       const btn = screen.getByRole('button', { name: /Enviar/i });
       expect(btn).not.toBeNull();
       expect(btn.className).toContain('btn-primary');
-      
+
       fireEvent.click(btn);
       expect(handleClick).toHaveBeenCalledTimes(1);
     });
 
     it('deve renderizar botão no estado desabilitado', () => {
       const handleClick = vi.fn();
-      render(<Button disabled onClick={handleClick}>Enviar</Button>);
+      render(
+        <Button disabled onClick={handleClick}>
+          Enviar
+        </Button>,
+      );
 
       const btn = screen.getByRole('button', { name: /Enviar/i });
       expect(btn.hasAttribute('disabled')).toBe(true);
-      
+
       fireEvent.click(btn);
       expect(handleClick).not.toHaveBeenCalled();
     });
 
     it('deve exibir spinner e desativar clique no estado loading', () => {
       const handleClick = vi.fn();
-      render(<Button loading onClick={handleClick}>Enviar</Button>);
+      render(
+        <Button loading onClick={handleClick}>
+          Enviar
+        </Button>,
+      );
 
       const btn = screen.getByRole('button', { name: /Processando/i });
       expect(btn.hasAttribute('disabled')).toBe(true);
       expect(screen.getByLabelText('Processando...')).not.toBeNull();
-      
+
       fireEvent.click(btn);
       expect(handleClick).not.toHaveBeenCalled();
     });
 
     it('deve suportar diferentes variantes e tamanhos', () => {
-      const { rerender } = render(<Button variant="danger" size="large">Remover</Button>);
+      const { rerender } = render(
+        <Button variant="danger" size="large">
+          Remover
+        </Button>,
+      );
       let btn = screen.getByRole('button', { name: /Remover/i });
       expect(btn.className).toContain('btn-danger');
       expect(btn.className).toContain('btn-large');
 
-      rerender(<Button variant="secondary" size="small">Cancelar</Button>);
+      rerender(
+        <Button variant="secondary" size="small">
+          Cancelar
+        </Button>,
+      );
       btn = screen.getByRole('button', { name: /Cancelar/i });
       expect(btn.className).toContain('btn-secondary');
       expect(btn.className).toContain('btn-small');
@@ -83,9 +102,13 @@ describe('UI Components Unit Tests', () => {
   describe('FormField & Input Components', () => {
     it('deve associar o label com o input e renderizar obrigatoriedade', () => {
       render(
-        <FormField label="Nome Completo" required hint="Digite sem abreviações.">
+        <FormField
+          label="Nome Completo"
+          required
+          hint="Digite sem abreviações."
+        >
           <Input placeholder="Seu nome" />
-        </FormField>
+        </FormField>,
       );
 
       const label = screen.getByText(/Nome Completo/i);
@@ -94,7 +117,7 @@ describe('UI Components Unit Tests', () => {
       const input = screen.getByPlaceholderText(/Seu nome/i);
       expect(input).not.toBeNull();
       expect(label.getAttribute('for')).toBe(input.id);
-      
+
       const hint = screen.getByText(/Digite sem abreviações./i);
       expect(input.getAttribute('aria-describedby')).toContain(hint.id);
     });
@@ -103,13 +126,13 @@ describe('UI Components Unit Tests', () => {
       render(
         <FormField label="E-mail" error="E-mail inválido.">
           <Input placeholder="Seu e-mail" />
-        </FormField>
+        </FormField>,
       );
 
       const input = screen.getByPlaceholderText(/Seu e-mail/i);
       expect(input.getAttribute('aria-invalid')).toBe('true');
       expect(input.className).toContain('input-erro');
-      
+
       const errorMsg = screen.getByRole('alert');
       expect(errorMsg.textContent).toContain('E-mail inválido.');
       expect(input.getAttribute('aria-describedby')).toContain(errorMsg.id);
@@ -120,7 +143,7 @@ describe('UI Components Unit Tests', () => {
   describe('Modal Component', () => {
     it('deve renderizar modal quando aberto, interceptar Escape e retornar foco', () => {
       const handleClose = vi.fn();
-      
+
       // Cria elemento ativo na tela para testar retorno do foco
       const triggerBtn = document.createElement('button');
       triggerBtn.textContent = 'Open';
@@ -131,7 +154,7 @@ describe('UI Components Unit Tests', () => {
       const { rerender } = render(
         <Modal aberto={true} onClose={handleClose} title="Janela de Teste">
           <p>Conteúdo do Modal</p>
-        </Modal>
+        </Modal>,
       );
 
       expect(screen.getByRole('dialog')).not.toBeNull();
@@ -149,10 +172,10 @@ describe('UI Components Unit Tests', () => {
       rerender(
         <Modal aberto={false} onClose={handleClose} title="Janela de Teste">
           <p>Conteúdo do Modal</p>
-        </Modal>
+        </Modal>,
       );
       expect(document.activeElement).toBe(triggerBtn);
-      
+
       // Cleanup
       document.body.removeChild(triggerBtn);
     });
@@ -174,7 +197,7 @@ describe('UI Components Unit Tests', () => {
           confirmText="Sim, inativar"
           cancelText="Não"
           variant="danger"
-        />
+        />,
       );
 
       expect(screen.getByText('Inativar Item')).not.toBeNull();
@@ -195,7 +218,7 @@ describe('UI Components Unit Tests', () => {
       const { rerender } = render(
         <Alert variant="error" title="Atenção" onClose={handleClose}>
           Ocorreu um erro
-        </Alert>
+        </Alert>,
       );
 
       // erro usa role="alert"
@@ -207,11 +230,7 @@ describe('UI Components Unit Tests', () => {
       expect(handleClose).toHaveBeenCalledTimes(1);
 
       // info usa role="status"
-      rerender(
-        <Alert variant="info">
-          Informação geral
-        </Alert>
-      );
+      rerender(<Alert variant="info">Informação geral</Alert>);
       expect(screen.getByRole('status')).not.toBeNull();
     });
   });
@@ -237,7 +256,7 @@ describe('UI Components Unit Tests', () => {
               <TableCell>ana@example.com</TableCell>
             </TableRow>
           </TableBody>
-        </Table>
+        </Table>,
       );
 
       expect(screen.getByRole('table')).not.toBeNull();
@@ -258,14 +277,18 @@ describe('UI Components Unit Tests', () => {
           currentPage={1}
           totalPages={3}
           onPageChange={handlePageChange}
-        />
+        />,
       );
 
-      const nextPageBtn = screen.getByRole('button', { name: /Ir para a próxima página/i });
+      const nextPageBtn = screen.getByRole('button', {
+        name: /Ir para a próxima página/i,
+      });
       fireEvent.click(nextPageBtn);
       expect(handlePageChange).toHaveBeenCalledWith(2);
 
-      const page3Btn = screen.getByRole('button', { name: /Ir para a página 3/i });
+      const page3Btn = screen.getByRole('button', {
+        name: /Ir para a página 3/i,
+      });
       fireEvent.click(page3Btn);
       expect(handlePageChange).toHaveBeenCalledWith(3);
     });

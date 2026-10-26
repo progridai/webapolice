@@ -11,7 +11,7 @@ export interface ReadOnlyFieldProps {
 export const ReadOnlyField: React.FC<ReadOnlyFieldProps> = ({
   value,
   id,
-  className = ''
+  className = '',
 }) => {
   return (
     <div className={`readonly-field-wrapper ${className}`}>

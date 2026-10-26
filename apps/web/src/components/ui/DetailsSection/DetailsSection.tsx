@@ -26,11 +26,7 @@ export const DetailsSection: React.FC<DetailsSectionProps> = ({
     <Card className={`p-4 flex flex-col gap-2 ${className}`}>
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
         <div className="flex items-start gap-3">
-          {icon && (
-            <div className="mt-1 text-texto-secundario">
-              {icon}
-            </div>
-          )}
+          {icon && <div className="mt-1 text-texto-secundario">{icon}</div>}
           <div>
             <h3 className="text-lg font-semibold text-texto-principal">
               {title}
@@ -42,18 +38,12 @@ export const DetailsSection: React.FC<DetailsSectionProps> = ({
             )}
           </div>
         </div>
-        {action && (
-          <div className="flex-shrink-0">
-            {action}
-          </div>
-        )}
+        {action && <div className="flex-shrink-0">{action}</div>}
       </div>
 
       <div className="flex-grow">
         {isEmpty && emptyState ? (
-          <div className="text-sm text-texto-secundario py-2">
-            {emptyState}
-          </div>
+          <div className="text-sm text-texto-secundario py-2">{emptyState}</div>
         ) : isEmpty ? (
           <p className="text-sm text-texto-secundario py-2">
             Nenhuma informação disponível.

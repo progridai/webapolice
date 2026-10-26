@@ -3,20 +3,18 @@ using System.Threading.Tasks;
 using WebApolice.Modulos.Cadastro.Application.Ports;
 using WebApolice.Modulos.Cadastro.Domain.Exceptions;
 
-using Microsoft.EntityFrameworkCore;
-using System.Linq;
 
 namespace WebApolice.Modulos.Cadastro.Application.UseCases.ConsultarCliente;
 
 public sealed class ConsultarClientePorIdHandler
 {
     private readonly IClientesQueries _queries;
-    private readonly WebApolice.Modulos.Seguranca.Infrastructure.Persistence.SegurancaDbContext _segurancaDbContext;
+    private readonly WebApolice.Modulos.Seguranca.Contracts.IDisponibilidadeCatalogo _catalogo;
 
-    public ConsultarClientePorIdHandler(IClientesQueries queries, WebApolice.Modulos.Seguranca.Infrastructure.Persistence.SegurancaDbContext segurancaDbContext)
+    public ConsultarClientePorIdHandler(IClientesQueries queries, WebApolice.Modulos.Seguranca.Contracts.IDisponibilidadeCatalogo catalogo)
     {
         _queries = queries;
-        _segurancaDbContext = segurancaDbContext;
+        _catalogo = catalogo;
     }
 
     public async Task<ConsultarClienteResult> Handle(ConsultarClientePorIdQuery query, CancellationToken cancellationToken)
@@ -25,12 +23,7 @@ public sealed class ConsultarClientePorIdHandler
         if (result == null)
             throw new ClienteNaoEncontradoException("Cliente não encontrado.");
 
-        var recursoRe = await _segurancaDbContext.Recursos
-            .Include(r => r.Modulo)
-            .Where(r => r.Codigo == "RE" && r.Modulo.Codigo == "CLIENTES")
-            .FirstOrDefaultAsync(cancellationToken);
-
-        if (recursoRe == null || !recursoRe.Habilitado || !recursoRe.Ativo || !recursoRe.Modulo.Habilitado || !recursoRe.Modulo.Ativo)
+        if (!await _catalogo.RecursoDisponivelAsync("CLIENTES", "RE", cancellationToken))
         {
             result = result with { Re = null };
         }

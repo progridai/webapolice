@@ -123,6 +123,11 @@ public sealed class ApiTestFactory : WebApplicationFactory<Program>
 
         builder.ConfigureServices(services =>
         {
+            services.AddScoped<WebApolice.Modulos.Seguranca.Application.Ports.IProvisionamentoUsuarioService, ProvisionamentoIsolado>();
+            services.AddScoped<WebApolice.Modulos.Seguranca.Application.Ports.IPermissoesEfetivasService, PermissoesIsoladas>();
+            services.AddScoped<WebApolice.Modulos.Seguranca.Contracts.IDisponibilidadeCatalogo, CatalogoIsolado>();
+            services.AddScoped<WebApolice.Modulos.Cadastro.Application.Ports.IClientesQueries, ClientesQueriesIsoladas>();
+            services.AddControllers().AddApplicationPart(typeof(WebApolice.Api.Infrastructure.Errors.TestController).Assembly);
             // Substituir apenas os parâmetros de validação do token JWT, mantendo
             // os event handlers (OnChallenge, etc.) configurados no Program.cs.
             // Usamos IPostConfigureOptions para sobrescrever APÓS a configuração original,
@@ -167,22 +172,9 @@ public sealed class ApiTestFactory : WebApplicationFactory<Program>
             options.Audience = _audience;
             options.ConfigurationManager = null;
 
-            // Substituir os parâmetros de validação para usar a chave de teste
-            options.TokenValidationParameters = new TokenValidationParameters
-            {
-                ValidateIssuer = true,
-                ValidateAudience = true,
-                ValidateLifetime = true,
-                ValidateIssuerSigningKey = true,
-
-                ValidIssuer = _issuer,
-                ValidAudience = _audience,
-
-                IssuerSigningKey = _chave,
-
-                NameClaimType = "preferred_username",
-                ClockSkew = TimeSpan.Zero, // Zero para testes de expiração precisos
-            };
+            // Preservar as regras reais do host; substituir somente a chave e o relógio de teste.
+            options.TokenValidationParameters.IssuerSigningKey = _chave;
+            options.TokenValidationParameters.ClockSkew = TimeSpan.Zero;
         }
     }
 }

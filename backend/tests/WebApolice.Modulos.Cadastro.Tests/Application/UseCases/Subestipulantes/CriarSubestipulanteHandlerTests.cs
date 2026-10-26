@@ -1,3 +1,4 @@
+using WebApolice.Modulos.Cadastro.Domain.Clientes;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -68,7 +69,7 @@ public class CriarSubestipulanteHandlerTests
             .ReturnsAsync(true);
 
         // Act & Assert
-        var ex = await Assert.ThrowsAsync<InvalidOperationException>(() => _handler.Handle(command, CancellationToken.None));
+        var ex = await Assert.ThrowsAsync<WebApolice.SharedKernel.Application.Exceptions.ValidacaoException>(() => _handler.Handle(command, CancellationToken.None));
         Assert.Equal("Já existe um subestipulante cadastrado com este CNPJ.", ex.Message);
     }
 
@@ -89,7 +90,7 @@ public class CriarSubestipulanteHandlerTests
             .ReturnsAsync(new PessoaModel(2, "Nome Original", "12.345.678/0001-99", "12345678000199", true, null, null, null));
 
         // Act & Assert
-        var ex = await Assert.ThrowsAsync<InvalidOperationException>(() => _handler.Handle(command, CancellationToken.None));
+        var ex = await Assert.ThrowsAsync<WebApolice.SharedKernel.Application.Exceptions.ValidacaoException>(() => _handler.Handle(command, CancellationToken.None));
         Assert.Contains("nome divergente", ex.Message);
         _transactionMock.Verify(t => t.RollbackAsync(It.IsAny<CancellationToken>()), Times.Once);
     }

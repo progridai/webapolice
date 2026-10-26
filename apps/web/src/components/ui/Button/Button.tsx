@@ -23,7 +23,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       type = 'button',
       ...props
     },
-    ref
+    ref,
   ) => {
     const isButtonDisabled = disabled || loading;
 
@@ -38,7 +38,11 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       >
         {loading ? (
           <>
-            <Spinner size="small" className="btn-spinner" aria-label="Processando..." />
+            <Spinner
+              size="small"
+              className="btn-spinner"
+              aria-label="Processando..."
+            />
             <span className="btn-loading-text sr-only">Carregando...</span>
             <span className="btn-content-hidden">{children}</span>
           </>
@@ -47,7 +51,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         )}
       </button>
     );
-  }
+  },
 );
 
 Button.displayName = 'Button';

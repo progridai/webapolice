@@ -17,42 +17,62 @@ export const seguradorasApi = {
   /**
    * Lista seguradoras de forma paginada com filtros opcionais.
    */
-  listar: async (query?: ListarSeguradorasQuery, signal?: AbortSignal): Promise<PagedResult<SeguradoraListItem>> => {
+  listar: async (
+    query?: ListarSeguradorasQuery,
+    signal?: AbortSignal,
+  ): Promise<PagedResult<SeguradoraListItem>> => {
     const params: Record<string, string | number | boolean> = {};
     if (query?.pagina) params['pagina'] = query.pagina;
     if (query?.tamanhoPagina) params['tamanhoPagina'] = query.tamanhoPagina;
     if (query?.busca) params['busca'] = query.busca;
     if (query?.ativo !== undefined) params['ativo'] = query.ativo;
 
-    const res = await httpClient.get<PagedResult<SeguradoraListItem>>('/api/seguradoras', {
-      params,
-      signal,
-    });
+    const res = await httpClient.get<PagedResult<SeguradoraListItem>>(
+      '/api/seguradoras',
+      {
+        params,
+        signal,
+      },
+    );
     return res.data;
   },
 
   /**
    * Obtém detalhes de uma seguradora pelo seu identificador público (UUID).
    */
-  obter: async (publicId: string, signal?: AbortSignal): Promise<SeguradoraDetalhe> => {
-    const res = await httpClient.get<SeguradoraDetalhe>(`/api/seguradoras/${publicId}`, {
-      signal,
-    });
+  obter: async (
+    publicId: string,
+    signal?: AbortSignal,
+  ): Promise<SeguradoraDetalhe> => {
+    const res = await httpClient.get<SeguradoraDetalhe>(
+      `/api/seguradoras/${publicId}`,
+      {
+        signal,
+      },
+    );
     return res.data;
   },
 
   /**
    * Cria uma nova seguradora.
    */
-  criar: async (data: CriarSeguradoraRequest): Promise<{ publicId: string }> => {
-    const res = await httpClient.post<{ publicId: string }>('/api/seguradoras', data);
+  criar: async (
+    data: CriarSeguradoraRequest,
+  ): Promise<{ publicId: string }> => {
+    const res = await httpClient.post<{ publicId: string }>(
+      '/api/seguradoras',
+      data,
+    );
     return res.data;
   },
 
   /**
    * Altera uma seguradora existente.
    */
-  alterar: async (publicId: string, data: AlterarSeguradoraRequest): Promise<void> => {
+  alterar: async (
+    publicId: string,
+    data: AlterarSeguradoraRequest,
+  ): Promise<void> => {
     await httpClient.put(`/api/seguradoras/${publicId}`, data);
   },
 

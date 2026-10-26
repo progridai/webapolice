@@ -54,7 +54,7 @@ describe('ThemeContext & useTema', () => {
     render(
       <ThemeProvider>
         <ThemeTestComponent />
-      </ThemeProvider>
+      </ThemeProvider>,
     );
 
     expect(screen.getByTestId('preferido').textContent).toBe('sistema');
@@ -72,7 +72,7 @@ describe('ThemeContext & useTema', () => {
     render(
       <ThemeProvider>
         <ThemeTestComponent />
-      </ThemeProvider>
+      </ThemeProvider>,
     );
 
     expect(screen.getByTestId('preferido').textContent).toBe('sistema');
@@ -85,7 +85,7 @@ describe('ThemeContext & useTema', () => {
     render(
       <ThemeProvider>
         <ThemeTestComponent />
-      </ThemeProvider>
+      </ThemeProvider>,
     );
 
     expect(screen.getByTestId('preferido').textContent).toBe('escuro');
@@ -96,7 +96,7 @@ describe('ThemeContext & useTema', () => {
     render(
       <ThemeProvider>
         <ThemeTestComponent />
-      </ThemeProvider>
+      </ThemeProvider>,
     );
 
     fireEvent.click(screen.getByText('Set Claro'));
@@ -116,16 +116,16 @@ describe('ThemeContext & useTema', () => {
     render(
       <ThemeProvider>
         <ThemeTestComponent />
-      </ThemeProvider>
+      </ThemeProvider>,
     );
 
     expect(screen.getByTestId('resolvido').textContent).toBe('light');
 
     // Simula alteração do sistema operacional para dark
     currentMatches = true;
-    
+
     act(() => {
-      listeners.forEach(listener => listener());
+      listeners.forEach((listener) => listener());
     });
 
     expect(screen.getByTestId('resolvido').textContent).toBe('dark');

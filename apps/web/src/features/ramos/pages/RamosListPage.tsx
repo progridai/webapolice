@@ -1,10 +1,10 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { 
-  PageHeader, 
-  Button, 
-  DataTable, 
-  Select, 
+import {
+  PageHeader,
+  Button,
+  DataTable,
+  Select,
   PlusIcon,
   EditIcon,
   XCircleIcon,
@@ -16,50 +16,53 @@ import {
   RowActions,
   StatusBadge,
   EyeIcon,
-  Pagination
+  Pagination,
+  Alert,
 } from '../../../components/ui';
 import type { Column } from '../../../components/ui/DataTable/DataTable';
 import { ROUTES, createPath } from '../../../app/routes/routePaths';
 import { useAuthorization } from '../../../auth/AuthorizationProvider';
+import { useConsulta } from '../../../shared/hooks/useConsulta';
 import { ramosApi, type RamoDto } from '../api/ramos.api';
 
 export const RamosListPage: React.FC = () => {
   const navigate = useNavigate();
   const { possuiPermissao } = useAuthorization();
 
-  const [ramos, setRamos] = useState<RamoDto[]>([]);
-  const [total, setTotal] = useState(0);
-  const [isLoading, setIsLoading] = useState(true);
-  
-  // Filtros e paginação
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
+
   const [busca, setBusca] = useState('');
   const [ativo, setAtivo] = useState<string>('');
   const [pagina, setPagina] = useState(1);
   const [tamanhoPagina] = useState(10);
 
-  const carregarRamos = useCallback(async () => {
-    try {
-      setIsLoading(true);
-      const res = await ramosApi.listar({
-        pagina,
-        tamanhoPagina,
-        busca: busca || undefined,
-        ativo: ativo === 'true' ? true : ativo === 'false' ? false : undefined,
-      });
-      setRamos(res.items);
-      setTotal(res.totalCount);
-    } catch (err) {
-      console.error('Erro ao listar ramos:', err);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [pagina, tamanhoPagina, busca, ativo]);
+  const load = useCallback(
+    (signal: AbortSignal) =>
+      ramosApi.listar(
+        {
+          pagina,
+          tamanhoPagina,
+          busca: busca || undefined,
+          ativo:
+            ativo === 'true' ? true : ativo === 'false' ? false : undefined,
+        },
+        signal,
+      ),
+    [pagina, tamanhoPagina, busca, ativo],
+  );
+  const {
+    data,
+    isLoading,
+    error: erroConsulta,
+    refetch,
+  } = useConsulta(
+    load,
+    'Não foi possível carregar a lista de ramos.',
+    refreshTrigger,
+  );
+  const ramos = data?.items || [];
+  const total = data?.totalCount || 0;
 
-  useEffect(() => {
-    carregarRamos();
-  }, [carregarRamos]);
-
-  // Disparado sempre que o SearchField com debounce mudar
   const handleBuscaChange = (novaBusca: string) => {
     setBusca(novaBusca);
     setPagina(1);
@@ -77,7 +80,7 @@ export const RamosListPage: React.FC = () => {
     if (!window.confirm('Tem certeza que deseja inativar este Ramo?')) return;
     try {
       await ramosApi.inativar(publicId);
-      carregarRamos();
+      setRefreshTrigger((previous) => previous + 1);
     } catch (err) {
       console.error('Erro ao inativar', err);
       alert('Erro ao inativar o ramo.');
@@ -88,7 +91,7 @@ export const RamosListPage: React.FC = () => {
     if (!window.confirm('Tem certeza que deseja reativar este Ramo?')) return;
     try {
       await ramosApi.reativar(publicId);
-      carregarRamos();
+      setRefreshTrigger((previous) => previous + 1);
     } catch (err) {
       console.error('Erro ao reativar', err);
       alert('Erro ao reativar o ramo.');
@@ -111,7 +114,7 @@ export const RamosListPage: React.FC = () => {
     {
       key: 'ativo',
       label: 'Status',
-      render: (row) => <StatusBadge status={row.ativo ? 'ativo' : 'inativo'} />
+      render: (row) => <StatusBadge status={row.ativo ? 'ativo' : 'inativo'} />,
     },
     {
       key: 'acoes',
@@ -119,12 +122,15 @@ export const RamosListPage: React.FC = () => {
       align: 'right',
       render: (row) => {
         const rowActions = [];
-        
+
         if (possuiPermissao('ramos.alterar')) {
           rowActions.push({
             label: 'Editar',
             icon: <EditIcon size={16} />,
-            onClick: () => navigate(createPath(ROUTES.RAMOS_EDITAR, { publicId: row.publicId }))
+            onClick: () =>
+              navigate(
+                createPath(ROUTES.RAMOS_EDITAR, { publicId: row.publicId }),
+              ),
           });
         }
         if (possuiPermissao('ramos.inativar') && row.ativo) {
@@ -132,14 +138,14 @@ export const RamosListPage: React.FC = () => {
             label: 'Inativar',
             icon: <XCircleIcon size={16} />,
             variant: 'danger' as const,
-            onClick: () => handleInativar(row.publicId)
+            onClick: () => handleInativar(row.publicId),
           });
         }
         if (possuiPermissao('ramos.reativar') && !row.ativo) {
           rowActions.push({
             label: 'Reativar',
             icon: <CheckCircleIcon size={16} />,
-            onClick: () => handleReativar(row.publicId)
+            onClick: () => handleReativar(row.publicId),
           });
         }
 
@@ -149,14 +155,14 @@ export const RamosListPage: React.FC = () => {
               label: 'Visualizar',
               icon: <EyeIcon size={16} />,
               // Temporário enquanto não há tela de visualização
-              onClick: () => alert('Visualizar ramo não implementado.')
+              onClick: () => alert('Visualizar ramo não implementado.'),
             }}
             actions={rowActions}
             ariaLabel={`Ações para o ramo ${row.nome}`}
           />
         );
-      }
-    }
+      },
+    },
   ];
 
   return (
@@ -166,10 +172,7 @@ export const RamosListPage: React.FC = () => {
         description="Gerencie os ramos de seguros utilizados no sistema"
         breadcrumbs={
           <Breadcrumbs
-            items={[
-              { label: 'Início', href: ROUTES.APP },
-              { label: 'Ramos' }
-            ]}
+            items={[{ label: 'Início', href: ROUTES.APP }, { label: 'Ramos' }]}
           />
         }
         actions={
@@ -182,31 +185,66 @@ export const RamosListPage: React.FC = () => {
         }
       />
 
+      {erroConsulta && (
+        <Alert variant="error" title="Erro de carregamento">
+          <div className="flex flex-col gap-2">
+            <span>Não foi possível carregar a lista de ramos.</span>
+            <div>
+              <Button
+                variant="secondary"
+                size="small"
+                onClick={() => void refetch()}
+              >
+                Tentar novamente
+              </Button>
+            </div>
+          </div>
+        </Alert>
+      )}
+
       <div className="flex flex-col gap-4">
         <FilterBar>
           <div className="flex-1 flex flex-col gap-1">
-            <label htmlFor="busca-ramos" className="text-sm font-medium text-texto-secundario">
+            <label
+              htmlFor="busca-ramos"
+              className="text-sm font-medium text-texto-secundario"
+            >
               Buscar ramo
             </label>
-            <SearchField 
-              id="busca-ramos" 
-              placeholder="Buscar por código ou nome..." 
-              value={busca} 
-              onChange={handleBuscaChange} 
+            <SearchField
+              id="busca-ramos"
+              placeholder="Buscar por código ou nome..."
+              value={busca}
+              onChange={handleBuscaChange}
             />
           </div>
           <div className="w-full md:w-48 flex flex-col gap-1">
-            <label htmlFor="status-ramos" className="text-sm font-medium text-texto-secundario">
+            <label
+              htmlFor="status-ramos"
+              className="text-sm font-medium text-texto-secundario"
+            >
               Status
             </label>
-            <Select id="status-ramos" value={ativo} onChange={(e) => { setAtivo(e.target.value); setPagina(1); }}>
+            <Select
+              id="status-ramos"
+              value={ativo}
+              onChange={(e) => {
+                setAtivo(e.target.value);
+                setPagina(1);
+              }}
+            >
               <option value="">Todos os status</option>
               <option value="true">Ativos</option>
               <option value="false">Inativos</option>
             </Select>
           </div>
           <div className="flex items-end pb-0">
-            <Button variant="secondary" disabled={!hasFilters} onClick={handleLimparFiltros} className="h-10">
+            <Button
+              variant="secondary"
+              disabled={!hasFilters}
+              onClick={handleLimparFiltros}
+              className="h-10"
+            >
               Limpar
             </Button>
           </div>
@@ -218,13 +256,15 @@ export const RamosListPage: React.FC = () => {
           totalItems={total}
         />
 
-        <DataTable
-          columns={columns}
-          data={ramos}
-          keyExtractor={(row) => row.publicId}
-          isLoading={isLoading}
-          emptyTitle="Nenhum ramo encontrado"
-        />
+        {(!erroConsulta || data) && (
+          <DataTable
+            columns={columns}
+            data={ramos}
+            keyExtractor={(row) => row.publicId}
+            isLoading={isLoading}
+            emptyTitle="Nenhum ramo encontrado"
+          />
+        )}
 
         {total > 0 && (
           <Pagination

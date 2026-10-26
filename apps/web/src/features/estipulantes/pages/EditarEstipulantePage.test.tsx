@@ -1,3 +1,4 @@
+import { HttpApiError } from '../../../services/http/httpError';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
 import { vi, describe, it, expect, beforeEach } from 'vitest';
@@ -46,19 +47,25 @@ describe('EditarEstipulantePage', () => {
   });
 
   it('deve exibir spinner durante carregamento e renderizar formulário em seguida', async () => {
-    (api.obterEstipulante as ReturnType<typeof vi.fn>).mockResolvedValue(mockEstipulante);
-    (api.obterConfiguracao as ReturnType<typeof vi.fn>).mockResolvedValue(mockConfiguracao);
+    (api.obterEstipulante as ReturnType<typeof vi.fn>).mockResolvedValue(
+      mockEstipulante,
+    );
+    (api.obterConfiguracao as ReturnType<typeof vi.fn>).mockResolvedValue(
+      mockConfiguracao,
+    );
 
     render(
       <BrowserRouter>
         <EditarEstipulantePage />
-      </BrowserRouter>
+      </BrowserRouter>,
     );
 
     // Na inicialização, deve mostrar carregando
 
     await waitFor(() => {
-      expect(screen.getByRole('heading', { name: 'Editar Estipulante' })).toBeTruthy();
+      expect(
+        screen.getByRole('heading', { name: 'Editar Estipulante' }),
+      ).toBeTruthy();
     });
 
     // Validar carregamento do CNPJ imutável no formato formatado
@@ -68,15 +75,20 @@ describe('EditarEstipulantePage', () => {
   });
 
   it('deve exibir EmptyState (404) quando estipulante não for encontrado', async () => {
-    (api.obterEstipulante as ReturnType<typeof vi.fn>).mockRejectedValue({
-      status: 404
-    });
-    (api.obterConfiguracao as ReturnType<typeof vi.fn>).mockResolvedValue(mockConfiguracao);
+    vi.mocked(api.obterEstipulante).mockRejectedValue(
+      new HttpApiError({
+        status: 404,
+        message: 'Não encontrado.',
+      }),
+    );
+    (api.obterConfiguracao as ReturnType<typeof vi.fn>).mockResolvedValue(
+      mockConfiguracao,
+    );
 
     render(
       <BrowserRouter>
         <EditarEstipulantePage />
-      </BrowserRouter>
+      </BrowserRouter>,
     );
 
     await waitFor(() => {
@@ -85,14 +97,20 @@ describe('EditarEstipulantePage', () => {
   });
 
   it('deve permitir submissão com sucesso enviando os dados e a configuração', async () => {
-    (api.obterEstipulante as ReturnType<typeof vi.fn>).mockResolvedValue(mockEstipulante);
-    (api.obterConfiguracao as ReturnType<typeof vi.fn>).mockResolvedValue(mockConfiguracao);
-    (api.alterarEstipulante as ReturnType<typeof vi.fn>).mockResolvedValue(undefined);
+    (api.obterEstipulante as ReturnType<typeof vi.fn>).mockResolvedValue(
+      mockEstipulante,
+    );
+    (api.obterConfiguracao as ReturnType<typeof vi.fn>).mockResolvedValue(
+      mockConfiguracao,
+    );
+    (api.alterarEstipulante as ReturnType<typeof vi.fn>).mockResolvedValue(
+      undefined,
+    );
 
     render(
       <BrowserRouter>
         <EditarEstipulantePage />
-      </BrowserRouter>
+      </BrowserRouter>,
     );
 
     await waitFor(() => {
@@ -100,34 +118,47 @@ describe('EditarEstipulantePage', () => {
     });
 
     // Disparar o botão de salvar
-    fireEvent.click(screen.getByRole('button', { name: /Salvar Estipulante/i }));
+    fireEvent.click(
+      screen.getByRole('button', { name: /Salvar Estipulante/i }),
+    );
 
     await waitFor(() => {
-      expect(api.alterarEstipulante).toHaveBeenCalledWith('estip-123', expect.any(Object));
+      expect(api.alterarEstipulante).toHaveBeenCalledWith(
+        'estip-123',
+        expect.any(Object),
+      );
     });
   });
 
   it('deve tratar conflito HTTP 409 (Pessoa Compartilhada)', async () => {
-    (api.obterEstipulante as ReturnType<typeof vi.fn>).mockResolvedValue(mockEstipulante);
-    (api.obterConfiguracao as ReturnType<typeof vi.fn>).mockResolvedValue(mockConfiguracao);
-    
+    (api.obterEstipulante as ReturnType<typeof vi.fn>).mockResolvedValue(
+      mockEstipulante,
+    );
+    (api.obterConfiguracao as ReturnType<typeof vi.fn>).mockResolvedValue(
+      mockConfiguracao,
+    );
+
     // Forçar erro na primeira promise (alterarEstipulante)
-    (api.alterarEstipulante as ReturnType<typeof vi.fn>).mockRejectedValue({
-      status: 409,
-      message: 'Conflito com Pessoa existente.'
-    });
+    vi.mocked(api.alterarEstipulante).mockRejectedValue(
+      new HttpApiError({
+        status: 409,
+        message: 'Conflito com Pessoa existente.',
+      }),
+    );
 
     render(
       <BrowserRouter>
         <EditarEstipulantePage />
-      </BrowserRouter>
+      </BrowserRouter>,
     );
 
     await waitFor(() => {
       expect(screen.getByDisplayValue('Estipulante Teste')).toBeTruthy();
     });
 
-    fireEvent.click(screen.getByRole('button', { name: /Salvar Estipulante/i }));
+    fireEvent.click(
+      screen.getByRole('button', { name: /Salvar Estipulante/i }),
+    );
 
     await waitFor(() => {
       expect(screen.getByText('Conflito com Pessoa existente.')).toBeTruthy();

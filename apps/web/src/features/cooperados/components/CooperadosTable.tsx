@@ -1,5 +1,13 @@
 import React from 'react';
-import { DataTable, StatusBadge, RowActions, EyeIcon, EditIcon, Button, Badge } from '../../../components/ui';
+import {
+  DataTable,
+  StatusBadge,
+  RowActions,
+  EyeIcon,
+  EditIcon,
+  Button,
+  Badge,
+} from '../../../components/ui';
 import type { Column } from '../../../components/ui/DataTable/DataTable';
 import { ROUTES, createPath } from '../../../app/routes/routePaths';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -46,18 +54,28 @@ export const CooperadosTable: React.FC<CooperadosTableProps> = ({
       key: 'codigo',
       label: 'Código',
       sortable: true,
-      render: (item) => <span className="text-texto-secundario text-sm font-medium">{item.codigo || '-'}</span>,
+      render: (item) => (
+        <span className="text-texto-secundario text-sm font-medium">
+          {item.codigo || '-'}
+        </span>
+      ),
     },
     {
       key: 'nome',
       label: 'Nome',
       sortable: true,
-      render: (item) => <span className="font-semibold text-texto-primario">{item.nome}</span>,
+      render: (item) => (
+        <span className="font-semibold text-texto-primario">{item.nome}</span>
+      ),
     },
     {
       key: 'cpfMascarado',
       label: 'CPF',
-      render: (item) => <span className="text-texto-secundario text-sm">{item.cpfMascarado}</span>,
+      render: (item) => (
+        <span className="text-texto-secundario text-sm">
+          {item.cpfMascarado}
+        </span>
+      ),
     },
     {
       key: 'contato',
@@ -84,7 +102,9 @@ export const CooperadosTable: React.FC<CooperadosTableProps> = ({
       key: 'status',
       label: 'Status',
       sortable: true,
-      render: (item) => <StatusBadge status={item.desativado ? 'inativo' : 'ativo'} />,
+      render: (item) => (
+        <StatusBadge status={item.desativado ? 'inativo' : 'ativo'} />
+      ),
     },
     {
       key: 'acoes',
@@ -98,11 +118,15 @@ export const CooperadosTable: React.FC<CooperadosTableProps> = ({
             onClick: () => handleVerDetalhes(item.publicId),
           }}
           actions={[
-            ...(podeAlterar ? [{
-              label: 'Editar',
-              icon: <EditIcon />,
-              onClick: () => handleEditar(item.publicId),
-            }] : []),
+            ...(podeAlterar
+              ? [
+                  {
+                    label: 'Editar',
+                    icon: <EditIcon />,
+                    onClick: () => handleEditar(item.publicId),
+                  },
+                ]
+              : []),
           ]}
           ariaLabel={`Ações para ${item.nome}`}
         />
@@ -120,7 +144,11 @@ export const CooperadosTable: React.FC<CooperadosTableProps> = ({
       direction={direction}
       onSort={onSort}
       aria-label="Lista de cooperados"
-      emptyTitle={hasActiveFilters ? 'Nenhum cooperado encontrado' : 'Nenhum cooperado cadastrado'}
+      emptyTitle={
+        hasActiveFilters
+          ? 'Nenhum cooperado encontrado'
+          : 'Nenhum cooperado cadastrado'
+      }
       emptyDescription={
         hasActiveFilters
           ? 'Não encontramos nenhum cooperado com os filtros informados.'
@@ -128,9 +156,7 @@ export const CooperadosTable: React.FC<CooperadosTableProps> = ({
       }
       emptyAction={
         hasActiveFilters && onClearFilters ? (
-          <Button onClick={onClearFilters}>
-            Limpar filtros
-          </Button>
+          <Button onClick={onClearFilters}>Limpar filtros</Button>
         ) : undefined
       }
     />

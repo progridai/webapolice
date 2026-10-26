@@ -8,8 +8,15 @@ import { CooperadosFilters } from '../components/CooperadosFilters';
 import { CooperadosTable } from '../components/CooperadosTable';
 import { CooperadosMobileList } from '../components/CooperadosMobileList';
 import {
-  Pagination, EmptyState, Alert, Button, Skeleton, ResultsSummary,
-  PageHeader, Breadcrumbs, UsersIcon
+  Pagination,
+  EmptyState,
+  Alert,
+  Button,
+  Skeleton,
+  ResultsSummary,
+  PageHeader,
+  Breadcrumbs,
+  UsersIcon,
 } from '../../../components/ui';
 
 export const CooperadosListPage: React.FC = () => {
@@ -19,8 +26,10 @@ export const CooperadosListPage: React.FC = () => {
   const navigate = useNavigate();
   const { possuiPermissao, possuiAcessoTotal } = useAuthorization();
 
-  const podeInserir = possuiAcessoTotal() || possuiPermissao('cooperados.inserir');
-  const podeAlterar = possuiAcessoTotal() || possuiPermissao('cooperados.alterar');
+  const podeInserir =
+    possuiAcessoTotal() || possuiPermissao('cooperados.inserir');
+  const podeAlterar =
+    possuiAcessoTotal() || possuiPermissao('cooperados.alterar');
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
@@ -36,7 +45,10 @@ export const CooperadosListPage: React.FC = () => {
   const handleSort = (column: string) => {
     setFilters({
       sortBy: column,
-      direction: filters.sortBy === column && filters.direction === 'asc' ? 'desc' : 'asc',
+      direction:
+        filters.sortBy === column && filters.direction === 'asc'
+          ? 'desc'
+          : 'asc',
     });
   };
 
@@ -44,26 +56,31 @@ export const CooperadosListPage: React.FC = () => {
     setFilters({ page });
   };
 
-  const hasActiveFilters = Boolean(filters.nome || filters.cpf || filters.status);
+  const hasActiveFilters = Boolean(
+    filters.nome || filters.cpf || filters.status,
+  );
   const hasData = data && data.itens && data.itens.length > 0;
 
   return (
-    <main className="flex flex-col gap-6 p-4 md:p-6 w-full max-w-[1440px] mx-auto focus:outline-none" tabIndex={-1}>
+    <main
+      className="flex flex-col gap-6 p-4 md:p-6 w-full max-w-[1440px] mx-auto focus:outline-none"
+      tabIndex={-1}
+    >
       <PageHeader
         title="Cooperados e Coordenadores"
         description="Gerencie a base de cooperados e coordenadores do sistema."
         icon={<UsersIcon size={24} />}
         breadcrumbs={
           <Breadcrumbs
-            items={[
-              { label: 'Início', href: '/' },
-              { label: 'Cooperados' },
-            ]}
+            items={[{ label: 'Início', href: '/' }, { label: 'Cooperados' }]}
           />
         }
         actions={
           podeInserir && (
-            <Button onClick={() => navigate(ROUTES.COOPERADOS_NOVO)} variant="primary">
+            <Button
+              onClick={() => navigate(ROUTES.COOPERADOS_NOVO)}
+              variant="primary"
+            >
               Novo Cooperado
             </Button>
           )
@@ -81,7 +98,10 @@ export const CooperadosListPage: React.FC = () => {
 
       {error ? (
         <div className="flex flex-col gap-4 mt-8 max-w-2xl mx-auto text-center items-center">
-          <Alert variant="error" title="Não foi possível carregar os cooperados">
+          <Alert
+            variant="error"
+            title="Não foi possível carregar os cooperados"
+          >
             {error.message}
           </Alert>
           <Button onClick={retry} size="small" loading={isLoading}>
@@ -89,15 +109,25 @@ export const CooperadosListPage: React.FC = () => {
           </Button>
         </div>
       ) : isLoading && !data && isMobile ? (
-        <div className="flex flex-col gap-4 mt-4" aria-busy="true" aria-live="polite">
+        <div
+          className="flex flex-col gap-4 mt-4"
+          aria-busy="true"
+          aria-live="polite"
+        >
           <Skeleton className="w-full h-32 rounded-lg bg-fundo-superficie border border-borda" />
           <Skeleton className="w-full h-32 rounded-lg bg-fundo-superficie border border-borda" />
           <Skeleton className="w-full h-32 rounded-lg bg-fundo-superficie border border-borda" />
         </div>
       ) : !hasData && isMobile ? (
         <EmptyState
-          icon={<UsersIcon size={48} className="text-texto-secundario opacity-50" />}
-          title={hasActiveFilters ? 'Nenhum cooperado encontrado' : 'Nenhum cooperado cadastrado'}
+          icon={
+            <UsersIcon size={48} className="text-texto-secundario opacity-50" />
+          }
+          title={
+            hasActiveFilters
+              ? 'Nenhum cooperado encontrado'
+              : 'Nenhum cooperado cadastrado'
+          }
           description={
             hasActiveFilters
               ? 'Não encontramos nenhum registro com os filtros informados.'
@@ -112,7 +142,10 @@ export const CooperadosListPage: React.FC = () => {
           }
         />
       ) : (
-        <section aria-label="Lista de cooperados" className="flex flex-col gap-4">
+        <section
+          aria-label="Lista de cooperados"
+          className="flex flex-col gap-4"
+        >
           {!isMobile && (
             <CooperadosTable
               cooperados={data?.itens || []}
@@ -127,8 +160,8 @@ export const CooperadosListPage: React.FC = () => {
           )}
 
           {isMobile && hasData && (
-            <CooperadosMobileList 
-              cooperados={data.itens} 
+            <CooperadosMobileList
+              cooperados={data.itens}
               podeAlterar={podeAlterar}
             />
           )}

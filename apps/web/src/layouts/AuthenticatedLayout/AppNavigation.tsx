@@ -26,8 +26,20 @@ interface NavItem {
 }
 
 const NAV_ITEMS: NavItem[] = [
-  { label: 'Coberturas', path: ROUTES.COBERTURAS, icon: BookOpenIcon, moduloCodigo: 'CADASTRO', permissaoCodigo: 'coberturas.visualizar' },
-  { label: 'Convênios de Cobrança', path: ROUTES.CONVENIOS_COBRANCA, icon: BookOpenIcon, moduloCodigo: 'CADASTRO', permissaoCodigo: 'convenios_cobranca.visualizar' },
+  {
+    label: 'Coberturas',
+    path: ROUTES.COBERTURAS,
+    icon: BookOpenIcon,
+    moduloCodigo: 'CADASTRO',
+    permissaoCodigo: 'coberturas.visualizar',
+  },
+  {
+    label: 'Convênios de Cobrança',
+    path: ROUTES.CONVENIOS_COBRANCA,
+    icon: BookOpenIcon,
+    moduloCodigo: 'CADASTRO',
+    permissaoCodigo: 'convenios_cobranca.visualizar',
+  },
 
   {
     label: 'Início',
@@ -140,14 +152,29 @@ interface AppNavigationProps {
 }
 
 export const AppNavigation: React.FC<AppNavigationProps> = ({ onNavigate }) => {
-  const { ehOperadorSistema, possuiModulo, possuiPermissao, possuiAcessoTotal } = useAuthorization();
+  const {
+    ehOperadorSistema,
+    possuiModulo,
+    possuiPermissao,
+    possuiAcessoTotal,
+  } = useAuthorization();
   const location = useLocation();
 
   const visibleItems = NAV_ITEMS.filter((item) => {
     if (item.requiresEnvFlag && !ENV.ENABLE_DESIGN_SYSTEM) return false;
     if (item.somenteOperador && !ehOperadorSistema()) return false;
-    if (item.moduloCodigo && !possuiAcessoTotal() && !possuiModulo(item.moduloCodigo)) return false;
-    if (item.permissaoCodigo && !possuiAcessoTotal() && !possuiPermissao(item.permissaoCodigo)) return false;
+    if (
+      item.moduloCodigo &&
+      !possuiAcessoTotal() &&
+      !possuiModulo(item.moduloCodigo)
+    )
+      return false;
+    if (
+      item.permissaoCodigo &&
+      !possuiAcessoTotal() &&
+      !possuiPermissao(item.permissaoCodigo)
+    )
+      return false;
     return true;
   });
 

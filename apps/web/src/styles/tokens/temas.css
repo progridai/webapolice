@@ -11,7 +11,9 @@
   --cor-marca-principal-borda: var(--palette-dourado-borda);
   --cor-marca-principal-texto: var(--palette-preto-suave);
   --cor-sobre-marca-principal: var(--palette-preto-suave);
-  --cor-sobre-dourado: var(--cor-sobre-marca-principal); /* Alias temporário de retrocompatibilidade */
+  --cor-sobre-dourado: var(
+    --cor-sobre-marca-principal
+  ); /* Alias temporário de retrocompatibilidade */
 
   /* Superfícies e Fundos */
   --cor-fundo-aplicacao: var(--palette-cinza-claro);
@@ -21,13 +23,15 @@
 
   /* Textos */
   --cor-texto-principal: var(--palette-preto-suave);
-  --cor-texto-secundario: var(--palette-neutral-600); /* Oferece contraste ~5.7:1 no fundo branco */
+  --cor-texto-secundario: var(
+    --palette-neutral-600
+  ); /* Oferece contraste ~5.7:1 no fundo branco */
   --cor-texto-inverso: var(--palette-branco);
 
   /* Bordas e Divisores */
   --cor-borda: var(--palette-neutral-200);
   --cor-borda-forte: var(--palette-neutral-400);
-  
+
   /* Interações */
   --cor-foco: var(--palette-dourado);
   --cor-desabilitado: var(--palette-neutral-400);
@@ -64,18 +68,27 @@
   --cor-marca-principal-suave: var(--palette-dourado-suave);
   --cor-marca-principal-borda: var(--palette-dourado-borda);
   --cor-marca-principal-texto: var(--palette-branco);
-  --cor-sobre-marca-principal: var(--palette-preto-suave); /* Dourado permanece com texto escuro para contraste */
-  --cor-sobre-dourado: var(--cor-sobre-marca-principal); /* Alias temporário de retrocompatibilidade */
+  --cor-sobre-marca-principal: var(
+    --palette-preto-suave
+  ); /* Dourado permanece com texto escuro para contraste */
+  --cor-sobre-dourado: var(
+    --cor-sobre-marca-principal
+  ); /* Alias temporário de retrocompatibilidade */
 
   /* Superfícies e Fundos */
   --cor-fundo-aplicacao: var(--palette-neutral-900); /* Preto suave */
-  --cor-fundo-superficie: var(--palette-neutral-850, #222225); /* Tom levemente mais claro */
+  --cor-fundo-superficie: var(
+    --palette-neutral-850,
+    #222225
+  ); /* Tom levemente mais claro */
   --cor-fundo-elevado: var(--palette-neutral-800); /* Tom escuro elevado */
   --cor-fundo-overlay: rgba(0, 0, 0, 0.65);
 
   /* Textos */
   --cor-texto-principal: var(--palette-neutral-100);
-  --cor-texto-secundario: var(--palette-neutral-400); /* Contraste ~5.4:1 contra o fundo de superfície escuro */
+  --cor-texto-secundario: var(
+    --palette-neutral-400
+  ); /* Contraste ~5.4:1 contra o fundo de superfície escuro */
   --cor-texto-inverso: var(--palette-preto-suave);
 
   /* Bordas e Divisores */

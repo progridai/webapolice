@@ -23,9 +23,7 @@ vi.mock('../../../auth/AuthorizationProvider', () => ({
 }));
 
 const Wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-  <MemoryRouter initialEntries={['/seguradoras']}>
-    {children}
-  </MemoryRouter>
+  <MemoryRouter initialEntries={['/seguradoras']}>{children}</MemoryRouter>
 );
 
 describe('SeguradorasListPage', () => {
@@ -42,7 +40,7 @@ describe('SeguradorasListPage', () => {
         addEventListener: vi.fn(),
         removeEventListener: vi.fn(),
         dispatchEvent: vi.fn(),
-      }))
+      })),
     );
   });
 
@@ -56,7 +54,9 @@ describe('SeguradorasListPage', () => {
     });
 
     render(<SeguradorasListPage />, { wrapper: Wrapper });
-    expect(screen.getByRole('heading', { name: 'Cadastro de Seguradoras' })).toBeTruthy();
+    expect(
+      screen.getByRole('heading', { name: 'Cadastro de Seguradoras' }),
+    ).toBeTruthy();
   });
 
   it('deve exibir tabela com seguradoras quando a API responder com sucesso', async () => {
@@ -109,12 +109,16 @@ describe('SeguradorasListPage', () => {
   });
 
   it('deve exibir mensagem de erro e permitir retentativa ao falhar', async () => {
-    vi.mocked(api.seguradorasApi.listar).mockRejectedValueOnce(new Error('Falha de conexão'));
+    vi.mocked(api.seguradorasApi.listar).mockRejectedValueOnce(
+      new Error('Falha de conexão'),
+    );
 
     render(<SeguradorasListPage />, { wrapper: Wrapper });
 
     await waitFor(() => {
-      expect(screen.getByText('Não foi possível carregar a lista de seguradoras.')).toBeTruthy();
+      expect(
+        screen.getByText('Não foi possível carregar a lista de seguradoras.'),
+      ).toBeTruthy();
     });
 
     const retryBtn = screen.getByRole('button', { name: /tentar novamente/i });
@@ -132,7 +136,9 @@ describe('SeguradorasListPage', () => {
 
     render(<SeguradorasListPage />, { wrapper: Wrapper });
 
-    const searchInput = screen.getByPlaceholderText(/Buscar por nome, CNPJ, código ou SUSEP/i);
+    const searchInput = screen.getByPlaceholderText(
+      /Buscar por nome, CNPJ, código ou SUSEP/i,
+    );
     fireEvent.change(searchInput, { target: { value: 'Porto' } });
 
     expect(api.seguradorasApi.listar).toHaveBeenCalledTimes(1);
@@ -173,10 +179,14 @@ describe('SeguradorasListPage', () => {
     const menuTrigger = screen.getByLabelText('Mais ações');
     fireEvent.click(menuTrigger);
 
-    const inativarBtn = await screen.findByRole('menuitem', { name: /Inativar/i });
+    const inativarBtn = await screen.findByRole('menuitem', {
+      name: /Inativar/i,
+    });
     fireEvent.click(inativarBtn);
 
-    expect(screen.getByText(/Tem certeza que deseja inativar a seguradora/i)).toBeTruthy();
+    expect(
+      screen.getByText(/Tem certeza que deseja inativar a seguradora/i),
+    ).toBeTruthy();
 
     const confirmBtn = screen.getByRole('button', { name: 'Sim, inativar' });
     fireEvent.click(confirmBtn);

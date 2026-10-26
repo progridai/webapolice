@@ -1,3 +1,4 @@
+using WebApolice.Modulos.Seguranca.Contracts.Authorization;
 using System;
 using System.Linq;
 using System.Threading;
@@ -5,7 +6,6 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using WebApolice.Modulos.Seguranca.Application.Authorization;
-using WebApolice.Modulos.Seguranca.Infrastructure.Authorization;
 using WebApolice.Modulos.Seguro.Api.Controllers.Requests;
 using WebApolice.Modulos.Seguro.Application.UseCases.Apolices.CriarApolice;
 using WebApolice.Modulos.Seguro.Application.UseCases.Apolices.ListarApolices;

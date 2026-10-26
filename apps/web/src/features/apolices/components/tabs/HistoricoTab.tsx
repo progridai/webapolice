@@ -1,6 +1,12 @@
 import React, { useState } from 'react';
 import { useApoliceHistorico } from '../../hooks/useApoliceHistorico';
-import { DataTable, Alert, Button, EmptyState, Pagination } from '../../../../components/ui';
+import {
+  DataTable,
+  Alert,
+  Button,
+  EmptyState,
+  Pagination,
+} from '../../../../components/ui';
 import type { Column } from '../../../../components/ui/DataTable/DataTable';
 import type { ApoliceHistoricoResult } from '../../types/apolice.types';
 
@@ -13,7 +19,11 @@ type LinhaHistorico = ApoliceHistoricoResult & { chaveLinha: string };
 export const HistoricoTab: React.FC<HistoricoTabProps> = ({ publicId }) => {
   const [page, setPage] = useState(1);
   const pageSize = 15;
-  const { data, isLoading, error } = useApoliceHistorico(publicId, page, pageSize);
+  const { data, isLoading, error } = useApoliceHistorico(
+    publicId,
+    page,
+    pageSize,
+  );
 
   if (error) {
     return (
@@ -21,7 +31,11 @@ export const HistoricoTab: React.FC<HistoricoTabProps> = ({ publicId }) => {
         <Alert variant="error" title="Erro ao carregar o histórico">
           {error.message}
         </Alert>
-        <Button onClick={() => window.location.reload()} size="small" loading={isLoading}>
+        <Button
+          onClick={() => window.location.reload()}
+          size="small"
+          loading={isLoading}
+        >
           Tentar novamente
         </Button>
       </div>
@@ -40,10 +54,12 @@ export const HistoricoTab: React.FC<HistoricoTabProps> = ({ publicId }) => {
   }
 
   // O contrato histórico não expõe ID. A chave é local à página, sem alterar a evidência recebida.
-  const registros: LinhaHistorico[] = (data?.items || []).map((item, index) => ({
-    ...item,
-    chaveLinha: `${publicId}-${data?.page ?? page}-${index}`,
-  }));
+  const registros: LinhaHistorico[] = (data?.items || []).map(
+    (item, index) => ({
+      ...item,
+      chaveLinha: `${publicId}-${data?.page ?? page}-${index}`,
+    }),
+  );
   const columns: Column<LinhaHistorico>[] = [
     {
       key: 'acao',
@@ -63,7 +79,9 @@ export const HistoricoTab: React.FC<HistoricoTabProps> = ({ publicId }) => {
       key: 'usuario',
       label: 'Usuário',
       render: (item) => (
-        <span className="text-sm text-texto-terciario">{item.usuarioPublicId || 'Sistema'}</span>
+        <span className="text-sm text-texto-terciario">
+          {item.usuarioPublicId || 'Sistema'}
+        </span>
       ),
     },
     {
@@ -86,7 +104,7 @@ export const HistoricoTab: React.FC<HistoricoTabProps> = ({ publicId }) => {
         isLoading={isLoading}
         aria-label="Histórico da Apólice"
       />
-      
+
       {data && Math.ceil(data.totalCount / data.pageSize) > 1 && (
         <div className="flex justify-center md:justify-end mt-4 pt-4 border-t border-borda">
           <Pagination

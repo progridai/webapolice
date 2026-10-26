@@ -13,8 +13,7 @@ namespace WebApolice.Integration.Tests.Setup;
 /// </summary>
 public class SegurancaIntegrationTestFixture : IAsyncLifetime
 {
-    private readonly PostgreSqlContainer _postgreSqlContainer = new PostgreSqlBuilder()
-        .WithImage("postgres:16")
+    private readonly PostgreSqlContainer _postgreSqlContainer = new PostgreSqlBuilder("postgres:18.4")
         .Build();
 
     public SegurancaDbContext DbContext { get; private set; } = default!;

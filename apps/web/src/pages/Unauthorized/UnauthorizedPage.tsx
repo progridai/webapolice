@@ -17,7 +17,8 @@ export const UnauthorizedPage: React.FC = () => {
   const { login } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const from = (location.state as { from?: { pathname: string } })?.from?.pathname;
+  const from = (location.state as { from?: { pathname: string } })?.from
+    ?.pathname;
 
   useEffect(() => {
     document.title = 'Sessão necessária | WebApólice';
@@ -33,10 +34,16 @@ export const UnauthorizedPage: React.FC = () => {
       <EmptyState
         title="Sessão necessária"
         description="Você precisa fazer login para acessar esta página. Por favor, entre com sua conta corporativa."
-        icon={<AlertIcon size={48} className="error-page-icon" aria-hidden="true" />}
+        icon={
+          <AlertIcon size={48} className="error-page-icon" aria-hidden="true" />
+        }
         action={
           <div className="error-page-actions">
-            <Button id="btn-login-unauthorized" variant="primary" onClick={handleLogin}>
+            <Button
+              id="btn-login-unauthorized"
+              variant="primary"
+              onClick={handleLogin}
+            >
               Entrar
             </Button>
             <Button variant="secondary" onClick={() => navigate(-1)}>

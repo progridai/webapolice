@@ -1,7 +1,12 @@
 /* Skeleton.css */
 
 .skeleton {
-  background: linear-gradient(90deg, var(--cor-borda) 25%, var(--cor-fundo-aplicacao) 50%, var(--cor-borda) 75%);
+  background: linear-gradient(
+    90deg,
+    var(--cor-borda) 25%,
+    var(--cor-fundo-aplicacao) 50%,
+    var(--cor-borda) 75%
+  );
   background-size: 200% 100%;
   animation: skeleton-loading 1.5s infinite ease-in-out;
 }

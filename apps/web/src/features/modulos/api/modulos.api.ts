@@ -1,5 +1,10 @@
 import { httpClient } from '../../../services/http/httpClient';
-import type { ModuloDto, ModuloListDto, CriarModuloDto, AtualizarModuloDto } from '../types/modulo.types';
+import type {
+  ModuloDto,
+  ModuloListDto,
+  CriarModuloDto,
+  AtualizarModuloDto,
+} from '../types/modulo.types';
 
 export interface ListarModulosParams {
   pagina: number;
@@ -14,19 +19,27 @@ export interface ListarModulosResponse {
 }
 
 export const modulosApi = {
-  listar: async (params: ListarModulosParams): Promise<ListarModulosResponse> => {
+  listar: async (
+    params: ListarModulosParams,
+    signal?: AbortSignal,
+  ): Promise<ListarModulosResponse> => {
     const queryParams: Record<string, string | number | boolean> = {
       pagina: params.pagina,
       tamanhoPagina: params.tamanhoPagina,
     };
     if (params.busca !== undefined) queryParams.busca = params.busca;
     if (params.ativo !== undefined) queryParams.ativo = params.ativo;
-    const { data } = await httpClient.get<ListarModulosResponse>('/api/modulos', { params: queryParams });
+    const { data } = await httpClient.get<ListarModulosResponse>(
+      '/api/modulos',
+      { params: queryParams, signal },
+    );
     return data;
   },
 
   obter: async (publicId: string): Promise<ModuloDto> => {
-    const { data } = await httpClient.get<ModuloDto>(`/api/modulos/${publicId}`);
+    const { data } = await httpClient.get<ModuloDto>(
+      `/api/modulos/${publicId}`,
+    );
     return data;
   },
 
@@ -35,8 +48,14 @@ export const modulosApi = {
     return data;
   },
 
-  alterar: async (publicId: string, dto: AtualizarModuloDto): Promise<ModuloDto> => {
-    const { data } = await httpClient.put<ModuloDto>(`/api/modulos/${publicId}`, dto);
+  alterar: async (
+    publicId: string,
+    dto: AtualizarModuloDto,
+  ): Promise<ModuloDto> => {
+    const { data } = await httpClient.put<ModuloDto>(
+      `/api/modulos/${publicId}`,
+      dto,
+    );
     return data;
   },
 

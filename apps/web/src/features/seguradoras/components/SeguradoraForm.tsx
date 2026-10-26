@@ -19,7 +19,10 @@ import {
 import { CnpjInput } from '../../../components/fields';
 import { normalizeCnpj } from '../../../shared/utils/normalizers';
 import { formatarCnpj } from '../../../shared/utils/formatters';
-import { seguradoraFormSchema, type SeguradoraFormData } from '../schemas/seguradoraFormSchema';
+import {
+  seguradoraFormSchema,
+  type SeguradoraFormData,
+} from '../schemas/seguradoraFormSchema';
 
 interface SeguradoraFormProps {
   initialData?: Partial<SeguradoraFormData>;
@@ -71,11 +74,22 @@ export const SeguradoraForm: React.FC<SeguradoraFormProps> = ({
   };
 
   return (
-    <form onSubmit={handleSubmit(handleFormSubmit)} className="flex flex-col gap-6" noValidate>
-      <FormSection title="Dados da Seguradora" icon={<BriefcaseIcon size={20} />}>
+    <form
+      onSubmit={handleSubmit(handleFormSubmit)}
+      className="flex flex-col gap-6"
+      noValidate
+    >
+      <FormSection
+        title="Dados da Seguradora"
+        icon={<BriefcaseIcon size={20} />}
+      >
         <FormGrid>
           <div className="lg:col-span-8">
-            <FormField label="Nome / Razão Social" required error={errors.nome?.message}>
+            <FormField
+              label="Nome / Razão Social"
+              required
+              error={errors.nome?.message}
+            >
               <Input
                 {...register('nome')}
                 id="seguradora-nome"
@@ -136,10 +150,20 @@ export const SeguradoraForm: React.FC<SeguradoraFormProps> = ({
 
       <FormActions>
         <div className="flex-grow flex justify-start" />
-        <Button type="button" variant="text" onClick={onCancel} disabled={isSubmitting}>
+        <Button
+          type="button"
+          variant="text"
+          onClick={onCancel}
+          disabled={isSubmitting}
+        >
           Cancelar
         </Button>
-        <Button type="submit" variant="primary" disabled={isSubmitting} loading={isSubmitting}>
+        <Button
+          type="submit"
+          variant="primary"
+          disabled={isSubmitting}
+          loading={isSubmitting}
+        >
           Salvar
         </Button>
       </FormActions>

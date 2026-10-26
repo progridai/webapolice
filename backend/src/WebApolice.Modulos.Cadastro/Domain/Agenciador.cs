@@ -45,7 +45,7 @@ public sealed class Agenciador
 
     private Agenciador() { }
 
-    public Agenciador(long pessoaId, TipoAgenciador tipo, string codigo, string susep, string inss, string issqn, int? numeroDependentes, DateOnly? dataInscricao, bool? credenciado, long? coordenadorId, long? bancoId, string agencia, string contaCorrente, string observacao)
+    public Agenciador(long pessoaId, TipoAgenciador tipo, string codigo, string? susep, string? inss, string? issqn, int? numeroDependentes, DateOnly? dataInscricao, bool? credenciado, long? coordenadorId, long? bancoId, string? agencia, string? contaCorrente, string? observacao)
     {
         PessoaId = pessoaId;
         PublicId = Guid.NewGuid();
@@ -69,7 +69,7 @@ public sealed class Agenciador
         UpdatedAt = CreatedAt;
     }
 
-    public void AtualizarDados(string codigo, string susep, string inss, string issqn, int? numeroDependentes, DateOnly? dataInscricao, bool? credenciado, long? coordenadorId, long? bancoId, string agencia, string contaCorrente, string observacao)
+    public void AtualizarDados(string codigo, string? susep, string? inss, string? issqn, int? numeroDependentes, DateOnly? dataInscricao, bool? credenciado, long? coordenadorId, long? bancoId, string? agencia, string? contaCorrente, string? observacao)
     {
         Codigo = codigo;
         Susep = susep;

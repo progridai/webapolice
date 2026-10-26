@@ -35,8 +35,11 @@ public static class CadastroModuleExtensions
             }).UseSnakeCaseNamingConvention();
         });
 
+        services.AddScoped<WebApolice.Modulos.Cadastro.Contracts.IClientesPropostas, ClientesPropostas>();
+
         // Ports / Repositories
         services.AddScoped<IClienteRepository, ClienteRepository>();
+        services.AddScoped<IOperacaoCadastroAuditada, OperacaoCadastroAuditada>();
         services.AddScoped<IClientesQueries, ClientesQueries>();
         services.AddScoped<ICooperadoRepository, CooperadoRepository>();
         services.AddScoped<ICooperadosQueries, CooperadosQueries>();

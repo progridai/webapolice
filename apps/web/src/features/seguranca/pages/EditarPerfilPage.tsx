@@ -3,7 +3,13 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { PerfilForm, type PerfilFormData } from '../components/PerfilForm';
 import { obterPerfilDetalhe, atualizarPerfil } from '../api/perfisApi';
 import { obterCatalogo } from '../api/catalogoApi';
-import { Alert, PageHeader, Breadcrumbs, Spinner, Button } from '../../../components/ui';
+import {
+  Alert,
+  PageHeader,
+  Breadcrumbs,
+  Spinner,
+  Button,
+} from '../../../components/ui';
 import type { CatalogoModuloDto } from '../types/seguranca.types';
 
 const PERFIL_ADMIN_CODIGO = 'ADMINISTRADOR';
@@ -12,7 +18,8 @@ export const EditarPerfilPage: React.FC = () => {
   const { publicId } = useParams<{ publicId: string }>();
   const navigate = useNavigate();
 
-  const [initialData, setInitialData] = useState<Partial<PerfilFormData> | null>(null);
+  const [initialData, setInitialData] =
+    useState<Partial<PerfilFormData> | null>(null);
   const [catalogo, setCatalogo] = useState<CatalogoModuloDto[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -24,9 +31,16 @@ export const EditarPerfilPage: React.FC = () => {
     const fetch = async () => {
       if (!publicId) return;
       try {
-        const [cat, perfil] = await Promise.all([obterCatalogo(), obterPerfilDetalhe(publicId)]);
-        
-        if (perfil.codigo === PERFIL_ADMIN_CODIGO && perfil.perfilSistema && perfil.acessoTotal) {
+        const [cat, perfil] = await Promise.all([
+          obterCatalogo(),
+          obterPerfilDetalhe(publicId),
+        ]);
+
+        if (
+          perfil.codigo === PERFIL_ADMIN_CODIGO &&
+          perfil.perfilSistema &&
+          perfil.acessoTotal
+        ) {
           setIsProtegido(true);
           setIsLoading(false);
           return;
@@ -64,8 +78,11 @@ export const EditarPerfilPage: React.FC = () => {
       navigate(`/seguranca/perfis/${publicId}`);
     } catch (err: unknown) {
       console.error('Erro ao editar perfil:', err);
-      const errorResponse = err as { response?: { status?: number; data?: { message?: string } } };
-      setError(errorResponse.response?.data?.message || 'Ocorreu um erro ao salvar o perfil.');
+      setError(
+        err instanceof Error && err.message
+          ? err.message
+          : 'Ocorreu um erro ao salvar o perfil.',
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -81,15 +98,26 @@ export const EditarPerfilPage: React.FC = () => {
 
   if (isProtegido) {
     return (
-      <main className="flex flex-col gap-6 p-6 max-w-4xl mx-auto focus:outline-none" role="main" tabIndex={-1}>
+      <main
+        className="flex flex-col gap-6 p-6 max-w-4xl mx-auto focus:outline-none"
+        role="main"
+        tabIndex={-1}
+      >
         <Alert variant="warning" title="Acesso Restrito">
-          O perfil <strong>ADMINISTRADOR</strong> é protegido pelo sistema e não pode ser editado.
+          O perfil <strong>ADMINISTRADOR</strong> é protegido pelo sistema e não
+          pode ser editado.
         </Alert>
         <div className="flex gap-4 mt-4">
-          <Button variant="primary" onClick={() => navigate('/seguranca/perfis')}>
+          <Button
+            variant="primary"
+            onClick={() => navigate('/seguranca/perfis')}
+          >
             Voltar para Perfis
           </Button>
-          <Button variant="secondary" onClick={() => navigate(`/seguranca/perfis/${publicId}`)}>
+          <Button
+            variant="secondary"
+            onClick={() => navigate(`/seguranca/perfis/${publicId}`)}
+          >
             Ver Detalhes
           </Button>
         </div>
@@ -99,8 +127,14 @@ export const EditarPerfilPage: React.FC = () => {
 
   if (error && !initialData) {
     return (
-      <main className="flex flex-col gap-6 p-6 max-w-4xl mx-auto focus:outline-none" role="main" tabIndex={-1}>
-        <Alert variant="error" title="Erro">{error}</Alert>
+      <main
+        className="flex flex-col gap-6 p-6 max-w-4xl mx-auto focus:outline-none"
+        role="main"
+        tabIndex={-1}
+      >
+        <Alert variant="error" title="Erro">
+          {error}
+        </Alert>
         <Button className="mt-4" onClick={() => navigate('/seguranca/perfis')}>
           Voltar
         </Button>
@@ -109,7 +143,11 @@ export const EditarPerfilPage: React.FC = () => {
   }
 
   return (
-    <main className="flex flex-col gap-6 p-6 max-w-4xl mx-auto focus:outline-none" role="main" tabIndex={-1}>
+    <main
+      className="flex flex-col gap-6 p-6 max-w-4xl mx-auto focus:outline-none"
+      role="main"
+      tabIndex={-1}
+    >
       <PageHeader
         title="Editar Perfil"
         description="Atualize os dados e permissões deste perfil."
@@ -128,10 +166,12 @@ export const EditarPerfilPage: React.FC = () => {
       <div className="w-full">
         {error && (
           <div className="mb-4">
-            <Alert variant="error" title="Erro ao Salvar">{error}</Alert>
+            <Alert variant="error" title="Erro ao Salvar">
+              {error}
+            </Alert>
           </div>
         )}
-        
+
         {initialData && (
           <PerfilForm
             initialData={initialData}

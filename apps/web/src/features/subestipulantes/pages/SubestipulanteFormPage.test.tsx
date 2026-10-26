@@ -30,12 +30,17 @@ describe('SubestipulanteFormPage', () => {
     render(
       <MemoryRouter initialEntries={['/subestipulantes/novo']}>
         <Routes>
-          <Route path="/subestipulantes/novo" element={<SubestipulanteFormPage />} />
+          <Route
+            path="/subestipulantes/novo"
+            element={<SubestipulanteFormPage />}
+          />
         </Routes>
-      </MemoryRouter>
+      </MemoryRouter>,
     );
 
-    expect(screen.getByRole('heading', { name: 'Novo Subestipulante' })).toBeTruthy();
+    expect(
+      screen.getByRole('heading', { name: 'Novo Subestipulante' }),
+    ).toBeTruthy();
     expect(screen.getByLabelText(/Nome \/ Razão Social/i)).toBeTruthy();
     expect(screen.getByLabelText(/CNPJ/i)).toBeTruthy();
     expect(screen.getByLabelText(/Código Interno/i)).toBeTruthy();
@@ -46,28 +51,40 @@ describe('SubestipulanteFormPage', () => {
     render(
       <MemoryRouter initialEntries={['/subestipulantes/novo']}>
         <Routes>
-          <Route path="/subestipulantes/novo" element={<SubestipulanteFormPage />} />
+          <Route
+            path="/subestipulantes/novo"
+            element={<SubestipulanteFormPage />}
+          />
         </Routes>
-      </MemoryRouter>
+      </MemoryRouter>,
     );
 
-    const salvarBtn = screen.getByRole('button', { name: 'Salvar Subestipulante' });
+    const salvarBtn = screen.getByRole('button', {
+      name: 'Salvar Subestipulante',
+    });
     fireEvent.click(salvarBtn);
 
     await waitFor(() => {
-      expect(screen.getByText('O nome ou razão social é obrigatório.')).toBeTruthy();
+      expect(
+        screen.getByText('O nome ou razão social é obrigatório.'),
+      ).toBeTruthy();
     });
   });
 
   it('deve submeter com sucesso ao preencher formulário válido', async () => {
-    vi.mocked(api.subestipulantesApi.criar).mockResolvedValueOnce({ publicId: 'sub-1' });
+    vi.mocked(api.subestipulantesApi.criar).mockResolvedValueOnce({
+      publicId: 'sub-1',
+    });
 
     render(
       <MemoryRouter initialEntries={['/subestipulantes/novo']}>
         <Routes>
-          <Route path="/subestipulantes/novo" element={<SubestipulanteFormPage />} />
+          <Route
+            path="/subestipulantes/novo"
+            element={<SubestipulanteFormPage />}
+          />
         </Routes>
-      </MemoryRouter>
+      </MemoryRouter>,
     );
 
     fireEvent.change(screen.getByLabelText(/Nome \/ Razão Social/i), {
@@ -80,7 +97,9 @@ describe('SubestipulanteFormPage', () => {
       target: { value: 'SUB-01' },
     });
 
-    const salvarBtn = screen.getByRole('button', { name: 'Salvar Subestipulante' });
+    const salvarBtn = screen.getByRole('button', {
+      name: 'Salvar Subestipulante',
+    });
     fireEvent.click(salvarBtn);
 
     await waitFor(() => {
@@ -108,21 +127,36 @@ describe('SubestipulanteFormPage', () => {
     render(
       <MemoryRouter initialEntries={['/subestipulantes/sub-1/editar']}>
         <Routes>
-          <Route path="/subestipulantes/:publicId/editar" element={<SubestipulanteFormPage />} />
+          <Route
+            path="/subestipulantes/:publicId/editar"
+            element={<SubestipulanteFormPage />}
+          />
         </Routes>
-      </MemoryRouter>
+      </MemoryRouter>,
     );
 
     expect(screen.getByLabelText(/Carregando subestipulante/i)).toBeTruthy();
 
     await waitFor(() => {
       expect(api.subestipulantesApi.obter).toHaveBeenCalledWith('sub-1');
-      expect(screen.getByRole('heading', { name: 'Editar Subestipulante' })).toBeTruthy();
+      expect(
+        screen.getByRole('heading', { name: 'Editar Subestipulante' }),
+      ).toBeTruthy();
     });
 
-    expect((screen.getByLabelText(/Nome \/ Razão Social/i) as HTMLInputElement).value).toBe('Subestipulante Existente');
-    expect((screen.getByLabelText(/CNPJ/i) as HTMLInputElement).value).toBe('11.222.333/0001-44');
-    expect((screen.getByLabelText(/Código Interno/i) as HTMLInputElement).value).toBe('SUB-123');
-    expect((screen.getByLabelText(/Observações Internas/i) as HTMLTextAreaElement).value).toBe('Anotação');
+    expect(
+      (screen.getByLabelText(/Nome \/ Razão Social/i) as HTMLInputElement)
+        .value,
+    ).toBe('Subestipulante Existente');
+    expect((screen.getByLabelText(/CNPJ/i) as HTMLInputElement).value).toBe(
+      '11.222.333/0001-44',
+    );
+    expect(
+      (screen.getByLabelText(/Código Interno/i) as HTMLInputElement).value,
+    ).toBe('SUB-123');
+    expect(
+      (screen.getByLabelText(/Observações Internas/i) as HTMLTextAreaElement)
+        .value,
+    ).toBe('Anotação');
   });
 });

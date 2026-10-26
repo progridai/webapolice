@@ -1,3 +1,4 @@
+using WebApolice.Modulos.Cadastro.Domain.Clientes;
 using System;
 
 namespace WebApolice.Modulos.Cadastro.Infrastructure.Persistence.Models.Vinculos;

@@ -12,7 +12,7 @@ public class CoreDbContextFactory : IDesignTimeDbContextFactory<CoreDbContext>
 
         if (string.IsNullOrWhiteSpace(connectionString))
         {
-            connectionString = "Host=painel.bravida.com.br;Port=5432;Database=webapolice_teste;Username=bravito;Password=Bravida@2023!";
+            throw new InvalidOperationException("Defina ConnectionStrings__PostgreSql para executar ferramentas EF.");
         }
 
         var optionsBuilder = new DbContextOptionsBuilder<CoreDbContext>();

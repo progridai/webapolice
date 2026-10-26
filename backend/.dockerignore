@@ -1,0 +1,11 @@
+**/bin
+**/obj
+**/TestResults
+**/.env*
+**/*.pfx
+**/*.p12
+**/*.key
+.artifacts
+.aws
+.git
+scratch

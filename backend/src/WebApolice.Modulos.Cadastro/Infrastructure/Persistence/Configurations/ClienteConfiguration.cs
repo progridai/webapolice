@@ -1,3 +1,4 @@
+using WebApolice.Modulos.Cadastro.Domain.Clientes;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using WebApolice.Modulos.Cadastro.Domain;

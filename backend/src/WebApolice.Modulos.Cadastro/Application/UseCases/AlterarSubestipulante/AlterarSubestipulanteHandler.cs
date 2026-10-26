@@ -25,15 +25,15 @@ public sealed class AlterarSubestipulanteHandler
     public async Task Handle(AlterarSubestipulanteCommand command, CancellationToken cancellationToken)
     {
         if (string.IsNullOrWhiteSpace(command.Nome))
-            throw new InvalidOperationException("O nome do subestipulante é obrigatório.");
+            throw new WebApolice.SharedKernel.Application.Exceptions.ValidacaoException("O nome do subestipulante é obrigatório.");
 
         var subestipulante = await _repository.ObterPorPublicIdAsync(command.PublicId, cancellationToken);
         if (subestipulante == null)
-            throw new InvalidOperationException("Subestipulante não encontrado.");
+            throw new WebApolice.SharedKernel.Application.Exceptions.ValidacaoException("Subestipulante não encontrado.");
 
         var pessoa = await _clienteRepository.LocalizarPessoaPorIdAsync(subestipulante.PessoaId, cancellationToken);
         if (pessoa == null)
-            throw new InvalidOperationException("Dados cadastrais do subestipulante não encontrados.");
+            throw new WebApolice.SharedKernel.Application.Exceptions.ValidacaoException("Dados cadastrais do subestipulante não encontrados.");
 
         string? cnpjLimpo = null;
         if (!string.IsNullOrWhiteSpace(command.Cnpj))
@@ -42,7 +42,7 @@ public sealed class AlterarSubestipulanteHandler
 
             var cnpjJaExiste = await _repository.CnpjJaExisteAsync(cnpjLimpo, subestipulante.Id, cancellationToken);
             if (cnpjJaExiste)
-                throw new InvalidOperationException("Já existe um subestipulante cadastrado com este CNPJ.");
+                throw new WebApolice.SharedKernel.Application.Exceptions.ValidacaoException("Já existe um subestipulante cadastrado com este CNPJ.");
         }
 
         await using var transaction = await _transactionManager.BeginTransactionAsync(cancellationToken);

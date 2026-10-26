@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using WebApolice.Modulos.Seguranca.Application.Authorization;
-using WebApolice.Modulos.Seguranca.Infrastructure.Authorization;
+using WebApolice.Modulos.Seguranca.Contracts.Authorization;
 using WebApolice.Modulos.Seguro.Application.Ports;
 using WebApolice.Modulos.Seguro.Application.UseCases.Apolices.PlanoModulo;
 

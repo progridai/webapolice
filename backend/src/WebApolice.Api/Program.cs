@@ -1,4 +1,4 @@
-﻿using System.Security.Claims;
+using System.Security.Claims;
 using System.Text.Json;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -13,11 +13,12 @@ using WebApolice.Modulos.Cadastro;
 using WebApolice.Modulos.Seguranca;
 using WebApolice.Modulos.Seguro;
 using WebApolice.Modulos.Financeiro;
-using WebApolice.Modulos.Seguranca.Infrastructure.Authentication;
+using WebApolice.Modulos.Seguranca.Api.Authentication;
 using WebApolice.SharedKernel.Application.Ports;
 using WebApolice.Shared.Infrastructure.Providers;
 using Scalar.AspNetCore;
 var builder = WebApplication.CreateBuilder(args);
+WebApolice.Api.Infrastructure.SegurancaHttp.Configurar(builder);
 
 // =============================================================================
 // CONFIGURAÇÃO EXTERNA: Autenticação
@@ -34,16 +35,7 @@ var configuracaoAuth = builder.Configuration
     .Get<ConfiguracaoAutenticacao>()
     ?? new ConfiguracaoAutenticacao();
 
-// Falhar na inicialização se Authority ou Audience não estiverem configurados
-if (string.IsNullOrWhiteSpace(configuracaoAuth.Authority))
-{
-    throw new InvalidOperationException(
-        "A configuração 'Authentication:Authority' é obrigatória e não foi fornecida. " +
-        "Defina via appsettings.json, appsettings.{Environment}.json ou pela variável de ambiente " +
-        "'Authentication__Authority'.");
-}
-
-// Audience constraint is disabled locally
+configuracaoAuth.Validar(builder.Environment.EnvironmentName);
 
 // =============================================================================
 // AUTENTICAÇÃO JWT BEARER
@@ -61,13 +53,11 @@ builder.Services
         opcoes.Audience = configuracaoAuth.Audience;
         opcoes.RequireHttpsMetadata = configuracaoAuth.RequireHttpsMetadata;
 
-        bool requireAudience = !string.IsNullOrWhiteSpace(configuracaoAuth.Audience);
-
         opcoes.TokenValidationParameters = new TokenValidationParameters
         {
             // Validações obrigatórias
             ValidateIssuer = true,
-            ValidateAudience = requireAudience,
+            ValidateAudience = true,
             ValidateLifetime = true,
             ValidateIssuerSigningKey = true,
 
@@ -123,6 +113,8 @@ builder.Services.AddScoped<IClaimsTransformation, TransformadorRolesDoRealm>();
 // =============================================================================
 builder.Services.AddAuthorization(opcoes =>
 {
+    opcoes.FallbackPolicy = new Microsoft.AspNetCore.Authorization.AuthorizationPolicyBuilder()
+        .RequireAuthenticatedUser().Build();
     opcoes.AddPolicy(PoliticasAutorizacao.Administracao, policy =>
         policy.RequireRole(PerfisAcesso.Admin));
 
@@ -252,6 +244,7 @@ var app = builder.Build();
 // =============================================================================
 
 // Tratamento centralizado de exceções não tratadas delegando para o IExceptionHandler registrado
+WebApolice.Api.Infrastructure.SegurancaHttp.UsarProxyConfiavel(app);
 app.UseExceptionHandler();
 
 // Respostas estruturadas para 403 Forbidden (autorização negada)
@@ -285,6 +278,7 @@ app.UseStatusCodePages(async statusCodeContext =>
 // HTTPS somente em produção/homologação (desenvolvimento local e testes usam HTTP)
 if (!app.Environment.IsDevelopment() && !app.Environment.IsEnvironment("Testing"))
 {
+    app.UseHsts();
     app.UseHttpsRedirection();
 }
 
@@ -303,6 +297,7 @@ app.UseCors("Frontend");
 
 // Autenticação e Autorização devem ser adicionados antes dos endpoints protegidos
 app.UseAuthentication();
+app.UseRateLimiter();
 app.UseMiddleware<ProvisionamentoUsuarioMiddleware>();
 app.UseAuthorization();
 app.UseMiddleware<WebApolice.Api.Infrastructure.PadronizacaoTextoMiddleware>();
@@ -445,27 +440,6 @@ app.MapGet("/api/admin/ping", () => Results.Ok(new
 .RequireAuthorization(PoliticasAutorizacao.Administracao);
 
 app.Run();
-
-namespace WebApolice.Api.Infrastructure.Errors
-{
-    // Classe temporária para testes de model binding
-    public class TestInput
-    {
-        [System.ComponentModel.DataAnnotations.Required]
-        public string Nome { get; set; } = string.Empty;
-    }
-
-    [ApiController]
-    [Route("api/test")]
-    public class TestController : ControllerBase
-    {
-        [HttpPost("bad-request")]
-        public IActionResult PostBadRequest([FromBody] TestInput input)
-        {
-            return Ok(input);
-        }
-    }
-}
 
 // Necessário para tornar o Program visível ao projeto de testes de integração (WebApplicationFactory)
 public partial class Program { }

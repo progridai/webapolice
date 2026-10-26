@@ -34,9 +34,9 @@ public class ListarUsuariosUseCase
         if (!string.IsNullOrWhiteSpace(busca))
         {
             busca = busca.ToLower();
-            query = query.Where(u => u.Username.ToLower().Contains(busca) || 
-                                     u.Nome.ToLower().Contains(busca) || 
-                                     u.Email.ToLower().Contains(busca));
+            query = query.Where(u => (u.Username != null && u.Username.ToLower().Contains(busca)) ||
+                                     (u.Nome != null && u.Nome.ToLower().Contains(busca)) ||
+                                     (u.Email != null && u.Email.ToLower().Contains(busca)));
         }
 
         if (ativo.HasValue)

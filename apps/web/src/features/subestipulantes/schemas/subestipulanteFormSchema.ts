@@ -22,18 +22,17 @@ export const subestipulanteFormSchema = z.object({
     .string()
     .trim()
     .max(30, 'O CNPJ deve ter no máximo 30 caracteres.')
-    .refine((val) => {
-      if (!val) return true;
-      const stripped = val.replace(/\\D/g, '');
-      if (stripped === '') return true;
-      return isValidCnpj(val);
-    }, { message: 'CNPJ inválido.' })
+    .refine(
+      (val) => {
+        if (!val) return true;
+        const stripped = val.replace(/\\D/g, '');
+        if (stripped === '') return true;
+        return isValidCnpj(val);
+      },
+      { message: 'CNPJ inválido.' },
+    )
     .optional(),
-  observacao: z
-    .string()
-    .trim()
-    .optional()
-    .or(z.literal('')),
+  observacao: z.string().trim().optional().or(z.literal('')),
 });
 
 export type SubestipulanteFormData = z.infer<typeof subestipulanteFormSchema>;

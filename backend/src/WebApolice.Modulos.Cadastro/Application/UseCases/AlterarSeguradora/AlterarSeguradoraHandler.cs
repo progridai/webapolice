@@ -25,15 +25,15 @@ public sealed class AlterarSeguradoraHandler
     public async Task Handle(AlterarSeguradoraCommand command, CancellationToken cancellationToken)
     {
         if (string.IsNullOrWhiteSpace(command.Nome))
-            throw new InvalidOperationException("O nome da seguradora é obrigatório.");
+            throw new WebApolice.SharedKernel.Application.Exceptions.ValidacaoException("O nome da seguradora é obrigatório.");
 
         var seguradora = await _repository.ObterPorPublicIdAsync(command.PublicId, cancellationToken);
         if (seguradora == null)
-            throw new InvalidOperationException("Seguradora não encontrada.");
+            throw new WebApolice.SharedKernel.Application.Exceptions.ValidacaoException("Seguradora não encontrada.");
 
         var pessoa = await _clienteRepository.LocalizarPessoaPorIdAsync(seguradora.PessoaId, cancellationToken);
         if (pessoa == null)
-            throw new InvalidOperationException("Pessoa associada não encontrada.");
+            throw new WebApolice.SharedKernel.Application.Exceptions.ValidacaoException("Pessoa associada não encontrada.");
 
         // Verifica se a pessoa está sendo usada por outros registros além dessa seguradora.
         // Simplificaremos a verificação: se o CNPJ mudar e ela estiver compartilhada, bloqueamos.
@@ -47,7 +47,7 @@ public sealed class AlterarSeguradoraHandler
             
             var cnpjJaExiste = await _repository.CnpjJaExisteAsync(cnpjLimpo, seguradora.Id, cancellationToken);
             if (cnpjJaExiste)
-                throw new InvalidOperationException("Já existe outra seguradora cadastrada com este CNPJ.");
+                throw new WebApolice.SharedKernel.Application.Exceptions.ValidacaoException("Já existe outra seguradora cadastrada com este CNPJ.");
         }
 
         pessoa.Nome = command.Nome;

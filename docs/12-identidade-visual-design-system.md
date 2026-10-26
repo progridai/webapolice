@@ -46,10 +46,11 @@ Para garantir conformidade com as diretrizes WCAG (mínimo de **4.5:1** para tex
 - **Texto Preto Suave (`#1A1A1A`) sobre Dourado Padrão**: Contraste de **8.30:1** (APROVADO em conformidade máxima). **Combinação oficial obrigatória para botões primários.**
 
 A camada de serviço (`IdentidadeVisualService`) assegura o contraste dinamicamente para identidades de organizações (White-label):
-- Calcula a luminância relativa da `marcaPrincipal`.
-- Se a luminância for `> 0.179`, o texto sobre a marca (`--cor-sobre-marca-principal`) será `#1A1A1A`.
-- Se a luminância for `<= 0.179`, o texto será `#FFFFFF`.
-- O mínimo obrigatório para texto legível sobre a marca principal é **WCAG AA (4.5:1)**. O serviço garante matematicamente o cumprimento desta norma ao escolher entre preto ou branco puro baseando-se na luminância.
+- Calcula a luminância relativa da `marcaPrincipal` e a razão de contraste das alternativas de texto, sem arredondar a decisão.
+- Na escolha automática, prefere `#1A1A1A` quando a razão sobre a marca alcança `4.5:1`; caso contrário, usa `#FFFFFF` se essa alternativa alcançar o mínimo.
+- Se ambas falharem em um tom intermediário, usa `#000000`. Por exemplo, vermelho `#FF0000` exige preto puro: preto suave e branco ficam abaixo de `4.5:1`.
+- O mínimo obrigatório para texto normal é **WCAG AA (4.5:1)**, conforme [SC 1.4.3 do W3C](https://www.w3.org/WAI/WCAG22/Understanding/contrast-minimum.html). O algoritmo automático passou a conferir a razão efetiva; o corte anterior de luminância `0.179` não garantia esse mínimo com preto suave.
+- Uma `corSobreMarcaPrincipal` explicitamente fornecida continua sendo respeitada pelo contrato existente; essa configuração precisa ser conferida na homologação. Esta correção não altera a política de valores explícitos nem constitui auditoria de todos os estados de todos os componentes.
 
 ### Contraste de Textos Secundários
 - **Tema Claro**: O texto secundário mapeado para `#52525B` sobre fundo branco possui contraste de **5.73:1** (Aprovado).
@@ -86,6 +87,17 @@ Os estilos e tokens estão organizados de forma modular sob `apps/web/src/styles
 --cor-borda:                  Bordas padrão sutis (Claro: #E4E4E7 | Escuro: #3F3F46)
 --cor-sobre-marca-principal:  Texto legível garantido sobre a marca principal
 ```
+
+---
+
+### Seletor assíncrono e simulador de identidade
+
+Revisão em 22/10/2026, registrada no [documento 53](53-estabilizacao-tokens-design-system.md):
+
+- `AsyncSelect` usa os tokens `--cor-*` existentes para superfícies, texto, borda, foco e erro, além de `--sombra-card` para o menu. Não usa os aliases antigos inexistentes `--bg-*`, `--marca-primaria`, `--status-erro`, `--texto-*` e `--borda-*`.
+- Opção selecionada e estado ativo usam o par `--cor-marca-principal` / `--cor-sobre-marca-principal`, acompanhando a identidade em vez de assumir texto branco sobre dourado.
+- Os seis botões do simulador white-label usam a variante secundária padrão. Seus nomes continuam identificando as marcas de demonstração; as cores são dados técnicos em `shared/identidade/marcasDemonstracao.ts`, entregues ao serviço de identidade, e não estilos locais dos controles.
+- Nenhum token ou paleta nova foi criado. Foram preservadas as seis configurações e a restauração do dourado. O scanner permanece com as mesmas regras e abrangência, sem novas exceções.
 
 ---
 

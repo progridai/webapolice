@@ -46,12 +46,12 @@ Sempre que um endpoint solicitar uma regra funcional (ex: `[AuthorizePermissao(P
      AND r.ativo = true
      AND m.ativo = true;
    ```
-4. Se o usuário constar atrelado em algum perfil onde `acesso_total = true`, esse carregamento é mitigado e o acesso é *Granted* universalmente.
+4. Se o usuário constar atrelado em algum perfil onde `acesso_total = true`, o acesso às ações dispensa vínculos individuais de permissão, mas exige usuário ERP ativo e catálogo existente, ativo e habilitado em toda a cadeia (permissão/recurso/módulo).
 5. Em caso da chave solicitada estar presente na lista efetiva, o pipeline avança.
 6. Em caso negativo, devolve Status **403 Forbidden**. Se o Token em si foi inválido, rejeita muito antes como **401 Unauthorized**.
 
 ## 4. Consumo Pelo Frontend
-O frontend invocará um novo endpoint como `GET /api/auth/permissoes` para carregar o seu pacote de diretrizes. Em posse das chaves (e.g. `['clientes.visualizar', 'financeiro.editar']`), os elementos visuais na UI se habilitarão utilizando novos Hooks base (ex: `useAuth().hasPermission()`).
+O frontend consulta `GET /api/seguranca/me` para obter usuário encontrado/ativo, AcessoTotal, módulos/recursos habilitados e permissões. `AuthorizationProvider` disponibiliza `useAuthorization().possuiPermissao()`, `possuiModulo()` e `possuiRecurso()` às rotas, menus e ações. Autenticação continua em AuthProvider; permissões de negócio vêm do ERP.
 *O front-end **nunca** infere funções deduzindo nomes de perfis.*
 
 ## 5. Diagrama de Sequência Híbrido
@@ -71,7 +71,7 @@ sequenceDiagram
     Usuario->>KC: Login e Senha
     KC-->>Front: Retorna Token JWT (c/ claim sub)
     
-    Front->>Back: Requisita GET /api/auth/permissoes (Bearer)
+    Front->>Back: Requisita GET /api/seguranca/me (Bearer)
     Back->>DB: Busca usuário pelo claim `sub`
     alt Usuário Não Encontrado (Primeiro Login)
         Back->>DB: INSERT INTO seguranca.usuario (sub, email...)
@@ -96,3 +96,10 @@ sequenceDiagram
         Back-->>Front: 403 Forbidden (ProblemDetails)
     end
 ```
+
+## Consolidação de 23/10/2026
+
+O fallback do host exige autenticação; endpoints técnicos públicos são explícitos. O catálogo é consultado por IDisponibilidadeCatalogo antes de AcessoTotal. Catálogo inexistente, permissão inativa, recurso inativo/desabilitado ou módulo inativo/desabilitado nega todos. O handler e os adaptadores de HttpContext ficam em Api/Authorization e Api/Authentication; o acesso EF permanece em Infrastructure. Consulte a revisão 76 para testes e limitações.
+
+
+Na consolidação de 23/10/2026, `AuthorizePermissaoAttribute` passou a ser contrato público em `WebApolice.Modulos.Seguranca.Contracts.Authorization`; controllers de outros módulos não devem importar Infrastructure de Segurança para declarar permissões. As políticas e a matriz de negação permanecem as mesmas.

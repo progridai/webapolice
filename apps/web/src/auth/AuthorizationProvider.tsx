@@ -1,6 +1,8 @@
-import { createContext, useContext, useEffect, useState, useCallback, type ReactNode } from 'react';
+import { createContext, useContext, useMemo, type ReactNode } from 'react';
 import { useAuth } from './useAuth';
 import { httpClient } from '../services/http/httpClient';
+import { useConsulta } from '../shared/hooks/useConsulta';
+import { Alert, Button } from '../components/ui';
 
 export interface UsuarioAutenticadoResponse {
   id: string;
@@ -32,38 +34,42 @@ interface AuthorizationContextData {
   refresh: () => Promise<void>;
 }
 
-const AuthorizationContext = createContext<AuthorizationContextData | undefined>(undefined);
+const AuthorizationContext = createContext<
+  AuthorizationContextData | undefined
+>(undefined);
 
 export function AuthorizationProvider({ children }: { children: ReactNode }) {
-  const { isAuthenticated } = useAuth();
-  const [data, setData] = useState<UsuarioAutenticadoResponse | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
-
-  const loadData = useCallback(async () => {
-    if (!isAuthenticated) {
-      setIsLoading(false);
-      return;
-    }
-
-    try {
-      console.log('[AuthorizationProvider] Iniciando requisição para /api/seguranca/me');
-      const res = await httpClient.get<UsuarioAutenticadoResponse>('/api/seguranca/me');
-      console.log('[AuthorizationProvider] Resposta recebida:', res);
-      setData(res.data);
-    } catch (err) {
-      console.error('[AuthorizationProvider] Erro ao buscar /api/seguranca/me:', err);
-      setError(err instanceof Error ? err : new Error(String(err)));
-    } finally {
-      setIsLoading(false);
-    }
-  }, [isAuthenticated]);
-
-  useEffect(() => {
-    loadData();
-  }, [loadData]);
-
-
+  const { isAuthenticated, isLoading: authLoading, user } = useAuth();
+  const session = useMemo(
+    () => (isAuthenticated && !authLoading ? { userId: user?.id } : null),
+    [isAuthenticated, authLoading, user?.id],
+  );
+  const load = useMemo(() => {
+    if (!session) return null;
+    return async (signal: AbortSignal) => {
+      try {
+        const response = await httpClient.get<UsuarioAutenticadoResponse>(
+          '/api/seguranca/me',
+          { signal },
+        );
+        return response.data;
+      } catch (cause: unknown) {
+        // Falha/cancelamento da operação atual não revalida permissões anteriores.
+        // Operações abortadas pelo ciclo da consulta são descartadas pelo sinal.
+        throw new Error('Não foi possível carregar as permissões do usuário.', {
+          cause,
+        });
+      }
+    };
+  }, [session]);
+  const consultation = useConsulta(
+    load,
+    'Não foi possível carregar as permissões do usuário.',
+  );
+  const isLoading = authLoading || consultation.isLoading;
+  const error = consultation.error;
+  // Só o resultado concluído da sessão atual pode alimentar as decisões de acesso.
+  const data = session && !isLoading && !error ? consultation.data : null;
 
   const value: AuthorizationContextData = {
     isLoading,
@@ -75,31 +81,40 @@ export function AuthorizationProvider({ children }: { children: ReactNode }) {
     modulosHabilitados: data?.modulosHabilitados ?? [],
     recursosHabilitados: data?.recursosHabilitados ?? [],
     permissoes: data?.permissoes ?? [],
-    possuiModulo: (codigo: string) => data?.modulosHabilitados.includes(codigo) ?? false,
-    possuiRecurso: (codigo: string) => data?.recursosHabilitados.includes(codigo) ?? false,
-    possuiPermissao: (codigo: string) => data?.acessoTotal === true || (data?.permissoes.includes(codigo) ?? false),
+    possuiModulo: (codigo: string) =>
+      data?.modulosHabilitados.includes(codigo) ?? false,
+    possuiRecurso: (codigo: string) =>
+      data?.recursosHabilitados.includes(codigo) ?? false,
+    possuiPermissao: (codigo: string) =>
+      data?.acessoTotal === true ||
+      (data?.permissoes.includes(codigo) ?? false),
     possuiAcessoTotal: () => data?.acessoTotal ?? false,
     ehOperadorSistema: () => data?.operadorSistema ?? false,
-    refresh: loadData,
+    refresh: consultation.refetch,
   };
-
-  if (error) {
-    return (
-      <div style={{ padding: '2rem', backgroundColor: '#fee2e2', color: '#991b1b', border: '1px solid #f87171', borderRadius: '4px', margin: '2rem' }}>
-        <h2>Erro de Autorização</h2>
-        <p>Não foi possível carregar as permissões do usuário a partir da API (/api/seguranca/me).</p>
-        <p>Por favor, abra o Console do Navegador (F12) para ver detalhes do erro.</p>
-        <pre style={{ background: '#fff', padding: '1rem', marginTop: '1rem', borderRadius: '4px', overflow: 'auto' }}>
-          {error instanceof Error ? error.message : JSON.stringify(error, null, 2)}
-        </pre>
-        <button onClick={() => window.location.reload()} style={{ marginTop: '1rem', padding: '0.5rem 1rem', background: '#991b1b', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>Recarregar Página</button>
-      </div>
-    );
-  }
 
   return (
     <AuthorizationContext.Provider value={value}>
-      {children}
+      {error ? (
+        <section
+          className="p-4 md:p-6 max-w-2xl mx-auto"
+          aria-label="Erro de autorização"
+        >
+          <Alert variant="error" title="Erro de Autorização">
+            Não foi possível carregar as permissões do usuário. Tente novamente.
+            <div className="mt-4">
+              <Button
+                variant="secondary"
+                onClick={() => void consultation.refetch()}
+              >
+                Tentar novamente
+              </Button>
+            </div>
+          </Alert>
+        </section>
+      ) : (
+        children
+      )}
     </AuthorizationContext.Provider>
   );
 }
@@ -108,7 +123,9 @@ export function AuthorizationProvider({ children }: { children: ReactNode }) {
 export function useAuthorization() {
   const context = useContext(AuthorizationContext);
   if (context === undefined) {
-    throw new Error('useAuthorization must be used within an AuthorizationProvider');
+    throw new Error(
+      'useAuthorization must be used within an AuthorizationProvider',
+    );
   }
   return context;
 }

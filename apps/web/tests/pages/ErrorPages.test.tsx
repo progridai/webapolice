@@ -43,19 +43,25 @@ const mockAuth: AuthContextValue = {
 
 const Wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <MemoryRouter>
-    <AuthContext.Provider value={mockAuth}>
-      {children}
-    </AuthContext.Provider>
+    <AuthContext.Provider value={mockAuth}>{children}</AuthContext.Provider>
   </MemoryRouter>
 );
 
 describe('Páginas de Erro', () => {
   beforeEach(() => {
-    vi.stubGlobal('matchMedia', vi.fn().mockImplementation((query) => ({
-      matches: false, media: query, onchange: null,
-      addListener: vi.fn(), removeListener: vi.fn(),
-      addEventListener: vi.fn(), removeEventListener: vi.fn(), dispatchEvent: vi.fn(),
-    })));
+    vi.stubGlobal(
+      'matchMedia',
+      vi.fn().mockImplementation((query) => ({
+        matches: false,
+        media: query,
+        onchange: null,
+        addListener: vi.fn(),
+        removeListener: vi.fn(),
+        addEventListener: vi.fn(),
+        removeEventListener: vi.fn(),
+        dispatchEvent: vi.fn(),
+      })),
+    );
   });
 
   describe('UnauthorizedPage', () => {
@@ -83,12 +89,16 @@ describe('Páginas de Erro', () => {
 
     it('deve exibir botão "Voltar ao início"', () => {
       render(<ForbiddenPage />, { wrapper: Wrapper });
-      expect(screen.getByRole('button', { name: /voltar ao início/i })).not.toBeNull();
+      expect(
+        screen.getByRole('button', { name: /voltar ao início/i }),
+      ).not.toBeNull();
     });
 
     it('deve exibir botão "Sair da conta"', () => {
       render(<ForbiddenPage />, { wrapper: Wrapper });
-      expect(screen.getByRole('button', { name: /sair da conta/i })).not.toBeNull();
+      expect(
+        screen.getByRole('button', { name: /sair da conta/i }),
+      ).not.toBeNull();
     });
   });
 
@@ -100,7 +110,9 @@ describe('Páginas de Erro', () => {
 
     it('deve exibir botão "Voltar ao início"', () => {
       render(<NotFoundPage />, { wrapper: Wrapper });
-      expect(screen.getByRole('button', { name: /voltar ao início/i })).not.toBeNull();
+      expect(
+        screen.getByRole('button', { name: /voltar ao início/i }),
+      ).not.toBeNull();
     });
 
     it('deve atualizar o document.title', () => {
@@ -117,7 +129,9 @@ describe('Páginas de Erro', () => {
 
     it('deve exibir botão "Tentar novamente"', () => {
       render(<UnexpectedErrorPage />, { wrapper: Wrapper });
-      expect(screen.getByRole('button', { name: /tentar novamente/i })).not.toBeNull();
+      expect(
+        screen.getByRole('button', { name: /tentar novamente/i }),
+      ).not.toBeNull();
     });
 
     it('deve não exibir detalhes técnicos', () => {

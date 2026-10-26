@@ -1,9 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 export default {
-  content: [
-    "./index.html",
-    "./src/**/*.{js,ts,jsx,tsx}",
-  ],
+  content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
   theme: {
     extend: {
       colors: {
@@ -48,8 +45,8 @@ export default {
         6: 'var(--espaco-6)',
         8: 'var(--espaco-8)',
         10: 'var(--espaco-10)',
-      }
+      },
     },
   },
   plugins: [],
-}
+};

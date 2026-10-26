@@ -1,6 +1,6 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.Http;
-using WebApolice.Modulos.Seguranca.Infrastructure.Authentication;
+using WebApolice.Modulos.Seguranca.Api.Authentication;
 using Xunit;
 using FluentAssertions;
 

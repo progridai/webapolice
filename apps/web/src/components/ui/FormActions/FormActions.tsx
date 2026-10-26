@@ -7,12 +7,16 @@ export interface FormActionsProps {
   sticky?: boolean;
 }
 
-export const FormActions: React.FC<FormActionsProps> = ({ children, className = '', sticky = true }) => {
+export const FormActions: React.FC<FormActionsProps> = ({
+  children,
+  className = '',
+  sticky = true,
+}) => {
   return (
-    <div className={`form-actions ${sticky ? 'form-actions-sticky' : ''} ${className}`}>
-      <div className="form-actions-content">
-        {children}
-      </div>
+    <div
+      className={`form-actions ${sticky ? 'form-actions-sticky' : ''} ${className}`}
+    >
+      <div className="form-actions-content">{children}</div>
     </div>
   );
 };

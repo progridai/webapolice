@@ -43,14 +43,16 @@ export function useSegurancaFilters() {
               next.set(key, String(value));
             }
           });
-          const isPageOrSort = Object.keys(newFilters).every((k) => k === 'page');
+          const isPageOrSort = Object.keys(newFilters).every(
+            (k) => k === 'page',
+          );
           if (!isPageOrSort) next.set('page', '1');
           return next;
         },
-        { replace: true }
+        { replace: true },
       );
     },
-    [setSearchParams]
+    [setSearchParams],
   );
 
   const clearFilters = useCallback(() => {

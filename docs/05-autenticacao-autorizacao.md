@@ -10,7 +10,7 @@ A arquitetura de segurança do WebApólice baseia-se nos seguintes pilares funda
 * **Single Sign-On (SSO)**: A autenticação é delegada de forma centralizada ao Keycloak. Usuários realizam login no IdP e obtêm sessões unificadas válidas para todas as aplicações autorizadas.
 * **Provedor de Identidade Central**: O Keycloak gerencia cadastros, políticas de senhas, sessões de usuários, emissão de tokens e federação de identidades (se aplicável no futuro).
 * **OpenID Connect (OIDC) e OAuth 2.0**: Protocolos abertos padrão de mercado para autenticação e autorização federada baseada em tokens JWT (JSON Web Tokens).
-* **Role-Based Access Control (RBAC)**: A autorização para execução de recursos operacionais baseia-se em roles atribuídas globalmente aos usuários (ex: `admin`, `gestor`, `operador`).
+* **Autorização operacional ERP**: Usuário ativo, perfis ativos e permissões granulares do catálogo. Roles `admin`/`gestor`/`operador` são usadas pelas políticas técnicas remanescentes e não substituem permissões de negócio. O frontend consulta `/api/seguranca/me`.
 
 ---
 
@@ -103,3 +103,7 @@ Ao implementar a integração de código, observe atentamente as seguintes diret
 ### C. TLS/SSL Mandatório em Produção
 * No ambiente de desenvolvimento local, a comunicação é permitida via HTTP simples na rede `127.0.0.1`.
 * Em ambiente de produção e homologação, todos os endpoints do Keycloak, do backend e do frontend **devem rodar exclusivamente sob HTTPS (TLS 1.3)**.
+
+## Consolidação — 23/10/2026
+
+Authority e Audience são obrigatórias. Audience nunca desliga a validação por estar vazia: a inicialização é recusada. HTTPS e metadata segura são obrigatórios em entrega; exceções restritas a Testing ou Development com Authority em loopback. Não tratar falha da configuração de um client Keycloak como motivo para desligar a validação. O catálogo deve existir e estar ativo/habilitado para usuários comuns e AcessoTotal. Consulte os documentos 76/78 e os testes de configuração/JWT/negações HTTP. A configuração real do IdP continua por homologar.

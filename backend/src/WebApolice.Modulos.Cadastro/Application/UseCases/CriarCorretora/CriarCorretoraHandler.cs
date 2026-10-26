@@ -1,3 +1,4 @@
+using WebApolice.Modulos.Cadastro.Domain.Clientes;
 using System;
 using System.Text.RegularExpressions;
 using System.Threading;

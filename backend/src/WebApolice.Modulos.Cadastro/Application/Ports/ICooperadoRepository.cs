@@ -1,3 +1,4 @@
+using WebApolice.Modulos.Cadastro.Domain.Clientes;
 using System;
 using System.Threading;
 using System.Threading.Tasks;

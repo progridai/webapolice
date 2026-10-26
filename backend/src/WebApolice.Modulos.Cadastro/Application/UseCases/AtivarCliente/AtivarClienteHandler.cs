@@ -14,16 +14,18 @@ public sealed record AtivarClienteResult(Guid Id, string Status, DateTime Update
 public sealed class AtivarClienteHandler
 {
     private readonly IClienteRepository _repository;
-    private readonly IRegistradorAuditoria _auditoria;
+    private readonly IOperacaoCadastroAuditada _operacao;
 
-    public AtivarClienteHandler(IClienteRepository repository, IRegistradorAuditoria auditoria)
+    public AtivarClienteHandler(IClienteRepository repository, IOperacaoCadastroAuditada operacao)
     {
         _repository = repository;
-        _auditoria = auditoria;
+        _operacao = operacao;
     }
 
     public async Task<AtivarClienteResult> Handle(AtivarClienteCommand command, CancellationToken cancellationToken)
     {
+        return await _operacao.ExecutarAsync<AtivarClienteResult>("Clientes", "cliente", "CLIENTE_ATIVADO", async ct =>
+        {
         var cliente = await _repository.ObterParaEdicaoPorPublicIdAsync(command.Id, cancellationToken);
         if (cliente == null)
             throw new ClienteNaoEncontradoException("Cliente não encontrado ou excluído.");
@@ -35,15 +37,8 @@ public sealed class AtivarClienteHandler
 
         await _repository.SalvarAlteracoesAsync(cancellationToken);
 
-        await _auditoria.RegistrarAsync(new RegistroAuditoria
-        {
-            Acao = "CLIENTE_ATIVADO",
-            Modulo = "Clientes",
-            Recurso = "cliente",
-            RecursoId = cliente.PublicId.ToString(),
-            Resultado = ResultadoAuditoria.Sucesso
+        var resultado = new AtivarClienteResult(cliente.PublicId, statusAtivo.Nome, cliente.UpdatedAt);
+        return (resultado, cliente.PublicId.ToString(), null, null);
         }, cancellationToken);
-
-        return new AtivarClienteResult(cliente.PublicId, statusAtivo.Nome, cliente.UpdatedAt);
     }
 }

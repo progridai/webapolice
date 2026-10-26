@@ -31,7 +31,7 @@ public class EstipulanteConfiguration : IEntityTypeConfiguration<EstipulanteMode
         builder.Property(x => x.DeletedAt).HasColumnName("deleted_at");
 
         builder.HasOne(x => x.Pessoa)
-            .WithMany(p => p.Estipulantes)
+            .WithMany()
             .HasForeignKey(x => x.PessoaId);
             
         builder.HasOne(x => x.Configuracao)

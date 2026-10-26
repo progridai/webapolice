@@ -34,7 +34,9 @@ export const SubestipulantesListPage: React.FC = () => {
   const navigate = useNavigate();
   const { possuiPermissao } = useAuthorization();
 
-  const [subestipulantes, setSubestipulantes] = useState<SubestipulanteListItem[]>([]);
+  const [subestipulantes, setSubestipulantes] = useState<
+    SubestipulanteListItem[]
+  >([]);
   const [total, setTotal] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -100,12 +102,18 @@ export const SubestipulantesListPage: React.FC = () => {
     if (!cnpj) return '-';
     const clean = cnpj.replace(/\D/g, '');
     if (clean.length === 14) {
-      return clean.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, '$1.$2.$3/$4-$5');
+      return clean.replace(
+        /^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/,
+        '$1.$2.$3/$4-$5',
+      );
     }
     return cnpj;
   };
 
-  const abrirConfirmacao = (item: SubestipulanteListItem, tipo: 'inativar' | 'reativar') => {
+  const abrirConfirmacao = (
+    item: SubestipulanteListItem,
+    tipo: 'inativar' | 'reativar',
+  ) => {
     setDialogConfig({
       aberto: true,
       tipo,
@@ -115,7 +123,12 @@ export const SubestipulantesListPage: React.FC = () => {
   };
 
   const fecharConfirmacao = () => {
-    setDialogConfig((prev) => ({ ...prev, aberto: false, item: null, loading: false }));
+    setDialogConfig((prev) => ({
+      ...prev,
+      aberto: false,
+      item: null,
+      loading: false,
+    }));
   };
 
   const handleExecutarAcaoStatus = async () => {
@@ -168,7 +181,12 @@ export const SubestipulantesListPage: React.FC = () => {
           rowActions.push({
             label: 'Editar',
             icon: <EditIcon size={16} />,
-            onClick: () => navigate(createPath(ROUTES.SUBESTIPULANTE_EDITAR, { publicId: row.publicId })),
+            onClick: () =>
+              navigate(
+                createPath(ROUTES.SUBESTIPULANTE_EDITAR, {
+                  publicId: row.publicId,
+                }),
+              ),
           });
         }
 
@@ -231,7 +249,11 @@ export const SubestipulantesListPage: React.FC = () => {
           <div className="flex flex-col gap-2">
             <span>{error}</span>
             <div>
-              <Button variant="secondary" size="small" onClick={carregarSubestipulantes}>
+              <Button
+                variant="secondary"
+                size="small"
+                onClick={carregarSubestipulantes}
+              >
                 Tentar novamente
               </Button>
             </div>
@@ -242,7 +264,10 @@ export const SubestipulantesListPage: React.FC = () => {
       <div className="flex flex-col gap-4">
         <FilterBar>
           <div className="flex-1 flex flex-col gap-1">
-            <label htmlFor="busca-subestipulantes" className="text-sm font-medium text-texto-secundario">
+            <label
+              htmlFor="busca-subestipulantes"
+              className="text-sm font-medium text-texto-secundario"
+            >
               Buscar subestipulante
             </label>
             <SearchField
@@ -253,7 +278,10 @@ export const SubestipulantesListPage: React.FC = () => {
             />
           </div>
           <div className="w-full md:w-48 flex flex-col gap-1">
-            <label htmlFor="status-subestipulantes" className="text-sm font-medium text-texto-secundario">
+            <label
+              htmlFor="status-subestipulantes"
+              className="text-sm font-medium text-texto-secundario"
+            >
               Status
             </label>
             <Select
@@ -314,7 +342,11 @@ export const SubestipulantesListPage: React.FC = () => {
         onClose={fecharConfirmacao}
         onConfirm={handleExecutarAcaoStatus}
         loading={dialogConfig.loading}
-        title={dialogConfig.tipo === 'inativar' ? 'Inativar Subestipulante' : 'Reativar Subestipulante'}
+        title={
+          dialogConfig.tipo === 'inativar'
+            ? 'Inativar Subestipulante'
+            : 'Reativar Subestipulante'
+        }
         description={
           dialogConfig.tipo === 'inativar' ? (
             <p>
@@ -322,16 +354,20 @@ export const SubestipulantesListPage: React.FC = () => {
               <strong>{dialogConfig.item?.nome}</strong>?
               <br />
               <span className="text-sm text-texto-secundario">
-                O cadastro ficará inativo no sistema, mas os vínculos e apólices existentes não serão apagados.
+                O cadastro ficará inativo no sistema, mas os vínculos e apólices
+                existentes não serão apagados.
               </span>
             </p>
           ) : (
             <p>
-              Deseja reativar o subestipulante <strong>{dialogConfig.item?.nome}</strong> para novas operações?
+              Deseja reativar o subestipulante{' '}
+              <strong>{dialogConfig.item?.nome}</strong> para novas operações?
             </p>
           )
         }
-        confirmText={dialogConfig.tipo === 'inativar' ? 'Sim, inativar' : 'Sim, reativar'}
+        confirmText={
+          dialogConfig.tipo === 'inativar' ? 'Sim, inativar' : 'Sim, reativar'
+        }
         variant={dialogConfig.tipo === 'inativar' ? 'danger' : 'primary'}
       />
     </div>

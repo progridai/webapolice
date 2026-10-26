@@ -1,6 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { PageHeader, Breadcrumbs, Alert, Skeleton } from '../../../components/ui';
+import {
+  PageHeader,
+  Breadcrumbs,
+  Alert,
+  Skeleton,
+} from '../../../components/ui';
 import { ROUTES } from '../../../app/routes/routePaths';
 import { CooperadoForm } from '../components/CooperadoForm';
 import { obterCooperadoDetalhe, alterarCooperado } from '../api/cooperadosApi';
@@ -9,7 +14,9 @@ import type { CooperadoFormData } from '../types/cooperados.types';
 export const EditarCooperadoPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const [initialData, setInitialData] = useState<CooperadoFormData | null>(null);
+  const [initialData, setInitialData] = useState<CooperadoFormData | null>(
+    null,
+  );
   const [isLoadingData, setIsLoadingData] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -49,10 +56,10 @@ export const EditarCooperadoPage: React.FC = () => {
           bancoId: dto.bancoId || 0,
           agencia: dto.agencia || '',
           contaCorrente: dto.contaCorrente || '',
-          observacao: dto.observacao || ''
+          observacao: dto.observacao || '',
         };
         setInitialData(formData);
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error(err);
         setError('Não foi possível carregar os dados do cooperado.');
       } finally {
@@ -69,13 +76,13 @@ export const EditarCooperadoPage: React.FC = () => {
     try {
       await alterarCooperado(id, data);
       navigate(ROUTES.COOPERADOS);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
-      if (err.name === 'HttpApiError' && err.message) {
-        setError(err.message);
-      } else {
-        setError(err?.response?.data?.message || 'Ocorreu um erro ao alterar o cooperado/coordenador.');
-      }
+      setError(
+        err instanceof Error && err.message
+          ? err.message
+          : 'Ocorreu um erro ao alterar o cooperado/coordenador.',
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -86,7 +93,11 @@ export const EditarCooperadoPage: React.FC = () => {
   };
 
   return (
-    <main className="flex flex-col gap-6 p-6 max-w-4xl mx-auto w-full focus:outline-none" role="main" tabIndex={-1}>
+    <main
+      className="flex flex-col gap-6 p-6 max-w-4xl mx-auto w-full focus:outline-none"
+      role="main"
+      tabIndex={-1}
+    >
       <PageHeader
         title="Editar Cooperado"
         description="Altere os dados do cooperado ou coordenador no sistema."

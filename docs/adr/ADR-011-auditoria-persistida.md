@@ -20,3 +20,9 @@ As principais decisões técnicas incluem:
 - A auditoria está contida e não "suja" o banco de dados principal de negócio, facilitando futuros off-loads, purges (retenção temporal) ou mesmo o particionamento da tabela.
 - As consultas em `jsonb` permitem buscar facilmente recursos auditados por chaves internas sem overhead de junções relacionais massivas.
 - Módulos futuros não precisam aprender tecnologias específicas de banco, bastando criar a classe que implementa seus contratos de auditoria para chamar a interface comum de injeção.
+
+## Consolidação — 23/10/2026
+
+O contexto histórico da decisão acima foi preservado. A implementação atual também tem usuário ERP local em Segurança, identificado pelo sub; o registro de auditoria continua usando a identidade externa. OperacaoAuditada coordena negócio/auditoria na mesma conexão/transação, com commit somente após o registro e rollback usando token independente do cancelamento do cliente. Application acessa esse mecanismo por portas do módulo; não injeta AuditoriaDbContext.
+
+Clientes, escritores auditados de Cooperados/Estipulantes, habilitação de módulos/recursos e novas escritas de Propostas foram ajustados nesta consolidação. Não há transação distribuída com o Keycloak: o mecanismo de compensação existente e as integrações reais continuam sujeitos à validação. Eventos históricos não foram regravados nem submetidos a Title Case. Cobertura e pendências estão na revisão 76.

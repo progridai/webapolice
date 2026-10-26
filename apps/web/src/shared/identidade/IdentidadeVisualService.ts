@@ -1,13 +1,18 @@
-import type { IdentidadeVisualOrganizacao, IdentidadeVisualCache } from './types';
+import type {
+  IdentidadeVisualOrganizacao,
+  IdentidadeVisualCache,
+} from './types';
 
 // Função auxiliar para converter HEX em RGB
 const hexToRgb = (hex: string) => {
   const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-  return result ? {
-    r: parseInt(result[1], 16),
-    g: parseInt(result[2], 16),
-    b: parseInt(result[3], 16)
-  } : null;
+  return result
+    ? {
+        r: parseInt(result[1], 16),
+        g: parseInt(result[2], 16),
+        b: parseInt(result[3], 16),
+      }
+    : null;
 };
 
 // Conversão RGB para HSL
@@ -18,17 +23,25 @@ const hexToHsl = (hex: string) => {
   const g = rgb.g / 255;
   const b = rgb.b / 255;
 
-  const max = Math.max(r, g, b), min = Math.min(r, g, b);
-  let h = 0, s = 0;
+  const max = Math.max(r, g, b),
+    min = Math.min(r, g, b);
+  let h = 0,
+    s = 0;
   const l = (max + min) / 2;
 
   if (max !== min) {
     const d = max - min;
     s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
     switch (max) {
-      case r: h = (g - b) / d + (g < b ? 6 : 0); break;
-      case g: h = (b - r) / d + 2; break;
-      case b: h = (r - g) / d + 4; break;
+      case r:
+        h = (g - b) / d + (g < b ? 6 : 0);
+        break;
+      case g:
+        h = (b - r) / d + 2;
+        break;
+      case b:
+        h = (r - g) / d + 4;
+        break;
     }
     h /= 6;
   }
@@ -46,17 +59,17 @@ const hslToHex = (h: number, s: number, l: number) => {
     const hue2rgb = (p: number, q: number, t: number) => {
       if (t < 0) t += 1;
       if (t > 1) t -= 1;
-      if (t < 1/6) return p + (q - p) * 6 * t;
-      if (t < 1/2) return q;
-      if (t < 2/3) return p + (q - p) * (2/3 - t) * 6;
+      if (t < 1 / 6) return p + (q - p) * 6 * t;
+      if (t < 1 / 2) return q;
+      if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
       return p;
     };
 
     const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
     const p = 2 * l - q;
-    r = hue2rgb(p, q, h + 1/3);
+    r = hue2rgb(p, q, h + 1 / 3);
     g = hue2rgb(p, q, h);
-    b = hue2rgb(p, q, h - 1/3);
+    b = hue2rgb(p, q, h - 1 / 3);
   }
 
   const toHex = (x: number) => {
@@ -78,7 +91,7 @@ const ajustarLuminosidade = (hex: string, fator: number) => {
 const calcularLuminancia = (hex: string) => {
   const rgb = hexToRgb(hex);
   if (!rgb) return 0;
-  
+
   const a = [rgb.r, rgb.g, rgb.b].map((v) => {
     v /= 255;
     return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
@@ -89,7 +102,12 @@ const calcularLuminancia = (hex: string) => {
 // Selecionar cor de contraste adequada
 export const obterCorContraste = (hexCorFundo: string) => {
   const luminancia = calcularLuminancia(hexCorFundo);
-  return luminancia > 0.179 ? '#1A1A1A' : '#FFFFFF';
+  const contrastePretoSuave =
+    (luminancia + 0.05) / (calcularLuminancia('#1A1A1A') + 0.05);
+  if (contrastePretoSuave >= 4.5) return '#1A1A1A';
+  if (1.05 / (luminancia + 0.05) >= 4.5) return '#FFFFFF';
+  // Tons intermediários podem exigir preto puro para alcançar WCAG AA.
+  return '#000000';
 };
 
 // Identidade Padrão WebApólice
@@ -110,16 +128,24 @@ export class IdentidadeVisualService {
     return `${STORAGE_KEY_PREFIX}${organizacaoId}`;
   }
 
-  static validarIdentidadeVisual(configuracao: Partial<IdentidadeVisualOrganizacao>): IdentidadeVisualOrganizacao {
+  static validarIdentidadeVisual(
+    configuracao: Partial<IdentidadeVisualOrganizacao>,
+  ): IdentidadeVisualOrganizacao {
     const orgId = configuracao.organizacaoId || 'padrao';
-    const marcaPrincipal = configuracao.marcaPrincipal || IDENTIDADE_PADRAO.marcaPrincipal;
+    const marcaPrincipal =
+      configuracao.marcaPrincipal || IDENTIDADE_PADRAO.marcaPrincipal;
 
     // Gerar cores derivadas (hover, ativa) se não forem fornecidas
-    const hover = configuracao.marcaPrincipalHover || ajustarLuminosidade(marcaPrincipal, -0.05);
-    const ativa = configuracao.marcaPrincipalAtiva || ajustarLuminosidade(marcaPrincipal, -0.10);
+    const hover =
+      configuracao.marcaPrincipalHover ||
+      ajustarLuminosidade(marcaPrincipal, -0.05);
+    const ativa =
+      configuracao.marcaPrincipalAtiva ||
+      ajustarLuminosidade(marcaPrincipal, -0.1);
 
     // Garantir contraste acessível se não for fornecido
-    const sobreMarca = configuracao.corSobreMarcaPrincipal || obterCorContraste(marcaPrincipal);
+    const sobreMarca =
+      configuracao.corSobreMarcaPrincipal || obterCorContraste(marcaPrincipal);
 
     return {
       ...configuracao,
@@ -131,19 +157,39 @@ export class IdentidadeVisualService {
     };
   }
 
-  static aplicarIdentidadeVisual(configuracao: Partial<IdentidadeVisualOrganizacao>) {
+  static aplicarIdentidadeVisual(
+    configuracao: Partial<IdentidadeVisualOrganizacao>,
+  ) {
     try {
       const identidadeValida = this.validarIdentidadeVisual(configuracao);
       const docEl = document.documentElement;
-      
-      docEl.style.setProperty('--cor-marca-principal', identidadeValida.marcaPrincipal);
-      docEl.style.setProperty('--cor-marca-principal-hover', identidadeValida.marcaPrincipalHover!);
-      docEl.style.setProperty('--cor-marca-principal-ativa', identidadeValida.marcaPrincipalAtiva!);
-      docEl.style.setProperty('--cor-sobre-marca-principal', identidadeValida.corSobreMarcaPrincipal!);
-      
+
+      docEl.style.setProperty(
+        '--cor-marca-principal',
+        identidadeValida.marcaPrincipal,
+      );
+      docEl.style.setProperty(
+        '--cor-marca-principal-hover',
+        identidadeValida.marcaPrincipalHover!,
+      );
+      docEl.style.setProperty(
+        '--cor-marca-principal-ativa',
+        identidadeValida.marcaPrincipalAtiva!,
+      );
+      docEl.style.setProperty(
+        '--cor-sobre-marca-principal',
+        identidadeValida.corSobreMarcaPrincipal!,
+      );
+
       // Cor suave para fundos (aprox 12% de opacidade)
-      docEl.style.setProperty('--cor-marca-principal-suave', `${identidadeValida.marcaPrincipal}20`);
-      docEl.style.setProperty('--cor-marca-principal-borda', identidadeValida.marcaPrincipalHover!);
+      docEl.style.setProperty(
+        '--cor-marca-principal-suave',
+        `${identidadeValida.marcaPrincipal}20`,
+      );
+      docEl.style.setProperty(
+        '--cor-marca-principal-borda',
+        identidadeValida.marcaPrincipalHover!,
+      );
       docEl.style.setProperty('--cor-foco', identidadeValida.marcaPrincipal);
 
       // Persistir no cache local
@@ -151,11 +197,17 @@ export class IdentidadeVisualService {
         organizacaoId: identidadeValida.organizacaoId,
         versao: CACHE_VERSAO,
         atualizadoEm: new Date().toISOString(),
-        identidade: identidadeValida
+        identidade: identidadeValida,
       };
 
-      localStorage.setItem(this.getStorageKey(identidadeValida.organizacaoId), JSON.stringify(cache));
-      localStorage.setItem('webapolice-identidade-atual', identidadeValida.organizacaoId);
+      localStorage.setItem(
+        this.getStorageKey(identidadeValida.organizacaoId),
+        JSON.stringify(cache),
+      );
+      localStorage.setItem(
+        'webapolice-identidade-atual',
+        identidadeValida.organizacaoId,
+      );
 
       return identidadeValida;
     } catch (e) {
@@ -166,7 +218,7 @@ export class IdentidadeVisualService {
 
   static restaurarIdentidadePadrao() {
     const docEl = document.documentElement;
-    
+
     docEl.style.removeProperty('--cor-marca-principal');
     docEl.style.removeProperty('--cor-marca-principal-hover');
     docEl.style.removeProperty('--cor-marca-principal-ativa');
@@ -176,7 +228,7 @@ export class IdentidadeVisualService {
     docEl.style.removeProperty('--cor-foco');
 
     localStorage.removeItem('webapolice-identidade-atual');
-    
+
     return IDENTIDADE_PADRAO;
   }
 
@@ -187,10 +239,12 @@ export class IdentidadeVisualService {
         const rawCache = localStorage.getItem(this.getStorageKey(atualId));
         if (rawCache) {
           const cache = JSON.parse(rawCache) as IdentidadeVisualCache;
-          
+
           // Validações do cache
           if (cache.versao !== CACHE_VERSAO) {
-            console.warn('Cache de identidade com versão incompatível. Ignorando.');
+            console.warn(
+              'Cache de identidade com versão incompatível. Ignorando.',
+            );
             this.restaurarIdentidadePadrao();
             return IDENTIDADE_PADRAO;
           }

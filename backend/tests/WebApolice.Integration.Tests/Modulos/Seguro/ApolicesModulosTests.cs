@@ -64,7 +64,7 @@ public class ApolicesModulosTests : IClassFixture<SeguroIntegrationTestFixture>,
         await using var command = _fixture.DbContext.Database.GetDbConnection().CreateCommand();
         command.CommandText = sql;
         await _fixture.DbContext.Database.OpenConnectionAsync();
-        var id = (long)await command.ExecuteScalarAsync();
+        var id = Assert.IsType<long>(await command.ExecuteScalarAsync());
         
         return (id, moduloPublicId);
     }
@@ -164,6 +164,7 @@ public class ApolicesModulosTests : IClassFixture<SeguroIntegrationTestFixture>,
         }, CancellationToken.None);
 
         var vinculoNoBanco = await _fixture.DbContext.ApoliceModulos.FirstOrDefaultAsync(x => x.PublicId == apoliceModuloPublicId);
+        Assert.NotNull(vinculoNoBanco);
         Assert.False(vinculoNoBanco.Ativo); // Inativado corretamente (ativo=false)
         Assert.Null(vinculoNoBanco.DeletedAt); // Soft delete não é encerramento normal (deleted_at continua nulo)
 
@@ -189,7 +190,7 @@ public class ApolicesModulosTests : IClassFixture<SeguroIntegrationTestFixture>,
         _fixture.DbContext.ApoliceModulos.Add(vinculoForcadoDuplicado);
         
         var dbUpdateException = await Assert.ThrowsAsync<DbUpdateException>(() => _fixture.DbContext.SaveChangesAsync());
-        Assert.Contains("duplicate key value violates unique constraint", dbUpdateException.InnerException.Message.ToLower());
+        Assert.Contains("duplicate key value violates unique constraint", Assert.IsType<Npgsql.PostgresException>(dbUpdateException.InnerException).Message.ToLower());
     }
 
     [Fact]

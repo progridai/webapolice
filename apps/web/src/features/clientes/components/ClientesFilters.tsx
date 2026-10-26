@@ -31,7 +31,9 @@ export const ClientesFilters: React.FC<ClientesFiltersProps> = ({
     });
   };
 
-  const hasActiveFilters = Boolean(filters.nome || filters.cpf || filters.status);
+  const hasActiveFilters = Boolean(
+    filters.nome || filters.cpf || filters.status,
+  );
   const searchValue = filters.nome || filters.cpf || '';
 
   return (
@@ -57,9 +59,14 @@ export const ClientesFilters: React.FC<ClientesFiltersProps> = ({
           id="status-cliente"
           value={filters.status || ''}
           onChange={(event) =>
-            onFilterChange({ 
-              status: event.target.value === '1' ? 1 : event.target.value === '2' ? 2 : '',
-              page: 1 // Reset to first page on filter change
+            onFilterChange({
+              status:
+                event.target.value === '1'
+                  ? 1
+                  : event.target.value === '2'
+                    ? 2
+                    : '',
+              page: 1, // Reset to first page on filter change
             })
           }
           disabled={isLoading}

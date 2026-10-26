@@ -26,7 +26,10 @@
   background-color: transparent;
   color: var(--cor-texto-secundario);
   cursor: pointer;
-  transition: background-color 150ms ease, color 150ms ease, border-color 150ms ease;
+  transition:
+    background-color 150ms ease,
+    color 150ms ease,
+    border-color 150ms ease;
 }
 
 .row-actions-menu-trigger:hover {
@@ -53,4 +56,3 @@
 .row-actions-item-danger .dropdown-menu-item-icon {
   color: inherit;
 }
-

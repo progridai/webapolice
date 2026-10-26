@@ -4,7 +4,7 @@
  */
 export function formatarDataOuVazio(dataString?: string | null): string {
   if (!dataString) return 'Não informado';
-  
+
   // Trata formato YYYY-MM-DD vindo do DateOnly do C#
   if (/^\d{4}-\d{2}-\d{2}/.test(dataString)) {
     const partes = dataString.substring(0, 10).split('-');
@@ -32,15 +32,15 @@ export function formatarDataOuVazio(dataString?: string | null): string {
 export function formatarTelefone(valor?: string | null): string {
   if (!valor) return '';
   const apenasNumeros = valor.replace(/\D/g, '');
-  
+
   if (apenasNumeros.length === 11) {
     return `(${apenasNumeros.substring(0, 2)}) ${apenasNumeros.substring(2, 7)}-${apenasNumeros.substring(7)}`;
   }
-  
+
   if (apenasNumeros.length === 10) {
     return `(${apenasNumeros.substring(0, 2)}) ${apenasNumeros.substring(2, 6)}-${apenasNumeros.substring(6)}`;
   }
-  
+
   return valor;
 }
 
@@ -74,11 +74,19 @@ export function formatarCnpj(valor?: string | null): string {
   if (!valor) return '';
   const apenasNumeros = valor.replace(/\D/g, '');
   if (apenasNumeros.length === 14) {
-    return apenasNumeros.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, '$1.$2.$3/$4-$5');
+    return apenasNumeros.replace(
+      /^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/,
+      '$1.$2.$3/$4-$5',
+    );
   }
   return valor;
 }
 
 export function formatarPremio(valor?: number | null) {
-  return valor == null ? 'Não informado' : new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(valor);
+  return valor == null
+    ? 'Não informado'
+    : new Intl.NumberFormat('pt-BR', {
+        style: 'currency',
+        currency: 'BRL',
+      }).format(valor);
 }

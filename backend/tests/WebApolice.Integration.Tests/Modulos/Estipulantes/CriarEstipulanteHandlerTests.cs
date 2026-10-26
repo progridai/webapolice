@@ -1,4 +1,6 @@
-﻿using System;
+using WebApolice.Integration.Tests.Setup;
+using WebApolice.Modulos.Cadastro.Domain.Clientes;
+using System;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
@@ -34,7 +36,7 @@ public class CriarEstipulanteHandlerTests
         _repositoryMock.Setup(r => r.CidadeExisteAsync(It.IsAny<long>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(true);
 
-        _handler = new CriarEstipulanteHandler(_repositoryMock.Object, _auditoriaMock.Object);
+        _handler = new CriarEstipulanteHandler(_repositoryMock.Object, new OperacaoCadastroSimulada(_auditoriaMock.Object, _transactionMock.Object));
     }
 
     [Fact]
@@ -89,7 +91,7 @@ public class CriarEstipulanteHandlerTests
         var command = CriarCommandValido() with { Cnpj = "123" };
         var act = () => _handler.Handle(command, CancellationToken.None);
 
-        await act.Should().ThrowAsync<EstipulanteInvalidoException>().WithMessage("CNPJ invÃ¡lido.");
+        await act.Should().ThrowAsync<EstipulanteInvalidoException>().WithMessage("CNPJ inválido.");
         _repositoryMock.Verify(r => r.AdicionarPessoa(It.IsAny<PessoaModel>()), Times.Never);
     }
 
@@ -101,7 +103,7 @@ public class CriarEstipulanteHandlerTests
 
         var act = () => _handler.Handle(command, CancellationToken.None);
 
-        await act.Should().ThrowAsync<EstipulanteInvalidoException>().WithMessage("Grupo informado nÃ£o existe.");
+        await act.Should().ThrowAsync<EstipulanteInvalidoException>().WithMessage("Grupo informado não existe.");
         _transactionMock.Verify(t => t.RollbackAsync(It.IsAny<CancellationToken>()), Times.Once);
     }
 
@@ -114,7 +116,7 @@ public class CriarEstipulanteHandlerTests
 
         var act = () => _handler.Handle(command, CancellationToken.None);
 
-        await act.Should().ThrowAsync<EstipulanteInvalidoException>().WithMessage("Seguradora informada nÃ£o existe.");
+        await act.Should().ThrowAsync<EstipulanteInvalidoException>().WithMessage("Seguradora informada não existe.");
         _transactionMock.Verify(t => t.RollbackAsync(It.IsAny<CancellationToken>()), Times.Once);
     }
 
@@ -126,7 +128,7 @@ public class CriarEstipulanteHandlerTests
 
         var act = () => _handler.Handle(command, CancellationToken.None);
 
-        await act.Should().ThrowAsync<EstipulanteInvalidoException>().WithMessage("A Cidade informada nÃ£o existe.");
+        await act.Should().ThrowAsync<EstipulanteInvalidoException>().WithMessage("A Cidade informada não existe.");
         _transactionMock.Verify(t => t.RollbackAsync(It.IsAny<CancellationToken>()), Times.Once);
     }
 
@@ -177,7 +179,7 @@ public class CriarEstipulanteHandlerTests
 
         var act = () => _handler.Handle(command, CancellationToken.None);
 
-        await act.Should().ThrowAsync<EstipulanteConflitoException>().WithMessage("JÃ¡ existe um Estipulante ativo para o CNPJ informado.");
+        await act.Should().ThrowAsync<EstipulanteConflitoException>().WithMessage("Já existe um Estipulante ativo para o CNPJ informado.");
         _transactionMock.Verify(t => t.RollbackAsync(It.IsAny<CancellationToken>()), Times.Once);
     }
 
@@ -185,14 +187,14 @@ public class CriarEstipulanteHandlerTests
     public async Task Conflito_DadosDivergentesPessoaExistente_Retorna409()
     {
         var command = CriarCommandValido();
-        var pessoaExistente = new PessoaModel { Id = 1, Nome = "Outra RazÃ£o Social", TipoPessoa = 2 };
+        var pessoaExistente = new PessoaModel { Id = 1, Nome = "Outra Razão Social", TipoPessoa = 2 };
         
         _repositoryMock.Setup(r => r.LocalizarPessoaPorDocumentoAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(pessoaExistente);
 
         var act = () => _handler.Handle(command, CancellationToken.None);
 
-        await act.Should().ThrowAsync<EstipulanteConflitoException>().WithMessage("O CNPJ informado jÃ¡ pertence a outra pessoa com RazÃ£o Social divergente no sistema.");
+        await act.Should().ThrowAsync<EstipulanteConflitoException>().WithMessage("O CNPJ informado já pertence a outra pessoa com Razão Social divergente no sistema.");
         _transactionMock.Verify(t => t.RollbackAsync(It.IsAny<CancellationToken>()), Times.Once);
     }
 

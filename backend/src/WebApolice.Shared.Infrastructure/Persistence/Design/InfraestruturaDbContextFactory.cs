@@ -11,11 +11,7 @@ public class InfraestruturaDbContextFactory : IDesignTimeDbContextFactory<Infrae
 
         if (string.IsNullOrWhiteSpace(connectionString))
         {
-            // Fornece uma mensagem clara se a connection string não estiver definida no ambiente (útil para uso da CLI localmente).
-            throw new InvalidOperationException(
-                "A variável de ambiente 'ConnectionStrings__PostgreSql' não foi definida. " +
-                "Para rodar as migrations, defina a variável de ambiente, por exemplo: " +
-                "$env:ConnectionStrings__PostgreSql='Host=localhost;Port=5432;Database=webapolice;Username=webapolice;Password=alterar'");
+            throw new InvalidOperationException("Defina ConnectionStrings__PostgreSql antes de executar ferramentas EF de infraestrutura.");
         }
 
         var optionsBuilder = new DbContextOptionsBuilder<InfraestruturaDbContext>();

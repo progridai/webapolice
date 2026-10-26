@@ -4,7 +4,6 @@ using System.Threading.Tasks;
 using System.Text.Json;
 using WebApolice.Modulos.Cadastro.Application.Ports;
 using WebApolice.Modulos.Cadastro.Domain.Exceptions;
-using WebApolice.Modulos.Cadastro.Infrastructure.Persistence;
 using WebApolice.Auditoria.Contracts;
 using WebApolice.Auditoria.Domain;
 
@@ -15,21 +14,17 @@ public sealed record AtivarCooperadoCommand(Guid PublicId);
 public sealed class AtivarCooperadoHandler
 {
     private readonly ICooperadoRepository _repository;
-    private readonly CadastroDbContext _dbContext;
-    private readonly IRegistradorAuditoria _auditoria;
+    private readonly IOperacaoCadastroAuditada _operacao;
 
-    public AtivarCooperadoHandler(ICooperadoRepository repository, CadastroDbContext dbContext, IRegistradorAuditoria auditoria)
+    public AtivarCooperadoHandler(ICooperadoRepository repository, IOperacaoCadastroAuditada operacao)
     {
         _repository = repository;
-        _dbContext = dbContext;
-        _auditoria = auditoria;
+        _operacao = operacao;
     }
 
     public async Task Handle(AtivarCooperadoCommand command, string usuarioSub, CancellationToken cancellationToken)
     {
-        await using var transaction = await _dbContext.BeginTransactionAsync(cancellationToken);
-
-        try
+        await _operacao.ExecutarAsync<bool>("Cadastro", "COOPERADOS", "REATIVAR", async ct =>
         {
             var agenciador = await _repository.ObterPorPublicIdAsync(command.PublicId, cancellationToken)
                 ?? throw new CooperadoNaoEncontradoException("Cooperado não encontrado.");
@@ -37,15 +32,10 @@ public sealed class AtivarCooperadoHandler
             agenciador.Ativar();
 
             await _repository.SalvarAlteracoesAsync(cancellationToken);
-            await transaction.CommitAsync(cancellationToken);
 
             var payloadAuditoria = JsonSerializer.SerializeToDocument(new { PublicId = agenciador.PublicId });
-            await _auditoria.RegistrarAsync(new RegistroAuditoria { Acao = "REATIVAR", Modulo = "Cadastro", Recurso = "COOPERADOS", RecursoId = agenciador.PublicId.ToString(), Resultado = ResultadoAuditoria.Sucesso, DadosPosteriores = payloadAuditoria }, cancellationToken);
-        }
-        catch
-        {
-            await transaction.RollbackAsync(cancellationToken);
-            throw;
-        }
+
+            return (true, agenciador.PublicId.ToString(), null, payloadAuditoria);
+        }, cancellationToken);
     }
 }

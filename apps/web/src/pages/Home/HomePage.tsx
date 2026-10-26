@@ -20,7 +20,8 @@ import './HomePage.css';
 export const HomePage: React.FC = () => {
   const { user, hasRole, hasAnyRole } = useAuth();
   const navigate = useNavigate();
-  const canAccessDesignSystem = ENV.ENABLE_DESIGN_SYSTEM && hasRole(APP_ROLES.ADMIN);
+  const canAccessDesignSystem =
+    ENV.ENABLE_DESIGN_SYSTEM && hasRole(APP_ROLES.ADMIN);
   const canAccessClientes = hasAnyRole([
     APP_ROLES.ADMIN,
     APP_ROLES.GESTOR,
@@ -41,7 +42,9 @@ export const HomePage: React.FC = () => {
     <div className="home-page">
       <div className="home-header">
         <h1 className="home-title">Olá, {firstName}!</h1>
-        <p className="home-subtitle">Você está autenticado e com acesso ao sistema.</p>
+        <p className="home-subtitle">
+          Você está autenticado e com acesso ao sistema.
+        </p>
       </div>
 
       <div className="home-modules">
@@ -56,10 +59,16 @@ export const HomePage: React.FC = () => {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <p>Acesse a listagem de clientes, aplique filtros e consulte os registros disponíveis.</p>
+                <p>
+                  Acesse a listagem de clientes, aplique filtros e consulte os
+                  registros disponíveis.
+                </p>
               </CardContent>
               <CardFooter>
-                <Button variant="primary" onClick={() => navigate(ROUTES.CLIENTES)}>
+                <Button
+                  variant="primary"
+                  onClick={() => navigate(ROUTES.CLIENTES)}
+                >
                   Acessar clientes
                 </Button>
               </CardFooter>
@@ -73,10 +82,16 @@ export const HomePage: React.FC = () => {
                 <CardTitle>Seguradoras</CardTitle>
               </CardHeader>
               <CardContent>
-                <p>Acesse o catálogo mestre de seguradoras, realize novos cadastros e consulte os registros.</p>
+                <p>
+                  Acesse o catálogo mestre de seguradoras, realize novos
+                  cadastros e consulte os registros.
+                </p>
               </CardContent>
               <CardFooter>
-                <Button variant="primary" onClick={() => navigate(ROUTES.SEGURADORAS)}>
+                <Button
+                  variant="primary"
+                  onClick={() => navigate(ROUTES.SEGURADORAS)}
+                >
                   Acessar seguradoras
                 </Button>
               </CardFooter>
@@ -90,10 +105,16 @@ export const HomePage: React.FC = () => {
                 <CardTitle>Corretoras</CardTitle>
               </CardHeader>
               <CardContent>
-                <p>Consulte e gerencie as corretoras parceiras cadastradas no sistema.</p>
+                <p>
+                  Consulte e gerencie as corretoras parceiras cadastradas no
+                  sistema.
+                </p>
               </CardContent>
               <CardFooter>
-                <Button variant="primary" onClick={() => navigate(ROUTES.CORRETORAS)}>
+                <Button
+                  variant="primary"
+                  onClick={() => navigate(ROUTES.CORRETORAS)}
+                >
                   Acessar corretoras
                 </Button>
               </CardFooter>
@@ -109,10 +130,16 @@ export const HomePage: React.FC = () => {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <p>Acesse a listagem de cooperados, gerencie cadastros e visualize informações de coordenadores.</p>
+                <p>
+                  Acesse a listagem de cooperados, gerencie cadastros e
+                  visualize informações de coordenadores.
+                </p>
               </CardContent>
               <CardFooter>
-                <Button variant="primary" onClick={() => navigate(ROUTES.COOPERADOS)}>
+                <Button
+                  variant="primary"
+                  onClick={() => navigate(ROUTES.COOPERADOS)}
+                >
                   Acessar cooperados
                 </Button>
               </CardFooter>
@@ -124,14 +151,21 @@ export const HomePage: React.FC = () => {
               <CardHeader>
                 <CardTitle>Design System</CardTitle>
                 <CardDescription>
-                  Catálogo de componentes visuais e tokens de design da aplicação.
+                  Catálogo de componentes visuais e tokens de design da
+                  aplicação.
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <p>Acesse o catálogo completo de componentes, tokens e diretrizes da identidade visual WebApólice.</p>
+                <p>
+                  Acesse o catálogo completo de componentes, tokens e diretrizes
+                  da identidade visual WebApólice.
+                </p>
               </CardContent>
               <CardFooter>
-                <Button variant="primary" onClick={() => navigate(ROUTES.DESIGN_SYSTEM)}>
+                <Button
+                  variant="primary"
+                  onClick={() => navigate(ROUTES.DESIGN_SYSTEM)}
+                >
                   Acessar catálogo
                 </Button>
               </CardFooter>

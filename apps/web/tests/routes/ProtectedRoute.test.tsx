@@ -30,31 +30,46 @@ function renderWithRouter(authValue: AuthContextValue) {
           <Route element={<ProtectedRoute />}>
             <Route path="/protected" element={<div>Conteudo Protegido</div>} />
           </Route>
-          <Route path="/unauthorized" element={<div>Pagina Nao Autorizada</div>} />
+          <Route
+            path="/unauthorized"
+            element={<div>Pagina Nao Autorizada</div>}
+          />
         </Routes>
       </AuthContext.Provider>
-    </MemoryRouter>
+    </MemoryRouter>,
   );
 }
 
 describe('ProtectedRoute', () => {
   it('renders protected content when authenticated', async () => {
-    renderWithRouter(mockAuthValue({ status: 'authenticated', isAuthenticated: true }));
+    renderWithRouter(
+      mockAuthValue({ status: 'authenticated', isAuthenticated: true }),
+    );
 
-    await waitFor(() => expect(screen.getByText('Conteudo Protegido')).not.toBeNull());
+    await waitFor(() =>
+      expect(screen.getByText('Conteudo Protegido')).not.toBeNull(),
+    );
   });
 
   it('redirects to unauthorized when unauthenticated', async () => {
-    renderWithRouter(mockAuthValue({ status: 'unauthenticated', isAuthenticated: false }));
+    renderWithRouter(
+      mockAuthValue({ status: 'unauthenticated', isAuthenticated: false }),
+    );
 
-    await waitFor(() => expect(screen.getByText('Pagina Nao Autorizada')).not.toBeNull());
+    await waitFor(() =>
+      expect(screen.getByText('Pagina Nao Autorizada')).not.toBeNull(),
+    );
   });
 
   it('renders loading while authentication is being resolved', () => {
-    renderWithRouter(mockAuthValue({ status: 'initializing', isLoading: true }));
+    renderWithRouter(
+      mockAuthValue({ status: 'initializing', isLoading: true }),
+    );
 
     expect(screen.queryByText('Conteudo Protegido')).toBeNull();
     expect(screen.queryByText('Pagina Nao Autorizada')).toBeNull();
-    expect(screen.getAllByRole('status', { name: /Carregando/ }).length).toBeGreaterThan(0);
+    expect(
+      screen.getAllByRole('status', { name: /Carregando/ }).length,
+    ).toBeGreaterThan(0);
   });
 });

@@ -2,15 +2,25 @@ import React, { useEffect, useState } from 'react';
 import { useAuthorization } from '../../../auth/AuthorizationProvider';
 import { useEstipulantes } from '../hooks/useEstipulantes';
 import { useEstipulantesFilters } from '../hooks/useEstipulantesFilters';
-import { inativarEstipulante, reativarEstipulante } from '../api/estipulantes.api';
+import {
+  inativarEstipulante,
+  reativarEstipulante,
+} from '../api/estipulantes.api';
 import { EstipulantesFilters } from '../components/EstipulantesFilters';
 import { EstipulantesTable } from '../components/EstipulantesTable';
 import { EstipulantesMobileList } from '../components/EstipulantesMobileList';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { ROUTES, createPath } from '../../../app/routes/routePaths';
 import {
-  Pagination, EmptyState, Alert, Button, Skeleton, ResultsSummary,
-  PageHeader, Breadcrumbs, PlusIcon
+  Pagination,
+  EmptyState,
+  Alert,
+  Button,
+  Skeleton,
+  ResultsSummary,
+  PageHeader,
+  Breadcrumbs,
+  PlusIcon,
 } from '../../../components/ui';
 
 export const EstipulantesListPage: React.FC = () => {
@@ -18,15 +28,22 @@ export const EstipulantesListPage: React.FC = () => {
   const location = useLocation();
   const { filters, setFilters, clearFilters } = useEstipulantesFilters();
   const [refreshTrigger, setRefreshTrigger] = useState(0);
-  const { data, isLoading, error, retry } = useEstipulantes(filters, refreshTrigger);
+  const { data, isLoading, error, retry } = useEstipulantes(
+    filters,
+    refreshTrigger,
+  );
   const [isMobile, setIsMobile] = useState(false);
   const { possuiPermissao, possuiAcessoTotal } = useAuthorization();
 
-  const podeInserir = possuiAcessoTotal() || possuiPermissao('estipulantes.inserir');
-  const podeAlterar = possuiAcessoTotal() || possuiPermissao('estipulantes.alterar');
-  
-  const podeInativar = possuiAcessoTotal() || possuiPermissao('estipulantes.inativar');
-  const podeReativar = possuiAcessoTotal() || possuiPermissao('estipulantes.reativar');
+  const podeInserir =
+    possuiAcessoTotal() || possuiPermissao('estipulantes.inserir');
+  const podeAlterar =
+    possuiAcessoTotal() || possuiPermissao('estipulantes.alterar');
+
+  const podeInativar =
+    possuiAcessoTotal() || possuiPermissao('estipulantes.inativar');
+  const podeReativar =
+    possuiAcessoTotal() || possuiPermissao('estipulantes.reativar');
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
@@ -42,7 +59,10 @@ export const EstipulantesListPage: React.FC = () => {
   const handleSort = (column: string) => {
     setFilters({
       sortBy: column,
-      direction: filters.sortBy === column && filters.direction === 'asc' ? 'desc' : 'asc',
+      direction:
+        filters.sortBy === column && filters.direction === 'asc'
+          ? 'desc'
+          : 'asc',
     });
   };
 
@@ -53,7 +73,7 @@ export const EstipulantesListPage: React.FC = () => {
   const handleInativar = async (publicId: string) => {
     try {
       await inativarEstipulante(publicId);
-      setRefreshTrigger(prev => prev + 1);
+      setRefreshTrigger((prev) => prev + 1);
     } catch (err) {
       console.error('Erro ao inativar', err);
       // Aqui idealmente teríamos um Toast notification
@@ -63,7 +83,7 @@ export const EstipulantesListPage: React.FC = () => {
   const handleReativar = async (publicId: string) => {
     try {
       await reativarEstipulante(publicId);
-      setRefreshTrigger(prev => prev + 1);
+      setRefreshTrigger((prev) => prev + 1);
     } catch (err) {
       console.error('Erro ao reativar', err);
     }
@@ -79,7 +99,10 @@ export const EstipulantesListPage: React.FC = () => {
   const hasData = data && data.itens && data.itens.length > 0;
 
   return (
-    <main className="flex flex-col gap-6 w-full max-w-[1440px] mx-auto p-0 focus:outline-none" tabIndex={-1}>
+    <main
+      className="flex flex-col gap-6 w-full max-w-[1440px] mx-auto p-0 focus:outline-none"
+      tabIndex={-1}
+    >
       <PageHeader
         title="Estipulantes"
         description="Gerencie as empresas e organizações estipulantes cadastradas no WebApólice."
@@ -101,7 +124,10 @@ export const EstipulantesListPage: React.FC = () => {
         }
       />
 
-      <section aria-label="Filtros de estipulantes" style={{ position: 'relative', zIndex: 10 }}>
+      <section
+        aria-label="Filtros de estipulantes"
+        style={{ position: 'relative', zIndex: 10 }}
+      >
         <EstipulantesFilters
           filters={filters}
           onFilterChange={setFilters}
@@ -112,7 +138,10 @@ export const EstipulantesListPage: React.FC = () => {
 
       {error ? (
         <div className="flex flex-col gap-4 items-start mt-4">
-          <Alert variant="error" title="Não foi possível carregar os estipulantes">
+          <Alert
+            variant="error"
+            title="Não foi possível carregar os estipulantes"
+          >
             {error.message}
           </Alert>
           <Button onClick={retry} size="small" loading={isLoading}>
@@ -120,14 +149,22 @@ export const EstipulantesListPage: React.FC = () => {
           </Button>
         </div>
       ) : isLoading && !data && isMobile ? (
-        <div className="flex flex-col gap-4 mt-4" aria-busy="true" aria-live="polite">
+        <div
+          className="flex flex-col gap-4 mt-4"
+          aria-busy="true"
+          aria-live="polite"
+        >
           <Skeleton className="h-[120px] rounded-lg" />
           <Skeleton className="h-[120px] rounded-lg" />
           <Skeleton className="h-[120px] rounded-lg" />
         </div>
       ) : !hasData && isMobile ? (
         <EmptyState
-          title={hasActiveFilters ? 'Nenhum estipulante corresponde aos filtros aplicados' : 'Nenhum estipulante cadastrado'}
+          title={
+            hasActiveFilters
+              ? 'Nenhum estipulante corresponde aos filtros aplicados'
+              : 'Nenhum estipulante cadastrado'
+          }
           description={
             hasActiveFilters
               ? 'Tente mudar sua busca ou limpar os filtros para encontrar o que procura.'
@@ -135,9 +172,7 @@ export const EstipulantesListPage: React.FC = () => {
           }
           action={
             hasActiveFilters ? (
-              <Button onClick={clearFilters}>
-                Limpar filtros
-              </Button>
+              <Button onClick={clearFilters}>Limpar filtros</Button>
             ) : undefined
           }
         />
@@ -152,8 +187,8 @@ export const EstipulantesListPage: React.FC = () => {
           )}
 
           {isMobile ? (
-            <EstipulantesMobileList 
-              estipulantes={data?.itens || []} 
+            <EstipulantesMobileList
+              estipulantes={data?.itens || []}
               podeInativar={podeInativar}
               podeReativar={podeReativar}
               podeAlterar={podeAlterar}

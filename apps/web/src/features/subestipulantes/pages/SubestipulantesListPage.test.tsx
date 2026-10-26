@@ -4,7 +4,10 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { MemoryRouter, Routes, Route } from 'react-router-dom';
 import { SubestipulantesListPage } from './SubestipulantesListPage';
 import * as api from '../api/subestipulantes.api';
-import type { SubestipulanteListItem, PagedResult } from '../types/subestipulante.types';
+import type {
+  SubestipulanteListItem,
+  PagedResult,
+} from '../types/subestipulante.types';
 
 vi.mock('../api/subestipulantes.api', () => ({
   subestipulantesApi: {
@@ -58,9 +61,12 @@ describe('SubestipulantesListPage', () => {
     render(
       <MemoryRouter initialEntries={['/subestipulantes']}>
         <Routes>
-          <Route path="/subestipulantes" element={<SubestipulantesListPage />} />
+          <Route
+            path="/subestipulantes"
+            element={<SubestipulantesListPage />}
+          />
         </Routes>
-      </MemoryRouter>
+      </MemoryRouter>,
     );
 
     expect(screen.getByText('Cadastro de Subestipulantes')).toBeTruthy();
@@ -85,9 +91,12 @@ describe('SubestipulantesListPage', () => {
     render(
       <MemoryRouter initialEntries={['/subestipulantes']}>
         <Routes>
-          <Route path="/subestipulantes" element={<SubestipulantesListPage />} />
+          <Route
+            path="/subestipulantes"
+            element={<SubestipulantesListPage />}
+          />
         </Routes>
-      </MemoryRouter>
+      </MemoryRouter>,
     );
 
     const buscaInput = screen.getByLabelText(/Buscar subestipulante/i);
@@ -95,7 +104,7 @@ describe('SubestipulantesListPage', () => {
 
     await waitFor(() => {
       expect(api.subestipulantesApi.listar).toHaveBeenCalledWith(
-        expect.objectContaining({ busca: 'Alpha', pagina: 1 })
+        expect.objectContaining({ busca: 'Alpha', pagina: 1 }),
       );
     });
 
@@ -104,7 +113,11 @@ describe('SubestipulantesListPage', () => {
 
     await waitFor(() => {
       expect(api.subestipulantesApi.listar).toHaveBeenCalledWith(
-        expect.objectContaining({ busca: undefined, ativo: undefined, pagina: 1 })
+        expect.objectContaining({
+          busca: undefined,
+          ativo: undefined,
+          pagina: 1,
+        }),
       );
     });
   });
@@ -116,9 +129,12 @@ describe('SubestipulantesListPage', () => {
     render(
       <MemoryRouter initialEntries={['/subestipulantes']}>
         <Routes>
-          <Route path="/subestipulantes" element={<SubestipulantesListPage />} />
+          <Route
+            path="/subestipulantes"
+            element={<SubestipulantesListPage />}
+          />
         </Routes>
-      </MemoryRouter>
+      </MemoryRouter>,
     );
 
     await waitFor(() => {
@@ -131,7 +147,9 @@ describe('SubestipulantesListPage', () => {
     const inativarBtn = screen.getByText('Inativar');
     fireEvent.click(inativarBtn);
 
-    expect(screen.getByText(/Tem certeza que deseja inativar o subestipulante/i)).toBeTruthy();
+    expect(
+      screen.getByText(/Tem certeza que deseja inativar o subestipulante/i),
+    ).toBeTruthy();
 
     const confirmarBtn = screen.getByRole('button', { name: 'Sim, inativar' });
     fireEvent.click(confirmarBtn);

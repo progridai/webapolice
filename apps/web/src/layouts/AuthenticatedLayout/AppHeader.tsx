@@ -16,7 +16,10 @@ interface AppHeaderProps {
   isMobileMenuOpen: boolean;
 }
 
-export const AppHeader: React.FC<AppHeaderProps> = ({ onMenuToggle, isMobileMenuOpen }) => {
+export const AppHeader: React.FC<AppHeaderProps> = ({
+  onMenuToggle,
+  isMobileMenuOpen,
+}) => {
   const { temaPreferido, alterarTema } = useTema();
 
   return (
@@ -25,7 +28,11 @@ export const AppHeader: React.FC<AppHeaderProps> = ({ onMenuToggle, isMobileMenu
         {/* Botão hambúrguer — apenas mobile */}
         <button
           className="app-header-menu-btn"
-          aria-label={isMobileMenuOpen ? 'Fechar menu de navegação' : 'Abrir menu de navegação'}
+          aria-label={
+            isMobileMenuOpen
+              ? 'Fechar menu de navegação'
+              : 'Abrir menu de navegação'
+          }
           aria-expanded={isMobileMenuOpen}
           aria-controls="mobile-nav-panel"
           type="button"

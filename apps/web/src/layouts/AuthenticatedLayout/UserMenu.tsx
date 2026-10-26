@@ -24,15 +24,12 @@ export const UserMenu: React.FC = () => {
     setIsOpen((prev) => !prev);
   }, []);
 
-  const handleKeyDown = useCallback(
-    (e: React.KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        setIsOpen(false);
-        buttonRef.current?.focus();
-      }
-    },
-    []
-  );
+  const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
+    if (e.key === 'Escape') {
+      setIsOpen(false);
+      buttonRef.current?.focus();
+    }
+  }, []);
 
   const handleLogout = useCallback(async () => {
     setIsOpen(false);

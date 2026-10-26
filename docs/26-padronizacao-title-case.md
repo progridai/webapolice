@@ -28,6 +28,8 @@ A função SQL usa a classificação alfabética/capitalização do locale UTF-8
 
 ## Novas implementações
 
+Consolidação de 23/10/2026: mover os tipos de Pessoa/Cliente para Domain.Clientes não altera a classificação por propriedade nem os mecanismos de SaveChanges/HTTP/SQL. O novo PublicId de PropostaItem é Guid técnico, preservado. LegadoId continua técnico, agora anulável em Proposta/Item para gravações nativas; valores históricos não são reescritos. Não foram acrescentados campos humanos. A reaplicação dos triggers no destino continua obrigatória conforme a orientação acima, sem normalizar evidências históricas nesta correção.
+
 1. Classificar cada novo campo como texto humano ou técnico.
 2. Para campos humanos, atualizar as listas equivalentes em C#, TypeScript e SQL, adicionando testes com caixa alta, caixa mista, acentos, null e idempotência.
 3. Herdar os novos contextos de negócio da base compartilhada; não usar DbContext diretamente.

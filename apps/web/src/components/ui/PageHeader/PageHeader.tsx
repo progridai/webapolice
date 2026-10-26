@@ -18,29 +18,35 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
   icon,
   breadcrumbs,
   actions,
-  children
+  children,
 }) => {
   return (
     <div className="page-header">
-      {breadcrumbs && <div className="page-header-breadcrumbs">{breadcrumbs}</div>}
-      
+      {breadcrumbs && (
+        <div className="page-header-breadcrumbs">{breadcrumbs}</div>
+      )}
+
       <div className="page-header-content">
         <div className="page-header-title-group">
-          {icon && <div className="page-header-icon" aria-hidden="true">{icon}</div>}
+          {icon && (
+            <div className="page-header-icon" aria-hidden="true">
+              {icon}
+            </div>
+          )}
           <div className="page-header-text">
             <div className="page-header-title-wrapper">
               <h1 className="page-header-title">{title}</h1>
-              {titleExtras && <div className="page-header-title-extras">{titleExtras}</div>}
+              {titleExtras && (
+                <div className="page-header-title-extras">{titleExtras}</div>
+              )}
             </div>
-            {description && <p className="page-header-description">{description}</p>}
+            {description && (
+              <p className="page-header-description">{description}</p>
+            )}
           </div>
         </div>
 
-        {actions && (
-          <div className="page-header-actions">
-            {actions}
-          </div>
-        )}
+        {actions && <div className="page-header-actions">{actions}</div>}
       </div>
 
       {children && <div className="page-header-extras">{children}</div>}

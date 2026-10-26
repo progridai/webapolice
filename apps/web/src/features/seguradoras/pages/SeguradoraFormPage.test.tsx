@@ -1,3 +1,4 @@
+import { HttpApiError } from '../../../services/http/httpError';
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
@@ -32,10 +33,12 @@ describe('SeguradoraFormPage', () => {
         <Routes>
           <Route path="/seguradoras/nova" element={<SeguradoraFormPage />} />
         </Routes>
-      </MemoryRouter>
+      </MemoryRouter>,
     );
 
-    expect(screen.getByRole('heading', { name: 'Nova Seguradora' })).toBeTruthy();
+    expect(
+      screen.getByRole('heading', { name: 'Nova Seguradora' }),
+    ).toBeTruthy();
     expect(screen.getByLabelText(/Nome \/ Razão Social/i)).toBeTruthy();
     expect(screen.getByLabelText(/CNPJ/i)).toBeTruthy();
     expect(screen.getByLabelText(/Código Interno/i)).toBeTruthy();
@@ -49,26 +52,30 @@ describe('SeguradoraFormPage', () => {
         <Routes>
           <Route path="/seguradoras/nova" element={<SeguradoraFormPage />} />
         </Routes>
-      </MemoryRouter>
+      </MemoryRouter>,
     );
 
     const salvarBtn = screen.getByRole('button', { name: 'Salvar' });
     fireEvent.click(salvarBtn);
 
     await waitFor(() => {
-      expect(screen.getByText('O nome da seguradora é obrigatório.')).toBeTruthy();
+      expect(
+        screen.getByText('O nome da seguradora é obrigatório.'),
+      ).toBeTruthy();
     });
   });
 
   it('deve submeter com sucesso ao preencher formulário válido', async () => {
-    vi.mocked(api.seguradorasApi.criar).mockResolvedValueOnce({ publicId: 'seg-1' });
+    vi.mocked(api.seguradorasApi.criar).mockResolvedValueOnce({
+      publicId: 'seg-1',
+    });
 
     render(
       <MemoryRouter initialEntries={['/seguradoras/nova']}>
         <Routes>
           <Route path="/seguradoras/nova" element={<SeguradoraFormPage />} />
         </Routes>
-      </MemoryRouter>
+      </MemoryRouter>,
     );
 
     fireEvent.change(screen.getByLabelText(/Nome \/ Razão Social/i), {
@@ -116,35 +123,52 @@ describe('SeguradoraFormPage', () => {
     render(
       <MemoryRouter initialEntries={['/seguradoras/s-edit-1/editar']}>
         <Routes>
-          <Route path="/seguradoras/:publicId/editar" element={<SeguradoraFormPage />} />
+          <Route
+            path="/seguradoras/:publicId/editar"
+            element={<SeguradoraFormPage />}
+          />
         </Routes>
-      </MemoryRouter>
+      </MemoryRouter>,
     );
 
     await waitFor(() => {
-      expect(screen.getByRole('heading', { name: 'Editar Seguradora' })).toBeTruthy();
+      expect(
+        screen.getByRole('heading', { name: 'Editar Seguradora' }),
+      ).toBeTruthy();
     });
 
-    expect((screen.getByLabelText(/Nome \/ Razão Social/i) as HTMLInputElement).value).toBe('Mapfre Seguros');
-    expect((screen.getByLabelText(/Código Interno/i) as HTMLInputElement).value).toBe('MPF-99');
-    expect((screen.getByLabelText(/Código SUSEP/i) as HTMLInputElement).value).toBe('06238');
-    expect((screen.getByLabelText(/CNPJ/i) as HTMLInputElement).value).toBe('61.074.175/0001-38');
-    expect((screen.getByLabelText(/Observação/i) as HTMLTextAreaElement).value).toBe('Parceiro estratégico');
+    expect(
+      (screen.getByLabelText(/Nome \/ Razão Social/i) as HTMLInputElement)
+        .value,
+    ).toBe('Mapfre Seguros');
+    expect(
+      (screen.getByLabelText(/Código Interno/i) as HTMLInputElement).value,
+    ).toBe('MPF-99');
+    expect(
+      (screen.getByLabelText(/Código SUSEP/i) as HTMLInputElement).value,
+    ).toBe('06238');
+    expect((screen.getByLabelText(/CNPJ/i) as HTMLInputElement).value).toBe(
+      '61.074.175/0001-38',
+    );
+    expect(
+      (screen.getByLabelText(/Observação/i) as HTMLTextAreaElement).value,
+    ).toBe('Parceiro estratégico');
   });
 
   it('deve exibir mensagem de erro quando a API rejeitar a criação', async () => {
-    vi.mocked(api.seguradorasApi.criar).mockRejectedValueOnce({
-      response: {
-        data: { message: 'Já existe uma seguradora cadastrada com este CNPJ.' },
-      },
-    });
+    vi.mocked(api.seguradorasApi.criar).mockRejectedValueOnce(
+      new HttpApiError({
+        status: 409,
+        message: 'Já existe uma seguradora cadastrada com este CNPJ.',
+      }),
+    );
 
     render(
       <MemoryRouter initialEntries={['/seguradoras/nova']}>
         <Routes>
           <Route path="/seguradoras/nova" element={<SeguradoraFormPage />} />
         </Routes>
-      </MemoryRouter>
+      </MemoryRouter>,
     );
 
     fireEvent.change(screen.getByLabelText(/Nome \/ Razão Social/i), {
@@ -155,7 +179,9 @@ describe('SeguradoraFormPage', () => {
     fireEvent.click(salvarBtn);
 
     await waitFor(() => {
-      expect(screen.getByText('Já existe uma seguradora cadastrada com este CNPJ.')).toBeTruthy();
+      expect(
+        screen.getByText('Já existe uma seguradora cadastrada com este CNPJ.'),
+      ).toBeTruthy();
     });
   });
 });

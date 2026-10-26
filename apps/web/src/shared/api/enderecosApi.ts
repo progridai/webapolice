@@ -10,7 +10,13 @@ export interface EnderecoConsultaResult {
   estadoId: number | null;
 }
 
-export async function consultarCep(cep: string, signal?: AbortSignal): Promise<EnderecoConsultaResult> {
-  const response = await httpClient.get<EnderecoConsultaResult>(`/api/enderecos/cep/${cep}`, { signal });
+export async function consultarCep(
+  cep: string,
+  signal?: AbortSignal,
+): Promise<EnderecoConsultaResult> {
+  const response = await httpClient.get<EnderecoConsultaResult>(
+    `/api/enderecos/cep/${cep}`,
+    { signal },
+  );
   return response.data;
 }

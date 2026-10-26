@@ -1,11 +1,11 @@
 /* main.css */
 /* Importação de todos os Design Tokens */
-@import './tokens/cores.css';
-@import './tokens/temas.css';
-@import './tokens/tipografia.css';
-@import './tokens/espacamentos.css';
-@import './tokens/bordas.css';
-@import './tokens/sombras.css';
+@import "./tokens/cores.css";
+@import "./tokens/temas.css";
+@import "./tokens/tipografia.css";
+@import "./tokens/espacamentos.css";
+@import "./tokens/bordas.css";
+@import "./tokens/sombras.css";
 
 @tailwind base;
 @tailwind components;
@@ -25,7 +25,9 @@ body {
   line-height: var(--linha-altura-normal);
   background-color: var(--cor-fundo-aplicacao);
   color: var(--cor-texto-principal);
-  transition: background-color 0.2s ease, color 0.2s ease;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease;
 }
 
 /* Foco global visível padrão */

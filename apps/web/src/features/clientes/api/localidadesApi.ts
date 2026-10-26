@@ -8,7 +8,13 @@ export interface CidadeResponse {
 /**
  * Busca as cidades de um estado específico
  */
-export async function buscarCidadesPorUf(uf: string): Promise<CidadeResponse[]> {
-  const response = await httpClient.get<CidadeResponse[]>(`/api/localidades/cidades?uf=${uf}`);
+export async function buscarCidadesPorUf(
+  uf: string,
+  signal?: AbortSignal,
+): Promise<CidadeResponse[]> {
+  const response = await httpClient.get<CidadeResponse[]>(
+    `/api/localidades/cidades?uf=${uf}`,
+    { signal },
+  );
   return response.data;
 }

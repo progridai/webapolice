@@ -1,3 +1,4 @@
+using WebApolice.Modulos.Cadastro.Domain.Clientes;
 using Microsoft.EntityFrameworkCore;
 using WebApolice.SharedKernel.Text;
 using WebApolice.Modulos.Cadastro.Infrastructure.Persistence;

@@ -1,3 +1,4 @@
+using WebApolice.Modulos.Cadastro.Domain.Clientes;
 using System;
 using System.Linq;
 using System.Threading;
@@ -7,7 +8,6 @@ using System.Text.RegularExpressions;
 using WebApolice.Modulos.Cadastro.Application.Ports;
 using WebApolice.Modulos.Cadastro.Domain;
 using WebApolice.Modulos.Cadastro.Domain.Exceptions;
-using WebApolice.Modulos.Cadastro.Infrastructure.Persistence;
 using WebApolice.Modulos.Cadastro.Infrastructure.Persistence.Models;
 using WebApolice.Auditoria.Contracts;
 using WebApolice.Auditoria.Domain;
@@ -18,14 +18,12 @@ namespace WebApolice.Modulos.Cadastro.Application.UseCases.CadastrarCooperado;
 public sealed class CadastrarCooperadoHandler
 {
     private readonly ICooperadoRepository _repository;
-    private readonly CadastroDbContext _dbContext;
-    private readonly IRegistradorAuditoria _auditoria;
+    private readonly IOperacaoCadastroAuditada _operacao;
 
-    public CadastrarCooperadoHandler(ICooperadoRepository repository, CadastroDbContext dbContext, IRegistradorAuditoria auditoria)
+    public CadastrarCooperadoHandler(ICooperadoRepository repository, IOperacaoCadastroAuditada operacao)
     {
         _repository = repository;
-        _dbContext = dbContext;
-        _auditoria = auditoria;
+        _operacao = operacao;
     }
 
     public async Task<CadastrarCooperadoResult> Handle(CadastrarCooperadoCommand command, string usuarioSub, CancellationToken cancellationToken)
@@ -60,9 +58,7 @@ public sealed class CadastrarCooperadoHandler
             coordenadorInternoId = coord.Id;
         }
 
-        await using var transaction = await _dbContext.BeginTransactionAsync(cancellationToken);
-
-        try
+        return await _operacao.ExecutarAsync<CadastrarCooperadoResult>("Cadastro", "COOPERADOS", "CRIAR", async ct =>
         {
             var pessoa = await _repository.LocalizarPessoaPorCpfAsync(documentoLimpo, cancellationToken);
             DateTime? dataNascimentoDt = DateTime.SpecifyKind(command.DataNascimento.Value.ToDateTime(TimeOnly.MinValue), DateTimeKind.Utc);
@@ -193,7 +189,6 @@ public sealed class CadastrarCooperadoHandler
 
             _repository.AdicionarAgenciador(agenciador);
             await _repository.SalvarAlteracoesAsync(cancellationToken);
-            await transaction.CommitAsync(cancellationToken);
 
             var payloadAuditoria = JsonSerializer.SerializeToDocument(new
             {
@@ -203,28 +198,16 @@ public sealed class CadastrarCooperadoHandler
                 Codigo = command.Codigo
             });
 
-            await _auditoria.RegistrarAsync(new RegistroAuditoria
-            {
-                Acao = "CRIAR",
-                Modulo = "Cadastro",
-                Recurso = "COOPERADOS",
-                RecursoId = agenciador.PublicId.ToString(),
-                Resultado = ResultadoAuditoria.Sucesso,
-                DadosPosteriores = payloadAuditoria
-            }, cancellationToken);
 
-            return new CadastrarCooperadoResult(
+
+            var resultado = new CadastrarCooperadoResult(
                 agenciador.PublicId,
                 pessoa.Nome,
                 $"{documentoLimpo.Substring(0, 3)}.***.***-{documentoLimpo.Substring(9, 2)}",
                 (short)command.Tipo,
                 agenciador.CreatedAt.UtcDateTime
             );
-        }
-        catch
-        {
-            await transaction.RollbackAsync(cancellationToken);
-            throw;
-        }
+            return (resultado, agenciador.PublicId.ToString(), null, payloadAuditoria);
+        }, cancellationToken);
     }
 }

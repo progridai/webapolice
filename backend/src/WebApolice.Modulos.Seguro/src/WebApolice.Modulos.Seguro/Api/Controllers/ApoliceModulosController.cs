@@ -1,3 +1,4 @@
+using WebApolice.Modulos.Seguranca.Contracts.Authorization;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -6,7 +7,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using WebApolice.Modulos.Seguranca.Application.Authorization;
 using WebApolice.Modulos.Seguranca.Application.Ports;
-using WebApolice.Modulos.Seguranca.Infrastructure.Authorization;
 using WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Application.UseCases.Apolices.CriarModuloApolice;
 using WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Application.UseCases.Apolices.AlterarModuloApolice;
 using WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Application.UseCases.Apolices.InativarModuloApolice;

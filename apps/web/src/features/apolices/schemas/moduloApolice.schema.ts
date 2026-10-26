@@ -5,7 +5,7 @@ import { z } from 'zod';
 // DataFim < DataInicio com ValidacaoException. Replicado aqui para melhorar UX.
 const vigenciaRefinement = (
   data: { dataInicio?: string | null; dataFim?: string | null },
-  ctx: z.RefinementCtx
+  ctx: z.RefinementCtx,
 ) => {
   if (data.dataInicio && data.dataFim) {
     const inicio = new Date(data.dataInicio + 'T00:00:00');
@@ -31,7 +31,9 @@ export const criarModuloApoliceSchema = z
   })
   .superRefine(vigenciaRefinement);
 
-export type CriarModuloApoliceFormValues = z.infer<typeof criarModuloApoliceSchema>;
+export type CriarModuloApoliceFormValues = z.infer<
+  typeof criarModuloApoliceSchema
+>;
 
 // Schema para ALTERAR vínculo: moduloPublicId não faz parte do payload de edição
 export const alterarModuloApoliceSchema = z
@@ -42,4 +44,6 @@ export const alterarModuloApoliceSchema = z
   })
   .superRefine(vigenciaRefinement);
 
-export type AlterarModuloApoliceFormValues = z.infer<typeof alterarModuloApoliceSchema>;
+export type AlterarModuloApoliceFormValues = z.infer<
+  typeof alterarModuloApoliceSchema
+>;

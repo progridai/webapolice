@@ -8,12 +8,17 @@ import type { AuthContextValue } from '../../auth/auth.types';
 import { useAuthorization } from '../../auth/AuthorizationProvider';
 import { makeAuthorization } from '../../../tests/helpers/authorization';
 
-vi.mock('../../auth/AuthorizationProvider', () => ({ useAuthorization: vi.fn() }));
+vi.mock('../../auth/AuthorizationProvider', () => ({
+  useAuthorization: vi.fn(),
+}));
 
 const navigateMock = vi.fn();
 
 vi.mock('react-router-dom', async () => {
-  const actual = await vi.importActual<typeof import('react-router-dom')>('react-router-dom');
+  const actual =
+    await vi.importActual<typeof import('react-router-dom')>(
+      'react-router-dom',
+    );
   return {
     ...actual,
     useNavigate: () => navigateMock,
@@ -50,8 +55,10 @@ function authValue(roles: string[]): AuthContextValue {
     logout: vi.fn(),
     refreshToken: vi.fn().mockResolvedValue(true),
     hasRole: (role: string) => roles.includes(role),
-    hasAnyRole: (rolesToCheck: string[]) => rolesToCheck.some((role) => roles.includes(role)),
-    hasAllRoles: (rolesToCheck: string[]) => rolesToCheck.every((role) => roles.includes(role)),
+    hasAnyRole: (rolesToCheck: string[]) =>
+      rolesToCheck.some((role) => roles.includes(role)),
+    hasAllRoles: (rolesToCheck: string[]) =>
+      rolesToCheck.every((role) => roles.includes(role)),
   };
 }
 
@@ -62,7 +69,7 @@ function renderHome(roles: string[]) {
       <AuthContext.Provider value={authValue(roles)}>
         <HomePage />
       </AuthContext.Provider>
-    </MemoryRouter>
+    </MemoryRouter>,
   );
 }
 

@@ -1,6 +1,6 @@
 import { forwardRef } from 'react';
 import ReactAsyncSelect from 'react-select/async';
-import type { GroupBase, StylesConfig } from 'react-select';
+import type { GroupBase, SelectInstance, StylesConfig } from 'react-select';
 
 export interface AsyncOptionItem {
   label: string;
@@ -19,67 +19,99 @@ export interface AsyncSelectProps {
   defaultOptions?: boolean | AsyncOptionItem[];
 }
 
-export const AsyncSelect = forwardRef<any, AsyncSelectProps>(
-  ({ id, name, placeholder = 'Selecione...', error, loadOptions, value, onChange, onBlur, defaultOptions = true }, ref) => {
-
-    const customStyles: StylesConfig<AsyncOptionItem, false, GroupBase<AsyncOptionItem>> = {
+export const AsyncSelect = forwardRef<
+  SelectInstance<AsyncOptionItem, false>,
+  AsyncSelectProps
+>(
+  (
+    {
+      id,
+      name,
+      placeholder = 'Selecione...',
+      error,
+      loadOptions,
+      value,
+      onChange,
+      onBlur,
+      defaultOptions = true,
+    },
+    ref,
+  ) => {
+    const customStyles: StylesConfig<
+      AsyncOptionItem,
+      false,
+      GroupBase<AsyncOptionItem>
+    > = {
       control: (provided, state) => ({
         ...provided,
         minHeight: '40px',
-        backgroundColor: 'var(--bg-principal)',
-        borderColor: error ? 'var(--status-erro)' : (state.isFocused ? 'var(--marca-primaria)' : 'var(--borda-forte)'),
-        boxShadow: state.isFocused ? (error ? '0 0 0 1px var(--status-erro)' : '0 0 0 1px var(--marca-primaria)') : 'none',
+        backgroundColor: 'var(--cor-fundo-superficie)',
+        borderColor: error
+          ? 'var(--cor-erro)'
+          : state.isFocused
+            ? 'var(--cor-foco)'
+            : 'var(--cor-borda-forte)',
+        boxShadow: state.isFocused
+          ? error
+            ? '0 0 0 1px var(--cor-erro)'
+            : '0 0 0 1px var(--cor-foco)'
+          : 'none',
         borderRadius: '0.375rem',
         '&:hover': {
-          borderColor: error ? 'var(--status-erro)' : (state.isFocused ? 'var(--marca-primaria)' : 'var(--borda-forte)'),
+          borderColor: error
+            ? 'var(--cor-erro)'
+            : state.isFocused
+              ? 'var(--cor-foco)'
+              : 'var(--cor-borda-forte)',
         },
       }),
       menu: (provided) => ({
         ...provided,
-        backgroundColor: 'var(--bg-secundario)',
-        border: '1px solid var(--borda-suave)',
-        boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+        backgroundColor: 'var(--cor-fundo-elevado)',
+        border: '1px solid var(--cor-borda)',
+        boxShadow: 'var(--sombra-card)',
         zIndex: 50,
       }),
       option: (provided, state) => ({
         ...provided,
         backgroundColor: state.isSelected
-          ? 'var(--marca-primaria)'
+          ? 'var(--cor-marca-principal)'
           : state.isFocused
-            ? 'var(--bg-terciario)'
+            ? 'var(--cor-fundo-aplicacao)'
             : 'transparent',
         color: state.isSelected
-          ? '#fff'
-          : 'var(--texto-principal)',
+          ? 'var(--cor-sobre-marca-principal)'
+          : 'var(--cor-texto-principal)',
         cursor: 'pointer',
         '&:active': {
-          backgroundColor: 'var(--marca-primaria-dark)',
+          backgroundColor: 'var(--cor-marca-principal)',
+          color: 'var(--cor-sobre-marca-principal)',
         },
       }),
       singleValue: (provided) => ({
         ...provided,
-        color: 'var(--texto-principal)',
+        color: 'var(--cor-texto-principal)',
       }),
       input: (provided) => ({
         ...provided,
-        color: 'var(--texto-principal)',
+        color: 'var(--cor-texto-principal)',
       }),
       placeholder: (provided) => ({
         ...provided,
-        color: 'var(--texto-terciario)',
+        color: 'var(--cor-texto-secundario)',
       }),
       noOptionsMessage: (provided) => ({
         ...provided,
-        color: 'var(--texto-secundario)',
+        color: 'var(--cor-texto-secundario)',
       }),
       loadingMessage: (provided) => ({
         ...provided,
-        color: 'var(--texto-secundario)',
+        color: 'var(--cor-texto-secundario)',
       }),
     };
 
     return (
-      <ReactAsyncSelect
+      <ReactAsyncSelect<AsyncOptionItem, false>
         ref={ref}
         inputId={id}
         name={name}
@@ -87,7 +119,7 @@ export const AsyncSelect = forwardRef<any, AsyncSelectProps>(
         defaultOptions={defaultOptions}
         loadOptions={loadOptions}
         value={value}
-        onChange={onChange as any}
+        onChange={onChange}
         onBlur={onBlur}
         placeholder={placeholder}
         styles={customStyles}
@@ -96,7 +128,7 @@ export const AsyncSelect = forwardRef<any, AsyncSelectProps>(
         classNamePrefix="react-select"
       />
     );
-  }
+  },
 );
 
 AsyncSelect.displayName = 'AsyncSelect';

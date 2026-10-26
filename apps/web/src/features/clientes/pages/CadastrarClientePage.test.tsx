@@ -18,7 +18,7 @@ describe('CadastrarClientePage', () => {
     render(
       <BrowserRouter>
         <CadastrarClientePage />
-      </BrowserRouter>
+      </BrowserRouter>,
     );
 
     expect(screen.getByRole('heading', { name: 'Novo Cliente' })).toBeTruthy();
@@ -27,17 +27,25 @@ describe('CadastrarClientePage', () => {
   });
 
   it('deve chamar a API ao submeter formulário válido', async () => {
-    (clienteWriteApi.cadastrarCliente as ReturnType<typeof vi.fn>).mockResolvedValue({ id: '123' });
+    (
+      clienteWriteApi.cadastrarCliente as ReturnType<typeof vi.fn>
+    ).mockResolvedValue({ id: '123' });
 
     render(
       <BrowserRouter>
         <CadastrarClientePage />
-      </BrowserRouter>
+      </BrowserRouter>,
     );
 
-    fireEvent.change(screen.getByLabelText(/Nome Completo/i), { target: { value: 'João da Silva' } });
-    fireEvent.input(screen.getByLabelText(/Documento/i), { target: { value: '52998224725' } });
-    fireEvent.change(screen.getByLabelText(/Data de Nascimento/i), { target: { value: '1990-01-01' } });
+    fireEvent.change(screen.getByLabelText(/Nome Completo/i), {
+      target: { value: 'João da Silva' },
+    });
+    fireEvent.input(screen.getByLabelText(/Documento/i), {
+      target: { value: '52998224725' },
+    });
+    fireEvent.change(screen.getByLabelText(/Data de Nascimento/i), {
+      target: { value: '1990-01-01' },
+    });
 
     fireEvent.click(screen.getByRole('button', { name: /Salvar Cliente/i }));
 

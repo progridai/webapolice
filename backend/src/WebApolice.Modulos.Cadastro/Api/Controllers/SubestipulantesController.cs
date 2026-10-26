@@ -57,7 +57,7 @@ public class SubestipulantesController : ControllerBase
             var publicId = await handler.Handle(command, cancellationToken);
             return CreatedAtAction(nameof(GetById), new { publicId }, new { publicId });
         }
-        catch (InvalidOperationException ex)
+        catch (WebApolice.SharedKernel.Application.Exceptions.ValidacaoException ex)
         {
             return BadRequest(new { message = ex.Message });
         }
@@ -79,7 +79,7 @@ public class SubestipulantesController : ControllerBase
             await handler.Handle(command, cancellationToken);
             return NoContent();
         }
-        catch (InvalidOperationException ex)
+        catch (WebApolice.SharedKernel.Application.Exceptions.ValidacaoException ex)
         {
             return BadRequest(new { message = ex.Message });
         }
@@ -99,7 +99,7 @@ public class SubestipulantesController : ControllerBase
             await handler.Handle(command, cancellationToken);
             return NoContent();
         }
-        catch (InvalidOperationException ex)
+        catch (WebApolice.SharedKernel.Application.Exceptions.ValidacaoException ex)
         {
             return BadRequest(new { message = ex.Message });
         }
@@ -119,7 +119,7 @@ public class SubestipulantesController : ControllerBase
             await handler.Handle(command, cancellationToken);
             return NoContent();
         }
-        catch (InvalidOperationException ex)
+        catch (WebApolice.SharedKernel.Application.Exceptions.ValidacaoException ex)
         {
             return BadRequest(new { message = ex.Message });
         }

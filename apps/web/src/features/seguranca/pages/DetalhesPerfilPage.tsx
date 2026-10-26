@@ -15,7 +15,10 @@ import {
 import { DescriptionItem } from '../../../components/ui/DescriptionList';
 import { obterPerfilDetalhe } from '../api/perfisApi';
 import { obterCatalogo } from '../api/catalogoApi';
-import type { PerfilDetalheDto, CatalogoModuloDto } from '../types/seguranca.types';
+import type {
+  PerfilDetalheDto,
+  CatalogoModuloDto,
+} from '../types/seguranca.types';
 import { useAuthorization } from '../../../auth/AuthorizationProvider';
 
 const PERFIL_ADMIN_CODIGO = 'ADMINISTRADOR';
@@ -31,7 +34,8 @@ export const DetalhesPerfilPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const podeEditar = possuiAcessoTotal() || possuiPermissao('seguranca.perfis.alterar');
+  const podeEditar =
+    possuiAcessoTotal() || possuiPermissao('seguranca.perfis.alterar');
 
   useEffect(() => {
     const load = async () => {
@@ -39,7 +43,10 @@ export const DetalhesPerfilPage: React.FC = () => {
       setIsLoading(true);
       setError(null);
       try {
-        const [p, c] = await Promise.all([obterPerfilDetalhe(publicId), obterCatalogo()]);
+        const [p, c] = await Promise.all([
+          obterPerfilDetalhe(publicId),
+          obterCatalogo(),
+        ]);
         setPerfil(p);
         setCatalogo(c);
       } catch {
@@ -56,16 +63,25 @@ export const DetalhesPerfilPage: React.FC = () => {
   }, [isLoading]);
 
   useEffect(() => {
-    document.title = perfil ? `${perfil.nome} | Perfis | WebApolice` : 'Detalhes do Perfil | WebApolice';
+    document.title = perfil
+      ? `${perfil.nome} | Perfis | WebApolice`
+      : 'Detalhes do Perfil | WebApolice';
   }, [perfil]);
 
   const isAdmin = perfil
-    ? perfil.codigo === PERFIL_ADMIN_CODIGO && perfil.perfilSistema && perfil.acessoTotal
+    ? perfil.codigo === PERFIL_ADMIN_CODIGO &&
+      perfil.perfilSistema &&
+      perfil.acessoTotal
     : false;
 
   if (isLoading) {
     return (
-      <main ref={mainRef} tabIndex={-1} className="flex flex-col gap-6 w-full max-w-[1440px] mx-auto p-0 focus:outline-none" aria-busy="true">
+      <main
+        ref={mainRef}
+        tabIndex={-1}
+        className="flex flex-col gap-6 w-full max-w-[1440px] mx-auto p-0 focus:outline-none"
+        aria-busy="true"
+      >
         <Skeleton className="w-32 h-10 mb-4" />
         <Skeleton className="w-full h-32 mb-4" />
         <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
@@ -78,8 +94,16 @@ export const DetalhesPerfilPage: React.FC = () => {
 
   if (error || !perfil) {
     return (
-      <main ref={mainRef} tabIndex={-1} className="flex flex-col gap-6 w-full max-w-[1440px] mx-auto p-0 focus:outline-none">
-        <Button variant="text" onClick={() => navigate('/seguranca/perfis')} className="mb-4">
+      <main
+        ref={mainRef}
+        tabIndex={-1}
+        className="flex flex-col gap-6 w-full max-w-[1440px] mx-auto p-0 focus:outline-none"
+      >
+        <Button
+          variant="text"
+          onClick={() => navigate('/seguranca/perfis')}
+          className="mb-4"
+        >
           ← Voltar para perfis
         </Button>
         <EmptyState
@@ -94,10 +118,16 @@ export const DetalhesPerfilPage: React.FC = () => {
   const permSelecionadas = new Set(perfil.permissoesPublicIds);
 
   return (
-    <main ref={mainRef} tabIndex={-1} className="flex flex-col gap-6 w-full max-w-[1440px] mx-auto p-0 focus:outline-none">
+    <main
+      ref={mainRef}
+      tabIndex={-1}
+      className="flex flex-col gap-6 w-full max-w-[1440px] mx-auto p-0 focus:outline-none"
+    >
       <PageHeader
         title={perfil.nome}
-        titleExtras={<StatusBadge status={perfil.ativo ? 'ativo' : 'inativo'} />}
+        titleExtras={
+          <StatusBadge status={perfil.ativo ? 'ativo' : 'inativo'} />
+        }
         breadcrumbs={
           <Breadcrumbs
             items={[
@@ -110,7 +140,10 @@ export const DetalhesPerfilPage: React.FC = () => {
         }
         actions={
           <div className="flex flex-wrap gap-2">
-            <Button variant="text" onClick={() => navigate('/seguranca/perfis')}>
+            <Button
+              variant="text"
+              onClick={() => navigate('/seguranca/perfis')}
+            >
               Voltar
             </Button>
             {podeEditar && !perfil.perfilSistema && (
@@ -127,8 +160,9 @@ export const DetalhesPerfilPage: React.FC = () => {
 
       {isAdmin && (
         <Alert variant="warning" title="Perfil protegido do sistema">
-          O perfil <strong>ADMINISTRADOR</strong> possui acesso total ao sistema de forma nativa.
-          Ele não pode ser editado ou inativado. Suas permissões não dependem de vínculos explícitos.
+          O perfil <strong>ADMINISTRADOR</strong> possui acesso total ao sistema
+          de forma nativa. Ele não pode ser editado ou inativado. Suas
+          permissões não dependem de vínculos explícitos.
         </Alert>
       )}
 
@@ -139,7 +173,9 @@ export const DetalhesPerfilPage: React.FC = () => {
               <DescriptionItem label="Código" value={perfil.codigo} />
             )}
             <DescriptionItem label="Nome" value={perfil.nome} />
-            {perfil.descricao && <DescriptionItem label="Descrição" value={perfil.descricao} />}
+            {perfil.descricao && (
+              <DescriptionItem label="Descrição" value={perfil.descricao} />
+            )}
             <DescriptionItem
               label="Tipo"
               value={
@@ -166,13 +202,14 @@ export const DetalhesPerfilPage: React.FC = () => {
         >
           {isAdmin ? (
             <p className="text-sm text-slate-600 dark:text-slate-400">
-              Este perfil possui acesso total ao sistema. As permissões individuais não se aplicam.
+              Este perfil possui acesso total ao sistema. As permissões
+              individuais não se aplicam.
             </p>
           ) : (
             <div className="flex flex-col gap-3">
               {catalogo.map((modulo) => {
                 const recursosComPermissao = modulo.recursos.filter((r) =>
-                  r.permissoes.some((p) => permSelecionadas.has(p.publicId))
+                  r.permissoes.some((p) => permSelecionadas.has(p.publicId)),
                 );
                 if (recursosComPermissao.length === 0) return null;
 
@@ -183,7 +220,8 @@ export const DetalhesPerfilPage: React.FC = () => {
                     </p>
                     {recursosComPermissao.map((recurso) => (
                       <div key={recurso.publicId} className="pl-3 mb-2">
-                        {recurso.nome.toLowerCase() !== modulo.nome.toLowerCase() && (
+                        {recurso.nome.toLowerCase() !==
+                          modulo.nome.toLowerCase() && (
                           <p className="text-sm font-medium text-texto-principal mb-1">
                             {recurso.nome}
                           </p>
@@ -192,7 +230,11 @@ export const DetalhesPerfilPage: React.FC = () => {
                           {recurso.permissoes
                             .filter((p) => permSelecionadas.has(p.publicId))
                             .map((perm) => (
-                              <Badge key={perm.publicId} variant="neutral" className="text-xs">
+                              <Badge
+                                key={perm.publicId}
+                                variant="neutral"
+                                className="text-xs"
+                              >
                                 {perm.nome}
                               </Badge>
                             ))}

@@ -1,6 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { PageHeader, Card, Alert, Spinner, Breadcrumbs } from '../../../components/ui';
+import {
+  PageHeader,
+  Card,
+  Alert,
+  Spinner,
+  Breadcrumbs,
+} from '../../../components/ui';
 import { ROUTES } from '../../../app/routes/routePaths';
 import { ModuloForm } from '../components/ModuloForm';
 import { modulosApi } from '../api/modulos.api';
@@ -29,7 +35,7 @@ export const ModuloFormPage: React.FC = () => {
           descricao: modulo.descricao,
           ativo: modulo.ativo,
         });
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error(err);
         setError('Não foi possível carregar os dados do módulo.');
       } finally {
@@ -59,9 +65,13 @@ export const ModuloFormPage: React.FC = () => {
       }
 
       navigate(ROUTES.MODULOS);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
-      setError(err?.response?.data?.detail || 'Ocorreu um erro ao salvar o módulo.');
+      setError(
+        err instanceof Error && err.message
+          ? err.message
+          : 'Ocorreu um erro ao salvar o módulo.',
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -96,7 +106,11 @@ export const ModuloFormPage: React.FC = () => {
       />
 
       {error && (
-        <Alert variant="error" title="Erro ao salvar" onClose={() => setError(null)}>
+        <Alert
+          variant="error"
+          title="Erro ao salvar"
+          onClose={() => setError(null)}
+        >
           {error}
         </Alert>
       )}

@@ -18,7 +18,9 @@ const ThemeContext = createContext<ThemeContextProps | undefined>(undefined);
 
 const LOCAL_STORAGE_KEY = 'webapolice-tema';
 
-export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
   const [temaPreferido, setTemaPreferido] = useState<TemaPreferido>(() => {
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
@@ -34,7 +36,9 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
       if (saved === 'claro') return 'light';
       if (saved === 'escuro') return 'dark';
-      return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      return window.matchMedia('(prefers-color-scheme: dark)').matches
+        ? 'dark'
+        : 'light';
     }
     return 'light';
   });
@@ -46,13 +50,17 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   useEffect(() => {
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-    
+
     const resolveAndApplyTheme = () => {
       const resolved: TemaResolvido =
         temaPreferido === 'sistema'
-          ? (mediaQuery.matches ? 'dark' : 'light')
-          : (temaPreferido === 'claro' ? 'light' : 'dark');
-      
+          ? mediaQuery.matches
+            ? 'dark'
+            : 'light'
+          : temaPreferido === 'claro'
+            ? 'light'
+            : 'dark';
+
       setTemaResolvido(resolved);
       document.documentElement.setAttribute('data-theme', resolved);
     };
@@ -86,10 +94,12 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     alterarTema,
     tema_preferido: temaPreferido,
     tema_resolvido: temaResolvido,
-    alterar_tema: alterarTema
+    alterar_tema: alterarTema,
   };
 
-  return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
+  return (
+    <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>
+  );
 };
 
 export const useTema = () => {

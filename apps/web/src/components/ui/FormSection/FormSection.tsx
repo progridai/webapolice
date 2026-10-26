@@ -16,23 +16,27 @@ export const FormSection: React.FC<FormSectionProps> = ({
   icon,
   action,
   children,
-  className = ''
+  className = '',
 }) => {
   return (
     <section className={`form-section ${className}`}>
       <div className="form-section-header">
         <div className="form-section-title-group">
-          {icon && <div className="form-section-icon" aria-hidden="true">{icon}</div>}
+          {icon && (
+            <div className="form-section-icon" aria-hidden="true">
+              {icon}
+            </div>
+          )}
           <div className="form-section-text">
             <h3 className="form-section-title">{title}</h3>
-            {description && <p className="form-section-description">{description}</p>}
+            {description && (
+              <p className="form-section-description">{description}</p>
+            )}
           </div>
         </div>
         {action && <div className="form-section-action">{action}</div>}
       </div>
-      <div className="form-section-content">
-        {children}
-      </div>
+      <div className="form-section-content">{children}</div>
     </section>
   );
 };

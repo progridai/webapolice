@@ -5,7 +5,13 @@
  */
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { PageHeader, Card, Alert, Spinner, Breadcrumbs } from '../../../components/ui';
+import {
+  PageHeader,
+  Card,
+  Alert,
+  Spinner,
+  Breadcrumbs,
+} from '../../../components/ui';
 import { ROUTES } from '../../../app/routes/routePaths';
 import { CorretoraForm } from '../components/CorretoraForm';
 import { corretorasApi } from '../api/corretoras.api';
@@ -19,7 +25,9 @@ export const CorretoraFormPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(isEdit);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [initialData, setInitialData] = useState<Partial<CorretoraFormData>>({});
+  const [initialData, setInitialData] = useState<Partial<CorretoraFormData>>(
+    {},
+  );
 
   useEffect(() => {
     if (!isEdit || !publicId) return;
@@ -73,7 +81,9 @@ export const CorretoraFormPage: React.FC = () => {
       navigate(ROUTES.CORRETORAS);
     } catch (err: unknown) {
       console.error('Erro ao salvar corretora:', err);
-      setError('Ocorreu um erro ao salvar a corretora. Verifique os dados informados.');
+      setError(
+        'Ocorreu um erro ao salvar a corretora. Verifique os dados informados.',
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -85,7 +95,10 @@ export const CorretoraFormPage: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="flex justify-center items-center h-64" aria-label="Carregando corretora">
+      <div
+        className="flex justify-center items-center h-64"
+        aria-label="Carregando corretora"
+      >
         <Spinner size="large" />
       </div>
     );
@@ -108,7 +121,11 @@ export const CorretoraFormPage: React.FC = () => {
       />
 
       {error && (
-        <Alert variant="error" title="Erro ao salvar" onClose={() => setError(null)}>
+        <Alert
+          variant="error"
+          title="Erro ao salvar"
+          onClose={() => setError(null)}
+        >
           {error}
         </Alert>
       )}

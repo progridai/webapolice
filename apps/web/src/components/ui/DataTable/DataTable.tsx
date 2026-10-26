@@ -42,7 +42,9 @@ export function DataTable<T>({
   renderExpandedRow,
   'aria-label': ariaLabel = 'Tabela de dados',
 }: DataTableProps<T>) {
-  const [expandedKeys, setExpandedKeys] = useState<Set<string | number>>(new Set());
+  const [expandedKeys, setExpandedKeys] = useState<Set<string | number>>(
+    new Set(),
+  );
 
   const toggleRow = (key: string | number) => {
     const next = new Set(expandedKeys);
@@ -50,7 +52,7 @@ export function DataTable<T>({
     else next.add(key);
     setExpandedKeys(next);
   };
-  
+
   if (isLoading && data.length === 0) {
     return (
       <div className="data-table-loading" aria-busy="true" aria-live="polite">
@@ -77,7 +79,11 @@ export function DataTable<T>({
     }
 
     const isActive = sortBy === column.key;
-    const sortDir = isActive ? (direction === 'desc' ? 'descending' : 'ascending') : 'none';
+    const sortDir = isActive
+      ? direction === 'desc'
+        ? 'descending'
+        : 'ascending'
+      : 'none';
 
     return (
       <button
@@ -98,7 +104,9 @@ export function DataTable<T>({
       <Table aria-label={ariaLabel}>
         <TableHeader>
           <TableRow>
-            {renderExpandedRow && <TableCell header align="center" style={{ width: '48px' }} />}
+            {renderExpandedRow && (
+              <TableCell header align="center" style={{ width: '48px' }} />
+            )}
             {columns.map((col) => (
               <TableCell key={col.key} header align={col.align}>
                 {renderSortHeader(col)}
@@ -112,22 +120,28 @@ export function DataTable<T>({
             const isExpanded = expandedKeys.has(key);
             return (
               <React.Fragment key={key}>
-                <TableRow className={isExpanded ? 'data-table-expanded-row' : ''}>
+                <TableRow
+                  className={isExpanded ? 'data-table-expanded-row' : ''}
+                >
                   {renderExpandedRow && (
                     <TableCell align="center" style={{ width: '48px' }}>
-                      <button 
-                        type="button" 
+                      <button
+                        type="button"
                         onClick={() => toggleRow(key)}
                         className="p-1 rounded transition-colors"
-                        style={{ backgroundColor: isExpanded ? 'var(--cor-fundo-aplicacao)' : 'transparent' }}
+                        style={{
+                          backgroundColor: isExpanded
+                            ? 'var(--cor-fundo-aplicacao)'
+                            : 'transparent',
+                        }}
                         aria-expanded={isExpanded}
                       >
-                        <ChevronRightIcon 
-                          size={16} 
-                          className="transition-transform duration-200" 
-                          style={{ 
+                        <ChevronRightIcon
+                          size={16}
+                          className="transition-transform duration-200"
+                          style={{
                             transform: isExpanded ? 'rotate(90deg)' : 'none',
-                            color: 'var(--cor-texto-secundario)'
+                            color: 'var(--cor-texto-secundario)',
                           }}
                         />
                       </button>
@@ -135,14 +149,26 @@ export function DataTable<T>({
                   )}
                   {columns.map((col) => (
                     <TableCell key={col.key} align={col.align}>
-                      {col.render ? col.render(item) : String((item as Record<string, unknown>)[col.key] ?? '')}
+                      {col.render
+                        ? col.render(item)
+                        : String(
+                            (item as Record<string, unknown>)[col.key] ?? '',
+                          )}
                     </TableCell>
                   ))}
                 </TableRow>
                 {isExpanded && renderExpandedRow && (
                   <TableRow className="data-table-expanded-content">
-                    <TableCell colSpan={columns.length + 1} className="p-0 border-t-0">
-                      <div className="p-4" style={{ borderLeft: '2px solid var(--cor-marca-principal)' }}>
+                    <TableCell
+                      colSpan={columns.length + 1}
+                      className="p-0 border-t-0"
+                    >
+                      <div
+                        className="p-4"
+                        style={{
+                          borderLeft: '2px solid var(--cor-marca-principal)',
+                        }}
+                      >
                         {renderExpandedRow(item)}
                       </div>
                     </TableCell>

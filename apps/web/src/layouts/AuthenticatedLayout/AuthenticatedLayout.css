@@ -147,7 +147,9 @@
   color: var(--cor-texto-secundario);
   font-size: var(--fonte-tamanho-sm);
   font-weight: var(--fonte-peso-normal);
-  transition: background-color 0.15s ease, color 0.15s ease;
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease;
   cursor: pointer;
 }
 
@@ -194,7 +196,9 @@
   color: var(--cor-texto-principal);
   font-family: var(--fonte-familia-principal);
   font-size: var(--fonte-tamanho-sm);
-  transition: background-color 0.15s ease, border-color 0.15s ease;
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease;
 }
 
 .user-menu-trigger:hover {

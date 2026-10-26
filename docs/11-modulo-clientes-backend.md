@@ -4,7 +4,7 @@ O **Módulo Clientes** é o componente central para a gestão de informações c
 
 ## 1. Fonte de Verdade e Nomenclatura Oficial do Banco
 Para fins arquiteturais, adota-se a seguinte taxonomia restrita:
-* **Banco Oficial Atual**: PostgreSQL 16 (conforme schema espelhado em `dump-webapolice-202607062125.sql`). Este é o único banco utilizado para a estruturação das entidades do domínio de clientes.
+* **Base de referência histórica**: o dump `dump-webapolice-202607062125.sql` registra o schema usado no desenho inicial em PostgreSQL 16. A infraestrutura de desenvolvimento e fixtures atuais usam PostgreSQL 18.4; a versão/schema efetivos do destino precisam ser conferidos antes de homologação. O dump não é substituído por esta consolidação.
 * **Banco Legado**: Banco SQL Server antigo do sistema AmauriBueno.
 * **Schema `legado` (PostgreSQL)**: Um schema restrito existente no PostgreSQL oficial utilizado estritamente para manter a rastreabilidade e abrigar os mapas e metadados de migração. **Ele não deve ser utilizado** para a sustentação de novas regras de negócio.
 * **Modelo Simplificado Incorreto**: O schema `clientes.clientes`, outrora projetado nos primórdios da implementação, é uma versão fictícia, descontinuada e incorreta. Este schema não faz parte do modelo de dados atual e não embasa as transações do sistema.
@@ -32,10 +32,10 @@ Os dois conceitos centrais de armazenamento estão subdivididos: `core.pessoa` (
 * **Condição de Bloqueio**: Vínculos de papéis de uma pessoa que já possuam preenchimento em sua coluna `deleted_at` (ou seja, logicamente excluídos) não caracterizam um vínculo efetivo, permitindo dessa forma a atualização normal dos dados cadastrais.
 
 ### Documento (CPF/CNPJ)
-* Durante a fase de cadastro, os documentos submetidos atravessam um fluxo completo de formatação, normalização algorítmica e dupla verificação.
-* Campos contendo as versões expurgadas de pontuação (como `documento_principal_limpo`) não constam nos retornos públicos da API.
-* Após o cadastro original, a regra fundamental torna a numeração do documento integralmente **imutável** para a funcionalidade de Edição Comum.
-* Por segurança da informação, todo e qualquer retorno visual em tela entrega os documentos censurados e mascarados.
+
+Cadastro e substituição de documento na API usam `DocumentoValidator` compartilhado, que verifica tipo de pessoa, tamanho, sequências repetidas e dígitos de CPF/CNPJ. O cliente HTTP não substitui essa barreira. Documento novo ou substituído inválido é rejeitado; documento legado inválido e inalterado conserva a evidência original e seu estado de validação. Nenhuma rotina desta entrega reprocessa documentos históricos.
+
+A interface comum mantém o documento sem edição; o handler já recebia documento opcional e continua admitindo substituição válida. A definição de uma operação exclusiva de correção documental e sua autorização permanece evolução de negócio, sem ser presumida nesta consolidação. Campos de busca normalizados são técnicos e ficam fora de Title Case. Aplicar mascaramento/minimização nos retornos apropriados; não presumir que todos os contratos atuais já mascaram documentos.
 
 ### Status Operacional
 * O módulo repassa diretamente as solicitações para ativação ("ativo") ou inativação ("inativo") valendo-se dos códigos literais.
@@ -49,22 +49,15 @@ O agrupamento relacional de endereços de entrega/cobrança, além dos dados de 
 * **Regra basilar no Update**: Nenhuma alteração pontual subscreve (overwrite) o valor de um contato ou endereço existente. As edições desencadeiam a inativação da entrada atual (`Ativo = false`), promovendo a inclusão de um contato ou endereço perfeitamente novo — salvaguardando a trilha histórica e integridade do registro de auditoria. Caso o valor permaneça idêntico, o registro ativo existente é mantido.
 * **Exceção Assumida (Cidades)**: O registro no banco conta momentaneamente com submissões usando a chave `cidadeId` baseada em numerais (ID de integração legado). Por conta da indefinição ou omissão de um `public_id` formatado em `core.cidade`, essa exceção vigora como dívida provisória de desenho.
 
-### Atomicidade Comprovada
-* Todas as quatro vertentes de domínio relacional descritas (Pessoa, Cliente, Endereço e Contato) viajam em um único bloco transacional orquestrado pela interface portuária.
-* Falhas inerentes na infraestrutura durante quaisquer etapas disparam invariavelmente um **Rollback**.
-* A prova arquitetural desta funcionalidade encontra-se na suíte de testes de integração, munida de um teste que compele a inserção através de uma Chave Estrangeira de Cidade falsa/inexistente. O teste verifica fisicamente, após o DbUpdateException, o saldo nulo de manipulações acidentais nas 4 tabelas, evidenciando ausência absoluta de registros residuais.
+### Transações e Evidência Atual
 
----
+Pessoa, Cliente, contatos, endereços e evento de auditoria usam uma única operação coordenada por `IOperacaoCadastroAuditada`, implementada com `OperacaoAuditada` em Infrastructure. A porta de repositório expõe tipos de Domain, sem EF Core ou modelos de Infrastructure. Disponibilidade de recurso de Segurança é consultada pelo contrato público `IDisponibilidadeCatalogo`.
+
+Os testes PostgreSQL exigem container efêmero; o teste de falha de endereço injeta erro controlado após gravações anteriores, em vez de presumir que uma FK ausente no antigo SQL parcial comprovaria rollback. Também foram acrescentadas regressões de falha/cancelamento da auditoria. Na execução de 23/10/2026, o Docker Engine estava indisponível: não houve comprovação física dessas garantias. Os 50 testes locais de Cadastro aprovados verificam regras/orquestração e não substituem essa integração.
 
 ## 4. Dívidas Técnicas Conhecidas
 
-O sistema conta com um catálogo formal de defasagens técnicas que serão endereçadas nas próximas *sprints* operacionais:
-
-* No Frontend de Clientes, a ferramenta ESLint dispara um `react-hooks/incompatible-library` ao escanear o uso sintático de `watch('falecido')` oriundo do pacote React Hook Form no `ClienteForm.tsx`.
-* **Impactos**: O referido warning não causa quebras. Não impede o processamento dos testes (Vitest), nem inviabiliza o Type Checking do TypeScript (tsc) e não desarmou a integridade da *build* (Vite/Rolldown).
-* **Solução Projetada**: Uma futura verificação sobre as opções do React Hook Form, explorando o utilitário isolado `useWatch` a fim de aprimorar a memorização do componente do React e coibir possíveis recargas de tela.
-
----
+As seis verificações frontend passaram nesta consolidação, com zero avisos de lint. O antigo alerta de React Hook Form descrito na versão anterior deste guia não constitui uma pendência observada nesta execução. Permanecem as evoluções abaixo e a homologação relacional/funcional; ver revisão 76 para evidências e pendências gerais de camadas e auditoria.
 
 ## 5. Próximas Evoluções Planejadas
 

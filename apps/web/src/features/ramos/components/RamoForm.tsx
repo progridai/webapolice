@@ -1,7 +1,16 @@
 import React, { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { FormField, Input, Textarea, Button, FormSection, FormGrid, FormActions, BriefcaseIcon } from '../../../components/ui';
+import {
+  FormField,
+  Input,
+  Textarea,
+  Button,
+  FormSection,
+  FormGrid,
+  FormActions,
+  BriefcaseIcon,
+} from '../../../components/ui';
 import { ramoFormSchema, type RamoFormData } from '../schemas/ramoFormSchema';
 
 interface RamoFormProps {
@@ -47,7 +56,11 @@ export const RamoForm: React.FC<RamoFormProps> = ({
         <FormGrid>
           <div className="lg:col-span-4">
             <FormField label="Código" required error={errors.codigo?.message}>
-              <Input {...register('codigo')} placeholder="Código do Ramo" disabled={!!initialData?.codigo} />
+              <Input
+                {...register('codigo')}
+                placeholder="Código do Ramo"
+                disabled={!!initialData?.codigo}
+              />
             </FormField>
           </div>
 
@@ -59,19 +72,32 @@ export const RamoForm: React.FC<RamoFormProps> = ({
 
           <div className="lg:col-span-12">
             <FormField label="Descrição" error={errors.descricao?.message}>
-              <Textarea {...register('descricao')} placeholder="Descrição do Ramo..." rows={3} />
+              <Textarea
+                {...register('descricao')}
+                placeholder="Descrição do Ramo..."
+                rows={3}
+              />
             </FormField>
           </div>
         </FormGrid>
       </FormSection>
 
       <FormActions>
-        <div className="flex-grow flex justify-start">
-        </div>
-        <Button type="button" variant="text" onClick={onCancel} disabled={isSubmitting}>
+        <div className="flex-grow flex justify-start"></div>
+        <Button
+          type="button"
+          variant="text"
+          onClick={onCancel}
+          disabled={isSubmitting}
+        >
           Cancelar
         </Button>
-        <Button type="submit" variant="primary" disabled={isSubmitting} loading={isSubmitting}>
+        <Button
+          type="submit"
+          variant="primary"
+          disabled={isSubmitting}
+          loading={isSubmitting}
+        >
           Salvar
         </Button>
       </FormActions>

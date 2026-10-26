@@ -23,6 +23,10 @@ public static class SeguroModuleExtensions
             })
             .UseSnakeCaseNamingConvention());
 
+        services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(SeguroModuleExtensions).Assembly));
+        services.Configure<WebApolice.Modulos.Seguro.Application.UseCases.Propostas.ConfiguracaoPropostas>(configuration.GetSection("Propostas"));
+        services.AddScoped<IOperacaoPropostas, WebApolice.Modulos.Seguro.Infrastructure.Persistence.OperacaoPropostas>();
+
         // Repositories & Queries
         services.AddScoped<IApoliceRepository, ApoliceRepository>();
         services.AddScoped<IApolicesQueries, ApolicesQueries>();

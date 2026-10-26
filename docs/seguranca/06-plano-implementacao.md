@@ -1,5 +1,8 @@
 # Plano de ImplementaÃ§Ã£o (MÃ³dulo de SeguranÃ§a)
 
+Nota de estado — 23/10/2026: este documento preserva o planejamento inicial. Referências abaixo a `/api/auth/permissoes`, arrays simplificados e componentes propostos são históricas; o contrato vigente é `/api/seguranca/me` com AuthorizationProvider/useAuthorization, descrito no fluxo de autenticação/autorização. A revisão 76 e os documentos 77/78 registram implementação, validações locais e pendências atuais.
+
+
 Este plano divide a estruturaÃ§Ã£o do novo controle de autorizaÃ§Ã£o granular do WebApÃ³lice em etapas menores e cadenciadas, mitigando o risco de instabilidades, permitindo testes isolados e mantendo o paralelismo da evoluÃ§Ã£o.
 
 ---

@@ -4,7 +4,12 @@
  * Testa os helpers de autorização centralizados.
  */
 import { describe, it, expect } from 'vitest';
-import { hasRole, hasAnyRole, hasAllRoles, APP_ROLES } from '../../src/auth/roles';
+import {
+  hasRole,
+  hasAnyRole,
+  hasAllRoles,
+  APP_ROLES,
+} from '../../src/auth/roles';
 
 describe('Helpers de Autorização', () => {
   describe('APP_ROLES', () => {

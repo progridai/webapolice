@@ -14,20 +14,16 @@ public record ReativarEstipulanteCommand(Guid PublicId);
 public sealed class ReativarEstipulanteHandler
 {
     private readonly IEstipulanteRepository _repository;
-    private readonly IRegistradorAuditoria _auditoria;
+    private readonly IOperacaoCadastroAuditada _operacao;
 
-    public ReativarEstipulanteHandler(IEstipulanteRepository repository, IRegistradorAuditoria auditoria)
+    public ReativarEstipulanteHandler(IEstipulanteRepository repository, IOperacaoCadastroAuditada operacao)
     {
         _repository = repository;
-        _auditoria = auditoria;
+        _operacao = operacao;
     }
 
     public async Task Handle(ReativarEstipulanteCommand command, CancellationToken cancellationToken)
     {
-        await using var transaction = await _repository.BeginTransactionAsync(cancellationToken);
-
-        try
-        {
             var estipulante = await _repository.ObterParaEdicaoPorPublicIdAsync(command.PublicId, cancellationToken);
             if (estipulante == null)
                 throw new EstipulanteInvalidoException("Estipulante não encontrado ou excluído.");
@@ -38,26 +34,17 @@ public sealed class ReativarEstipulanteHandler
                 return;
             }
 
+        await _operacao.ExecutarAsync<bool>("Estipulantes", "estipulante", "ESTIPULANTE_REATIVADO", async ct =>
+        {
+
+
             estipulante.Ativo = true;
             estipulante.UpdatedAt = DateTimeOffset.UtcNow;
 
             await _repository.SalvarAlteracoesAsync(cancellationToken);
-            await transaction.CommitAsync(cancellationToken);
 
-            await _auditoria.RegistrarAsync(new RegistroAuditoria
-            {
-                Acao = "ESTIPULANTE_REATIVADO",
-                Modulo = "Estipulantes",
-                Recurso = "estipulante",
-                RecursoId = estipulante.PublicId.ToString(),
-                Resultado = ResultadoAuditoria.Sucesso,
-                DadosPosteriores = JsonSerializer.SerializeToDocument(new { Ativo = true })
-            }, cancellationToken);
-        }
-        catch (Exception)
-        {
-            await transaction.RollbackAsync(cancellationToken);
-            throw;
-        }
+
+            return (true, estipulante.PublicId.ToString(), null, JsonSerializer.SerializeToDocument(new { Ativo = true }));
+        }, cancellationToken);
     }
 }

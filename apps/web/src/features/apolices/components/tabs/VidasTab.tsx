@@ -1,18 +1,36 @@
 import React, { useState, useMemo } from 'react';
 import { useApoliceVidas } from '../../hooks/useApoliceVidas';
-import { DataTable, StatusBadge, Pagination, Alert, Button, EmptyState, ConfirmDialog } from '../../../../components/ui';
+import {
+  DataTable,
+  StatusBadge,
+  Pagination,
+  Alert,
+  Button,
+  EmptyState,
+  ConfirmDialog,
+} from '../../../../components/ui';
 import type { Column } from '../../../../components/ui/DataTable/DataTable';
-import type { ApoliceVidaListItem, ApoliceVidaQuery } from '../../types/apolice.types';
+import type {
+  ApoliceVidaListItem,
+  ApoliceVidaQuery,
+} from '../../types/apolice.types';
 import { useAuthorization } from '../../../../auth/AuthorizationProvider';
 import { ApoliceVidaFormModal } from './ApoliceVidaFormModal';
-import { inativarApoliceVida, criarApoliceVida, atualizarApoliceVida } from '../../api/apolices.api';
+import {
+  inativarApoliceVida,
+  criarApoliceVida,
+  atualizarApoliceVida,
+} from '../../api/apolices.api';
 
 interface VidasTabProps {
   publicId: string;
 }
 
 export const VidasTab: React.FC<VidasTabProps> = ({ publicId }) => {
-  const [query, setQuery] = useState<ApoliceVidaQuery>({ page: 1, pageSize: 10 });
+  const [query, setQuery] = useState<ApoliceVidaQuery>({
+    page: 1,
+    pageSize: 10,
+  });
   const { data, isLoading, error, retry } = useApoliceVidas(publicId, query);
   const { possuiPermissao } = useAuthorization();
 
@@ -22,14 +40,21 @@ export const VidasTab: React.FC<VidasTabProps> = ({ publicId }) => {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [selectedVida, setSelectedVida] = useState<ApoliceVidaListItem | undefined>(undefined);
+  const [selectedVida, setSelectedVida] = useState<
+    ApoliceVidaListItem | undefined
+  >(undefined);
 
-  const [confirmDialog, setConfirmDialog] = useState<{ isOpen: boolean; vidaId?: string; isLoading: boolean }>({
+  const [confirmDialog, setConfirmDialog] = useState<{
+    isOpen: boolean;
+    vidaId?: string;
+    isLoading: boolean;
+  }>({
     isOpen: false,
     isLoading: false,
   });
 
-  const handlePageChange = (newPage: number) => setQuery(prev => ({ ...prev, page: newPage }));
+  const handlePageChange = (newPage: number) =>
+    setQuery((prev) => ({ ...prev, page: newPage }));
 
   const handleAdd = () => {
     setSelectedVida(undefined);
@@ -47,7 +72,7 @@ export const VidasTab: React.FC<VidasTabProps> = ({ publicId }) => {
 
   const confirmarEncerramento = async () => {
     if (!confirmDialog.vidaId) return;
-    setConfirmDialog(prev => ({ ...prev, isLoading: true }));
+    setConfirmDialog((prev) => ({ ...prev, isLoading: true }));
     try {
       await inativarApoliceVida(publicId, confirmDialog.vidaId);
       setConfirmDialog({ isOpen: false, isLoading: false });
@@ -55,11 +80,13 @@ export const VidasTab: React.FC<VidasTabProps> = ({ publicId }) => {
     } catch (err) {
       console.error(err);
       alert('Erro ao encerrar participação.');
-      setConfirmDialog(prev => ({ ...prev, isLoading: false }));
+      setConfirmDialog((prev) => ({ ...prev, isLoading: false }));
     }
   };
 
-  const handleFormSubmit = async (formData: import('../../schemas/apoliceVida.schema').ApoliceVidaFormValues) => {
+  const handleFormSubmit = async (
+    formData: import('../../schemas/apoliceVida.schema').ApoliceVidaFormValues,
+  ) => {
     setIsSubmitting(true);
     try {
       if (selectedVida) {
@@ -69,7 +96,7 @@ export const VidasTab: React.FC<VidasTabProps> = ({ publicId }) => {
           dataFimVigencia: formData.dataFimVigencia || null,
           observacao: formData.observacao || null,
           apoliceSubgrupoPublicId: formData.apoliceSubgrupoPublicId || null,
-          apoliceModuloPublicId: formData.apoliceModuloPublicId || null
+          apoliceModuloPublicId: formData.apoliceModuloPublicId || null,
         });
       } else {
         // Create mode
@@ -79,7 +106,7 @@ export const VidasTab: React.FC<VidasTabProps> = ({ publicId }) => {
           apoliceModuloPublicId: formData.apoliceModuloPublicId || null,
           dataInicioVigencia: formData.dataInicioVigencia || null,
           dataFimVigencia: formData.dataFimVigencia || null,
-          observacao: formData.observacao || null
+          observacao: formData.observacao || null,
         });
       }
       setIsModalOpen(false);
@@ -99,8 +126,14 @@ export const VidasTab: React.FC<VidasTabProps> = ({ publicId }) => {
         label: 'Cliente',
         render: (vida) => (
           <div className="flex flex-col">
-            <span className="font-medium text-texto-principal">{vida.clienteNome}</span>
-            {vida.clienteDocumentoMascarado && <span className="text-xs text-texto-terciario">{vida.clienteDocumentoMascarado}</span>}
+            <span className="font-medium text-texto-principal">
+              {vida.clienteNome}
+            </span>
+            {vida.clienteDocumentoMascarado && (
+              <span className="text-xs text-texto-terciario">
+                {vida.clienteDocumentoMascarado}
+              </span>
+            )}
           </div>
         ),
       },
@@ -108,14 +141,18 @@ export const VidasTab: React.FC<VidasTabProps> = ({ publicId }) => {
         key: 'subgrupo',
         label: 'Subgrupo',
         render: (vida) => (
-          <span className="text-sm text-texto-principal">{vida.subgrupoNome || '—'}</span>
+          <span className="text-sm text-texto-principal">
+            {vida.subgrupoNome || '—'}
+          </span>
         ),
       },
       {
         key: 'modulo',
         label: 'Módulo',
         render: (vida) => (
-          <span className="text-sm text-texto-principal">{vida.moduloNome || '—'}</span>
+          <span className="text-sm text-texto-principal">
+            {vida.moduloNome || '—'}
+          </span>
         ),
       },
       {
@@ -123,16 +160,22 @@ export const VidasTab: React.FC<VidasTabProps> = ({ publicId }) => {
         label: 'Vigência',
         render: (vida) => (
           <span className="text-texto-secundario text-sm">
-            {vida.dataInicioVigencia ? new Date(vida.dataInicioVigencia).toLocaleDateString('pt-BR') : '—'} 
-            {' até '} 
-            {vida.dataFimVigencia ? new Date(vida.dataFimVigencia).toLocaleDateString('pt-BR') : '—'}
+            {vida.dataInicioVigencia
+              ? new Date(vida.dataInicioVigencia).toLocaleDateString('pt-BR')
+              : '—'}
+            {' até '}
+            {vida.dataFimVigencia
+              ? new Date(vida.dataFimVigencia).toLocaleDateString('pt-BR')
+              : '—'}
           </span>
         ),
       },
       {
         key: 'status',
         label: 'Status',
-        render: (vida) => <StatusBadge status={vida.ativo ? 'ativo' : 'inativo'} />,
+        render: (vida) => (
+          <StatusBadge status={vida.ativo ? 'ativo' : 'inativo'} />
+        ),
       },
     ];
 
@@ -143,10 +186,21 @@ export const VidasTab: React.FC<VidasTabProps> = ({ publicId }) => {
         render: (vida) => (
           <div className="flex items-center justify-end gap-2">
             {podeAlterar && (
-              <Button variant="text" size="small" onClick={() => handleEdit(vida)}>Editar</Button>
+              <Button
+                variant="text"
+                size="small"
+                onClick={() => handleEdit(vida)}
+              >
+                Editar
+              </Button>
             )}
             {podeInativar && vida.ativo && (
-              <Button variant="text" size="small" className="text-error hover:bg-error/10" onClick={() => handleEncerrarClick(vida.apoliceVidaPublicId)}>
+              <Button
+                variant="text"
+                size="small"
+                className="text-error hover:bg-error/10"
+                onClick={() => handleEncerrarClick(vida.apoliceVidaPublicId)}
+              >
                 Encerrar
               </Button>
             )}
@@ -183,7 +237,7 @@ export const VidasTab: React.FC<VidasTabProps> = ({ publicId }) => {
         </div>
       )}
 
-      {(!isLoading && !hasData) ? (
+      {!isLoading && !hasData ? (
         <EmptyState
           title="Nenhuma vida encontrada"
           description="Esta apólice não possui beneficiários ou vidas cadastradas."
@@ -197,7 +251,7 @@ export const VidasTab: React.FC<VidasTabProps> = ({ publicId }) => {
             isLoading={isLoading}
             aria-label="Lista de Vidas da Apólice"
           />
-          
+
           {data && Math.ceil(data.totalCount / data.pageSize) > 1 && (
             <div className="flex justify-center md:justify-end mt-4 pt-4 border-t border-borda">
               <Pagination

@@ -5,7 +5,13 @@
  */
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { PageHeader, Card, Alert, Spinner, Breadcrumbs } from '../../../components/ui';
+import {
+  PageHeader,
+  Card,
+  Alert,
+  Spinner,
+  Breadcrumbs,
+} from '../../../components/ui';
 import { ROUTES } from '../../../app/routes/routePaths';
 import { SubestipulanteForm } from '../components/SubestipulanteForm';
 import { subestipulantesApi } from '../api/subestipulantes.api';
@@ -19,7 +25,9 @@ export const SubestipulanteFormPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(isEdit);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [initialData, setInitialData] = useState<Partial<SubestipulanteFormData>>({});
+  const [initialData, setInitialData] = useState<
+    Partial<SubestipulanteFormData>
+  >({});
 
   useEffect(() => {
     if (!isEdit || !publicId) return;
@@ -37,11 +45,10 @@ export const SubestipulanteFormPage: React.FC = () => {
         });
       } catch (err: unknown) {
         console.error('Erro ao carregar dados do subestipulante:', err);
-        const apiError = err as { response?: { data?: { message?: string } }, message?: string };
         setError(
-          apiError?.response?.data?.message ||
-            apiError?.message ||
-            'Não foi possível carregar os dados do subestipulante.'
+          err instanceof Error && err.message
+            ? err.message
+            : 'Não foi possível carregar os dados do subestipulante.',
         );
       } finally {
         setIsLoading(false);
@@ -76,9 +83,11 @@ export const SubestipulanteFormPage: React.FC = () => {
       navigate(ROUTES.SUBESTIPULANTES);
     } catch (err: unknown) {
       console.error('Erro ao salvar subestipulante:', err);
-      const apiError = err as { response?: { data?: { message?: string } }, message?: string };
-      const apiMsg = apiError?.response?.data?.message || apiError?.message;
-      setError(apiMsg || 'Ocorreu um erro ao salvar o subestipulante. Verifique os dados informados.');
+      setError(
+        err instanceof Error && err.message
+          ? err.message
+          : 'Ocorreu um erro ao salvar o subestipulante. Verifique os dados informados.',
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -90,7 +99,10 @@ export const SubestipulanteFormPage: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="flex justify-center items-center h-64" aria-label="Carregando subestipulante">
+      <div
+        className="flex justify-center items-center h-64"
+        aria-label="Carregando subestipulante"
+      >
         <Spinner size="large" />
       </div>
     );
@@ -113,7 +125,11 @@ export const SubestipulanteFormPage: React.FC = () => {
       />
 
       {error && (
-        <Alert variant="error" title="Erro ao salvar" onClose={() => setError(null)}>
+        <Alert
+          variant="error"
+          title="Erro ao salvar"
+          onClose={() => setError(null)}
+        >
           {error}
         </Alert>
       )}

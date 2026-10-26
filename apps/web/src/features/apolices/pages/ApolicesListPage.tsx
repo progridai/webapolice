@@ -7,8 +7,14 @@ import { ApolicesMobileList } from '../components/ApolicesMobileList';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { ROUTES, createPath } from '../../../app/routes/routePaths';
 import {
-  Pagination, EmptyState, Alert, Button, Skeleton, ResultsSummary,
-  PageHeader, Breadcrumbs
+  Pagination,
+  EmptyState,
+  Alert,
+  Button,
+  Skeleton,
+  ResultsSummary,
+  PageHeader,
+  Breadcrumbs,
 } from '../../../components/ui';
 import { useAuthorization } from '../../../auth/AuthorizationProvider';
 
@@ -40,32 +46,42 @@ export const ApolicesListPage: React.FC = () => {
     });
   };
 
-  const hasActiveFilters = Boolean(filters.busca || filters.status || filters.ativo !== undefined || filters.tipoRamo);
+  const hasActiveFilters = Boolean(
+    filters.busca ||
+    filters.status ||
+    filters.ativo !== undefined ||
+    filters.tipoRamo,
+  );
   const hasData = data && data.items && data.items.length > 0;
   const { possuiPermissao } = useAuthorization();
   const podeInserir = possuiPermissao('apolices.inserir');
 
   return (
-    <main className="flex flex-col gap-6 w-full max-w-[1440px] mx-auto p-0 focus:outline-none" tabIndex={-1}>
+    <main
+      className="flex flex-col gap-6 w-full max-w-[1440px] mx-auto p-0 focus:outline-none"
+      tabIndex={-1}
+    >
       <PageHeader
         title="Apólices"
         description="Gestão de apólices e contratos vigentes no WebApólice."
         breadcrumbs={
           <Breadcrumbs
-            items={[
-              { label: 'Seguros', href: '/' },
-              { label: 'Apólices' },
-            ]}
+            items={[{ label: 'Seguros', href: '/' }, { label: 'Apólices' }]}
           />
         }
         actions={
           podeInserir ? (
-            <Button onClick={() => navigate(ROUTES.APOLICE_NOVA)}>Nova Apólice</Button>
+            <Button onClick={() => navigate(ROUTES.APOLICE_NOVA)}>
+              Nova Apólice
+            </Button>
           ) : undefined
         }
       />
 
-      <section aria-label="Filtros de apólices" style={{ position: 'relative', zIndex: 10 }}>
+      <section
+        aria-label="Filtros de apólices"
+        style={{ position: 'relative', zIndex: 10 }}
+      >
         <ApolicesFilters
           filters={filters}
           onFilterChange={setFilters}
@@ -84,14 +100,22 @@ export const ApolicesListPage: React.FC = () => {
           </Button>
         </div>
       ) : isLoading && !data && isMobile ? (
-        <div className="flex flex-col gap-4 mt-4" aria-busy="true" aria-live="polite">
+        <div
+          className="flex flex-col gap-4 mt-4"
+          aria-busy="true"
+          aria-live="polite"
+        >
           <Skeleton className="h-[120px] rounded-lg" />
           <Skeleton className="h-[120px] rounded-lg" />
           <Skeleton className="h-[120px] rounded-lg" />
         </div>
       ) : !hasData && isMobile ? (
         <EmptyState
-          title={hasActiveFilters ? 'Nenhuma apólice corresponde aos filtros aplicados' : 'Nenhuma apólice cadastrada'}
+          title={
+            hasActiveFilters
+              ? 'Nenhuma apólice corresponde aos filtros aplicados'
+              : 'Nenhuma apólice cadastrada'
+          }
           description={
             hasActiveFilters
               ? 'Tente mudar sua busca ou limpar os filtros para encontrar o que procura.'
@@ -99,9 +123,7 @@ export const ApolicesListPage: React.FC = () => {
           }
           action={
             hasActiveFilters ? (
-              <Button onClick={clearFilters}>
-                Limpar filtros
-              </Button>
+              <Button onClick={clearFilters}>Limpar filtros</Button>
             ) : undefined
           }
         />
@@ -116,8 +138,8 @@ export const ApolicesListPage: React.FC = () => {
           )}
 
           {isMobile ? (
-            <ApolicesMobileList 
-              apolices={data?.items || []} 
+            <ApolicesMobileList
+              apolices={data?.items || []}
               onDetalhar={handleVerDetalhes}
             />
           ) : (

@@ -22,18 +22,26 @@ export interface PagedResult<T> {
 }
 
 export const modulosGlobaisApi = {
-  listar: async (query?: ListarModulosGlobaisQuery, signal?: AbortSignal): Promise<PagedResult<ModuloGlobalListItem>> => {
+  listar: async (
+    query?: ListarModulosGlobaisQuery,
+    signal?: AbortSignal,
+  ): Promise<PagedResult<ModuloGlobalListItem>> => {
     const params = new URLSearchParams();
-    
+
     if (query?.pagina) params.append('pagina', query.pagina.toString());
-    if (query?.tamanhoPagina) params.append('tamanhoPagina', query.tamanhoPagina.toString());
+    if (query?.tamanhoPagina)
+      params.append('tamanhoPagina', query.tamanhoPagina.toString());
     if (query?.busca) params.append('busca', query.busca);
-    if (query?.ativo !== undefined) params.append('ativo', query.ativo.toString());
-    
+    if (query?.ativo !== undefined)
+      params.append('ativo', query.ativo.toString());
+
     const queryString = params.toString();
     const url = queryString ? `/api/modulos?${queryString}` : '/api/modulos';
-    
-    const response = await httpClient.get<PagedResult<ModuloGlobalListItem>>(url, { signal });
+
+    const response = await httpClient.get<PagedResult<ModuloGlobalListItem>>(
+      url,
+      { signal },
+    );
     return response.data;
-  }
+  },
 };

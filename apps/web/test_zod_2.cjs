@@ -1,4 +1,4 @@
-const { z } = require('zod');
+const { z } = require("zod");
 
 const enderecoSchema = z.object({
   cep: z.string().optional(),
@@ -15,8 +15,12 @@ const clienteSchema = z.object({
 });
 
 const result = clienteSchema.parse({
-  endereco: {}
+  endereco: {},
 });
 
 console.log(result.endereco);
-console.log(Object.values(result.endereco).some(val => val !== "" && val !== undefined && val !== 0));
+console.log(
+  Object.values(result.endereco).some(
+    (val) => val !== "" && val !== undefined && val !== 0,
+  ),
+);

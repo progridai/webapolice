@@ -19,7 +19,10 @@ export const SubestipulantesRoutes = (
       </PermissionProtectedRoute>
     }
   >
-    <Route path={ROUTES.SUBESTIPULANTES} element={<SubestipulantesListPage />} />
+    <Route
+      path={ROUTES.SUBESTIPULANTES}
+      element={<SubestipulantesListPage />}
+    />
     <Route
       path={ROUTES.SUBESTIPULANTE_NOVO}
       element={

@@ -4,14 +4,8 @@ import type { InputProps } from '../ui/Input';
 
 export const DateInput = forwardRef<HTMLInputElement, InputProps>(
   (props, ref) => {
-    return (
-      <Input
-        type="date"
-        ref={ref}
-        {...props}
-      />
-    );
-  }
+    return <Input type="date" ref={ref} {...props} />;
+  },
 );
 
 DateInput.displayName = 'DateInput';

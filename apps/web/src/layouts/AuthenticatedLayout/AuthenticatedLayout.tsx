@@ -56,10 +56,7 @@ export const AuthenticatedLayout: React.FC = () => {
       </div>
 
       {/* Navegação mobile */}
-      <MobileNavigation
-        isOpen={isMobileMenuOpen}
-        onClose={handleMenuClose}
-      />
+      <MobileNavigation isOpen={isMobileMenuOpen} onClose={handleMenuClose} />
     </div>
   );
 };

@@ -46,18 +46,20 @@ export const UsuariosListPage: React.FC = () => {
 
   const hasActiveFilters = Boolean(filters.busca || filters.ativo !== '');
   const hasData = data && data.itens && data.itens.length > 0;
-  
-  const podeEditar = possuiAcessoTotal() || possuiPermissao('seguranca.usuarios.alterar');
-  const podeCriar = possuiAcessoTotal() || possuiPermissao('seguranca.usuarios.inserir');
+
+  const podeEditar =
+    possuiAcessoTotal() || possuiPermissao('seguranca.usuarios.alterar');
+  const podeCriar =
+    possuiAcessoTotal() || possuiPermissao('seguranca.usuarios.inserir');
 
   const columns: Column<UsuarioListDto>[] = [
     {
       key: 'nome',
       label: 'Usuário',
       render: (u) => (
-      <div className="flex flex-col gap-1">
-        <span className="font-semibold text-texto-principal">{u.nome}</span>
-      </div>
+        <div className="flex flex-col gap-1">
+          <span className="font-semibold text-texto-principal">{u.nome}</span>
+        </div>
       ),
     },
     {
@@ -99,13 +101,16 @@ export const UsuariosListPage: React.FC = () => {
             onClick: () => navigate(`/seguranca/usuarios/${u.publicId}`),
           }}
           actions={
-            podeEditar ? [
-              {
-                label: 'Alterar',
-                icon: <EditIcon />,
-                onClick: () => navigate(`/seguranca/usuarios/${u.publicId}/editar`),
-              },
-            ] : []
+            podeEditar
+              ? [
+                  {
+                    label: 'Alterar',
+                    icon: <EditIcon />,
+                    onClick: () =>
+                      navigate(`/seguranca/usuarios/${u.publicId}/editar`),
+                  },
+                ]
+              : []
           }
           ariaLabel={`Ações para ${u.nome}`}
         />
@@ -114,7 +119,10 @@ export const UsuariosListPage: React.FC = () => {
   ];
 
   return (
-    <main className="flex flex-col gap-6 w-full max-w-[1440px] mx-auto p-0 focus:outline-none" tabIndex={-1}>
+    <main
+      className="flex flex-col gap-6 w-full max-w-[1440px] mx-auto p-0 focus:outline-none"
+      tabIndex={-1}
+    >
       <PageHeader
         title="Usuários"
         description="Gerencie os usuários que possuem acesso ao sistema."
@@ -129,17 +137,26 @@ export const UsuariosListPage: React.FC = () => {
         }
         actions={
           podeCriar ? (
-            <Button onClick={() => navigate(ROUTES.SEGURANCA_USUARIO_NOVO)} variant="primary">
+            <Button
+              onClick={() => navigate(ROUTES.SEGURANCA_USUARIO_NOVO)}
+              variant="primary"
+            >
               Novo Usuário
             </Button>
           ) : undefined
         }
       />
 
-      <section aria-label="Filtros de usuários" style={{ position: 'relative', zIndex: 10 }}>
+      <section
+        aria-label="Filtros de usuários"
+        style={{ position: 'relative', zIndex: 10 }}
+      >
         <FilterBar>
           <div>
-            <label htmlFor="busca-usuario" className="block text-sm mb-1 font-medium text-texto-secundario">
+            <label
+              htmlFor="busca-usuario"
+              className="block text-sm mb-1 font-medium text-texto-secundario"
+            >
               Buscar usuário
             </label>
             <SearchField
@@ -152,7 +169,10 @@ export const UsuariosListPage: React.FC = () => {
           </div>
 
           <div>
-            <label htmlFor="status-usuario" className="block text-sm mb-1 font-medium text-texto-secundario">
+            <label
+              htmlFor="status-usuario"
+              className="block text-sm mb-1 font-medium text-texto-secundario"
+            >
               Status
             </label>
             <Select
@@ -192,20 +212,32 @@ export const UsuariosListPage: React.FC = () => {
           </Button>
         </div>
       ) : isLoading && !data && isMobile ? (
-        <div aria-busy="true" aria-live="polite" className="flex flex-col gap-4">
+        <div
+          aria-busy="true"
+          aria-live="polite"
+          className="flex flex-col gap-4"
+        >
           <Skeleton className="w-full h-12 rounded-lg" />
           <Skeleton className="w-full h-12 rounded-lg" />
           <Skeleton className="w-full h-12 rounded-lg" />
         </div>
       ) : !hasData && !isLoading ? (
         <EmptyState
-          title={hasActiveFilters ? 'Nenhum usuário encontrado' : 'Nenhum usuário cadastrado'}
+          title={
+            hasActiveFilters
+              ? 'Nenhum usuário encontrado'
+              : 'Nenhum usuário cadastrado'
+          }
           description={
             hasActiveFilters
               ? 'Não encontramos nenhum usuário com os filtros informados.'
               : 'Ainda não existem usuários cadastrados na plataforma.'
           }
-          action={hasActiveFilters ? <Button onClick={clearFilters}>Limpar filtros</Button> : undefined}
+          action={
+            hasActiveFilters ? (
+              <Button onClick={clearFilters}>Limpar filtros</Button>
+            ) : undefined
+          }
         />
       ) : (
         <div className="flex flex-col gap-3">
@@ -223,7 +255,11 @@ export const UsuariosListPage: React.FC = () => {
             keyExtractor={(item) => item.publicId}
             isLoading={isLoading}
             aria-label="Lista de usuários"
-            emptyTitle={hasActiveFilters ? 'Nenhum usuário encontrado' : 'Nenhum usuário cadastrado'}
+            emptyTitle={
+              hasActiveFilters
+                ? 'Nenhum usuário encontrado'
+                : 'Nenhum usuário cadastrado'
+            }
             emptyDescription={
               hasActiveFilters
                 ? 'Não encontramos nenhum usuário com os filtros informados.'

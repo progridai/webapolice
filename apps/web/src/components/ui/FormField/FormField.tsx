@@ -8,7 +8,12 @@ export interface FormFieldProps {
   error?: string;
   hint?: string;
   id?: string;
-  children: React.ReactElement<{ id?: string; 'aria-describedby'?: string; 'aria-invalid'?: string; className?: string }>;
+  children: React.ReactElement<{
+    id?: string;
+    'aria-describedby'?: string;
+    'aria-invalid'?: string;
+    className?: string;
+  }>;
 }
 
 export const FormField: React.FC<FormFieldProps> = ({
@@ -20,11 +25,14 @@ export const FormField: React.FC<FormFieldProps> = ({
   children,
 }) => {
   const generatedId = React.useId();
-  const id = customId || (children.props as { id?: string }).id || `field-${generatedId}`;
-  
+  const id =
+    customId ||
+    (children.props as { id?: string }).id ||
+    `field-${generatedId}`;
+
   const errorId = `${id}-error`;
   const hintId = `${id}-hint`;
-  
+
   let describedBy = '';
   if (error) describedBy += ` ${errorId}`;
   if (hint) describedBy += ` ${hintId}`;
@@ -37,12 +45,16 @@ export const FormField: React.FC<FormFieldProps> = ({
     id,
     'aria-describedby': describedBy || undefined,
     'aria-invalid': error ? 'true' : undefined,
-    className: `${childProps.className || ''} ${error ? 'input-erro' : ''}`.trim(),
+    className:
+      `${childProps.className || ''} ${error ? 'input-erro' : ''}`.trim(),
   });
 
   return (
     <div className="form-group">
-      <label htmlFor={id} className={`form-label ${required ? 'required' : ''}`}>
+      <label
+        htmlFor={id}
+        className={`form-label ${required ? 'required' : ''}`}
+      >
         {label}
       </label>
       {child}

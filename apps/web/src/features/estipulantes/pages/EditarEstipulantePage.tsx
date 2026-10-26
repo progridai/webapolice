@@ -1,14 +1,33 @@
+import { HttpApiError } from '../../../services/http/httpError';
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { EstipulanteForm, type EstipulanteFormData } from '../components/EstipulanteForm';
-import { obterEstipulante, obterConfiguracao, alterarEstipulante, excluirEstipulante } from '../api/estipulantes.api';
-import { Alert, Spinner, PageHeader, Breadcrumbs, BriefcaseIcon, HomeIcon, EmptyState, Button } from '../../../components/ui';
+import {
+  EstipulanteForm,
+  type EstipulanteFormData,
+} from '../components/EstipulanteForm';
+import {
+  obterEstipulante,
+  obterConfiguracao,
+  alterarEstipulante,
+  excluirEstipulante,
+} from '../api/estipulantes.api';
+import {
+  Alert,
+  Spinner,
+  PageHeader,
+  Breadcrumbs,
+  BriefcaseIcon,
+  HomeIcon,
+  EmptyState,
+  Button,
+} from '../../../components/ui';
 
 export const EditarEstipulantePage: React.FC = () => {
   const { publicId } = useParams<{ publicId: string }>();
   const navigate = useNavigate();
-  
-  const [initialData, setInitialData] = useState<Partial<EstipulanteFormData> | null>(null);
+
+  const [initialData, setInitialData] =
+    useState<Partial<EstipulanteFormData> | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -19,17 +38,14 @@ export const EditarEstipulantePage: React.FC = () => {
       if (!publicId) return;
       try {
         const [estipulanteData, configData] = await Promise.all([
-          obterEstipulante(publicId).catch((err) => {
-            if (err.status === 404) throw new Error('NOT_FOUND');
+          obterEstipulante(publicId),
+          obterConfiguracao(publicId).catch((err: unknown) => {
+            // Se a configuração não existir (404), tratamos graciosamente
+            if (err instanceof HttpApiError && err.isNotFound()) return null;
             throw err;
           }),
-          obterConfiguracao(publicId).catch((err) => {
-            // Se a configuração não existir (404), tratamos graciosamente
-            if (err.status === 404) return null;
-            throw err;
-          })
         ]);
-        
+
         setInitialData({
           razaoSocial: estipulanteData.razaoSocial,
           nomeFantasia: estipulanteData.nomeFantasia || '',
@@ -38,34 +54,48 @@ export const EditarEstipulantePage: React.FC = () => {
           grupoPublicId: estipulanteData.grupoPublicId || '',
           seguradoraPublicId: estipulanteData.seguradoraPublicId || '',
           observacao: estipulanteData.observacao || '',
-          endereco: estipulanteData.endereco ? {
-            cep: estipulanteData.endereco.cep || '',
-            logradouro: estipulanteData.endereco.logradouro || '',
-            numero: estipulanteData.endereco.numero || '',
-            complemento: estipulanteData.endereco.complemento || '',
-            bairro: estipulanteData.endereco.bairro || '',
-            uf: estipulanteData.endereco.uf || '',
-            cidadeId: estipulanteData.endereco.cidadeId || undefined,
-          } : undefined,
-          contatos: estipulanteData.contatos?.map((c: any) => ({
-            tipoContato: c.tipoContato,
-            valor: c.valor,
-            principal: c.principal
-          })) || [],
-          contatosInstitucionais: estipulanteData.contatosInstitucionais?.map((c: any) => ({
-            nome: c.nome,
-            departamento: c.departamento,
-            email: c.email,
-            telefone: c.telefone,
-            ramal: c.ramal
-          })) || [],
-          configuracao: configData ? {
-            dataInicioVigencia: configData.dataInicioVigencia ? new Date(configData.dataInicioVigencia).toISOString().split('T')[0] : '',
-            dataFimVigencia: configData.dataFimVigencia ? new Date(configData.dataFimVigencia).toISOString().split('T')[0] : '',
-          } : undefined,
+          endereco: estipulanteData.endereco
+            ? {
+                cep: estipulanteData.endereco.cep || '',
+                logradouro: estipulanteData.endereco.logradouro || '',
+                numero: estipulanteData.endereco.numero || '',
+                complemento: estipulanteData.endereco.complemento || '',
+                bairro: estipulanteData.endereco.bairro || '',
+                uf: estipulanteData.endereco.uf || '',
+                cidadeId: estipulanteData.endereco.cidadeId || undefined,
+              }
+            : undefined,
+          contatos:
+            estipulanteData.contatos?.map((c) => ({
+              tipoContato: c.tipoContato,
+              valor: c.valor,
+              principal: c.principal,
+            })) || [],
+          contatosInstitucionais:
+            estipulanteData.contatosInstitucionais?.map((c) => ({
+              nome: c.nome,
+              departamento: c.departamento,
+              email: c.email,
+              telefone: c.telefone,
+              ramal: c.ramal,
+            })) || [],
+          configuracao: configData
+            ? {
+                dataInicioVigencia: configData.dataInicioVigencia
+                  ? new Date(configData.dataInicioVigencia)
+                      .toISOString()
+                      .split('T')[0]
+                  : '',
+                dataFimVigencia: configData.dataFimVigencia
+                  ? new Date(configData.dataFimVigencia)
+                      .toISOString()
+                      .split('T')[0]
+                  : '',
+              }
+            : undefined,
         });
       } catch (err: unknown) {
-        if (err instanceof Error && err.message === 'NOT_FOUND') {
+        if (err instanceof HttpApiError && err.isNotFound()) {
           setNotFound(true);
         } else {
           console.error('Erro ao carregar estipulante:', err);
@@ -92,34 +122,44 @@ export const EditarEstipulantePage: React.FC = () => {
         seguradoraPublicId: data.seguradoraPublicId || undefined,
         observacao: data.observacao,
         endereco: data.endereco ? { ...data.endereco } : undefined,
-        contatos: data.contatos && data.contatos.length > 0 ? data.contatos.map(c => ({
-          tipoContato: c.tipoContato,
-          valor: c.valor,
-          principal: c.principal,
-        })) : undefined,
-        contatosInstitucionais: data.contatosInstitucionais && data.contatosInstitucionais.length > 0 ? data.contatosInstitucionais.map(c => ({
-          nome: c.nome,
-          departamento: c.departamento,
-          email: c.email,
-          telefone: c.telefone,
-          ramal: c.ramal
-        })) : undefined,
+        contatos:
+          data.contatos && data.contatos.length > 0
+            ? data.contatos.map((c) => ({
+                tipoContato: c.tipoContato,
+                valor: c.valor,
+                principal: c.principal,
+              }))
+            : undefined,
+        contatosInstitucionais:
+          data.contatosInstitucionais && data.contatosInstitucionais.length > 0
+            ? data.contatosInstitucionais.map((c) => ({
+                nome: c.nome,
+                departamento: c.departamento,
+                email: c.email,
+                telefone: c.telefone,
+                ramal: c.ramal,
+              }))
+            : undefined,
         configuracao: {
           dataInicioVigencia: data.configuracao.dataInicioVigencia,
           dataFimVigencia: data.configuracao.dataFimVigencia || undefined,
-        }
+        },
       });
 
       navigate('/estipulantes');
     } catch (err: unknown) {
       console.error('Erro ao alterar estipulante:', err);
-      
-      const apiError = err as { status?: number, message?: string };
-      
-      if (apiError.status === 409) {
-        setError(apiError.message || 'A Razão Social informada diverge de uma Pessoa já compartilhada, impossibilitando a alteração global neste fluxo.');
+      if (err instanceof HttpApiError && err.isConflict()) {
+        setError(
+          err.message ||
+            'A Razão Social informada diverge de uma Pessoa já compartilhada, impossibilitando a alteração global neste fluxo.',
+        );
       } else {
-        setError(apiError.message || 'Ocorreu um erro ao salvar o estipulante. Verifique os dados e tente novamente.');
+        setError(
+          err instanceof Error && err.message
+            ? err.message
+            : 'Ocorreu um erro ao salvar o estipulante. Verifique os dados e tente novamente.',
+        );
       }
     } finally {
       setIsSubmitting(false);
@@ -128,8 +168,9 @@ export const EditarEstipulantePage: React.FC = () => {
 
   const handleDelete = async () => {
     if (!publicId) return;
-    if (!window.confirm('Tem certeza que deseja excluir este estipulante?')) return;
-    
+    if (!window.confirm('Tem certeza que deseja excluir este estipulante?'))
+      return;
+
     setIsSubmitting(true);
     try {
       await excluirEstipulante(publicId);
@@ -155,11 +196,19 @@ export const EditarEstipulantePage: React.FC = () => {
 
   if (notFound) {
     return (
-      <main className="flex flex-col gap-6 p-6 max-w-4xl mx-auto focus:outline-none" role="main" tabIndex={-1}>
+      <main
+        className="flex flex-col gap-6 p-6 max-w-4xl mx-auto focus:outline-none"
+        role="main"
+        tabIndex={-1}
+      >
         <EmptyState
           title="Estipulante não encontrado"
           description="O registro que você tentou acessar não existe ou foi removido."
-          action={<Button onClick={() => navigate('/estipulantes')}>Voltar para Listagem</Button>}
+          action={
+            <Button onClick={() => navigate('/estipulantes')}>
+              Voltar para Listagem
+            </Button>
+          }
         />
       </main>
     );
@@ -167,22 +216,38 @@ export const EditarEstipulantePage: React.FC = () => {
 
   if (error && !initialData) {
     return (
-      <main className="flex flex-col gap-6 p-6 max-w-4xl mx-auto focus:outline-none" role="main" tabIndex={-1}>
-        <Alert variant="error" title="Erro">{error}</Alert>
-        <Button className="mt-4" onClick={() => navigate('/estipulantes')}>Voltar</Button>
+      <main
+        className="flex flex-col gap-6 p-6 max-w-4xl mx-auto focus:outline-none"
+        role="main"
+        tabIndex={-1}
+      >
+        <Alert variant="error" title="Erro">
+          {error}
+        </Alert>
+        <Button className="mt-4" onClick={() => navigate('/estipulantes')}>
+          Voltar
+        </Button>
       </main>
     );
   }
 
   const breadcrumbItems = [
     { label: 'Início', href: '/', icon: <HomeIcon size={14} /> },
-    { label: 'Estipulantes', href: '/estipulantes', icon: <BriefcaseIcon size={14} /> },
-    { label: 'Editar Estipulante' }
+    {
+      label: 'Estipulantes',
+      href: '/estipulantes',
+      icon: <BriefcaseIcon size={14} />,
+    },
+    { label: 'Editar Estipulante' },
   ];
 
   return (
-    <main className="flex flex-col gap-6 p-6 max-w-4xl mx-auto focus:outline-none" role="main" tabIndex={-1}>
-      <PageHeader 
+    <main
+      className="flex flex-col gap-6 p-6 max-w-4xl mx-auto focus:outline-none"
+      role="main"
+      tabIndex={-1}
+    >
+      <PageHeader
         title="Editar Estipulante"
         description="Atualize os dados e a configuração operacional do estipulante."
         breadcrumbs={<Breadcrumbs items={breadcrumbItems} />}
@@ -191,12 +256,14 @@ export const EditarEstipulantePage: React.FC = () => {
       <div className="w-full">
         {error && (
           <div className="mb-4">
-            <Alert variant="error" title="Erro ao Salvar">{error}</Alert>
+            <Alert variant="error" title="Erro ao Salvar">
+              {error}
+            </Alert>
           </div>
         )}
-        
+
         {initialData && (
-          <EstipulanteForm 
+          <EstipulanteForm
             initialData={initialData}
             isEdit={true}
             onSubmit={handleSubmit}

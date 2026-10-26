@@ -1,3 +1,4 @@
+using WebApolice.Modulos.Cadastro.Domain.Clientes;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using WebApolice.Modulos.Cadastro.Infrastructure.Persistence.Models;
@@ -15,6 +16,7 @@ public class InfrastructureModelsConfiguration : IEntityTypeConfiguration<Pessoa
 
         builder.Property(x => x.Id).HasColumnName("id");
         builder.Property(x => x.PublicId).HasColumnName("public_id");
+        builder.Property(x => x.DataNascimento).HasColumnType("date");
         builder.Property(x => x.TipoPessoa).HasColumnName("tipo_pessoa");
         builder.Property(x => x.Nome).HasColumnName("nome");
         builder.Property(x => x.DocumentoPrincipal).HasColumnName("documento_principal");

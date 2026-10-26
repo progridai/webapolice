@@ -28,4 +28,18 @@ public sealed class ConfiguracaoAutenticacao
     /// Pode ser sobrescrita por: Authentication__RequireHttpsMetadata (variável de ambiente)
     /// </summary>
     public bool RequireHttpsMetadata { get; init; } = true;
+    public void Validar(string ambiente)
+    {
+        if (!Uri.TryCreate(Authority, UriKind.Absolute, out var uri) ||
+            (uri.Scheme != Uri.UriSchemeHttps && uri.Scheme != Uri.UriSchemeHttp) ||
+            !string.IsNullOrEmpty(uri.UserInfo) || !string.IsNullOrEmpty(uri.Query) || !string.IsNullOrEmpty(uri.Fragment))
+            throw new InvalidOperationException("Authentication:Authority deve ser uma URL HTTP(S) absoluta sem credenciais, query ou fragmento.");
+        if (string.IsNullOrWhiteSpace(Audience))
+            throw new InvalidOperationException("Authentication:Audience é obrigatória.");
+
+        var teste = ambiente == "Testing";
+        var desenvolvimentoLocal = ambiente == "Development" && uri.IsLoopback;
+        if (!teste && !desenvolvimentoLocal && (!RequireHttpsMetadata || uri.Scheme != Uri.UriSchemeHttps))
+            throw new InvalidOperationException("Authentication exige Authority HTTPS e RequireHttpsMetadata=true fora de desenvolvimento local e testes.");
+    }
 }

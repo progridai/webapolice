@@ -14,7 +14,10 @@ export interface BreadcrumbsProps {
   className?: string;
 }
 
-export const Breadcrumbs: React.FC<BreadcrumbsProps> = ({ items, className = '' }) => {
+export const Breadcrumbs: React.FC<BreadcrumbsProps> = ({
+  items,
+  className = '',
+}) => {
   if (!items || items.length === 0) return null;
 
   return (
@@ -27,12 +30,19 @@ export const Breadcrumbs: React.FC<BreadcrumbsProps> = ({ items, className = '' 
             <li key={index} className="breadcrumbs-item">
               {item.href && !isLast ? (
                 <Link to={item.href} className="breadcrumbs-link">
-                  {item.icon && <span className="breadcrumbs-icon">{item.icon}</span>}
+                  {item.icon && (
+                    <span className="breadcrumbs-icon">{item.icon}</span>
+                  )}
                   <span className="breadcrumbs-text">{item.label}</span>
                 </Link>
               ) : (
-                <span className="breadcrumbs-current" aria-current={isLast ? 'page' : undefined}>
-                  {item.icon && <span className="breadcrumbs-icon">{item.icon}</span>}
+                <span
+                  className="breadcrumbs-current"
+                  aria-current={isLast ? 'page' : undefined}
+                >
+                  {item.icon && (
+                    <span className="breadcrumbs-icon">{item.icon}</span>
+                  )}
                   <span className="breadcrumbs-text">{item.label}</span>
                 </span>
               )}

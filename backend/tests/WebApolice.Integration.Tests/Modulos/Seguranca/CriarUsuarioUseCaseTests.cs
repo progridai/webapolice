@@ -48,14 +48,14 @@ public class CriarUsuarioUseCaseTests : IClassFixture<SegurancaIntegrationTestFi
     {
         if (_usuariosCriados.Any())
         {
-            await _dbContext.Database.ExecuteSqlRawAsync($"DELETE FROM seguranca.auditoria_permissao WHERE usuario_afetado_id IN (SELECT id FROM seguranca.usuario WHERE public_id = ANY(ARRAY['{string.Join("','", _usuariosCriados)}']::uuid[]))");
-            await _dbContext.Database.ExecuteSqlRawAsync($"DELETE FROM seguranca.usuario_perfil WHERE usuario_id IN (SELECT id FROM seguranca.usuario WHERE public_id = ANY(ARRAY['{string.Join("','", _usuariosCriados)}']::uuid[]))");
-            await _dbContext.Database.ExecuteSqlRawAsync($"DELETE FROM seguranca.usuario WHERE public_id = ANY(ARRAY['{string.Join("','", _usuariosCriados)}']::uuid[])");
+            await _dbContext.Database.ExecuteSqlAsync($"DELETE FROM seguranca.auditoria_permissao WHERE usuario_afetado_id IN (SELECT id FROM seguranca.usuario WHERE public_id = ANY({_usuariosCriados.ToArray()}))");
+            await _dbContext.Database.ExecuteSqlAsync($"DELETE FROM seguranca.usuario_perfil WHERE usuario_id IN (SELECT id FROM seguranca.usuario WHERE public_id = ANY({_usuariosCriados.ToArray()}))");
+            await _dbContext.Database.ExecuteSqlAsync($"DELETE FROM seguranca.usuario WHERE public_id = ANY({_usuariosCriados.ToArray()})");
         }
         if (_perfisCriados.Any())
         {
-            await _dbContext.Database.ExecuteSqlRawAsync($"DELETE FROM seguranca.perfil_permissao WHERE perfil_id IN (SELECT id FROM seguranca.perfil WHERE public_id = ANY(ARRAY['{string.Join("','", _perfisCriados)}']::uuid[]))");
-            await _dbContext.Database.ExecuteSqlRawAsync($"DELETE FROM seguranca.perfil WHERE public_id = ANY(ARRAY['{string.Join("','", _perfisCriados)}']::uuid[])");
+            await _dbContext.Database.ExecuteSqlAsync($"DELETE FROM seguranca.perfil_permissao WHERE perfil_id IN (SELECT id FROM seguranca.perfil WHERE public_id = ANY({_perfisCriados.ToArray()}))");
+            await _dbContext.Database.ExecuteSqlAsync($"DELETE FROM seguranca.perfil WHERE public_id = ANY({_perfisCriados.ToArray()})");
         }
     }
 
@@ -132,7 +132,7 @@ public class CriarUsuarioUseCaseTests : IClassFixture<SegurancaIntegrationTestFi
                 It.IsAny<EventId>(),
                 It.Is<It.IsAnyType>((v, t) => true),
                 It.IsAny<Exception>(),
-                It.Is<Func<It.IsAnyType, Exception, string>>((v, t) => true)),
+                It.Is<Func<It.IsAnyType, Exception?, string>>((v, t) => true)),
             Times.Once);
     }
 }

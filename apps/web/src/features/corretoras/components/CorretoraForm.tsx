@@ -19,7 +19,10 @@ import {
 import { CnpjInput } from '../../../components/fields';
 import { normalizeCnpj } from '../../../shared/utils/normalizers';
 import { formatarCnpj } from '../../../shared/utils/formatters';
-import { corretoraFormSchema, type CorretoraFormData } from '../schemas/corretoraFormSchema';
+import {
+  corretoraFormSchema,
+  type CorretoraFormData,
+} from '../schemas/corretoraFormSchema';
 
 interface CorretoraFormProps {
   initialData?: Partial<CorretoraFormData>;
@@ -71,11 +74,22 @@ export const CorretoraForm: React.FC<CorretoraFormProps> = ({
   };
 
   return (
-    <form onSubmit={handleSubmit(handleFormSubmit)} className="flex flex-col gap-6" noValidate>
-      <FormSection title="Dados da Corretora" icon={<BriefcaseIcon size={20} />}>
+    <form
+      onSubmit={handleSubmit(handleFormSubmit)}
+      className="flex flex-col gap-6"
+      noValidate
+    >
+      <FormSection
+        title="Dados da Corretora"
+        icon={<BriefcaseIcon size={20} />}
+      >
         <FormGrid>
           <div className="lg:col-span-8">
-            <FormField label="Nome / Razão Social" required error={errors.nome?.message}>
+            <FormField
+              label="Nome / Razão Social"
+              required
+              error={errors.nome?.message}
+            >
               <Input
                 {...register('nome')}
                 id="corretora-nome"
@@ -112,7 +126,10 @@ export const CorretoraForm: React.FC<CorretoraFormProps> = ({
           </div>
 
           <div className="lg:col-span-6">
-            <FormField label="Código Protheus" error={errors.codigoProtheus?.message}>
+            <FormField
+              label="Código Protheus"
+              error={errors.codigoProtheus?.message}
+            >
               <Input
                 {...register('codigoProtheus')}
                 id="corretora-codigoProtheus"
@@ -136,10 +153,20 @@ export const CorretoraForm: React.FC<CorretoraFormProps> = ({
 
       <FormActions>
         <div className="flex-grow flex justify-start" />
-        <Button type="button" variant="text" onClick={onCancel} disabled={isSubmitting}>
+        <Button
+          type="button"
+          variant="text"
+          onClick={onCancel}
+          disabled={isSubmitting}
+        >
           Cancelar
         </Button>
-        <Button type="submit" variant="primary" disabled={isSubmitting} loading={isSubmitting}>
+        <Button
+          type="submit"
+          variant="primary"
+          disabled={isSubmitting}
+          loading={isSubmitting}
+        >
           Salvar
         </Button>
       </FormActions>

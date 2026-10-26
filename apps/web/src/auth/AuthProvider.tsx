@@ -12,7 +12,13 @@
  * - Não armazenar tokens manualmente (Keycloak gerencia internamente)
  * - Não expor tokens em logs
  */
-import React, { useCallback, useEffect, useRef, useState, useMemo } from 'react';
+import React, {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  useMemo,
+} from 'react';
 import { AuthContext } from './AuthContext';
 import { getKeycloakInstance, initKeycloakOnce } from './keycloak';
 import {
@@ -31,18 +37,24 @@ interface AuthProviderProps {
 }
 
 /** Extrai o modelo interno de usuário a partir dos dados do token Keycloak */
-function extractUser(kc: ReturnType<typeof getKeycloakInstance>): AuthUser | null {
+function extractUser(
+  kc: ReturnType<typeof getKeycloakInstance>,
+): AuthUser | null {
   if (!kc.authenticated || !kc.tokenParsed) return null;
 
   const token = kc.tokenParsed as Record<string, unknown>;
-  const realmRoles = (token['realm_access'] as { roles?: string[] })?.roles ?? [];
+  const realmRoles =
+    (token['realm_access'] as { roles?: string[] })?.roles ?? [];
 
   return {
     id: (token['sub'] as string) ?? '',
     username: (token['preferred_username'] as string) ?? '',
     name:
       (token['name'] as string) ??
-      [(token['given_name'] as string) ?? '', (token['family_name'] as string) ?? '']
+      [
+        (token['given_name'] as string) ?? '',
+        (token['family_name'] as string) ?? '',
+      ]
         .filter(Boolean)
         .join(' '),
     email: (token['email'] as string) ?? '',
@@ -54,7 +66,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [status, setStatus] = useState<AuthStatus>('initializing');
   const [user, setUser] = useState<AuthUser | null>(null);
   const refreshingRef = useRef(false);
-  const tokenRefreshIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const tokenRefreshIntervalRef = useRef<ReturnType<typeof setInterval> | null>(
+    null,
+  );
 
   const kc = getKeycloakInstance();
 
@@ -62,11 +76,16 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const isAuthenticated = status === 'authenticated';
   const roles = useMemo(() => user?.roles ?? [], [user?.roles]);
 
-  const { hasRole, hasAnyRole, hasAllRoles } = useMemo(() => ({
-    hasRole: (role: string) => hasRoleUtil(roles, role),
-    hasAnyRole: (rolesToCheck: string[]) => hasAnyRoleUtil(roles, rolesToCheck),
-    hasAllRoles: (rolesToCheck: string[]) => hasAllRolesUtil(roles, rolesToCheck),
-  }), [roles]);
+  const { hasRole, hasAnyRole, hasAllRoles } = useMemo(
+    () => ({
+      hasRole: (role: string) => hasRoleUtil(roles, role),
+      hasAnyRole: (rolesToCheck: string[]) =>
+        hasAnyRoleUtil(roles, rolesToCheck),
+      hasAllRoles: (rolesToCheck: string[]) =>
+        hasAllRolesUtil(roles, rolesToCheck),
+    }),
+    [roles],
+  );
 
   const refreshToken = useCallback(async (): Promise<boolean> => {
     if (refreshingRef.current) return false;
@@ -112,7 +131,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         // bloqueia o postMessage do iframe por política CORS/SameSite.
         const timeoutPromise = new Promise<boolean>((resolve) => {
           setTimeout(() => {
-            console.warn('[AuthProvider] Keycloak init timeout — continuando como não autenticado.');
+            console.warn(
+              '[AuthProvider] Keycloak init timeout — continuando como não autenticado.',
+            );
             resolve(false);
           }, 8000);
         });
@@ -120,7 +141,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         const authenticated = await Promise.race([
           initKeycloakOnce({
             onLoad: 'check-sso',
-            silentCheckSsoRedirectUri: window.location.origin + '/silent-check-sso.html',
+            silentCheckSsoRedirectUri:
+              window.location.origin + '/silent-check-sso.html',
             pkceMethod: 'S256',
             checkLoginIframe: false,
             redirectUri: getOidcRedirectUri(),
@@ -171,7 +193,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     async (redirectUri?: string) => {
       await kc.login({ redirectUri: redirectUri ?? window.location.href });
     },
-    [kc]
+    [kc],
   );
 
   const logout = useCallback(
@@ -182,7 +204,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       IdentidadeVisualService.restaurarIdentidadePadrao();
       await kc.logout({ redirectUri: redirectUri ?? window.location.origin });
     },
-    [kc]
+    [kc],
   );
 
   const value: AuthContextValue = {
@@ -200,7 +222,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   if (isLoading) {
-    // Importante: atrasamos a renderização dos filhos (ex: HashRouter) para que a URL 
+    // Importante: atrasamos a renderização dos filhos (ex: HashRouter) para que a URL
     // original seja preservada enquanto o OIDC valida o token.
     return <PageLoading />;
   }

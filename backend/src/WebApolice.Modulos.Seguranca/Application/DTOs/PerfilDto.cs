@@ -7,7 +7,7 @@ public sealed record PerfilDto(
     Guid PublicId,
     string Codigo,
     string Nome,
-    string Descricao,
+    string? Descricao,
     bool Ativo,
     bool PerfilSistema,
     bool AcessoTotal
@@ -17,7 +17,7 @@ public sealed record PerfilDetalheDto(
     Guid PublicId,
     string Codigo,
     string Nome,
-    string Descricao,
+    string? Descricao,
     bool Ativo,
     bool PerfilSistema,
     bool AcessoTotal,

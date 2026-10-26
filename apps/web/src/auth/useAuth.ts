@@ -15,7 +15,7 @@ export function useAuth(): AuthContextValue {
   if (!context) {
     throw new Error(
       'useAuth deve ser utilizado dentro de um AuthProvider.\n' +
-        'Certifique-se de que o componente está dentro da árvore do AppProviders.'
+        'Certifique-se de que o componente está dentro da árvore do AppProviders.',
     );
   }
   return context;

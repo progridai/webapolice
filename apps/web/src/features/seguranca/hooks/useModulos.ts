@@ -2,7 +2,11 @@
  * useModulos.ts — Hook para gerenciar módulos do sistema.
  */
 import { useState, useCallback, useEffect } from 'react';
-import { listarModulos, alterarHabilitacaoModulo, alterarHabilitacaoRecurso } from '../api/modulosApi';
+import {
+  listarModulos,
+  alterarHabilitacaoModulo,
+  alterarHabilitacaoRecurso,
+} from '../api/modulosApi';
 import type { ModuloDto } from '../api/modulosApi';
 import { useAuthorization } from '../../../auth/AuthorizationProvider';
 
@@ -20,7 +24,8 @@ export function useModulos() {
       const data = await listarModulos();
       setModulos(data);
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'Erro ao carregar módulos';
+      const message =
+        err instanceof Error ? err.message : 'Erro ao carregar módulos';
       setError(message);
       console.error('Erro ao carregar módulos', err);
     } finally {
@@ -33,43 +38,70 @@ export function useModulos() {
     carregarModulos();
   }, [carregarModulos]);
 
-  const handleToggleModulo = async (publicId: string, currentHabilitado: boolean) => {
+  const handleToggleModulo = async (
+    publicId: string,
+    currentHabilitado: boolean,
+  ) => {
     setToggleError(null);
     try {
       const novoHabilitado = !currentHabilitado;
       await alterarHabilitacaoModulo(publicId, novoHabilitado);
-      setModulos(current =>
-        current.map(m => m.publicId === publicId ? { ...m, habilitado: novoHabilitado } : m)
+      setModulos((current) =>
+        current.map((m) =>
+          m.publicId === publicId ? { ...m, habilitado: novoHabilitado } : m,
+        ),
       );
       await refresh();
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'Erro ao alterar status do módulo.';
+      const message =
+        err instanceof Error
+          ? err.message
+          : 'Erro ao alterar status do módulo.';
       console.error('Erro ao alterar status do módulo', err);
       setToggleError(message);
     }
   };
 
-  const handleToggleRecurso = async (moduloId: string, recursoId: string, currentHabilitado: boolean) => {
+  const handleToggleRecurso = async (
+    moduloId: string,
+    recursoId: string,
+    currentHabilitado: boolean,
+  ) => {
     setToggleError(null);
     try {
       const novoHabilitado = !currentHabilitado;
       await alterarHabilitacaoRecurso(recursoId, novoHabilitado);
-      setModulos(current =>
-        current.map(m => {
+      setModulos((current) =>
+        current.map((m) => {
           if (m.publicId !== moduloId) return m;
           return {
             ...m,
-            recursos: m.recursos?.map(r => r.publicId === recursoId ? { ...r, habilitado: novoHabilitado } : r)
+            recursos: m.recursos?.map((r) =>
+              r.publicId === recursoId
+                ? { ...r, habilitado: novoHabilitado }
+                : r,
+            ),
           };
-        })
+        }),
       );
       await refresh();
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'Erro ao alterar status do recurso.';
+      const message =
+        err instanceof Error
+          ? err.message
+          : 'Erro ao alterar status do recurso.';
       console.error('Erro ao alterar status do recurso', err);
       setToggleError(message);
     }
   };
 
-  return { modulos, isLoading, error, toggleError, handleToggleModulo, handleToggleRecurso, recarregar: carregarModulos };
+  return {
+    modulos,
+    isLoading,
+    error,
+    toggleError,
+    handleToggleModulo,
+    handleToggleRecurso,
+    recarregar: carregarModulos,
+  };
 }

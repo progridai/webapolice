@@ -32,10 +32,12 @@ import { UnexpectedErrorPage } from '../../pages/UnexpectedError';
 
 // Páginas autenticadas (com lazy loading)
 const HomePage = lazy(() =>
-  import('../../pages/Home').then((m) => ({ default: m.HomePage }))
+  import('../../pages/Home').then((m) => ({ default: m.HomePage })),
 );
 const DesignSystemPage = lazy(() =>
-  import('../../pages/DesignSystem').then((m) => ({ default: m.DesignSystemPage }))
+  import('../../pages/DesignSystem').then((m) => ({
+    default: m.DesignSystemPage,
+  })),
 );
 
 // Carregamento de rota
@@ -59,7 +61,10 @@ export const AppRoutes: React.FC = () => {
   return (
     <Routes>
       {/* Raiz: redireciona para /app (autenticado) ou /login (não-autenticado via ProtectedRoute) */}
-      <Route path={ROUTES.ROOT} element={<Navigate to={ROUTES.APP} replace />} />
+      <Route
+        path={ROUTES.ROOT}
+        element={<Navigate to={ROUTES.APP} replace />}
+      />
 
       {/* ── Rotas Públicas ── */}
       <Route element={<PublicLayout />}>

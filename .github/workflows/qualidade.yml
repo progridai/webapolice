@@ -1,0 +1,79 @@
+name: Qualidade
+on:
+  pull_request:
+  push:
+    branches: [main, master]
+permissions:
+  contents: read
+jobs:
+  frontend:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24.18.0
+          cache: npm
+          cache-dependency-path: apps/web/package-lock.json
+      - run: npm ci
+        working-directory: apps/web
+      - run: npm run format:check
+        working-directory: apps/web
+      - run: npm run typecheck
+        working-directory: apps/web
+      - run: npm run lint -- --max-warnings=0
+        working-directory: apps/web
+      - run: npm run lint:design-system
+        working-directory: apps/web
+      - run: npm run test:run
+        working-directory: apps/web
+      - run: npm run build
+        working-directory: apps/web
+      - run: npm audit --audit-level=low
+        working-directory: apps/web
+  backend:
+    runs-on: ubuntu-24.04
+    env:
+      Logging__EventLog__LogLevel__Default: None
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.301
+      - run: dotnet restore backend/WebApolice.slnx --configfile backend/NuGet.Config
+      - run: dotnet build backend/WebApolice.slnx --no-restore -c Release
+      - run: dotnet test backend/WebApolice.slnx --no-build --no-restore -c Release --logger trx
+      - name: Impedir aprovação com integrações ignoradas
+        shell: pwsh
+        run: |
+          $reports = Get-ChildItem backend/tests/*/TestResults/*.trx
+          if (-not $reports) { throw 'Nenhum relatório de testes encontrado.' }
+          foreach ($report in $reports) {
+            [xml]$trx = Get-Content -Raw $report.FullName
+            if ([int]$trx.TestRun.ResultSummary.Counters.notExecuted -gt 0) { throw "Testes ignorados: $($report.Name)" }
+          }
+      - run: dotnet list backend/WebApolice.slnx package --vulnerable --include-transitive --format json --no-restore > nuget-audit.json
+      - name: Impedir vulnerabilidades NuGet
+        shell: pwsh
+        run: |
+          $audit = Get-Content -Raw nuget-audit.json | ConvertFrom-Json
+          if (-not $audit.projects.Count -or $audit.problems.Count) { throw 'Auditoria NuGet inconclusiva.' }
+          foreach ($project in $audit.projects) {
+            foreach ($framework in $project.frameworks) {
+              foreach ($package in @($framework.topLevelPackages) + @($framework.transitivePackages)) {
+                if ($package.vulnerabilities.Count) { throw "Dependência vulnerável: $($package.id)" }
+              }
+            }
+          }
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: resultados-backend
+          path: |
+            backend/**/TestResults/*.trx
+            nuget-audit.json
+  segredos:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - run: python backend/scripts/verificar-segredos.py

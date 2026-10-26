@@ -26,8 +26,6 @@ import type { Column } from '../../../components/ui/DataTable/DataTable';
 import type { PerfilDto } from '../types/seguranca.types';
 import { useAuthorization } from '../../../auth/AuthorizationProvider';
 
-
-
 export const PerfisListPage: React.FC = () => {
   const { filters, setFilters, clearFilters } = useSegurancaFilters();
   const { data, isLoading, error, retry } = usePerfis(filters);
@@ -49,8 +47,10 @@ export const PerfisListPage: React.FC = () => {
   const hasActiveFilters = Boolean(filters.busca || filters.ativo !== '');
   const hasData = data && data.itens && data.itens.length > 0;
 
-  const podeEditar = possuiAcessoTotal() || possuiPermissao('seguranca.perfis.alterar');
-  const podeCriar = possuiAcessoTotal() || possuiPermissao('seguranca.perfis.inserir');
+  const podeEditar =
+    possuiAcessoTotal() || possuiPermissao('seguranca.perfis.alterar');
+  const podeCriar =
+    possuiAcessoTotal() || possuiPermissao('seguranca.perfis.inserir');
 
   const columns: Column<PerfilDto>[] = [
     {
@@ -65,7 +65,11 @@ export const PerfisListPage: React.FC = () => {
     {
       key: 'descricao',
       label: 'Descrição',
-      render: (p) => <span className="text-sm truncate max-w-xs block">{p.descricao || '-'}</span>,
+      render: (p) => (
+        <span className="text-sm truncate max-w-xs block">
+          {p.descricao || '-'}
+        </span>
+      ),
     },
     {
       key: 'tipo',
@@ -106,13 +110,16 @@ export const PerfisListPage: React.FC = () => {
             onClick: () => navigate(`/seguranca/perfis/${p.publicId}`),
           }}
           actions={
-            podeEditar && !p.perfilSistema ? [
-              {
-                label: 'Alterar',
-                icon: <EditIcon />,
-                onClick: () => navigate(`/seguranca/perfis/${p.publicId}/editar`),
-              },
-            ] : []
+            podeEditar && !p.perfilSistema
+              ? [
+                  {
+                    label: 'Alterar',
+                    icon: <EditIcon />,
+                    onClick: () =>
+                      navigate(`/seguranca/perfis/${p.publicId}/editar`),
+                  },
+                ]
+              : []
           }
           ariaLabel={`Ações para ${p.nome}`}
         />
@@ -121,7 +128,10 @@ export const PerfisListPage: React.FC = () => {
   ];
 
   return (
-    <main className="flex flex-col gap-6 w-full max-w-[1440px] mx-auto p-0 focus:outline-none" tabIndex={-1}>
+    <main
+      className="flex flex-col gap-6 w-full max-w-[1440px] mx-auto p-0 focus:outline-none"
+      tabIndex={-1}
+    >
       <PageHeader
         title="Perfis de Acesso"
         description="Gerencie os perfis e suas permissões no sistema."
@@ -136,17 +146,26 @@ export const PerfisListPage: React.FC = () => {
         }
         actions={
           podeCriar ? (
-            <Button onClick={() => navigate(ROUTES.SEGURANCA_PERFIL_NOVO)} variant="primary">
+            <Button
+              onClick={() => navigate(ROUTES.SEGURANCA_PERFIL_NOVO)}
+              variant="primary"
+            >
               Novo Perfil
             </Button>
           ) : undefined
         }
       />
 
-      <section aria-label="Filtros de perfis" style={{ position: 'relative', zIndex: 10 }}>
+      <section
+        aria-label="Filtros de perfis"
+        style={{ position: 'relative', zIndex: 10 }}
+      >
         <FilterBar>
           <div>
-            <label htmlFor="busca-perfil" className="block text-sm mb-1 font-medium text-texto-secundario">
+            <label
+              htmlFor="busca-perfil"
+              className="block text-sm mb-1 font-medium text-texto-secundario"
+            >
               Buscar perfil
             </label>
             <SearchField
@@ -159,7 +178,10 @@ export const PerfisListPage: React.FC = () => {
           </div>
 
           <div>
-            <label htmlFor="status-perfil" className="block text-sm mb-1 font-medium text-texto-secundario">
+            <label
+              htmlFor="status-perfil"
+              className="block text-sm mb-1 font-medium text-texto-secundario"
+            >
               Status
             </label>
             <Select
@@ -199,20 +221,32 @@ export const PerfisListPage: React.FC = () => {
           </Button>
         </div>
       ) : isLoading && !data && isMobile ? (
-        <div aria-busy="true" aria-live="polite" className="flex flex-col gap-4">
+        <div
+          aria-busy="true"
+          aria-live="polite"
+          className="flex flex-col gap-4"
+        >
           <Skeleton className="w-full h-12 rounded-lg" />
           <Skeleton className="w-full h-12 rounded-lg" />
           <Skeleton className="w-full h-12 rounded-lg" />
         </div>
       ) : !hasData && !isLoading ? (
         <EmptyState
-          title={hasActiveFilters ? 'Nenhum perfil encontrado' : 'Nenhum perfil cadastrado'}
+          title={
+            hasActiveFilters
+              ? 'Nenhum perfil encontrado'
+              : 'Nenhum perfil cadastrado'
+          }
           description={
             hasActiveFilters
               ? 'Não encontramos nenhum perfil com os filtros informados.'
               : 'Ainda não existem perfis cadastrados na plataforma.'
           }
-          action={hasActiveFilters ? <Button onClick={clearFilters}>Limpar filtros</Button> : undefined}
+          action={
+            hasActiveFilters ? (
+              <Button onClick={clearFilters}>Limpar filtros</Button>
+            ) : undefined
+          }
         />
       ) : (
         <div className="flex flex-col gap-3">
@@ -230,7 +264,11 @@ export const PerfisListPage: React.FC = () => {
             keyExtractor={(item) => item.publicId}
             isLoading={isLoading}
             aria-label="Lista de perfis"
-            emptyTitle={hasActiveFilters ? 'Nenhum perfil encontrado' : 'Nenhum perfil cadastrado'}
+            emptyTitle={
+              hasActiveFilters
+                ? 'Nenhum perfil encontrado'
+                : 'Nenhum perfil cadastrado'
+            }
             emptyDescription={
               hasActiveFilters
                 ? 'Não encontramos nenhum perfil com os filtros informados.'

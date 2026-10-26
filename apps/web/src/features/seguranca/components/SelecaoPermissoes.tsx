@@ -53,7 +53,9 @@ export const SelecaoPermissoes: React.FC<SelecaoPermissoesProps> = ({
     <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
       {catalogo.map((modulo) => (
         <DetailsSection key={modulo.publicId} title={modulo.nome}>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+          <div
+            style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}
+          >
             {modulo.recursos.map((recurso) => {
               const ids = recurso.permissoes.map((p) => p.publicId);
               const todos = ids.every((id) => selecionados.includes(id));
@@ -77,7 +79,14 @@ export const SelecaoPermissoes: React.FC<SelecaoPermissoesProps> = ({
                   </div>
 
                   {/* Permissões individuais */}
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', paddingLeft: '24px' }}>
+                  <div
+                    style={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '4px',
+                      paddingLeft: '24px',
+                    }}
+                  >
                     {recurso.permissoes.map((perm) => (
                       <Checkbox
                         key={perm.publicId}

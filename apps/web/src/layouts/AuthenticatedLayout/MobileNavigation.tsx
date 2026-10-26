@@ -18,7 +18,10 @@ interface MobileNavigationProps {
   onClose: () => void;
 }
 
-export const MobileNavigation: React.FC<MobileNavigationProps> = ({ isOpen, onClose }) => {
+export const MobileNavigation: React.FC<MobileNavigationProps> = ({
+  isOpen,
+  onClose,
+}) => {
   const closeButtonRef = useRef<HTMLButtonElement>(null);
 
   // Bloqueia scroll do body quando menu está aberto
@@ -41,7 +44,7 @@ export const MobileNavigation: React.FC<MobileNavigationProps> = ({ isOpen, onCl
         onClose();
       }
     },
-    [onClose]
+    [onClose],
   );
 
   if (!isOpen) return null;

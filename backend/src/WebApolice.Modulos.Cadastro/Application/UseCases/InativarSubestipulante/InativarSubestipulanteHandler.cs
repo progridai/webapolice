@@ -19,7 +19,7 @@ public sealed class InativarSubestipulanteHandler
         var subestipulante = await _repository.ObterPorPublicIdAsync(command.PublicId, cancellationToken);
         
         if (subestipulante == null)
-            throw new InvalidOperationException("Subestipulante não encontrado.");
+            throw new WebApolice.SharedKernel.Application.Exceptions.ValidacaoException("Subestipulante não encontrado.");
 
         if (!subestipulante.Ativo)
             return;

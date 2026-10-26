@@ -19,7 +19,10 @@ import {
 import { CnpjInput } from '../../../components/fields';
 import { normalizeCnpj } from '../../../shared/utils/normalizers';
 import { formatarCnpj } from '../../../shared/utils/formatters';
-import { subestipulanteFormSchema, type SubestipulanteFormData } from '../schemas/subestipulanteFormSchema';
+import {
+  subestipulanteFormSchema,
+  type SubestipulanteFormData,
+} from '../schemas/subestipulanteFormSchema';
 
 interface SubestipulanteFormProps {
   initialData?: Partial<SubestipulanteFormData>;
@@ -69,11 +72,22 @@ export const SubestipulanteForm: React.FC<SubestipulanteFormProps> = ({
   };
 
   return (
-    <form onSubmit={handleSubmit(handleFormSubmit)} className="flex flex-col gap-6" noValidate>
-      <FormSection title="Dados do Subestipulante" icon={<BriefcaseIcon size={20} />}>
+    <form
+      onSubmit={handleSubmit(handleFormSubmit)}
+      className="flex flex-col gap-6"
+      noValidate
+    >
+      <FormSection
+        title="Dados do Subestipulante"
+        icon={<BriefcaseIcon size={20} />}
+      >
         <FormGrid>
           <div className="lg:col-span-8">
-            <FormField label="Nome / Razão Social" required error={errors.nome?.message}>
+            <FormField
+              label="Nome / Razão Social"
+              required
+              error={errors.nome?.message}
+            >
               <Input
                 {...register('nome')}
                 id="subestipulante-nome"
@@ -114,7 +128,10 @@ export const SubestipulanteForm: React.FC<SubestipulanteFormProps> = ({
       <FormSection title="Outras Informações">
         <FormGrid>
           <div className="lg:col-span-12">
-            <FormField label="Observações Internas" error={errors.observacao?.message}>
+            <FormField
+              label="Observações Internas"
+              error={errors.observacao?.message}
+            >
               <Textarea
                 {...register('observacao')}
                 id="subestipulante-observacao"

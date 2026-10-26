@@ -4,7 +4,10 @@ import './Alert.css';
 
 export type AlertVariant = 'success' | 'error' | 'warning' | 'info';
 
-export interface AlertProps extends Omit<React.HTMLAttributes<HTMLDivElement>, 'title'> {
+export interface AlertProps extends Omit<
+  React.HTMLAttributes<HTMLDivElement>,
+  'title'
+> {
   variant?: AlertVariant;
   title?: React.ReactNode;
   onClose?: () => void;
@@ -28,7 +31,8 @@ export const Alert: React.FC<AlertProps> = ({
 }) => {
   const IconComponent = variantIcons[variant];
   // Por padrão, erro e warning têm role="alert" para leitores de tela
-  const resolvedRole = role || (variant === 'error' || variant === 'warning' ? 'alert' : 'status');
+  const resolvedRole =
+    role || (variant === 'error' || variant === 'warning' ? 'alert' : 'status');
 
   return (
     <div

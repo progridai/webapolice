@@ -6,10 +6,9 @@ export interface FilterBarProps {
   className?: string;
 }
 
-export const FilterBar: React.FC<FilterBarProps> = ({ children, className = '' }) => {
-  return (
-    <div className={`filter-bar ${className}`}>
-      {children}
-    </div>
-  );
+export const FilterBar: React.FC<FilterBarProps> = ({
+  children,
+  className = '',
+}) => {
+  return <div className={`filter-bar ${className}`}>{children}</div>;
 };

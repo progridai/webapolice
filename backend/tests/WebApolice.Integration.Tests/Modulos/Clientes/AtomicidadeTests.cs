@@ -1,3 +1,6 @@
+using WebApolice.Auditoria.Infrastructure;
+using WebApolice.Modulos.Cadastro.Infrastructure.Persistence;
+using WebApolice.Modulos.Seguranca.Contracts;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -27,13 +30,21 @@ public class AtomicidadeTests : IClassFixture<ClientesIntegrationTestFixture>
     {
         // Arrange
         var dbContext = _fixture.DbContext;
+        // Falha controlada do banco após salvar Pessoa/Cliente. Não presume FKs ausentes do modelo parcial.
+        await dbContext.Database.ExecuteSqlRawAsync("""
+            CREATE OR REPLACE FUNCTION core.falha_endereco_teste() RETURNS trigger LANGUAGE plpgsql AS $$
+            BEGIN RAISE EXCEPTION 'falha-controlada-endereco'; END $$;
+            CREATE TRIGGER falha_endereco_teste BEFORE INSERT ON core.pessoa_endereco
+            FOR EACH ROW WHEN (NEW.cep = '00000000') EXECUTE FUNCTION core.falha_endereco_teste();
+            """);
         var repository = new ClienteRepository(dbContext);
         var auditoriaMock = new Mock<IRegistradorAuditoria>();
-        var segurancaDbContext = new WebApolice.Modulos.Seguranca.Infrastructure.Persistence.SegurancaDbContext(
-            new DbContextOptionsBuilder<WebApolice.Modulos.Seguranca.Infrastructure.Persistence.SegurancaDbContext>()
-                .UseNpgsql(dbContext.Database.GetConnectionString())
-                .Options);
-        var handler = new CadastrarClienteHandler(repository, dbContext, auditoriaMock.Object, segurancaDbContext);
+        await using var auditoriaDb = new AuditoriaDbContext(new DbContextOptionsBuilder<AuditoriaDbContext>()
+            .UseNpgsql(dbContext.Database.GetDbConnection()).UseSnakeCaseNamingConvention().Options);
+        var operacao = new OperacaoCadastroAuditada(dbContext,
+            new OperacaoAuditada(auditoriaDb, auditoriaMock.Object, Mock.Of<IContextoAuditoria>()));
+        var handler = new CadastrarClienteHandler(repository, operacao, Mock.Of<IDisponibilidadeCatalogo>());
+
 
         var enderecoRequest = new WebApolice.Modulos.Cadastro.Application.UseCases.CadastrarCliente.EnderecoCommand(
             "RESIDENCIAL",
@@ -42,7 +53,7 @@ public class AtomicidadeTests : IClassFixture<ClientesIntegrationTestFixture>
             "123",
             null,
             "Bairro Teste",
-            9999999, // CidadeId Inexistente que vai violar a Foreign Key
+            9999999, // Falha é injetada pelo trigger exclusivo de testes.
             "RS",
             true
         );

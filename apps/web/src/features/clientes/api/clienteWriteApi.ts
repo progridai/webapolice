@@ -4,15 +4,21 @@
  * Comunicação direta com o backend para os casos de uso de escrita (Cadastro/Edição).
  */
 import { httpClient } from '../../../services/http/httpClient';
-import type { CadastrarClienteRequest, AlterarClienteRequest } from '../types/cliente.types';
+import type {
+  CadastrarClienteRequest,
+  AlterarClienteRequest,
+} from '../types/cliente.types';
 
 /**
  * Cadastra um novo cliente.
  */
 export async function cadastrarCliente(
-  request: CadastrarClienteRequest
+  request: CadastrarClienteRequest,
 ): Promise<{ id: string }> {
-  const response = await httpClient.post<{ publicId: string }>('/api/clientes', request);
+  const response = await httpClient.post<{ publicId: string }>(
+    '/api/clientes',
+    request,
+  );
   return { id: response.data.publicId };
 }
 
@@ -21,7 +27,7 @@ export async function cadastrarCliente(
  */
 export async function alterarCliente(
   publicId: string,
-  request: AlterarClienteRequest
+  request: AlterarClienteRequest,
 ): Promise<void> {
   await httpClient.put(`/api/clientes/${publicId}`, request);
 }

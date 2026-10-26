@@ -55,12 +55,14 @@ export const Modal: React.FC<ModalProps> = ({
         // Armadilha de foco (Tab loop)
         if (e.key === 'Tab' && modalRef.current) {
           const focusableElements = modalRef.current.querySelectorAll(
-            'a[href], area[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), button:not([disabled]), iframe, object, embed, [tabindex="0"], [contenteditable]'
+            'a[href], area[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), button:not([disabled]), iframe, object, embed, [tabindex="0"], [contenteditable]',
           );
-          
+
           if (focusableElements.length > 0) {
             const firstElement = focusableElements[0] as HTMLElement;
-            const lastElement = focusableElements[focusableElements.length - 1] as HTMLElement;
+            const lastElement = focusableElements[
+              focusableElements.length - 1
+            ] as HTMLElement;
 
             if (e.shiftKey) {
               if (document.activeElement === firstElement) {
@@ -83,7 +85,7 @@ export const Modal: React.FC<ModalProps> = ({
         // Restaura rolagem
         document.body.style.overflow = originalOverflow;
         window.removeEventListener('keydown', handleKeyDown);
-        
+
         // Retorna o foco ao elemento original
         if (previousActiveElement.current) {
           previousActiveElement.current.focus();

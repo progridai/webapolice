@@ -1,3 +1,4 @@
+using WebApolice.Modulos.Seguranca.Contracts.Authorization;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
@@ -7,7 +8,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using WebApolice.Modulos.Cadastro.Api.Requests;
 using WebApolice.Modulos.Seguranca.Application.Authorization;
-using WebApolice.Modulos.Seguranca.Infrastructure.Authorization;
 using WebApolice.Modulos.Cadastro.Application.UseCases.AlterarCliente;
 using WebApolice.Modulos.Cadastro.Application.UseCases.AtivarCliente;
 using WebApolice.Modulos.Cadastro.Application.UseCases.CadastrarCliente;

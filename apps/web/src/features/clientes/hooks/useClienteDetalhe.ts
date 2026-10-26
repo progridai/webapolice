@@ -10,7 +10,9 @@ interface UseClienteDetalheResult {
   retry: () => void;
 }
 
-export function useClienteDetalhe(id: string | undefined): UseClienteDetalheResult {
+export function useClienteDetalhe(
+  id: string | undefined,
+): UseClienteDetalheResult {
   const [data, setData] = useState<ClienteDetalheResponse | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(!!id);
   const [error, setError] = useState<Error | HttpApiError | null>(null);
@@ -31,7 +33,7 @@ export function useClienteDetalhe(id: string | undefined): UseClienteDetalheResu
     const fetchData = async () => {
       setIsLoading(true);
       setError(null);
-      
+
       try {
         const result = await obterClienteDetalhe(id, abortController.signal);
         if (isMounted) {

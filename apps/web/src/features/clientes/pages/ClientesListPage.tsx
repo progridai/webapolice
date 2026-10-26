@@ -8,11 +8,17 @@ import { ClientesFilters } from '../components/ClientesFilters';
 import { ClientesTable } from '../components/ClientesTable';
 import { ClientesMobileList } from '../components/ClientesMobileList';
 import {
-  Pagination, EmptyState, Alert, Button, Skeleton, ResultsSummary,
-  PageHeader, Breadcrumbs, UsersIcon
+  Pagination,
+  EmptyState,
+  Alert,
+  Button,
+  Skeleton,
+  ResultsSummary,
+  PageHeader,
+  Breadcrumbs,
+  UsersIcon,
 } from '../../../components/ui';
 import './ClientesListPage.css';
-
 
 export const ClientesListPage: React.FC = () => {
   const { filters, setFilters, clearFilters } = useClientesFilters();
@@ -21,8 +27,10 @@ export const ClientesListPage: React.FC = () => {
   const navigate = useNavigate();
   const { possuiPermissao, possuiAcessoTotal } = useAuthorization();
 
-  const podeInserir = possuiAcessoTotal() || possuiPermissao('clientes.inserir');
-  const podeAlterar = possuiAcessoTotal() || possuiPermissao('clientes.alterar');
+  const podeInserir =
+    possuiAcessoTotal() || possuiPermissao('clientes.inserir');
+  const podeAlterar =
+    possuiAcessoTotal() || possuiPermissao('clientes.alterar');
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
@@ -38,7 +46,10 @@ export const ClientesListPage: React.FC = () => {
   const handleSort = (column: string) => {
     setFilters({
       sortBy: column,
-      direction: filters.sortBy === column && filters.direction === 'asc' ? 'desc' : 'asc',
+      direction:
+        filters.sortBy === column && filters.direction === 'asc'
+          ? 'desc'
+          : 'asc',
     });
   };
 
@@ -46,7 +57,9 @@ export const ClientesListPage: React.FC = () => {
     setFilters({ page });
   };
 
-  const hasActiveFilters = Boolean(filters.nome || filters.cpf || filters.status);
+  const hasActiveFilters = Boolean(
+    filters.nome || filters.cpf || filters.status,
+  );
   const hasData = data && data.itens && data.itens.length > 0;
 
   return (
@@ -57,15 +70,15 @@ export const ClientesListPage: React.FC = () => {
         icon={<UsersIcon size={24} />}
         breadcrumbs={
           <Breadcrumbs
-            items={[
-              { label: 'Início', href: '/' },
-              { label: 'Clientes' },
-            ]}
+            items={[{ label: 'Início', href: '/' }, { label: 'Clientes' }]}
           />
         }
         actions={
           podeInserir && (
-            <Button onClick={() => navigate(ROUTES.CLIENTE_NOVO)} variant="primary">
+            <Button
+              onClick={() => navigate(ROUTES.CLIENTE_NOVO)}
+              variant="primary"
+            >
               Novo Cliente
             </Button>
           )
@@ -98,7 +111,11 @@ export const ClientesListPage: React.FC = () => {
         </div>
       ) : !hasData && isMobile ? (
         <EmptyState
-          title={hasActiveFilters ? 'Nenhum cliente encontrado' : 'Nenhum cliente cadastrado'}
+          title={
+            hasActiveFilters
+              ? 'Nenhum cliente encontrado'
+              : 'Nenhum cliente cadastrado'
+          }
           description={
             hasActiveFilters
               ? 'Não encontramos nenhum cliente com os filtros informados.'
@@ -106,9 +123,7 @@ export const ClientesListPage: React.FC = () => {
           }
           action={
             hasActiveFilters ? (
-              <Button onClick={clearFilters}>
-                Limpar filtros
-              </Button>
+              <Button onClick={clearFilters}>Limpar filtros</Button>
             ) : undefined
           }
         />
@@ -127,7 +142,10 @@ export const ClientesListPage: React.FC = () => {
           </div>
 
           {isMobile ? (
-            <ClientesMobileList clientes={data?.itens || []} podeAlterar={podeAlterar} />
+            <ClientesMobileList
+              clientes={data?.itens || []}
+              podeAlterar={podeAlterar}
+            />
           ) : (
             <ClientesTable
               clientes={data?.itens || []}
@@ -156,5 +174,3 @@ export const ClientesListPage: React.FC = () => {
     </main>
   );
 };
-
-

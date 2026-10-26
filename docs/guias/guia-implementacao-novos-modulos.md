@@ -1,11 +1,13 @@
 # Guia Oficial para Implementação de Novos Módulos
 
 **Status:** Em vigor  
-**Versão:** 3.1  
-**Data da última revisão:** 31 de Julho de 2026  
+**Versão:** 3.2\
+**Data da última revisão:** 23 de Outubro de 2026\
 **Finalidade:** Integração Técnica de novas funcionalidades com Segurança e Controle de Acesso  
 
 > **REGRA CRÍTICA:** As regras funcionais, campos, telas e fluxos do novo módulo devem ser definidos em documentação própria. Este guia trata da configuração técnica de Segurança e Controle de Acesso.
+
+Toda implementação de tela, componente, serviço ou teste deve também seguir o [guia obrigatório de padrões do frontend](guia-padroes-frontend.md), incluindo os seis checks locais e a atualização da documentação. Este complemento não altera as decisões e a matriz de segurança deste guia.
 
 ## 1. Referência Técnica de Segurança (Caminhos Reais)
 
@@ -19,8 +21,8 @@ Para otimizar o desenvolvimento e evitar buscas desnecessárias (economizando to
 
 **Backend (Autorização e APIs):**
 - **PermissoesSeguranca (constantes)**: `backend/src/WebApolice.Modulos.Seguranca/Application/Authorization/PermissoesSeguranca.cs`
-- **PermissaoAuthorizationHandler**: `backend/src/WebApolice.Modulos.Seguranca/Infrastructure/Authorization/PermissaoAuthorizationHandler.cs`
-- **AuthorizePermissaoAttribute**: `backend/src/WebApolice.Modulos.Seguranca/Infrastructure/Authorization/AuthorizePermissaoAttribute.cs`
+- **PermissaoAuthorizationHandler**: `backend/src/WebApolice.Modulos.Seguranca/Api/Authorization/PermissaoAuthorizationHandler.cs`
+- **AuthorizePermissaoAttribute**: `backend/src/WebApolice.Modulos.Seguranca/Contracts/Authorization/AuthorizePermissaoAttribute.cs`
 - **PermissaoPolicyProvider**: `backend/src/WebApolice.Modulos.Seguranca/Infrastructure/Authorization/PermissaoPolicyProvider.cs`
 - **Controller de GET /api/seguranca/me**: `backend/src/WebApolice.Modulos.Seguranca/Api/Controllers/MeController.cs`
 - **Caso de uso de /api/seguranca/me**: `backend/src/WebApolice.Modulos.Seguranca/Application/UseCases/Me/ObterUsuarioAutenticadoUseCase.cs`
@@ -144,3 +146,6 @@ Ao iniciar o desenvolvimento de um novo módulo, o usuário colará o prompt aba
 > 2. Liste os arquivos e referências técnicas que serão modificados (Constants, Controllers, Providers, Migrations, Rotas).
 > 3. Solicite aprovação explícita antes de codificar.
 > 4. Uma vez aprovado, implemente a Migration do Catálogo (usando UUIDs fixos), atualize as constantes do Backend, proteja os Endpoints e configure o Frontend."
+
+
+Na consolidação de 23/10/2026, `AuthorizePermissaoAttribute` passou a ser contrato público em `WebApolice.Modulos.Seguranca.Contracts.Authorization`; controllers de outros módulos não devem importar Infrastructure de Segurança para declarar permissões. As políticas e a matriz de negação permanecem as mesmas.

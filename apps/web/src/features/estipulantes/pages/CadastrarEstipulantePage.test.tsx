@@ -1,3 +1,4 @@
+import { HttpApiError } from '../../../services/http/httpError';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
 import { vi, describe, it, expect, beforeEach } from 'vitest';
@@ -21,10 +22,12 @@ describe('CadastrarEstipulantePage', () => {
     render(
       <BrowserRouter>
         <CadastrarEstipulantePage />
-      </BrowserRouter>
+      </BrowserRouter>,
     );
 
-    expect(screen.getByRole('heading', { name: 'Novo Estipulante' })).toBeTruthy();
+    expect(
+      screen.getByRole('heading', { name: 'Novo Estipulante' }),
+    ).toBeTruthy();
     expect(screen.getByLabelText(/Razão Social/i)).toBeTruthy();
     expect(screen.getByLabelText(/CNPJ/i)).toBeTruthy();
     expect(screen.getByLabelText(/Início de Vigência/i)).toBeTruthy();
@@ -34,34 +37,50 @@ describe('CadastrarEstipulantePage', () => {
     render(
       <BrowserRouter>
         <CadastrarEstipulantePage />
-      </BrowserRouter>
+      </BrowserRouter>,
     );
 
-    fireEvent.click(screen.getByRole('button', { name: /Salvar Estipulante/i }));
+    fireEvent.click(
+      screen.getByRole('button', { name: /Salvar Estipulante/i }),
+    );
 
     await waitFor(() => {
-      expect(screen.getByText(/A Razão Social deve ter no mínimo 3 caracteres/i)).toBeTruthy();
+      expect(
+        screen.getByText(/A Razão Social deve ter no mínimo 3 caracteres/i),
+      ).toBeTruthy();
       expect(screen.getByText(/CNPJ inválido/i)).toBeTruthy();
-      expect(screen.getByText(/A data de início da vigência é obrigatória/i)).toBeTruthy();
+      expect(
+        screen.getByText(/A data de início da vigência é obrigatória/i),
+      ).toBeTruthy();
     });
 
     expect(api.cadastrarEstipulante).not.toHaveBeenCalled();
   });
 
   it('deve chamar a API ao submeter formulário válido', async () => {
-    (api.cadastrarEstipulante as ReturnType<typeof vi.fn>).mockResolvedValue({ publicId: '123' });
+    (api.cadastrarEstipulante as ReturnType<typeof vi.fn>).mockResolvedValue({
+      publicId: '123',
+    });
 
     render(
       <BrowserRouter>
         <CadastrarEstipulantePage />
-      </BrowserRouter>
+      </BrowserRouter>,
     );
 
-    fireEvent.change(screen.getByLabelText(/Razão Social/i), { target: { value: 'Empresa Teste' } });
-    fireEvent.input(screen.getByLabelText(/CNPJ/i), { target: { value: '61.198.164/0001-60' } });
-    fireEvent.change(screen.getByLabelText(/Início de Vigência/i), { target: { value: '2026-01-01' } });
+    fireEvent.change(screen.getByLabelText(/Razão Social/i), {
+      target: { value: 'Empresa Teste' },
+    });
+    fireEvent.input(screen.getByLabelText(/CNPJ/i), {
+      target: { value: '61.198.164/0001-60' },
+    });
+    fireEvent.change(screen.getByLabelText(/Início de Vigência/i), {
+      target: { value: '2026-01-01' },
+    });
 
-    fireEvent.click(screen.getByRole('button', { name: /Salvar Estipulante/i }));
+    fireEvent.click(
+      screen.getByRole('button', { name: /Salvar Estipulante/i }),
+    );
 
     await waitFor(() => {
       expect(api.cadastrarEstipulante).toHaveBeenCalledWith({
@@ -73,53 +92,77 @@ describe('CadastrarEstipulantePage', () => {
         configuracao: {
           dataInicioVigencia: '2026-01-01',
           dataFimVigencia: '',
-        }
+        },
       });
     });
   });
 
   it('deve exibir feedback ao receber erro 409 da API (Conflito)', async () => {
-    (api.cadastrarEstipulante as ReturnType<typeof vi.fn>).mockRejectedValue({
-      response: {
+    vi.mocked(api.cadastrarEstipulante).mockRejectedValue(
+      new HttpApiError({
         status: 409,
-        data: { message: 'Já existe um Estipulante com este CNPJ' }
-      }
-    });
+        message: 'Já existe um Estipulante com este CNPJ',
+      }),
+    );
 
     render(
       <BrowserRouter>
         <CadastrarEstipulantePage />
-      </BrowserRouter>
+      </BrowserRouter>,
     );
 
-    fireEvent.change(screen.getByLabelText(/Razão Social/i), { target: { value: 'Empresa Teste' } });
-    fireEvent.input(screen.getByLabelText(/CNPJ/i), { target: { value: '61.198.164/0001-60' } });
-    fireEvent.change(screen.getByLabelText(/Início de Vigência/i), { target: { value: '2026-01-01' } });
+    fireEvent.change(screen.getByLabelText(/Razão Social/i), {
+      target: { value: 'Empresa Teste' },
+    });
+    fireEvent.input(screen.getByLabelText(/CNPJ/i), {
+      target: { value: '61.198.164/0001-60' },
+    });
+    fireEvent.change(screen.getByLabelText(/Início de Vigência/i), {
+      target: { value: '2026-01-01' },
+    });
 
-    fireEvent.click(screen.getByRole('button', { name: /Salvar Estipulante/i }));
+    fireEvent.click(
+      screen.getByRole('button', { name: /Salvar Estipulante/i }),
+    );
 
     await waitFor(() => {
-      expect(screen.getByText('Já existe um Estipulante com este CNPJ')).toBeTruthy();
+      expect(
+        screen.getByText('Já existe um Estipulante com este CNPJ'),
+      ).toBeTruthy();
     });
   });
 
   it('deve exibir mensagem de erro genérica', async () => {
-    (api.cadastrarEstipulante as ReturnType<typeof vi.fn>).mockRejectedValue(new Error('Erro Fatal'));
+    (api.cadastrarEstipulante as ReturnType<typeof vi.fn>).mockRejectedValue(
+      new Error(''),
+    );
 
     render(
       <BrowserRouter>
         <CadastrarEstipulantePage />
-      </BrowserRouter>
+      </BrowserRouter>,
     );
 
-    fireEvent.change(screen.getByLabelText(/Razão Social/i), { target: { value: 'Empresa Teste' } });
-    fireEvent.input(screen.getByLabelText(/CNPJ/i), { target: { value: '61.198.164/0001-60' } });
-    fireEvent.change(screen.getByLabelText(/Início de Vigência/i), { target: { value: '2026-01-01' } });
+    fireEvent.change(screen.getByLabelText(/Razão Social/i), {
+      target: { value: 'Empresa Teste' },
+    });
+    fireEvent.input(screen.getByLabelText(/CNPJ/i), {
+      target: { value: '61.198.164/0001-60' },
+    });
+    fireEvent.change(screen.getByLabelText(/Início de Vigência/i), {
+      target: { value: '2026-01-01' },
+    });
 
-    fireEvent.click(screen.getByRole('button', { name: /Salvar Estipulante/i }));
+    fireEvent.click(
+      screen.getByRole('button', { name: /Salvar Estipulante/i }),
+    );
 
     await waitFor(() => {
-      expect(screen.getByText('Ocorreu um erro ao cadastrar o estipulante. Verifique os dados e tente novamente.')).toBeTruthy();
+      expect(
+        screen.getByText(
+          'Ocorreu um erro ao cadastrar o estipulante. Verifique os dados e tente novamente.',
+        ),
+      ).toBeTruthy();
     });
   });
 });

@@ -7,25 +7,36 @@ import { AuthenticatedLayout } from '../../../layouts/AuthenticatedLayout';
 import { PageLoading } from '../../../components/application/PageLoading';
 
 const ClientesListPage = lazy(() =>
-  import('../pages/ClientesListPage').then((m) => ({ default: m.ClientesListPage }))
+  import('../pages/ClientesListPage').then((m) => ({
+    default: m.ClientesListPage,
+  })),
 );
 
 const ClienteDetalhePage = lazy(() =>
-  import('../pages/ClienteDetalhePage').then((m) => ({ default: m.ClienteDetalhePage }))
+  import('../pages/ClienteDetalhePage').then((m) => ({
+    default: m.ClienteDetalhePage,
+  })),
 );
 
 const CadastrarClientePage = lazy(() =>
-  import('../pages/CadastrarClientePage').then((m) => ({ default: m.CadastrarClientePage }))
+  import('../pages/CadastrarClientePage').then((m) => ({
+    default: m.CadastrarClientePage,
+  })),
 );
 
 const EditarClientePage = lazy(() =>
-  import('../pages/EditarClientePage').then((m) => ({ default: m.EditarClientePage }))
+  import('../pages/EditarClientePage').then((m) => ({
+    default: m.EditarClientePage,
+  })),
 );
 
 export const ClientesRoutes = (
   <Route
     element={
-      <PermissionProtectedRoute moduloCodigo="CLIENTES" permissaoCodigo="clientes.visualizar">
+      <PermissionProtectedRoute
+        moduloCodigo="CLIENTES"
+        permissaoCodigo="clientes.visualizar"
+      >
         <AuthenticatedLayout />
       </PermissionProtectedRoute>
     }
@@ -41,7 +52,10 @@ export const ClientesRoutes = (
     <Route
       path={ROUTES.CLIENTE_NOVO}
       element={
-        <PermissionProtectedRoute moduloCodigo="CLIENTES" permissaoCodigo="clientes.inserir">
+        <PermissionProtectedRoute
+          moduloCodigo="CLIENTES"
+          permissaoCodigo="clientes.inserir"
+        >
           <Suspense fallback={<PageLoading />}>
             <CadastrarClientePage />
           </Suspense>
@@ -51,7 +65,10 @@ export const ClientesRoutes = (
     <Route
       path={ROUTES.CLIENTE_EDITAR}
       element={
-        <PermissionProtectedRoute moduloCodigo="CLIENTES" permissaoCodigo="clientes.alterar">
+        <PermissionProtectedRoute
+          moduloCodigo="CLIENTES"
+          permissaoCodigo="clientes.alterar"
+        >
           <Suspense fallback={<PageLoading />}>
             <EditarClientePage />
           </Suspense>

@@ -3,7 +3,7 @@
  *
  * Página de listagem oficial de Corretoras.
  */
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   PageHeader,
@@ -27,6 +27,7 @@ import {
 import type { Column } from '../../../components/ui/DataTable/DataTable';
 import { ROUTES, createPath } from '../../../app/routes/routePaths';
 import { useAuthorization } from '../../../auth/AuthorizationProvider';
+import { useConsulta } from '../../../shared/hooks/useConsulta';
 import { corretorasApi } from '../api/corretoras.api';
 import type { CorretoraListItem } from '../types/corretora.types';
 
@@ -34,10 +35,8 @@ export const CorretorasListPage: React.FC = () => {
   const navigate = useNavigate();
   const { possuiPermissao } = useAuthorization();
 
-  const [corretoras, setCorretoras] = useState<CorretoraListItem[]>([]);
-  const [total, setTotal] = useState(0);
-  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   const [busca, setBusca] = useState('');
   const [ativo, setAtivo] = useState<string>('');
@@ -56,29 +55,32 @@ export const CorretorasListPage: React.FC = () => {
     loading: false,
   });
 
-  const carregarCorretoras = useCallback(async () => {
-    try {
-      setIsLoading(true);
-      setError(null);
-      const res = await corretorasApi.listar({
-        pagina,
-        tamanhoPagina,
-        busca: busca.trim() || undefined,
-        ativo: ativo === 'true' ? true : ativo === 'false' ? false : undefined,
-      });
-      setCorretoras(res.itens || []);
-      setTotal(res.totalItens || 0);
-    } catch (err: unknown) {
-      console.error('Erro ao listar corretoras:', err);
-      setError('Não foi possível carregar a lista de corretoras.');
-    } finally {
-      setIsLoading(false);
-    }
-  }, [pagina, tamanhoPagina, busca, ativo]);
-
-  useEffect(() => {
-    carregarCorretoras();
-  }, [carregarCorretoras]);
+  const load = useCallback(
+    (signal: AbortSignal) =>
+      corretorasApi.listar(
+        {
+          pagina,
+          tamanhoPagina,
+          busca: busca.trim() || undefined,
+          ativo:
+            ativo === 'true' ? true : ativo === 'false' ? false : undefined,
+        },
+        signal,
+      ),
+    [pagina, tamanhoPagina, busca, ativo],
+  );
+  const {
+    data,
+    isLoading,
+    error: erroConsulta,
+    refetch,
+  } = useConsulta(
+    load,
+    'Não foi possível carregar a lista de corretoras.',
+    refreshTrigger,
+  );
+  const corretoras = data?.itens || [];
+  const total = data?.totalItens || 0;
 
   const handleBuscaChange = (novaBusca: string) => {
     setBusca(novaBusca);
@@ -97,21 +99,33 @@ export const CorretorasListPage: React.FC = () => {
     if (!cnpj) return '-';
     const clean = cnpj.replace(/\D/g, '');
     if (clean.length === 14) {
-      return clean.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, '$1.$2.$3/$4-$5');
+      return clean.replace(
+        /^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/,
+        '$1.$2.$3/$4-$5',
+      );
     }
     return cnpj;
   };
 
-  const abrirConfirmacao = (item: CorretoraListItem, tipo: 'inativar' | 'reativar') => {
+  const abrirConfirmacao = (
+    item: CorretoraListItem,
+    tipo: 'inativar' | 'reativar',
+  ) => {
     setDialogConfig({ aberto: true, tipo, item, loading: false });
   };
 
   const fecharConfirmacao = () => {
-    setDialogConfig((prev) => ({ ...prev, aberto: false, item: null, loading: false }));
+    setDialogConfig((prev) => ({
+      ...prev,
+      aberto: false,
+      item: null,
+      loading: false,
+    }));
   };
 
   const handleExecutarAcaoStatus = async () => {
     if (!dialogConfig.item) return;
+    setError(null);
     try {
       setDialogConfig((prev) => ({ ...prev, loading: true }));
       if (dialogConfig.tipo === 'inativar') {
@@ -120,7 +134,7 @@ export const CorretorasListPage: React.FC = () => {
         await corretorasApi.reativar(dialogConfig.item.publicId);
       }
       fecharConfirmacao();
-      await carregarCorretoras();
+      setRefreshTrigger((previous) => previous + 1);
     } catch (err: unknown) {
       console.error(`Erro ao ${dialogConfig.tipo} corretora:`, err);
       setError(`Ocorreu um erro ao ${dialogConfig.tipo} a corretora.`);
@@ -164,7 +178,10 @@ export const CorretorasListPage: React.FC = () => {
           rowActions.push({
             label: 'Editar',
             icon: <EditIcon size={16} />,
-            onClick: () => navigate(createPath(ROUTES.CORRETORA_EDITAR, { publicId: row.publicId })),
+            onClick: () =>
+              navigate(
+                createPath(ROUTES.CORRETORA_EDITAR, { publicId: row.publicId }),
+              ),
           });
         }
 
@@ -218,12 +235,16 @@ export const CorretorasListPage: React.FC = () => {
         }
       />
 
-      {error && (
-        <Alert variant="error" title="Erro de carregamento" onClose={() => setError(null)}>
+      {erroConsulta && (
+        <Alert variant="error" title="Erro de carregamento">
           <div className="flex flex-col gap-2">
-            <span>{error}</span>
+            <span>Não foi possível carregar a lista de corretoras.</span>
             <div>
-              <Button variant="secondary" size="small" onClick={carregarCorretoras}>
+              <Button
+                variant="secondary"
+                size="small"
+                onClick={() => void refetch()}
+              >
                 Tentar novamente
               </Button>
             </div>
@@ -231,10 +252,23 @@ export const CorretorasListPage: React.FC = () => {
         </Alert>
       )}
 
+      {error && (
+        <Alert
+          variant="error"
+          title="Falha na operação"
+          onClose={() => setError(null)}
+        >
+          {error}
+        </Alert>
+      )}
+
       <div className="flex flex-col gap-4">
         <FilterBar>
           <div className="flex-1 flex flex-col gap-1">
-            <label htmlFor="busca-corretoras" className="text-sm font-medium text-texto-secundario">
+            <label
+              htmlFor="busca-corretoras"
+              className="text-sm font-medium text-texto-secundario"
+            >
               Buscar Corretora
             </label>
             <SearchField
@@ -245,7 +279,10 @@ export const CorretorasListPage: React.FC = () => {
             />
           </div>
           <div className="w-full md:w-48 flex flex-col gap-1">
-            <label htmlFor="status-corretoras" className="text-sm font-medium text-texto-secundario">
+            <label
+              htmlFor="status-corretoras"
+              className="text-sm font-medium text-texto-secundario"
+            >
               Status
             </label>
             <Select
@@ -279,18 +316,20 @@ export const CorretorasListPage: React.FC = () => {
           totalItems={total}
         />
 
-        <DataTable
-          columns={columns}
-          data={corretoras}
-          keyExtractor={(row) => row.publicId}
-          isLoading={isLoading}
-          emptyTitle="Nenhuma corretora encontrada"
-          emptyDescription={
-            hasFilters
-              ? 'Tente ajustar os filtros ou termos da pesquisa.'
-              : 'Clique em "Nova Corretora" para começar a cadastrar.'
-          }
-        />
+        {(!erroConsulta || data) && (
+          <DataTable
+            columns={columns}
+            data={corretoras}
+            keyExtractor={(row) => row.publicId}
+            isLoading={isLoading}
+            emptyTitle="Nenhuma corretora encontrada"
+            emptyDescription={
+              hasFilters
+                ? 'Tente ajustar os filtros ou termos da pesquisa.'
+                : 'Clique em "Nova Corretora" para começar a cadastrar.'
+            }
+          />
+        )}
 
         {total > 0 && (
           <Pagination
@@ -306,7 +345,11 @@ export const CorretorasListPage: React.FC = () => {
         onClose={fecharConfirmacao}
         onConfirm={handleExecutarAcaoStatus}
         loading={dialogConfig.loading}
-        title={dialogConfig.tipo === 'inativar' ? 'Inativar Corretora' : 'Reativar Corretora'}
+        title={
+          dialogConfig.tipo === 'inativar'
+            ? 'Inativar Corretora'
+            : 'Reativar Corretora'
+        }
         description={
           dialogConfig.tipo === 'inativar' ? (
             <p>
@@ -315,11 +358,14 @@ export const CorretorasListPage: React.FC = () => {
             </p>
           ) : (
             <p>
-              Deseja reativar a corretora <strong>{dialogConfig.item?.nome}</strong>?
+              Deseja reativar a corretora{' '}
+              <strong>{dialogConfig.item?.nome}</strong>?
             </p>
           )
         }
-        confirmText={dialogConfig.tipo === 'inativar' ? 'Sim, inativar' : 'Sim, reativar'}
+        confirmText={
+          dialogConfig.tipo === 'inativar' ? 'Sim, inativar' : 'Sim, reativar'
+        }
         variant={dialogConfig.tipo === 'inativar' ? 'danger' : 'primary'}
       />
     </div>

@@ -1,16 +1,26 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { UsuarioForm, type EditarUsuarioFormData } from '../components/UsuarioForm';
+import {
+  UsuarioForm,
+  type EditarUsuarioFormData,
+} from '../components/UsuarioForm';
 import { obterUsuarioDetalhe, atualizarUsuario } from '../api/usuariosApi';
 import { listarPerfis } from '../api/perfisApi';
-import { Alert, PageHeader, Breadcrumbs, Spinner, Button } from '../../../components/ui';
+import {
+  Alert,
+  PageHeader,
+  Breadcrumbs,
+  Spinner,
+  Button,
+} from '../../../components/ui';
 import type { PerfilDto } from '../types/seguranca.types';
 
 export const EditarUsuarioPage: React.FC = () => {
   const { publicId } = useParams<{ publicId: string }>();
   const navigate = useNavigate();
 
-  const [initialData, setInitialData] = useState<Partial<EditarUsuarioFormData> | null>(null);
+  const [initialData, setInitialData] =
+    useState<Partial<EditarUsuarioFormData> | null>(null);
   const [perfis, setPerfis] = useState<PerfilDto[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -23,16 +33,16 @@ export const EditarUsuarioPage: React.FC = () => {
       try {
         const [p, usuario] = await Promise.all([
           listarPerfis({ pageSize: 1000 }),
-          obterUsuarioDetalhe(publicId)
+          obterUsuarioDetalhe(publicId),
         ]);
-        
+
         setPerfis(p.itens || []);
         setInitialData({
           username: usuario.username,
           nome: usuario.nome,
           email: usuario.email,
           ativo: usuario.ativo,
-          perfilPublicIds: usuario.perfisAtribuidos.map(p => p.publicId),
+          perfilPublicIds: usuario.perfisAtribuidos.map((p) => p.publicId),
         });
       } catch (err: unknown) {
         console.error('Erro ao carregar usuário:', err);
@@ -58,8 +68,11 @@ export const EditarUsuarioPage: React.FC = () => {
       navigate(`/seguranca/usuarios/${publicId}`);
     } catch (err: unknown) {
       console.error('Erro ao editar usuário:', err);
-      const errorResponse = err as { response?: { status?: number; data?: { message?: string } } };
-      setError(errorResponse.response?.data?.message || 'Ocorreu um erro ao salvar o usuário.');
+      setError(
+        err instanceof Error && err.message
+          ? err.message
+          : 'Ocorreu um erro ao salvar o usuário.',
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -75,9 +88,18 @@ export const EditarUsuarioPage: React.FC = () => {
 
   if (error && !initialData) {
     return (
-      <main className="flex flex-col gap-6 p-6 max-w-4xl mx-auto focus:outline-none" role="main" tabIndex={-1}>
-        <Alert variant="error" title="Erro">{error}</Alert>
-        <Button className="mt-4" onClick={() => navigate('/seguranca/usuarios')}>
+      <main
+        className="flex flex-col gap-6 p-6 max-w-4xl mx-auto focus:outline-none"
+        role="main"
+        tabIndex={-1}
+      >
+        <Alert variant="error" title="Erro">
+          {error}
+        </Alert>
+        <Button
+          className="mt-4"
+          onClick={() => navigate('/seguranca/usuarios')}
+        >
           Voltar
         </Button>
       </main>
@@ -85,7 +107,11 @@ export const EditarUsuarioPage: React.FC = () => {
   }
 
   return (
-    <main className="flex flex-col gap-6 p-6 max-w-4xl mx-auto focus:outline-none" role="main" tabIndex={-1}>
+    <main
+      className="flex flex-col gap-6 p-6 max-w-4xl mx-auto focus:outline-none"
+      role="main"
+      tabIndex={-1}
+    >
       <PageHeader
         title="Editar Usuário"
         description="Atualize as informações e os acessos deste usuário."
@@ -104,10 +130,12 @@ export const EditarUsuarioPage: React.FC = () => {
       <div className="w-full">
         {error && (
           <div className="mb-4">
-            <Alert variant="error" title="Erro ao Salvar">{error}</Alert>
+            <Alert variant="error" title="Erro ao Salvar">
+              {error}
+            </Alert>
           </div>
         )}
-        
+
         {initialData && (
           <UsuarioForm
             initialData={initialData}

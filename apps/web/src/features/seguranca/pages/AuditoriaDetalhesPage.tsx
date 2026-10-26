@@ -52,7 +52,12 @@ export const AuditoriaDetalhesPage: React.FC = () => {
   const navigate = useNavigate();
   const mainRef = useRef<HTMLElement>(null);
 
-  const { data: auditoria, isLoading, error, retry } = useAuditoriaDetalhe(publicId ?? '');
+  const {
+    data: auditoria,
+    isLoading,
+    error,
+    retry,
+  } = useAuditoriaDetalhe(publicId ?? '');
 
   useEffect(() => {
     if (!isLoading && mainRef.current) mainRef.current.focus();
@@ -80,7 +85,10 @@ export const AuditoriaDetalhesPage: React.FC = () => {
           />
         }
         actions={
-          <Button variant="secondary" onClick={() => navigate(ROUTES.SEGURANCA_AUDITORIA)}>
+          <Button
+            variant="secondary"
+            onClick={() => navigate(ROUTES.SEGURANCA_AUDITORIA)}
+          >
             Voltar
           </Button>
         }
@@ -96,7 +104,11 @@ export const AuditoriaDetalhesPage: React.FC = () => {
           </Button>
         </div>
       ) : isLoading ? (
-        <div aria-busy="true" aria-live="polite" className="seguranca-skeletons">
+        <div
+          aria-busy="true"
+          aria-live="polite"
+          className="seguranca-skeletons"
+        >
           <Skeleton className="seguranca-skeleton-row h-40" />
           <Skeleton className="seguranca-skeleton-row h-40" />
         </div>
@@ -105,15 +117,29 @@ export const AuditoriaDetalhesPage: React.FC = () => {
           <DetailsSection title="Informações do Evento">
             <DescriptionList>
               <DescriptionItem label="Ação" value={auditoria.acao} />
-              <DescriptionItem label="Entidade" value={auditoria.entidadeTipo} />
+              <DescriptionItem
+                label="Entidade"
+                value={auditoria.entidadeTipo}
+              />
               <DescriptionItem
                 label="ID da Entidade"
-                value={<code className="catalogo-permissao-codigo">{auditoria.entidadeId}</code>}
+                value={
+                  <code className="catalogo-permissao-codigo">
+                    {auditoria.entidadeId}
+                  </code>
+                }
               />
-              <DescriptionItem label="Data" value={formatDate(auditoria.createdAt)} />
+              <DescriptionItem
+                label="Data"
+                value={formatDate(auditoria.createdAt)}
+              />
               <DescriptionItem
                 label="ID do Registro"
-                value={<code className="catalogo-permissao-codigo">{auditoria.publicId}</code>}
+                value={
+                  <code className="catalogo-permissao-codigo">
+                    {auditoria.publicId}
+                  </code>
+                }
               />
             </DescriptionList>
           </DetailsSection>

@@ -1,6 +1,9 @@
 import { useState, useEffect, useCallback } from 'react';
 import { obterEstipulante, obterConfiguracao } from '../api/estipulantes.api';
-import type { EstipulanteDetalheResponse, EstipulanteConfiguracaoResponse } from '../types/estipulante.types';
+import type {
+  EstipulanteDetalheResponse,
+  EstipulanteConfiguracaoResponse,
+} from '../types/estipulante.types';
 import { HttpApiError } from '../../../services/http/httpError';
 
 export interface EstipulanteDetalheCompleto {
@@ -15,7 +18,9 @@ interface UseEstipulanteDetalheResult {
   retry: () => void;
 }
 
-export function useEstipulanteDetalhe(publicId: string | undefined): UseEstipulanteDetalheResult {
+export function useEstipulanteDetalhe(
+  publicId: string | undefined,
+): UseEstipulanteDetalheResult {
   const [data, setData] = useState<EstipulanteDetalheCompleto | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(!!publicId);
   const [error, setError] = useState<Error | HttpApiError | null>(null);
@@ -33,23 +38,37 @@ export function useEstipulanteDetalhe(publicId: string | undefined): UseEstipula
     const fetchData = async () => {
       setIsLoading(true);
       setError(null);
-      
+
       try {
         const [estipulanteResult, configResult] = await Promise.all([
           obterEstipulante(publicId),
-          obterConfiguracao(publicId).catch(err => {
-            if (err.status === 404) return null;
+          obterConfiguracao(publicId).catch((err: unknown) => {
+            if (err instanceof HttpApiError && err.isNotFound()) return null;
             throw err;
-          })
+          }),
         ]);
-        
+
         if (isMounted) {
-          setData({ estipulante: estipulanteResult, configuracao: configResult });
+          setData({
+            estipulante: estipulanteResult,
+            configuracao: configResult,
+          });
           setIsLoading(false);
         }
-      } catch (err: any) {
-        if (isMounted && err.name !== 'AbortError') {
-          setError(err);
+      } catch (err: unknown) {
+        if (isMounted) {
+          if (!(
+            (err instanceof Error || err instanceof DOMException) &&
+            err.name === 'AbortError'
+          )) {
+            setError(
+              err instanceof Error
+                ? err
+                : new Error(
+                    'Não foi possível carregar os dados do estipulante.',
+                  ),
+            );
+          }
           setIsLoading(false);
         }
       }

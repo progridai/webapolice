@@ -3,9 +3,13 @@ import {
   criarApolice,
   alterarApolice,
   listarApolices,
+  obterApolice,
   listarApoliceVidas,
 } from '../../src/features/apolices/api/apolices.api';
+import { listarCooperados } from '../../src/features/cooperados/api/cooperadosApi';
 import { listarEstipulantes } from '../../src/features/estipulantes/api/estipulantes.api';
+import { modulosApi } from '../../src/features/modulos/api/modulos.api';
+import { ramosApi } from '../../src/features/ramos/api/ramos.api';
 import { corretorasApi } from '../../src/features/corretoras/api/corretoras.api';
 import {
   atualizarUsuario,
@@ -42,6 +46,43 @@ function request() {
 }
 
 describe('Contratos HTTP de Usuários e Apólices', () => {
+  it.each(['cooperados', 'modulos', 'ramos', 'corretoras'] as const)(
+    'propaga cancelamento de %s enquanto a rede está pendente',
+    async (feature) => {
+      const controller = new AbortController();
+      mockFetch.mockImplementationOnce(
+        (_url, options) =>
+          new Promise<Response>((_resolve, reject) => {
+            options?.signal?.addEventListener(
+              'abort',
+              () => reject(options.signal?.reason),
+              { once: true },
+            );
+          }),
+      );
+      const load = {
+        cooperados: () =>
+          listarCooperados({ page: 1, limit: 20 }, controller.signal),
+        modulos: () =>
+          modulosApi.listar(
+            { pagina: 1, tamanhoPagina: 20 },
+            controller.signal,
+          ),
+        ramos: () =>
+          ramosApi.listar({ pagina: 1, tamanhoPagina: 20 }, controller.signal),
+        corretoras: () => corretorasApi.listar({}, controller.signal),
+      };
+      const pending = load[feature]();
+      const sent = request();
+      const assertion = expect(pending).rejects.toMatchObject({
+        name: 'AbortError',
+      });
+      controller.abort();
+      expect(sent.options?.signal?.aborted).toBe(true);
+      await assertion;
+    },
+  );
+
   it.each(['criar', 'alterar'] as const)(
     'envia apenas o contrato básico ao %s Apólice',
     async (operation) => {
@@ -93,6 +134,41 @@ describe('Contratos HTTP de Usuários e Apólices', () => {
       dataAniversario: '2026-06-01',
     });
   });
+
+  it.each([false, true])(
+    'consulta Detalhe e encaminha cancelamento opcional: %s',
+    async (withSignal) => {
+      let finish!: (response: Response) => void;
+      mockFetch.mockReturnValueOnce(
+        new Promise<Response>((resolve) => {
+          finish = resolve;
+        }),
+      );
+      const controller = new AbortController();
+      const pending = obterApolice(
+        'apolice-1',
+        withSignal ? controller.signal : undefined,
+      );
+      const sent = request();
+      expect(sent.url.pathname).toBe('/api/apolices/apolice-1');
+      expect(sent.url.search).toBe('');
+      expect(sent.options?.method).toBe('GET');
+      expect(sent.body).toBeUndefined();
+      expect(sent.options?.signal?.aborted).toBe(false);
+      controller.abort();
+      expect(sent.options?.signal?.aborted).toBe(withSignal);
+      finish(
+        new Response(JSON.stringify({ publicId: 'apolice-1' }), {
+          status: 200,
+        }),
+      );
+      if (withSignal) {
+        await expect(pending).rejects.toMatchObject({ name: 'AbortError' });
+      } else {
+        expect(await pending).toEqual({ publicId: 'apolice-1' });
+      }
+    },
+  );
 
   it('serializa os filtros de Vidas com os nomes aceitos pelo backend', async () => {
     const signal = new AbortController().signal;
@@ -166,6 +242,106 @@ describe('Contratos HTTP de Usuários e Apólices', () => {
       busca: 'EMPRESA',
       ativo: 'false',
     });
+  });
+
+  it.each([false, true])(
+    'preserva filtros e cancelamento da listagem de Cooperados: %s',
+    async (withSignal) => {
+      const controller = new AbortController();
+      await listarCooperados(
+        {
+          page: 2,
+          limit: 50,
+          nome: '  JOÃO da SILVA  ',
+          cpf: '123.456.789-09',
+          status: '2',
+          sortBy: 'nome',
+          direction: 'desc',
+        },
+        withSignal ? controller.signal : undefined,
+      );
+      const sent = request();
+      expect(sent.url.pathname).toBe('/api/cooperados');
+      expect(sent.options?.method).toBe('GET');
+      expect(Object.fromEntries(sent.url.searchParams)).toEqual({
+        pagina: '2',
+        tamanho_pagina: '50',
+        nome: '  JOÃO da SILVA  ',
+        cpf: '123.456.789-09',
+        status: '2',
+        ordenar_por: 'nome',
+        direcao: 'desc',
+      });
+      expect(sent.options?.signal?.aborted).toBe(false);
+      controller.abort();
+      expect(sent.options?.signal?.aborted).toBe(false);
+    },
+  );
+
+  it('omite filtros opcionais ausentes na listagem de Cooperados', async () => {
+    await listarCooperados({ page: 1, limit: 20 });
+    expect(Object.fromEntries(request().url.searchParams)).toEqual({
+      pagina: '1',
+      tamanho_pagina: '20',
+    });
+  });
+
+  it.each([false, true])(
+    'preserva filtros e cancelamento opcional na listagem de Módulos: %s',
+    async (withSignal) => {
+      const controller = new AbortController();
+      await modulosApi.listar(
+        { pagina: 2, tamanhoPagina: 10, busca: '  JOÃO  ', ativo: false },
+        withSignal ? controller.signal : undefined,
+      );
+      const sent = request();
+      expect(sent.url.pathname).toBe('/api/modulos');
+      expect(Object.fromEntries(sent.url.searchParams)).toEqual({
+        pagina: '2',
+        tamanhoPagina: '10',
+        busca: '  JOÃO  ',
+        ativo: 'false',
+      });
+      expect(sent.options?.signal?.aborted).toBe(false);
+      controller.abort();
+      expect(sent.options?.signal?.aborted).toBe(false);
+    },
+  );
+
+  it.each([false, true])(
+    'preserva filtros e cancelamento opcional na listagem de Ramos: %s',
+    async (withSignal) => {
+      const controller = new AbortController();
+      const query = { pagina: 1, tamanhoPagina: 100, ativo: true };
+      await ramosApi.listar(query, withSignal ? controller.signal : undefined);
+      const sent = request();
+      expect(sent.url.pathname).toBe('/api/ramos');
+      expect(Object.fromEntries(sent.url.searchParams)).toEqual({
+        pagina: '1',
+        tamanhoPagina: '100',
+        ativo: 'true',
+      });
+      expect(sent.options?.signal?.aborted).toBe(false);
+      controller.abort();
+      expect(sent.options?.signal?.aborted).toBe(false);
+    },
+  );
+
+  it('encaminha cancelamento opcional na listagem de Corretoras', async () => {
+    const controller = new AbortController();
+    await corretorasApi.listar(
+      { busca: 'EMPRESA', ativo: false },
+      controller.signal,
+    );
+    const sent = request();
+    expect(sent.url.pathname).toBe('/api/corretoras');
+    expect(Object.fromEntries(sent.url.searchParams)).toEqual({
+      busca: 'EMPRESA',
+      ativo: 'false',
+    });
+    expect(sent.options?.signal?.aborted).toBe(false);
+    controller.abort();
+    expect(sent.options?.signal?.aborted).toBe(false);
   });
 
   it('aceita consulta de Corretoras sem parâmetros', async () => {

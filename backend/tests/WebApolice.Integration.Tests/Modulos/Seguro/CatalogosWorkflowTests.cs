@@ -1,3 +1,4 @@
+using WebApolice.Modulos.Seguranca.Api.Authorization;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -457,7 +458,7 @@ public sealed class CatalogosWorkflowTests : IAsyncLifetime
             var permissions = new Mock<IPermissoesEfetivasService>();
             permissions.Setup(e => e.CalcularPermissoesAsync("test", It.IsAny<CancellationToken>())).ReturnsAsync(new PermissoesEfetivasUsuario(true, true, total, false, ["CADASTRO"], ["CONVENIOS_COBRANCA"], permit ? ["convenios_cobranca.visualizar"] : []));
             var request = new DefaultHttpContext(); request.Response.Body = new MemoryStream();
-            var handler = new PermissaoAuthorizationHandler(user.Object, permissions.Object, new HttpContextAccessor { HttpContext = request }, _seguranca);
+            var handler = new PermissaoAuthorizationHandler(user.Object, permissions.Object, new HttpContextAccessor { HttpContext = request }, new DisponibilidadeCatalogo(_seguranca));
             var context = new AuthorizationHandlerContext([new PermissaoRequirement("convenios_cobranca.visualizar")], new ClaimsPrincipal(new ClaimsIdentity([new Claim("sub", "test")], "test")), null);
             await handler.HandleAsync(context); Assert.Equal(expected, context.HasSucceeded);
         }

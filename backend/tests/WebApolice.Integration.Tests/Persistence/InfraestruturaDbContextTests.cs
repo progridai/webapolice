@@ -9,8 +9,7 @@ namespace WebApolice.Integration.Tests.Persistence;
 public sealed class InfraestruturaDbContextTests : IAsyncLifetime
 {
 #pragma warning disable CS0618 // O construtor obsoleto do PostgreSqlBuilder
-    private readonly PostgreSqlContainer _postgreSqlContainer = new PostgreSqlBuilder()
-        .WithImage("postgres:18.4")
+    private readonly PostgreSqlContainer _postgreSqlContainer = new PostgreSqlBuilder("postgres:18.4")
         .Build();
 #pragma warning restore CS0618
 

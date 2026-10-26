@@ -1,7 +1,8 @@
 import React from 'react';
 import './Badge.css';
 
-export type BadgeVariant = 'neutral' | 'success' | 'warning' | 'error' | 'info' | 'brand';
+export type BadgeVariant =
+  'neutral' | 'success' | 'warning' | 'error' | 'info' | 'brand';
 
 export interface BadgeProps extends React.HTMLAttributes<HTMLSpanElement> {
   variant?: BadgeVariant;

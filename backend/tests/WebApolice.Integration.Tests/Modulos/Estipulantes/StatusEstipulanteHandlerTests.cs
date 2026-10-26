@@ -1,4 +1,5 @@
-﻿using System;
+using WebApolice.Integration.Tests.Setup;
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 using FluentAssertions;
@@ -29,8 +30,8 @@ public class StatusEstipulanteHandlerTests
 
         _repositoryMock.Setup(r => r.BeginTransactionAsync(It.IsAny<CancellationToken>())).ReturnsAsync(_transactionMock.Object);
 
-        _inativarHandler = new InativarEstipulanteHandler(_repositoryMock.Object, _auditoriaMock.Object);
-        _reativarHandler = new ReativarEstipulanteHandler(_repositoryMock.Object, _auditoriaMock.Object);
+        _inativarHandler = new InativarEstipulanteHandler(_repositoryMock.Object, new OperacaoCadastroSimulada(_auditoriaMock.Object, _transactionMock.Object));
+        _reativarHandler = new ReativarEstipulanteHandler(_repositoryMock.Object, new OperacaoCadastroSimulada(_auditoriaMock.Object, _transactionMock.Object));
     }
 
     [Fact]

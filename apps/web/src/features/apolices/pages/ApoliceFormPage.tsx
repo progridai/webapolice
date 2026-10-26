@@ -1,8 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { PageHeader, Alert, Button } from '../../../components/ui';
-import { ApoliceForm, type ApoliceFormInitialData } from '../components/forms/ApoliceForm';
-import { obterApolice, criarApolice, alterarApolice } from '../api/apolices.api';
+import {
+  ApoliceForm,
+  type ApoliceFormInitialData,
+} from '../components/forms/ApoliceForm';
+import {
+  obterApolice,
+  criarApolice,
+  alterarApolice,
+} from '../api/apolices.api';
 import type { ApoliceFormValues } from '../schemas/apoliceForm.schema';
 import { PageLoading } from '../../../components/application/PageLoading';
 
@@ -11,7 +18,9 @@ export const ApoliceFormPage: React.FC = () => {
   const isEdicao = Boolean(publicId);
   const navigate = useNavigate();
 
-  const [initialData, setInitialData] = useState<ApoliceFormInitialData | undefined>(undefined);
+  const [initialData, setInitialData] = useState<
+    ApoliceFormInitialData | undefined
+  >(undefined);
   const [isLoadingData, setIsLoadingData] = useState(isEdicao);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -59,7 +68,11 @@ export const ApoliceFormPage: React.FC = () => {
         navigate(`/apolices/${result.publicId}`);
       }
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Ocorreu um erro ao salvar a apólice. Verifique os dados.');
+      setError(
+        err instanceof Error
+          ? err.message
+          : 'Ocorreu um erro ao salvar a apólice. Verifique os dados.',
+      );
     } finally {
       setIsSaving(false);
     }
@@ -70,16 +83,29 @@ export const ApoliceFormPage: React.FC = () => {
   }
 
   return (
-    <main className="flex flex-col gap-6 w-full max-w-[1440px] mx-auto p-0 focus:outline-none" tabIndex={-1}>
+    <main
+      className="flex flex-col gap-6 w-full max-w-[1440px] mx-auto p-0 focus:outline-none"
+      tabIndex={-1}
+    >
       <PageHeader
         title={isEdicao ? 'Editar Apólice' : 'Nova Apólice'}
-        description={isEdicao ? 'Altere os dados básicos da apólice' : 'Crie uma nova apólice vinculada a um estipulante'}
-        actions={<Button variant="secondary" onClick={() => navigate(-1)}>Voltar</Button>}
+        description={
+          isEdicao
+            ? 'Altere os dados básicos da apólice'
+            : 'Crie uma nova apólice vinculada a um estipulante'
+        }
+        actions={
+          <Button variant="secondary" onClick={() => navigate(-1)}>
+            Voltar
+          </Button>
+        }
       />
       <div className="max-w-4xl">
         {error && (
           <div className="mb-4">
-            <Alert variant="error" title="Erro">{error}</Alert>
+            <Alert variant="error" title="Erro">
+              {error}
+            </Alert>
           </div>
         )}
         <ApoliceForm

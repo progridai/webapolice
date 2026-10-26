@@ -17,12 +17,14 @@ let errorCount = 0;
 
 function scanDirectory(dirPath) {
   if (!fs.existsSync(dirPath)) return;
-  
+
   const entries = fs.readdirSync(dirPath, { withFileTypes: true });
 
   for (const entry of entries) {
     const fullPath = path.join(dirPath, entry.name);
-    const relativePath = path.relative(path.join(__dirname, '..'), fullPath).replace(/\\/g, '/');
+    const relativePath = path
+      .relative(path.join(__dirname, '..'), fullPath)
+      .replace(/\\/g, '/');
 
     if (entry.isDirectory()) {
       scanDirectory(fullPath);
@@ -44,7 +46,11 @@ function checkFile(filePath, relativePath, ext) {
 
   lines.forEach((line, index) => {
     // Ignora comentários de lint ou justificativas explícitas
-    if (line.includes('exceção justificada') || line.includes('justificado') || line.includes('eslint-disable')) {
+    if (
+      line.includes('exceção justificada') ||
+      line.includes('justificado') ||
+      line.includes('eslint-disable')
+    ) {
       return;
     }
 
@@ -58,27 +64,35 @@ function checkFile(filePath, relativePath, ext) {
     if (match) {
       const colorValue = match[1];
       console.error(
-        `\x1b[31m[ERRO DO DESIGN SYSTEM]\x1b[0m Cor fixa detectada no arquivo: \x1b[33m${relativePath}:${index + 1}\x1b[0m`
+        `\x1b[31m[ERRO DO DESIGN SYSTEM]\x1b[0m Cor fixa detectada no arquivo: \x1b[33m${relativePath}:${index + 1}\x1b[0m`,
       );
       console.error(`  > Linha: ${line.trim()}`);
       console.error(`  > Valor proibido: ${colorValue}`);
-      console.error(`  > Solução: Substitua pelo correspondente var(--cor-*) ou var(--palette-*).\n`);
+      console.error(
+        `  > Solução: Substitua pelo correspondente var(--cor-*) ou var(--palette-*).\n`,
+      );
       errorCount++;
     }
   });
 }
 
-console.log('Iniciando verificação de cores hexadecimais/rgb fixadas nos componentes...');
+console.log(
+  'Iniciando verificação de cores hexadecimais/rgb fixadas nos componentes...',
+);
 const rootPath = path.join(__dirname, '..');
 
-TARGET_DIRECTORIES.forEach(dir => {
+TARGET_DIRECTORIES.forEach((dir) => {
   scanDirectory(path.join(rootPath, dir));
 });
 
 if (errorCount > 0) {
-  console.error(`\x1b[31mFalha: Encontradas ${errorCount} ocorrências de cores fixadas indevidamente.\x1b[0m`);
+  console.error(
+    `\x1b[31mFalha: Encontradas ${errorCount} ocorrências de cores fixadas indevidamente.\x1b[0m`,
+  );
   process.exit(1);
 } else {
-  console.log('\x1b[32mSucesso: Nenhuma cor fixa em componentes/páginas encontrada. Conformidade de tokens de 100%!\x1b[0m');
+  console.log(
+    '\x1b[32mSucesso: Nenhuma cor fixa em componentes/páginas encontrada. Conformidade de tokens de 100%!\x1b[0m',
+  );
   process.exit(0);
 }

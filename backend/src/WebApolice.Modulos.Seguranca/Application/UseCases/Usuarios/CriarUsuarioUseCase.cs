@@ -70,7 +70,7 @@ public class CriarUsuarioUseCase
         {
             await _keycloakClient.DefinirSenhaTemporariaAsync(keycloakSub, senhaTemporaria, cancellationToken);
         }
-        catch (Exception exSenha)
+        catch (Exception)
         {
             try
             {
@@ -119,7 +119,7 @@ public class CriarUsuarioUseCase
 
             return novoUsuario.PublicId;
         }
-        catch (Exception exLocal)
+        catch (Exception)
         {
             await transaction.RollbackAsync(cancellationToken);
             try

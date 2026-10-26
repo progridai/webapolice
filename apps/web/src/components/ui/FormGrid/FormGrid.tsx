@@ -6,10 +6,9 @@ export interface FormGridProps {
   className?: string;
 }
 
-export const FormGrid: React.FC<FormGridProps> = ({ children, className = '' }) => {
-  return (
-    <div className={`form-grid ${className}`}>
-      {children}
-    </div>
-  );
+export const FormGrid: React.FC<FormGridProps> = ({
+  children,
+  className = '',
+}) => {
+  return <div className={`form-grid ${className}`}>{children}</div>;
 };

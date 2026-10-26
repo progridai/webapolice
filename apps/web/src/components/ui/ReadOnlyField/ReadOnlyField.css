@@ -21,7 +21,9 @@
 
 .readonly-field-input:focus-visible {
   border-color: var(--cor-marca-principal);
-  box-shadow: 0 0 0 2px var(--cor-fundo-superficie), 0 0 0 4px var(--cor-marca-principal);
+  box-shadow:
+    0 0 0 2px var(--cor-fundo-superficie),
+    0 0 0 4px var(--cor-marca-principal);
 }
 
 .readonly-field-icon {

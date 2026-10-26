@@ -1,13 +1,15 @@
 # Guia Oficial para Utilização do Design System e Criação de Telas
 
 **Status:** Em vigor  
-**Versão:** 2.0  
-**Data:** 14 de Agosto de 2026  
+**Versão:** 2.1\
+**Data:** 23 de Outubro de 2026\
 **Finalidade:** Padronizar a criação e adaptação de telas (Listagem, Detalhes e Formulários) no WebApólice, focando em sistemas administrativos de alta densidade (ERPs).
 
 Este guia contém as decisões arquiteturais e regras de ouro sobre como utilizar nosso Design System de forma escalável. Sempre consulte estas diretrizes antes de iniciar ou refatorar uma tela.
 
 ---
+
+A criação e adaptação de telas também deve cumprir o [guia obrigatório de padrões do frontend](guia-padroes-frontend.md): reutilização dos componentes e serviços, temas e acessibilidade, Title Case, formatação e aprovação de todos os checks locais.
 
 ## 1. Princípios Básicos de Layout (Tailwind como Motor Oficial)
 

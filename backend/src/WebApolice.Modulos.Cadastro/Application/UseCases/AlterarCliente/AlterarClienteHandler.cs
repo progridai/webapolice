@@ -1,47 +1,35 @@
+using WebApolice.Modulos.Cadastro.Domain.Validators;
+using WebApolice.Modulos.Seguranca.Contracts;
+using WebApolice.Modulos.Cadastro.Domain.Clientes;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
 using WebApolice.Modulos.Cadastro.Application.Ports;
 using WebApolice.Modulos.Cadastro.Domain.Exceptions;
-using WebApolice.Modulos.Cadastro.Infrastructure.Persistence;
-using WebApolice.Modulos.Cadastro.Infrastructure.Persistence.Models;
 
-using WebApolice.Auditoria.Contracts;
-using WebApolice.Auditoria.Domain;
-using System.Text.Json;
-using Microsoft.EntityFrameworkCore;
-using System.Linq;
 
 namespace WebApolice.Modulos.Cadastro.Application.UseCases.AlterarCliente;
 
 public sealed class AlterarClienteHandler
 {
     private readonly IClienteRepository _repository;
-    private readonly CadastroDbContext _dbContext;
-    private readonly IRegistradorAuditoria _auditoria;
-    private readonly WebApolice.Modulos.Seguranca.Infrastructure.Persistence.SegurancaDbContext _segurancaDbContext;
+    private readonly IOperacaoCadastroAuditada _operacao;
+    private readonly IDisponibilidadeCatalogo _catalogo;
 
-    public AlterarClienteHandler(IClienteRepository repository, CadastroDbContext dbContext, IRegistradorAuditoria auditoria, WebApolice.Modulos.Seguranca.Infrastructure.Persistence.SegurancaDbContext segurancaDbContext)
+    public AlterarClienteHandler(IClienteRepository repository, IOperacaoCadastroAuditada operacao, IDisponibilidadeCatalogo catalogo)
     {
         _repository = repository;
-        _dbContext = dbContext;
-        _auditoria = auditoria;
-        _segurancaDbContext = segurancaDbContext;
+        _operacao = operacao;
+        _catalogo = catalogo;
     }
 
     public async Task Handle(AlterarClienteCommand command, string usuarioSub, CancellationToken cancellationToken)
     {
         if (!string.IsNullOrWhiteSpace(command.Re))
         {
-            var recursoRe = await _segurancaDbContext.Recursos
-                .Include(r => r.Modulo)
-                .Where(r => r.Codigo == "RE" && r.Modulo.Codigo == "CLIENTES")
-                .FirstOrDefaultAsync(cancellationToken);
-
-            if (recursoRe == null || !recursoRe.Habilitado || !recursoRe.Ativo || !recursoRe.Modulo.Habilitado || !recursoRe.Modulo.Ativo)
+            if (!await _catalogo.RecursoDisponivelAsync("CLIENTES", "RE", cancellationToken))
             {
                 throw new ClienteInvalidoException("O campo RE não está habilitado no sistema.");
             }
@@ -56,9 +44,7 @@ public sealed class AlterarClienteHandler
         if (command.Falecido && !command.DataObito.HasValue)
             throw new ClienteInvalidoException("Data de óbito é obrigatória para clientes falecidos.");
 
-        await using var transaction = await _dbContext.BeginTransactionAsync(cancellationToken);
-
-        try
+        await _operacao.ExecutarAsync<bool>("Clientes", "cliente", "CLIENTE_ALTERADO", async ct =>
         {
             var cliente = await _repository.ObterParaEdicaoPorPublicIdAsync(command.Id, cancellationToken);
             if (cliente == null)
@@ -79,17 +65,20 @@ public sealed class AlterarClienteHandler
             {
                 var documentoLimpo = LimparDocumento(command.Documento);
                 var documentoValido = ValidarDocumento(documentoLimpo, pessoa.TipoPessoa);
-                if (!documentoValido)
+                if (!documentoValido && documentoLimpo != pessoa.DocumentoPrincipalLimpo)
                     throw new ClienteInvalidoException("Documento inválido.");
-                pessoa.AtualizarDocumento(command.Documento, documentoLimpo);
+                // Documento legado inválido e inalterado permanece como evidência original.
+                if (documentoValido)
+                {
+                    pessoa.AtualizarDocumento(command.Documento, documentoLimpo);
+                    pessoa.DocumentoValido = true;
+                }
             }
 
             cliente.AtualizarDados(command.Falecido, command.DataObito, command.Observacao, command.Re);
 
             // Contatos
-            var contatosAtuais = await _dbContext.Contatos
-                .Where(x => x.PessoaId == pessoa.Id && x.Ativo)
-                .ToListAsync(cancellationToken);
+            var contatosAtuais = await _repository.ObterContatosAtivosAsync(pessoa.Id, cancellationToken);
 
             var contatosManter = new HashSet<long>();
 
@@ -134,9 +123,7 @@ public sealed class AlterarClienteHandler
             }
 
             // Endereços
-            var enderecosAtuais = await _dbContext.Enderecos
-                .Where(x => x.PessoaId == pessoa.Id && x.Ativo)
-                .ToListAsync(cancellationToken);
+            var enderecosAtuais = await _repository.ObterEnderecosAtivosAsync(pessoa.Id, cancellationToken);
 
             var enderecosManter = new HashSet<long>();
 
@@ -188,23 +175,9 @@ public sealed class AlterarClienteHandler
             }
 
             await _repository.SalvarAlteracoesAsync(cancellationToken);
-            await transaction.CommitAsync(cancellationToken);
 
-            await _auditoria.RegistrarAsync(new RegistroAuditoria
-            {
-                Acao = "CLIENTE_ALTERADO",
-                Modulo = "Clientes",
-                Recurso = "cliente",
-                RecursoId = cliente.PublicId.ToString(),
-                Resultado = ResultadoAuditoria.Sucesso,
-                DadosPosteriores = JsonSerializer.SerializeToDocument(new { command.Nome, command.Documento })
-            }, cancellationToken);
-        }
-        catch (Exception)
-        {
-            await transaction.RollbackAsync(cancellationToken);
-            throw;
-        }
+            return (true, cliente.PublicId.ToString(), null, new { command.Nome, command.Documento });
+        }, cancellationToken);
     }
 
     private static string NormalizarContatoValor(string tipo, string valor)
@@ -218,11 +191,5 @@ public sealed class AlterarClienteHandler
         return new string(doc.Where(char.IsDigit).ToArray());
     }
 
-    private static bool ValidarDocumento(string limpo, short tipoPessoa)
-    {
-        // Simplificado para o escopo
-        if (tipoPessoa == 1) return limpo.Length == 11;
-        if (tipoPessoa == 2) return limpo.Length == 14;
-        return false;
-    }
+    private static bool ValidarDocumento(string limpo, short tipoPessoa) => DocumentoValidator.IsValid(limpo, tipoPessoa);
 }

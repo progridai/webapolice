@@ -1,5 +1,11 @@
 # Regras permanentes do WebApolice
 
+## Padrões obrigatórios do frontend
+
+Para criar ou alterar telas, componentes, formulários, hooks, serviços, contratos e testes, leia e siga [docs/guias/guia-padroes-frontend.md](docs/guias/guia-padroes-frontend.md). Preserve os padrões existentes e mantenha a documentação atualizada na mesma entrega.
+
+Antes de concluir alterações do frontend, execute em `apps/web`: `npm.cmd run format:check`, `npm.cmd run typecheck`, `npm.cmd run lint`, `npm.cmd run lint:design-system`, `npm.cmd run test:run` e `npm.cmd run build`. Todos devem passar, com zero pendências de formatação, erros de tipos, erros/avisos de lint e ocorrências no scanner. Não flexibilize configurações ou verificações para obter aprovação.
+
 ## Padronização obrigatória dos dados
 
 Leia [docs/26-padronizacao-title-case.md](docs/26-padronizacao-title-case.md).

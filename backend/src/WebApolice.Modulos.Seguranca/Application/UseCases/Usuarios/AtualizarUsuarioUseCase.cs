@@ -105,7 +105,7 @@ public class AtualizarUsuarioUseCase
             await _dbContext.SaveChangesAsync(cancellationToken);
             await transaction.CommitAsync(cancellationToken);
         }
-        catch (Exception exLocal)
+        catch (Exception)
         {
             await transaction.RollbackAsync(cancellationToken);
             try

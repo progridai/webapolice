@@ -2,17 +2,28 @@ import { httpClient } from '../../../services/http/httpClient';
 import type { ApoliceFormValues } from '../schemas/apoliceForm.schema';
 import type { PremiosCobertura } from '../../cadastros-seguro/api/catalogos.api';
 
-export async function alterarPremiosApolice(apolicePublicId: string, vinculoPublicId: string, dados: PremiosCobertura): Promise<void> {
-  await httpClient.put(`/api/apolices/${apolicePublicId}/coberturas/${vinculoPublicId}/premios`, dados);
+export async function alterarPremiosApolice(
+  apolicePublicId: string,
+  vinculoPublicId: string,
+  dados: PremiosCobertura,
+): Promise<void> {
+  await httpClient.put(
+    `/api/apolices/${apolicePublicId}/coberturas/${vinculoPublicId}/premios`,
+    dados,
+  );
 }
-import type { 
-  ApoliceListItem, ApolicesQuery, PagedResult, 
-  ApoliceDetalheResponse, ApoliceVidaListItem, SalvarApoliceRequest
+import type {
+  ApoliceListItem,
+  ApolicesQuery,
+  PagedResult,
+  ApoliceDetalheResponse,
+  ApoliceVidaListItem,
+  SalvarApoliceRequest,
 } from '../types/apolice.types';
 
 export async function listarApolices(
   query: ApolicesQuery,
-  signal?: AbortSignal
+  signal?: AbortSignal,
 ): Promise<PagedResult<ApoliceListItem>> {
   const params = new URLSearchParams();
 
@@ -24,17 +35,26 @@ export async function listarApolices(
   if (query.estipulanteId) params.append('estipulanteId', query.estipulanteId);
   if (query.seguradoraId) params.append('seguradoraId', query.seguradoraId);
   if (query.tipoRamo) params.append('tipoRamo', query.tipoRamo);
-  if (query.vigenciaDataReferencia) params.append('vigenciaDataReferencia', query.vigenciaDataReferencia);
+  if (query.vigenciaDataReferencia)
+    params.append('vigenciaDataReferencia', query.vigenciaDataReferencia);
 
   const queryString = params.toString();
   const url = queryString ? `/api/apolices?${queryString}` : '/api/apolices';
 
-  const response = await httpClient.get<PagedResult<ApoliceListItem>>(url, { signal });
+  const response = await httpClient.get<PagedResult<ApoliceListItem>>(url, {
+    signal,
+  });
   return response.data;
 }
 
-export async function obterApolice(publicId: string): Promise<ApoliceDetalheResponse> {
-  const response = await httpClient.get<ApoliceDetalheResponse>(`/api/apolices/${publicId}`);
+export async function obterApolice(
+  publicId: string,
+  signal?: AbortSignal,
+): Promise<ApoliceDetalheResponse> {
+  const response = await httpClient.get<ApoliceDetalheResponse>(
+    `/api/apolices/${publicId}`,
+    { signal },
+  );
   return response.data;
 }
 
@@ -51,13 +71,21 @@ function toSalvarApoliceRequest(data: ApoliceFormValues): SalvarApoliceRequest {
   };
 }
 
-export async function criarApolice(data: ApoliceFormValues): Promise<{ publicId: string }> {
+export async function criarApolice(
+  data: ApoliceFormValues,
+): Promise<{ publicId: string }> {
   const payload = toSalvarApoliceRequest(data);
-  const response = await httpClient.post<{ publicId: string }>('/api/apolices', payload);
+  const response = await httpClient.post<{ publicId: string }>(
+    '/api/apolices',
+    payload,
+  );
   return response.data;
 }
 
-export async function alterarApolice(publicId: string, data: ApoliceFormValues): Promise<void> {
+export async function alterarApolice(
+  publicId: string,
+  data: ApoliceFormValues,
+): Promise<void> {
   const payload = toSalvarApoliceRequest(data);
   await httpClient.put(`/api/apolices/${publicId}`, payload);
 }
@@ -65,7 +93,7 @@ export async function alterarApolice(publicId: string, data: ApoliceFormValues):
 export async function listarApoliceVidas(
   publicId: string,
   query: import('../types/apolice.types').ApoliceVidaQuery,
-  signal?: AbortSignal
+  signal?: AbortSignal,
 ): Promise<PagedResult<ApoliceVidaListItem>> {
   const params = new URLSearchParams();
 
@@ -73,68 +101,84 @@ export async function listarApoliceVidas(
   if (query.pageSize) params.append('tamanhoPagina', query.pageSize.toString());
   if (query.busca) params.append('busca', query.busca);
   if (query.status) params.append('status', query.status.toString());
-  if (query.apoliceSubgrupoPublicId) params.append('apoliceSubgrupoPublicId', query.apoliceSubgrupoPublicId);
-  if (query.apoliceModuloPublicId) params.append('apoliceModuloPublicId', query.apoliceModuloPublicId);
-  if (query.vigenciaDataReferencia) params.append('vigenciaDataReferencia', query.vigenciaDataReferencia);
+  if (query.apoliceSubgrupoPublicId)
+    params.append('apoliceSubgrupoPublicId', query.apoliceSubgrupoPublicId);
+  if (query.apoliceModuloPublicId)
+    params.append('apoliceModuloPublicId', query.apoliceModuloPublicId);
+  if (query.vigenciaDataReferencia)
+    params.append('vigenciaDataReferencia', query.vigenciaDataReferencia);
 
   const queryString = params.toString();
-  const url = queryString ? `/api/apolices/${publicId}/vidas?${queryString}` : `/api/apolices/${publicId}/vidas`;
-  
-  const response = await httpClient.get<PagedResult<ApoliceVidaListItem>>(url, { signal });
+  const url = queryString
+    ? `/api/apolices/${publicId}/vidas?${queryString}`
+    : `/api/apolices/${publicId}/vidas`;
+
+  const response = await httpClient.get<PagedResult<ApoliceVidaListItem>>(url, {
+    signal,
+  });
   return response.data;
 }
 
 export async function obterApoliceVida(
   apolicePublicId: string,
   vidaPublicId: string,
-  signal?: AbortSignal
+  signal?: AbortSignal,
 ): Promise<ApoliceVidaListItem> {
-  const response = await httpClient.get<ApoliceVidaListItem>(`/api/apolices/${apolicePublicId}/vidas/${vidaPublicId}`, { signal });
+  const response = await httpClient.get<ApoliceVidaListItem>(
+    `/api/apolices/${apolicePublicId}/vidas/${vidaPublicId}`,
+    { signal },
+  );
   return response.data;
 }
 
 export async function criarApoliceVida(
   apolicePublicId: string,
-  payload: import('../types/apolice.types').CriarApoliceVidaRequest
+  payload: import('../types/apolice.types').CriarApoliceVidaRequest,
 ): Promise<{ publicId: string }> {
-  const response = await httpClient.post<{ publicId: string }>(`/api/apolices/${apolicePublicId}/vidas`, payload);
+  const response = await httpClient.post<{ publicId: string }>(
+    `/api/apolices/${apolicePublicId}/vidas`,
+    payload,
+  );
   return response.data;
 }
 
 export async function atualizarApoliceVida(
   apolicePublicId: string,
   vidaPublicId: string,
-  payload: import('../types/apolice.types').AlterarApoliceVidaRequest
+  payload: import('../types/apolice.types').AlterarApoliceVidaRequest,
 ): Promise<void> {
-  await httpClient.put(`/api/apolices/${apolicePublicId}/vidas/${vidaPublicId}`, payload);
+  await httpClient.put(
+    `/api/apolices/${apolicePublicId}/vidas/${vidaPublicId}`,
+    payload,
+  );
 }
 
 export async function inativarApoliceVida(
   apolicePublicId: string,
-  vidaPublicId: string
+  vidaPublicId: string,
 ): Promise<void> {
-  await httpClient.patch(`/api/apolices/${apolicePublicId}/vidas/${vidaPublicId}/inativar`);
+  await httpClient.patch(
+    `/api/apolices/${apolicePublicId}/vidas/${vidaPublicId}/inativar`,
+  );
 }
 
 export async function listarApoliceSubestipulantes(
   publicId: string,
-  signal?: AbortSignal
+  signal?: AbortSignal,
 ): Promise<import('../types/apolice.types').ApoliceSubestipulanteResult[]> {
-  const response = await httpClient.get<import('../types/apolice.types').ApoliceSubestipulanteResult[]>(
-    `/api/apolices/${publicId}/subestipulantes`,
-    { signal }
-  );
+  const response = await httpClient.get<
+    import('../types/apolice.types').ApoliceSubestipulanteResult[]
+  >(`/api/apolices/${publicId}/subestipulantes`, { signal });
   return response.data;
 }
 
 export async function obterApoliceUniversoPermitido(
   publicId: string,
-  signal?: AbortSignal
+  signal?: AbortSignal,
 ): Promise<import('../types/apolice.types').ApoliceUniversoPermitidoResult> {
-  const response = await httpClient.get<import('../types/apolice.types').ApoliceUniversoPermitidoResult>(
-    `/api/apolices/${publicId}/universo-permitido`,
-    { signal }
-  );
+  const response = await httpClient.get<
+    import('../types/apolice.types').ApoliceUniversoPermitidoResult
+  >(`/api/apolices/${publicId}/universo-permitido`, { signal });
   return response.data;
 }
 
@@ -142,17 +186,18 @@ export async function listarApoliceHistorico(
   publicId: string,
   page: number = 1,
   pageSize: number = 20,
-  signal?: AbortSignal
-): Promise<PagedResult<import('../types/apolice.types').ApoliceHistoricoResult>> {
+  signal?: AbortSignal,
+): Promise<
+  PagedResult<import('../types/apolice.types').ApoliceHistoricoResult>
+> {
   const params = new URLSearchParams({
     pagina: page.toString(),
-    tamanhoPagina: pageSize.toString()
+    tamanhoPagina: pageSize.toString(),
   });
-  
-  const response = await httpClient.get<PagedResult<import('../types/apolice.types').ApoliceHistoricoResult>>(
-    `/api/apolices/${publicId}/historico?${params.toString()}`, 
-    { signal }
-  );
+
+  const response = await httpClient.get<
+    PagedResult<import('../types/apolice.types').ApoliceHistoricoResult>
+  >(`/api/apolices/${publicId}/historico?${params.toString()}`, { signal });
   return response.data;
 }
 
@@ -163,8 +208,8 @@ export interface VincularRamoApoliceRequest {
 }
 
 export async function vincularRamoApolice(
-  apolicePublicId: string, 
-  payload: VincularRamoApoliceRequest
+  apolicePublicId: string,
+  payload: VincularRamoApoliceRequest,
 ): Promise<void> {
   await httpClient.post(`/api/apolices/${apolicePublicId}/ramos`, payload);
 }
@@ -175,18 +220,23 @@ export interface AtualizarRamoApoliceRequest {
 }
 
 export async function atualizarRamoApolice(
-  apolicePublicId: string, 
-  ramoPublicId: string, 
-  payload: AtualizarRamoApoliceRequest
+  apolicePublicId: string,
+  ramoPublicId: string,
+  payload: AtualizarRamoApoliceRequest,
 ): Promise<void> {
-  await httpClient.put(`/api/apolices/${apolicePublicId}/ramos/${ramoPublicId}`, payload);
+  await httpClient.put(
+    `/api/apolices/${apolicePublicId}/ramos/${ramoPublicId}`,
+    payload,
+  );
 }
 
 export async function inativarRamoApolice(
-  apolicePublicId: string, 
-  ramoPublicId: string
+  apolicePublicId: string,
+  ramoPublicId: string,
 ): Promise<void> {
-  await httpClient.patch(`/api/apolices/${apolicePublicId}/ramos/${ramoPublicId}/inativar`);
+  await httpClient.patch(
+    `/api/apolices/${apolicePublicId}/ramos/${ramoPublicId}/inativar`,
+  );
 }
 
 export interface VincularSubestipulanteApoliceRequest {
@@ -197,9 +247,12 @@ export interface VincularSubestipulanteApoliceRequest {
 
 export async function vincularSubestipulanteApolice(
   apolicePublicId: string,
-  payload: VincularSubestipulanteApoliceRequest
+  payload: VincularSubestipulanteApoliceRequest,
 ): Promise<void> {
-  await httpClient.post(`/api/apolices/${apolicePublicId}/subestipulantes`, payload);
+  await httpClient.post(
+    `/api/apolices/${apolicePublicId}/subestipulantes`,
+    payload,
+  );
 }
 
 export interface AtualizarSubestipulanteApoliceRequest {
@@ -210,50 +263,55 @@ export interface AtualizarSubestipulanteApoliceRequest {
 export async function atualizarSubestipulanteApolice(
   apolicePublicId: string,
   subestipulantePublicId: string,
-  payload: AtualizarSubestipulanteApoliceRequest
+  payload: AtualizarSubestipulanteApoliceRequest,
 ): Promise<void> {
-  await httpClient.put(`/api/apolices/${apolicePublicId}/subestipulantes/${subestipulantePublicId}`, payload);
+  await httpClient.put(
+    `/api/apolices/${apolicePublicId}/subestipulantes/${subestipulantePublicId}`,
+    payload,
+  );
 }
 
 export async function inativarSubestipulanteApolice(
   apolicePublicId: string,
-  subestipulantePublicId: string
+  subestipulantePublicId: string,
 ): Promise<void> {
-  await httpClient.patch(`/api/apolices/${apolicePublicId}/subestipulantes/${subestipulantePublicId}/inativar`);
+  await httpClient.patch(
+    `/api/apolices/${apolicePublicId}/subestipulantes/${subestipulantePublicId}/inativar`,
+  );
 }
 
 // ── Subgrupos da Apólice ──────────────────────────────────────────────────
 
 export async function listarApoliceSubgrupos(
   publicId: string,
-  signal?: AbortSignal
+  signal?: AbortSignal,
 ): Promise<import('../types/apolice.types').ApoliceSubgrupoResult[]> {
-  const response = await httpClient.get<import('../types/apolice.types').ApoliceSubgrupoResult[]>(
-    `/api/apolices/${publicId}/subgrupos`,
-    { signal }
-  );
+  const response = await httpClient.get<
+    import('../types/apolice.types').ApoliceSubgrupoResult[]
+  >(`/api/apolices/${publicId}/subgrupos`, { signal });
   return response.data;
 }
 
 export async function obterApoliceSubgrupo(
   apolicePublicId: string,
   subgrupoPublicId: string,
-  signal?: AbortSignal
+  signal?: AbortSignal,
 ): Promise<import('../types/apolice.types').ApoliceSubgrupoResult> {
-  const response = await httpClient.get<import('../types/apolice.types').ApoliceSubgrupoResult>(
-    `/api/apolices/${apolicePublicId}/subgrupos/${subgrupoPublicId}`,
-    { signal }
-  );
+  const response = await httpClient.get<
+    import('../types/apolice.types').ApoliceSubgrupoResult
+  >(`/api/apolices/${apolicePublicId}/subgrupos/${subgrupoPublicId}`, {
+    signal,
+  });
   return response.data;
 }
 
 export async function criarApoliceSubgrupo(
   apolicePublicId: string,
-  payload: import('../types/apolice.types').CriarSubgrupoApoliceRequest
+  payload: import('../types/apolice.types').CriarSubgrupoApoliceRequest,
 ): Promise<{ subgrupoPublicId: string }> {
   const response = await httpClient.post<{ subgrupoPublicId: string }>(
     `/api/apolices/${apolicePublicId}/subgrupos`,
-    payload
+    payload,
   );
   return response.data;
 }
@@ -261,20 +319,20 @@ export async function criarApoliceSubgrupo(
 export async function alterarApoliceSubgrupo(
   apolicePublicId: string,
   subgrupoPublicId: string,
-  payload: import('../types/apolice.types').AlterarSubgrupoApoliceRequest
+  payload: import('../types/apolice.types').AlterarSubgrupoApoliceRequest,
 ): Promise<void> {
   await httpClient.put(
     `/api/apolices/${apolicePublicId}/subgrupos/${subgrupoPublicId}`,
-    payload
+    payload,
   );
 }
 
 export async function inativarApoliceSubgrupo(
   apolicePublicId: string,
-  subgrupoPublicId: string
+  subgrupoPublicId: string,
 ): Promise<void> {
   await httpClient.patch(
-    `/api/apolices/${apolicePublicId}/subgrupos/${subgrupoPublicId}/inativar`
+    `/api/apolices/${apolicePublicId}/subgrupos/${subgrupoPublicId}/inativar`,
   );
 }
 
@@ -282,22 +340,21 @@ export async function inativarApoliceSubgrupo(
 
 export async function listarApoliceModulos(
   apolicePublicId: string,
-  signal?: AbortSignal
+  signal?: AbortSignal,
 ): Promise<import('../types/apolice.types').ApoliceModuloResult[]> {
-  const response = await httpClient.get<import('../types/apolice.types').ApoliceModuloResult[]>(
-    `/api/apolices/${apolicePublicId}/modulos`,
-    { signal }
-  );
+  const response = await httpClient.get<
+    import('../types/apolice.types').ApoliceModuloResult[]
+  >(`/api/apolices/${apolicePublicId}/modulos`, { signal });
   return response.data;
 }
 
 export async function criarApoliceModulo(
   apolicePublicId: string,
-  payload: import('../types/apolice.types').CriarModuloApoliceRequest
+  payload: import('../types/apolice.types').CriarModuloApoliceRequest,
 ): Promise<{ publicId: string }> {
   const response = await httpClient.post<{ publicId: string }>(
     `/api/apolices/${apolicePublicId}/modulos`,
-    payload
+    payload,
   );
   return response.data;
 }
@@ -306,20 +363,20 @@ export async function criarApoliceModulo(
 export async function alterarApoliceModulo(
   apolicePublicId: string,
   apoliceModuloPublicId: string,
-  payload: import('../types/apolice.types').AlterarModuloApoliceRequest
+  payload: import('../types/apolice.types').AlterarModuloApoliceRequest,
 ): Promise<void> {
   await httpClient.put(
     `/api/apolices/${apolicePublicId}/modulos/${apoliceModuloPublicId}`,
-    payload
+    payload,
   );
 }
 
 // PATCH usa apoliceModuloPublicId (publicId do vínculo seguro.apolice_modulo)
 export async function inativarApoliceModulo(
   apolicePublicId: string,
-  apoliceModuloPublicId: string
+  apoliceModuloPublicId: string,
 ): Promise<void> {
   await httpClient.patch(
-    `/api/apolices/${apolicePublicId}/modulos/${apoliceModuloPublicId}/inativar`
+    `/api/apolices/${apolicePublicId}/modulos/${apoliceModuloPublicId}/inativar`,
   );
 }

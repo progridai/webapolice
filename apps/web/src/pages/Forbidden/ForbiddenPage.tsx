@@ -26,7 +26,9 @@ export const ForbiddenPage: React.FC = () => {
       <EmptyState
         title="Acesso negado"
         description="Você não tem permissão para acessar esta área. Se acredita que isso é um erro, entre em contato com o administrador do sistema."
-        icon={<ErrorIcon size={48} className="error-page-icon" aria-hidden="true" />}
+        icon={
+          <ErrorIcon size={48} className="error-page-icon" aria-hidden="true" />
+        }
         action={
           <div className="error-page-actions">
             <Button

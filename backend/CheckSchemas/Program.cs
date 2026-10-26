@@ -3,7 +3,9 @@ using Npgsql;
 
 class Program {
     static void Main() {
-        string connStr = "Host=painel.bravida.com.br;Port=5432;Database=webapolice_antigo;Username=bravito;Password=Bravida@2023!";
+        string connStr = Environment.GetEnvironmentVariable("WEBAPOLICE_SOURCE_CONNECTION")
+            ?? throw new InvalidOperationException("Defina WEBAPOLICE_SOURCE_CONNECTION antes de executar a ferramenta.");
+        if (string.IsNullOrWhiteSpace(connStr)) throw new InvalidOperationException("WEBAPOLICE_SOURCE_CONNECTION não pode estar vazia.");
         using var conn = new NpgsqlConnection(connStr);
         conn.Open();
         using var cmd = new NpgsqlCommand("SELECT table_schema, table_name FROM information_schema.tables WHERE table_schema = 'core'", conn);

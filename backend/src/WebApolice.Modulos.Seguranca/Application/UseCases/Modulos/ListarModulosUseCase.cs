@@ -9,7 +9,7 @@ using WebApolice.Modulos.Seguranca.Infrastructure.Persistence;
 namespace WebApolice.Modulos.Seguranca.Application.UseCases.Modulos;
 
 public record RecursoDto(Guid PublicId, string Codigo, string Nome, bool Ativo, bool Habilitado);
-public record ModuloDto(Guid PublicId, string Codigo, string Nome, string Descricao, string Icone, int Ordem, bool Ativo, bool Habilitado, List<RecursoDto> Recursos);
+public record ModuloDto(Guid PublicId, string Codigo, string Nome, string? Descricao, string? Icone, int Ordem, bool Ativo, bool Habilitado, List<RecursoDto> Recursos);
 
 public class ListarModulosUseCase
 {

@@ -29,6 +29,7 @@ import {
   UsersIcon,
 } from '../../components/ui';
 import { IdentidadeVisualService } from '../../shared/identidade';
+import { MARCAS_DEMONSTRACAO } from '../../shared/identidade/marcasDemonstracao';
 import './DesignSystemPage.css';
 
 interface ClienteMock {
@@ -40,11 +41,41 @@ interface ClienteMock {
 }
 
 const CLIENTES_INICIAIS: ClienteMock[] = [
-  { id: 1, nome: 'Rodrigo Silva de Souza', cpf: '123.482.193-45', email: 'rodrigo.silva@example.com', status: 'ativo' },
-  { id: 2, nome: 'Ana Maria Oliveira', cpf: '098.918.423-76', email: 'ana.maria@example.com', status: 'ativo' },
-  { id: 3, nome: 'Carlos Souza Araujo', cpf: '456.294.851-32', email: 'carlos.souza@example.com', status: 'inativo' },
-  { id: 4, nome: 'Beatriz Santos Pinheiro', cpf: '789.159.357-12', email: 'beatriz.santos@example.com', status: 'ativo' },
-  { id: 5, nome: 'Eduardo Pereira Neto', cpf: '321.753.951-98', email: 'eduardo.pereira@example.com', status: 'inativo' },
+  {
+    id: 1,
+    nome: 'Rodrigo Silva de Souza',
+    cpf: '123.482.193-45',
+    email: 'rodrigo.silva@example.com',
+    status: 'ativo',
+  },
+  {
+    id: 2,
+    nome: 'Ana Maria Oliveira',
+    cpf: '098.918.423-76',
+    email: 'ana.maria@example.com',
+    status: 'ativo',
+  },
+  {
+    id: 3,
+    nome: 'Carlos Souza Araujo',
+    cpf: '456.294.851-32',
+    email: 'carlos.souza@example.com',
+    status: 'inativo',
+  },
+  {
+    id: 4,
+    nome: 'Beatriz Santos Pinheiro',
+    cpf: '789.159.357-12',
+    email: 'beatriz.santos@example.com',
+    status: 'ativo',
+  },
+  {
+    id: 5,
+    nome: 'Eduardo Pereira Neto',
+    cpf: '321.753.951-98',
+    email: 'eduardo.pereira@example.com',
+    status: 'inativo',
+  },
 ];
 
 export const DesignSystemPage: React.FC = () => {
@@ -55,9 +86,13 @@ export const DesignSystemPage: React.FC = () => {
   const [tabelaCarregando, setTabelaCarregando] = useState(false);
   const [tabelaVazia, setTabelaVazia] = useState(false);
   const [filtroTexto, setFiltroTexto] = useState('');
-  const [checkboxSelecionados, setCheckboxSelecionados] = useState<number[]>([]);
+  const [checkboxSelecionados, setCheckboxSelecionados] = useState<number[]>(
+    [],
+  );
   const [paginaAtual, setPaginaAtual] = useState(1);
-  const [clienteParaDeletar, setClienteParaDeletar] = useState<number | null>(null);
+  const [clienteParaDeletar, setClienteParaDeletar] = useState<number | null>(
+    null,
+  );
 
   // Estados de formulário
   const [nomeInput, setNomeInput] = useState('');
@@ -91,7 +126,7 @@ export const DesignSystemPage: React.FC = () => {
 
   const toggleCheckbox = (id: number) => {
     setCheckboxSelecionados((prev) =>
-      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
+      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id],
     );
   };
 
@@ -113,7 +148,9 @@ export const DesignSystemPage: React.FC = () => {
     setTimeout(() => {
       setLoadingExclusao(false);
       setConfirmacaoAberta(false);
-      alert(`Cliente ID ${clienteParaDeletar} inativado com sucesso (Showcase Mock)!`);
+      alert(
+        `Cliente ID ${clienteParaDeletar} inativado com sucesso (Showcase Mock)!`,
+      );
       setClienteParaDeletar(null);
     }, 1000);
   };
@@ -121,7 +158,7 @@ export const DesignSystemPage: React.FC = () => {
   const clientesFiltrados = CLIENTES_INICIAIS.filter(
     (c) =>
       c.nome.toLowerCase().includes(filtroTexto.toLowerCase()) ||
-      c.email.toLowerCase().includes(filtroTexto.toLowerCase())
+      c.email.toLowerCase().includes(filtroTexto.toLowerCase()),
   );
 
   return (
@@ -129,7 +166,8 @@ export const DesignSystemPage: React.FC = () => {
       <div className="main-header">
         <h1>Catálogo de Componentes do Design System</h1>
         <p className="main-subtitle">
-          Demonstração visual interativa de todos os componentes UI obrigatórios para o projeto WebApólice.
+          Demonstração visual interativa de todos os componentes UI obrigatórios
+          para o projeto WebApólice.
         </p>
       </div>
 
@@ -137,8 +175,13 @@ export const DesignSystemPage: React.FC = () => {
         {/* Seção 1: Identidade e Cores */}
         <Card className="col-span-2">
           <CardHeader>
-            <CardTitle>1. Identidade Visual Oferecida e Cores Oficiais</CardTitle>
-            <CardDescription>Cores extraídas da marca e estruturadas em tokens semânticos nos temas.</CardDescription>
+            <CardTitle>
+              1. Identidade Visual Oferecida e Cores Oficiais
+            </CardTitle>
+            <CardDescription>
+              Cores extraídas da marca e estruturadas em tokens semânticos nos
+              temas.
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="colors-grid">
@@ -177,12 +220,23 @@ export const DesignSystemPage: React.FC = () => {
             </div>
 
             <div className="functional-colors-list mt-4">
-              <h4>Cores Funcionais (Uso exclusivo para comunicação de status e feedback)</h4>
+              <h4>
+                Cores Funcionais (Uso exclusivo para comunicação de status e
+                feedback)
+              </h4>
               <div className="functional-colors-grid">
-                <span className="badge badge-success"><span className="badge-dot" /> Sucesso (Verde)</span>
-                <span className="badge badge-error"><span className="badge-dot" /> Erro (Vermelho)</span>
-                <span className="badge badge-warning"><span className="badge-dot" /> Alerta (Amarelo)</span>
-                <span className="badge badge-info"><span className="badge-dot" /> Informação (Azul)</span>
+                <span className="badge badge-success">
+                  <span className="badge-dot" /> Sucesso (Verde)
+                </span>
+                <span className="badge badge-error">
+                  <span className="badge-dot" /> Erro (Vermelho)
+                </span>
+                <span className="badge badge-warning">
+                  <span className="badge-dot" /> Alerta (Amarelo)
+                </span>
+                <span className="badge badge-info">
+                  <span className="badge-dot" /> Informação (Azul)
+                </span>
               </div>
             </div>
           </CardContent>
@@ -191,32 +245,28 @@ export const DesignSystemPage: React.FC = () => {
         {/* NOVA SEÇÃO: Validador de Identidade (Apenas Local/Showcase) */}
         <Card className="col-span-2">
           <CardHeader>
-            <CardTitle>Validador de Identidade (Simulador White-label)</CardTitle>
-            <CardDescription>Altere temporariamente a cor principal para testar contrastes dinâmicos e regras automáticas (WCAG AA).</CardDescription>
+            <CardTitle>
+              Validador de Identidade (Simulador White-label)
+            </CardTitle>
+            <CardDescription>
+              Altere temporariamente a cor principal para testar contrastes
+              dinâmicos e regras automáticas (WCAG AA).
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="button-row">
               <Button onClick={() => restaurarPadrao()}>
                 Dourado (Padrão)
               </Button>
-              <Button style={{ backgroundColor: '#0055FF', color: '#FFF', borderColor: '#0055FF' }} onClick={() => setMarcaSimulada('#0055FF')}>
-                Azul Escuro
-              </Button>
-              <Button style={{ backgroundColor: '#00FF00', color: '#000', borderColor: '#00FF00' }} onClick={() => setMarcaSimulada('#00FF00')}>
-                Verde Neon
-              </Button>
-              <Button style={{ backgroundColor: '#FF0000', color: '#FFF', borderColor: '#FF0000' }} onClick={() => setMarcaSimulada('#FF0000')}>
-                Vermelho Vivo
-              </Button>
-              <Button style={{ backgroundColor: '#6B21A8', color: '#FFF', borderColor: '#6B21A8' }} onClick={() => setMarcaSimulada('#6B21A8')}>
-                Roxo Escuro
-              </Button>
-              <Button style={{ backgroundColor: '#000000', color: '#FFF', borderColor: '#000000' }} onClick={() => setMarcaSimulada('#000000')}>
-                Preto Absoluto
-              </Button>
-              <Button style={{ backgroundColor: '#FFFFFF', color: '#000', border: '1px solid #CCC' }} onClick={() => setMarcaSimulada('#FFFFFF')}>
-                Branco Puro
-              </Button>
+              {MARCAS_DEMONSTRACAO.map((marca) => (
+                <Button
+                  key={marca.nome}
+                  variant="secondary"
+                  onClick={() => setMarcaSimulada(marca.marcaPrincipal)}
+                >
+                  {marca.nome}
+                </Button>
+              ))}
             </div>
           </CardContent>
         </Card>
@@ -225,7 +275,9 @@ export const DesignSystemPage: React.FC = () => {
         <Card>
           <CardHeader>
             <CardTitle>2. Botões (Button)</CardTitle>
-            <CardDescription>Variantes, tamanhos e estados interativos.</CardDescription>
+            <CardDescription>
+              Variantes, tamanhos e estados interativos.
+            </CardDescription>
           </CardHeader>
           <CardContent className="button-sections">
             <div className="showcase-section">
@@ -250,9 +302,15 @@ export const DesignSystemPage: React.FC = () => {
             <div className="showcase-section mt-3">
               <h5>Estados Especiais</h5>
               <div className="button-row">
-                <Button variant="primary" disabled>Desabilitado</Button>
-                <Button variant="primary" loading>Salvando...</Button>
-                <Button variant="danger" loading>Processando...</Button>
+                <Button variant="primary" disabled>
+                  Desabilitado
+                </Button>
+                <Button variant="primary" loading>
+                  Salvando...
+                </Button>
+                <Button variant="danger" loading>
+                  Processando...
+                </Button>
               </div>
             </div>
           </CardContent>
@@ -262,17 +320,25 @@ export const DesignSystemPage: React.FC = () => {
         <Card>
           <CardHeader>
             <CardTitle>3. Badges, Feedback & Carregamento</CardTitle>
-            <CardDescription>Badges de status, alertas, spinners e skeletons.</CardDescription>
+            <CardDescription>
+              Badges de status, alertas, spinners e skeletons.
+            </CardDescription>
           </CardHeader>
           <CardContent className="feedback-sections">
             <div className="showcase-section">
               <h5>Badges</h5>
               <div className="badge-row">
                 <Badge variant="neutral">Neutro</Badge>
-                <Badge variant="brand" dot>Ativo Marca</Badge>
-                <Badge variant="success" dot>Sucesso</Badge>
+                <Badge variant="brand" dot>
+                  Ativo Marca
+                </Badge>
+                <Badge variant="success" dot>
+                  Sucesso
+                </Badge>
                 <Badge variant="warning">Atenção</Badge>
-                <Badge variant="error" dot>Erro</Badge>
+                <Badge variant="error" dot>
+                  Erro
+                </Badge>
                 <Badge variant="info">Informação</Badge>
               </div>
             </div>
@@ -306,11 +372,19 @@ export const DesignSystemPage: React.FC = () => {
         {/* Seção 4: Formulários */}
         <Card className="col-span-2">
           <CardHeader>
-            <CardTitle>4. Campos de Formulário (FormFields, Inputs & Controls)</CardTitle>
-            <CardDescription>Campos estruturados associados por id/aria para conformidade de acessibilidade.</CardDescription>
+            <CardTitle>
+              4. Campos de Formulário (FormFields, Inputs & Controls)
+            </CardTitle>
+            <CardDescription>
+              Campos estruturados associados por id/aria para conformidade de
+              acessibilidade.
+            </CardDescription>
           </CardHeader>
           <CardContent>
-            <form onSubmit={handleSalvarCliente} className="showcase-form-layout">
+            <form
+              onSubmit={handleSalvarCliente}
+              className="showcase-form-layout"
+            >
               <div className="form-grid">
                 <FormField
                   label="Nome Completo"
@@ -376,14 +450,18 @@ export const DesignSystemPage: React.FC = () => {
                 <Button type="submit" variant="primary">
                   Enviar Formulário
                 </Button>
-                <Button type="reset" variant="secondary" onClick={() => {
-                  setNomeInput('');
-                  setCpfInput('');
-                  setPerfilSelect('comum');
-                  setTermoCheckbox(false);
-                  setComentarioTextarea('');
-                  setNomeErro('');
-                }}>
+                <Button
+                  type="reset"
+                  variant="secondary"
+                  onClick={() => {
+                    setNomeInput('');
+                    setCpfInput('');
+                    setPerfilSelect('comum');
+                    setTermoCheckbox(false);
+                    setComentarioTextarea('');
+                    setNomeErro('');
+                  }}
+                >
                   Limpar
                 </Button>
               </div>
@@ -395,20 +473,26 @@ export const DesignSystemPage: React.FC = () => {
         <Card className="col-span-2">
           <CardHeader>
             <CardTitle>5. Alertas de Estado (Alert)</CardTitle>
-            <CardDescription>Mensagens com ícones e cores semânticas funcionais.</CardDescription>
+            <CardDescription>
+              Mensagens com ícones e cores semânticas funcionais.
+            </CardDescription>
           </CardHeader>
           <CardContent className="alerts-showcase-list">
             <Alert variant="success" title="Cadastro Concluído">
-              O cliente foi salvo com êxito e os dados pessoais foram protegidos conforme a LGPD.
+              O cliente foi salvo com êxito e os dados pessoais foram protegidos
+              conforme a LGPD.
             </Alert>
             <Alert variant="error" title="Erro Crítico de Validação">
-              Falha ao conectar com o serviço do ERP. As alterações locais não puderam ser gravadas na base.
+              Falha ao conectar com o serviço do ERP. As alterações locais não
+              puderam ser gravadas na base.
             </Alert>
             <Alert variant="warning" title="Documentação Pendente">
-              O cliente possui pendências cadastrais na Receita Federal. Algumas apólices podem ser recusadas.
+              O cliente possui pendências cadastrais na Receita Federal. Algumas
+              apólices podem ser recusadas.
             </Alert>
             <Alert variant="info" title="Inativação Temporária">
-              A inativação de registros suspende a emissão, mas preserva a rastreabilidade histórica.
+              A inativação de registros suspende a emissão, mas preserva a
+              rastreabilidade histórica.
             </Alert>
           </CardContent>
         </Card>
@@ -417,8 +501,13 @@ export const DesignSystemPage: React.FC = () => {
         <Card className="col-span-2">
           <CardHeader className="showcase-table-header">
             <div>
-              <CardTitle>6. Tabela & Paginação (Table, Pagination & EmptyState)</CardTitle>
-              <CardDescription>Demonstração dos estados de dados, carregamento, ausência de registros e paginação.</CardDescription>
+              <CardTitle>
+                6. Tabela & Paginação (Table, Pagination & EmptyState)
+              </CardTitle>
+              <CardDescription>
+                Demonstração dos estados de dados, carregamento, ausência de
+                registros e paginação.
+              </CardDescription>
             </div>
             <div className="table-controls-row">
               <Button
@@ -450,13 +539,19 @@ export const DesignSystemPage: React.FC = () => {
                   aria-label="Filtrar dados"
                 />
               </div>
-              <span className="selected-count">{checkboxSelecionados.length} itens selecionados</span>
+              <span className="selected-count">
+                {checkboxSelecionados.length} itens selecionados
+              </span>
             </div>
 
             {/* Tabela Real ou Skeletons */}
             <div className="table-container-wrapper mt-3">
               {tabelaCarregando ? (
-                <div className="table-skeletons" aria-busy="true" aria-label="Carregando tabela">
+                <div
+                  className="table-skeletons"
+                  aria-busy="true"
+                  aria-label="Carregando tabela"
+                >
                   {[1, 2, 3].map((i) => (
                     <div className="table-skeleton-row" key={i}>
                       <Skeleton variant="row" />
@@ -469,7 +564,14 @@ export const DesignSystemPage: React.FC = () => {
                   description="Não encontramos correspondências para a sua pesquisa. Tente ajustar os filtros informados."
                   icon={<UsersIcon size={48} aria-hidden="true" />}
                   action={
-                    <Button variant="primary" size="small" onClick={() => { setFiltroTexto(''); setTabelaVazia(false); }}>
+                    <Button
+                      variant="primary"
+                      size="small"
+                      onClick={() => {
+                        setFiltroTexto('');
+                        setTabelaVazia(false);
+                      }}
+                    >
                       Limpar Pesquisa
                     </Button>
                   }
@@ -480,7 +582,10 @@ export const DesignSystemPage: React.FC = () => {
                     <TableRow>
                       <TableCell header style={{ width: '40px' }}>
                         <Checkbox
-                          checked={checkboxSelecionados.length === CLIENTES_INICIAIS.length}
+                          checked={
+                            checkboxSelecionados.length ===
+                            CLIENTES_INICIAIS.length
+                          }
                           onChange={toggleTodosCheckbox}
                           aria-label="Selecionar tudo"
                         />
@@ -491,7 +596,12 @@ export const DesignSystemPage: React.FC = () => {
                       <TableCell header>CPF</TableCell>
                       <TableCell header>E-mail</TableCell>
                       <TableCell header>Status</TableCell>
-                      <TableCell header style={{ width: '100px', textAlign: 'right' }}>Ações</TableCell>
+                      <TableCell
+                        header
+                        style={{ width: '100px', textAlign: 'right' }}
+                      >
+                        Ações
+                      </TableCell>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -507,12 +617,18 @@ export const DesignSystemPage: React.FC = () => {
                             aria-label={`Selecionar ${cliente.nome}`}
                           />
                         </TableCell>
-                        <TableCell className="fw-semibold">{cliente.nome}</TableCell>
-                        <TableCell className="font-mono">{cliente.cpf}</TableCell>
+                        <TableCell className="fw-semibold">
+                          {cliente.nome}
+                        </TableCell>
+                        <TableCell className="font-mono">
+                          {cliente.cpf}
+                        </TableCell>
                         <td>{cliente.email}</td>
                         <TableCell>
                           <Badge
-                            variant={cliente.status === 'ativo' ? 'success' : 'neutral'}
+                            variant={
+                              cliente.status === 'ativo' ? 'success' : 'neutral'
+                            }
                             dot
                           >
                             {cliente.status}
@@ -522,7 +638,9 @@ export const DesignSystemPage: React.FC = () => {
                           <Button
                             variant="secondary"
                             size="small"
-                            onClick={() => alert(`Editar cliente ID ${cliente.id}`)}
+                            onClick={() =>
+                              alert(`Editar cliente ID ${cliente.id}`)
+                            }
                             aria-label={`Editar ${cliente.nome}`}
                           >
                             ✏️
@@ -559,7 +677,10 @@ export const DesignSystemPage: React.FC = () => {
         <Card className="col-span-2">
           <CardHeader>
             <CardTitle>7. Modais e Diálogos (Modal & ConfirmDialog)</CardTitle>
-            <CardDescription>Caixas de diálogo com retenção/trap de foco, tecla Escape ativa e acessibilidade.</CardDescription>
+            <CardDescription>
+              Caixas de diálogo com retenção/trap de foco, tecla Escape ativa e
+              acessibilidade.
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="button-row">
@@ -584,14 +705,23 @@ export const DesignSystemPage: React.FC = () => {
             <Button variant="secondary" onClick={() => setModalAberto(false)}>
               Fechar
             </Button>
-            <Button variant="primary" onClick={() => { alert('Confirmado!'); setModalAberto(false); }}>
+            <Button
+              variant="primary"
+              onClick={() => {
+                alert('Confirmado!');
+                setModalAberto(false);
+              }}
+            >
               Salvar Alterações
             </Button>
           </>
         }
       >
         <p>Este modal foi construído de forma 100% reutilizável.</p>
-        <p className="mt-2">Ele bloqueia a rolagem do fundo, intercepta a tecla Escape e devolve o foco ao botão de origem quando fechado.</p>
+        <p className="mt-2">
+          Ele bloqueia a rolagem do fundo, intercepta a tecla Escape e devolve o
+          foco ao botão de origem quando fechado.
+        </p>
       </Modal>
 
       <ConfirmDialog

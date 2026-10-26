@@ -20,7 +20,7 @@ public sealed class InativarSeguradoraHandler
     {
         var seguradora = await _repository.ObterPorPublicIdAsync(command.PublicId, cancellationToken);
         if (seguradora == null)
-            throw new InvalidOperationException("Seguradora não encontrada.");
+            throw new WebApolice.SharedKernel.Application.Exceptions.ValidacaoException("Seguradora não encontrada.");
 
         if (!seguradora.Ativo)
             return;

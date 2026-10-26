@@ -49,7 +49,7 @@ public class ClientesControllerAuthTests : IClassFixture<ApiTestFactory>
     }
 
     [Fact]
-    public async Task Cadastro_ComRoleAdmin_NaoDeveRetornar403()
+    public async Task RoleAdminSemPermissaoErpNaoAutorizaCadastro()
     {
         var token = ApiTestFactory.GerarTokenDeTeste(roles: new[] { "admin" });
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
@@ -57,17 +57,16 @@ public class ClientesControllerAuthTests : IClassFixture<ApiTestFactory>
         var request = new { TipoPessoa = 1, Nome = "Teste", Documento = "00000000000" };
         var response = await _client.PostAsJsonAsync("/api/clientes", request);
         
-        response.StatusCode.Should().NotBe(HttpStatusCode.Forbidden);
-        response.StatusCode.Should().NotBe(HttpStatusCode.Unauthorized);
+        response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
     }
 
     [Fact]
-    public async Task Consulta_ComRoleOperador_NaoDeveRetornar403()
+    public async Task ConsultaComPermissaoErpPassaPelaAutorizacao()
     {
-        var token = ApiTestFactory.GerarTokenDeTeste(roles: new[] { "operador" });
+        var token = ApiTestFactory.GerarTokenDeTeste(sub: "erp-leitor", roles: new[] { "operador" });
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
-        var response = await _client.GetAsync("/api/clientes/999");
-        response.StatusCode.Should().NotBe(HttpStatusCode.Forbidden);
+        var response = await _client.GetAsync("/api/clientes/00000000-0000-0000-0000-000000000999");
+        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
         response.StatusCode.Should().NotBe(HttpStatusCode.Unauthorized);
     }
     

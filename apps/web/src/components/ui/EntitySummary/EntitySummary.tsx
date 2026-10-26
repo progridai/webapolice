@@ -24,9 +24,7 @@ export const EntitySummary: React.FC<EntitySummaryProps> = ({
       <div className="entity-summary-content">
         {/* Avatar Area */}
         {avatarIcon && (
-          <div className="entity-summary-avatar">
-            {avatarIcon}
-          </div>
+          <div className="entity-summary-avatar">{avatarIcon}</div>
         )}
 
         {/* Info Area */}
@@ -42,20 +40,14 @@ export const EntitySummary: React.FC<EntitySummaryProps> = ({
                 </p>
               )}
             </div>
-            
+
             {/* Badges / Status Area */}
-            {badges && (
-              <div className="entity-summary-badges">
-                {badges}
-              </div>
-            )}
+            {badges && <div className="entity-summary-badges">{badges}</div>}
           </div>
 
           {/* Secondary Info Area (e.g. key-value pairs) */}
           {secondaryInfo && (
-            <div className="entity-summary-secondary">
-              {secondaryInfo}
-            </div>
+            <div className="entity-summary-secondary">{secondaryInfo}</div>
           )}
         </div>
       </div>

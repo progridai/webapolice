@@ -14,19 +14,17 @@ public record ExcluirEstipulanteCommand(Guid PublicId);
 public sealed class ExcluirEstipulanteHandler
 {
     private readonly IEstipulanteRepository _repository;
-    private readonly IRegistradorAuditoria _auditoria;
+    private readonly IOperacaoCadastroAuditada _operacao;
 
-    public ExcluirEstipulanteHandler(IEstipulanteRepository repository, IRegistradorAuditoria auditoria)
+    public ExcluirEstipulanteHandler(IEstipulanteRepository repository, IOperacaoCadastroAuditada operacao)
     {
         _repository = repository;
-        _auditoria = auditoria;
+        _operacao = operacao;
     }
 
     public async Task Handle(ExcluirEstipulanteCommand command, CancellationToken cancellationToken)
     {
-        await using var transaction = await _repository.BeginTransactionAsync(cancellationToken);
-
-        try
+        await _operacao.ExecutarAsync<bool>("Estipulantes", "estipulante", "ESTIPULANTE_EXCLUIDO", async ct =>
         {
             var estipulante = await _repository.ObterParaEdicaoPorPublicIdAsync(command.PublicId, cancellationToken);
             if (estipulante == null || estipulante.DeletedAt != null)
@@ -37,22 +35,9 @@ public sealed class ExcluirEstipulanteHandler
             estipulante.UpdatedAt = DateTimeOffset.UtcNow;
 
             await _repository.SalvarAlteracoesAsync(cancellationToken);
-            await transaction.CommitAsync(cancellationToken);
 
-            await _auditoria.RegistrarAsync(new RegistroAuditoria
-            {
-                Acao = "ESTIPULANTE_EXCLUIDO",
-                Modulo = "Estipulantes",
-                Recurso = "estipulante",
-                RecursoId = estipulante.PublicId.ToString(),
-                Resultado = ResultadoAuditoria.Sucesso,
-                DadosPosteriores = JsonSerializer.SerializeToDocument(new { DeletedAt = estipulante.DeletedAt, Ativo = false })
-            }, cancellationToken);
-        }
-        catch (Exception)
-        {
-            await transaction.RollbackAsync(cancellationToken);
-            throw;
-        }
+
+            return (true, estipulante.PublicId.ToString(), null, JsonSerializer.SerializeToDocument(new { DeletedAt = estipulante.DeletedAt, Ativo = false }));
+        }, cancellationToken);
     }
 }

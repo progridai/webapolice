@@ -15,7 +15,12 @@ public class PessoaDocumentoModel
     public DateTimeOffset CreatedAt { get; private set; }
 
     // Construtor EF
-    protected PessoaDocumentoModel() { }
+    protected PessoaDocumentoModel()
+    {
+        TipoDocumento = null!;
+        Numero = null!;
+        NumeroLimpo = null!;
+    }
 
     public PessoaDocumentoModel(long pessoaId, string tipoDocumento, string numero, string numeroLimpo, string? orgaoEmissor, DateTime? dataEmissao, bool principal)
     {

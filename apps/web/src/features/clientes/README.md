@@ -58,11 +58,11 @@ Referencias:
 - `docs/15-modulo-clientes-listagem.md`
 - `docs/11-modulo-clientes-backend.md`
 
-## Auditoria de EdiÁ„o (Julho 2026)
+## Auditoria de Edi√ß√£o (Julho 2026)
 
-* **Causa da falha anterior**:
-  * A rota de ediÁ„o (`/clientes/:id/editar`) n„o estava declarada no `routePaths.ts`, resultando em p·gina 404.
-  * O `ClienteForm.tsx` n„o estava recarregando os dados do backend porque faltava a chamada para `reset(initialData)` da biblioteca React Hook Form.
-  * As listagens e a tela de detalhe n„o apresentavam os botıes e atalhos para a funcionalidade.
-* **Arquivos alterados**: `routePaths.ts`, `ClienteForm.tsx`, `ClienteDetalhePage.tsx`, `ClientesTable.tsx`, `ClientesMobileList.tsx`, `EditarClientePage.test.tsx`.
-* **ExperiÍncia Final**: Bot„o 'Editar' adicionado na listagem e nos detalhes. Formul·rio exibe CPF/CNPJ como 'somente leitura'. Erros 409 (conflito de pessoa compartilhada) s„o mantidos em tela sem redirecionamento, comunicando o usu·rio claramente.
+- **Causa da falha anterior**:
+  - A rota de edi√ß√£o (`/clientes/:id/editar`) n√£o estava declarada no `routePaths.ts`, resultando em p√°gina 404.
+  - O `ClienteForm.tsx` n√£o estava recarregando os dados do backend porque faltava a chamada para `reset(initialData)` da biblioteca React Hook Form.
+  - As listagens e a tela de detalhe n√£o apresentavam os bot√µes e atalhos para a funcionalidade.
+- **Arquivos alterados**: `routePaths.ts`, `ClienteForm.tsx`, `ClienteDetalhePage.tsx`, `ClientesTable.tsx`, `ClientesMobileList.tsx`, `EditarClientePage.test.tsx`.
+- **Experi√™ncia Final**: Bot√£o 'Editar' adicionado na listagem e nos detalhes. Formul√°rio exibe CPF/CNPJ como 'somente leitura'. Erros 409 (conflito de pessoa compartilhada) s√£o mantidos em tela sem redirecionamento, comunicando o usu√°rio claramente.

@@ -26,10 +26,10 @@ export const ApolicesFilters: React.FC<ApolicesFiltersProps> = ({
   };
 
   const hasActiveFilters = Boolean(
-    filters.busca || 
-    filters.status || 
+    filters.busca ||
+    filters.status ||
     filters.ativo !== undefined ||
-    filters.tipoRamo
+    filters.tipoRamo,
   );
   const searchValue = filters.busca || '';
 
@@ -51,9 +51,9 @@ export const ApolicesFilters: React.FC<ApolicesFiltersProps> = ({
           id="status-apolice"
           value={filters.status || ''}
           onChange={(event) =>
-            onFilterChange({ 
+            onFilterChange({
               status: event.target.value,
-              page: 1
+              page: 1,
             })
           }
           disabled={isLoading}
@@ -74,9 +74,9 @@ export const ApolicesFilters: React.FC<ApolicesFiltersProps> = ({
           value={filters.ativo === undefined ? '' : filters.ativo.toString()}
           onChange={(event) => {
             const val = event.target.value;
-            onFilterChange({ 
+            onFilterChange({
               ativo: val === '' ? undefined : val === 'true',
-              page: 1
+              page: 1,
             });
           }}
           disabled={isLoading}

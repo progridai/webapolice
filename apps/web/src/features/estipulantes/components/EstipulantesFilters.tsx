@@ -1,6 +1,9 @@
 import React from 'react';
 import { Select, Button, FilterBar, SearchField } from '../../../components/ui';
-import type { EstipulantesQuery, StatusEstipulanteEnum } from '../types/estipulante.types';
+import type {
+  EstipulantesQuery,
+  StatusEstipulanteEnum,
+} from '../types/estipulante.types';
 
 interface EstipulantesFiltersProps {
   filters: EstipulantesQuery;
@@ -46,9 +49,10 @@ export const EstipulantesFilters: React.FC<EstipulantesFiltersProps> = ({
           id="status-estipulante"
           value={filters.status || ''}
           onChange={(event) =>
-            onFilterChange({ 
-              status: event.target.value as unknown as StatusEstipulanteEnum | '',
-              page: 1
+            onFilterChange({
+              status: event.target.value as unknown as
+                StatusEstipulanteEnum | '',
+              page: 1,
             })
           }
           disabled={isLoading}

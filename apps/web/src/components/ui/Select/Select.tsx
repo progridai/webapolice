@@ -13,7 +13,10 @@ export interface SelectProps extends React.SelectHTMLAttributes<HTMLSelectElemen
 }
 
 export const Select = forwardRef<HTMLSelectElement, SelectProps>(
-  ({ children, className = '', error = false, placeholder, options, ...props }, ref) => {
+  (
+    { children, className = '', error = false, placeholder, options, ...props },
+    ref,
+  ) => {
     return (
       <select
         ref={ref}
@@ -34,7 +37,7 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
           : children}
       </select>
     );
-  }
+  },
 );
 
 Select.displayName = 'Select';

@@ -1,3 +1,4 @@
+using WebApolice.Modulos.Cadastro.Domain.Clientes;
 using System;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -27,7 +28,7 @@ public sealed class CriarSeguradoraHandler
     public async Task<Guid> Handle(CriarSeguradoraCommand command, CancellationToken cancellationToken)
     {
         if (string.IsNullOrWhiteSpace(command.Nome))
-            throw new InvalidOperationException("O nome da seguradora é obrigatório.");
+            throw new WebApolice.SharedKernel.Application.Exceptions.ValidacaoException("O nome da seguradora é obrigatório.");
 
         string? cnpjLimpo = null;
         if (!string.IsNullOrWhiteSpace(command.Cnpj))
@@ -36,7 +37,7 @@ public sealed class CriarSeguradoraHandler
             
             var cnpjJaExiste = await _repository.CnpjJaExisteAsync(cnpjLimpo, null, cancellationToken);
             if (cnpjJaExiste)
-                throw new InvalidOperationException("Já existe uma seguradora cadastrada com este CNPJ.");
+                throw new WebApolice.SharedKernel.Application.Exceptions.ValidacaoException("Já existe uma seguradora cadastrada com este CNPJ.");
         }
 
         await using var transaction = await _transactionManager.BeginTransactionAsync(cancellationToken);
@@ -55,7 +56,7 @@ public sealed class CriarSeguradoraHandler
                     // Conforme combinado com o cliente, utilizaremos a mesma lógica de Cliente (verificando divergência simples).
                     if (!string.Equals(pessoaExistente.Nome, command.Nome, StringComparison.OrdinalIgnoreCase))
                     {
-                        throw new InvalidOperationException("O documento informado já pertence a outra pessoa com nome divergente no sistema.");
+                        throw new WebApolice.SharedKernel.Application.Exceptions.ValidacaoException("O documento informado já pertence a outra pessoa com nome divergente no sistema.");
                     }
                     pessoaId = pessoaExistente.Id;
                 }

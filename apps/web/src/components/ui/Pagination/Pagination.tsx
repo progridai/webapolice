@@ -30,15 +30,24 @@ export const Pagination: React.FC<PaginationProps> = ({
         >
           Anterior
         </Button>
-        
+
         {Array.from({ length: totalPages }, (_, i) => i + 1)
-          .filter(page => page === 1 || page === totalPages || Math.abs(page - currentPage) <= 1)
+          .filter(
+            (page) =>
+              page === 1 ||
+              page === totalPages ||
+              Math.abs(page - currentPage) <= 1,
+          )
           .map((page, index, array) => {
             const showEllipsis = index > 0 && page - array[index - 1] > 1;
-            
+
             return (
               <React.Fragment key={page}>
-                {showEllipsis && <span className="pagination-ellipsis" aria-hidden="true">...</span>}
+                {showEllipsis && (
+                  <span className="pagination-ellipsis" aria-hidden="true">
+                    ...
+                  </span>
+                )}
                 <Button
                   variant={currentPage === page ? 'primary' : 'secondary'}
                   size="small"

@@ -1,3 +1,7 @@
+using Microsoft.Extensions.Options;
+using WebApolice.Modulos.Cadastro.Contracts;
+using WebApolice.Modulos.Seguro.Application.Ports;
+using WebApolice.Modulos.Seguro.Application.UseCases.Propostas;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -13,35 +17,57 @@ public class CriarPropostaHandler : IRequestHandler<CriarPropostaCommand, Guid>
 {
     private readonly SeguroDbContext _dbContext;
 
-    public CriarPropostaHandler(SeguroDbContext dbContext)
+    private readonly IClientesPropostas _clientes;
+    private readonly ConfiguracaoPropostas _configuracao;
+    private readonly IOperacaoPropostas _operacao;
+
+    public CriarPropostaHandler(SeguroDbContext dbContext, IClientesPropostas clientes,
+        IOptions<ConfiguracaoPropostas> configuracao, IOperacaoPropostas operacao)
     {
         _dbContext = dbContext;
+        _clientes = clientes;
+        _configuracao = configuracao.Value;
+        _operacao = operacao;
     }
 
     public async Task<Guid> Handle(CriarPropostaCommand request, CancellationToken cancellationToken)
     {
+        if (request.ClienteId <= 0)
+            throw new ValidacaoException("Cliente é obrigatório.");
+        if (string.IsNullOrWhiteSpace(_configuracao.StatusInicialCodigo))
+            throw new ValidacaoException("O status inicial de Propostas ainda não foi definido.");
+        return await _operacao.ExecutarAsync<Guid>("PROPOSTA_CRIADA", async ct =>
+        {
+        var status = await _dbContext.PropostaStatuses.SingleOrDefaultAsync(
+            s => s.Codigo == _configuracao.StatusInicialCodigo, cancellationToken)
+            ?? throw new ValidacaoException("Status inicial de Propostas não encontrado no catálogo.");
         // 1. Carregar Entidades Mestre
         var apolice = await _dbContext.Apolices
             .FirstOrDefaultAsync(a => a.PublicId == request.ApoliceId, cancellationToken);
             
         if (apolice == null)
-            throw new ValidacaoException("ApÃ³lice nÃ£o encontrada.");
+            throw new ValidacaoException("Apólice não encontrada.");
 
         var apoliceVida = await _dbContext.ApoliceVidas
             .FirstOrDefaultAsync(v => v.PublicId == request.ApoliceVidaId, cancellationToken);
             
         if (apoliceVida == null)
-            throw new ValidacaoException("ApoliceVida nÃ£o encontrada.");
+            throw new ValidacaoException("ApoliceVida não encontrada.");
 
-        // 2. Travar SeguranÃ§a e Integridade Cross-Contexto
+        // 2. Travar Segurança e Integridade Cross-Contexto
         if (apoliceVida.ApoliceId != apolice.Id)
-            throw new ValidacaoException("A ApoliceVida informada nÃ£o pertence Ã  ApÃ³lice informada.");
+            throw new ValidacaoException("A ApoliceVida informada não pertence à Apólice informada.");
 
         if (apoliceVida.ClienteId != request.ClienteId)
-            throw new ValidacaoException("O Cliente informado nÃ£o Ã© o titular desta InscriÃ§Ã£o (ApoliceVida).");
+            throw new ValidacaoException("O Cliente informado não é o titular desta Inscrição (ApoliceVida).");
 
         if (!apoliceVida.Ativo)
-            throw new ValidacaoException("A InscriÃ§Ã£o estÃ¡ inativa e nÃ£o pode gerar nova Proposta.");
+            throw new ValidacaoException("A Inscrição está inativa e não pode gerar nova Proposta.");
+
+        if (apoliceVida.ClienteVinculoId is not > 0)
+            throw new ValidacaoException("A Vida deve possuir vínculo de Cliente/Pessoa.");
+        var identidade = await _clientes.ResolverAsync(request.ClienteId, apoliceVida.ClienteVinculoId.Value, cancellationToken)
+            ?? throw new ValidacaoException("Vínculo de Cliente/Pessoa inexistente, inativo ou incompatível.");
 
         // 3. Montar Snapshot Protegido
         var proposta = new Propostum
@@ -50,19 +76,19 @@ public class CriarPropostaHandler : IRequestHandler<CriarPropostaCommand, Guid>
             ApoliceId = apolice.Id,
             ApoliceVidaId = apoliceVida.Id,
             
-            // Snapshot obrigatÃ³rio de hierarquia
+            // Snapshot obrigatório de hierarquia
             EstipulanteId = apolice.EstipulanteId,
             SeguradoraId = apolice.SeguradoraId,
             
-            // Snapshot HÃ­brido (Se a apÃ³lice forÃ§ar corretora, usamos ela. Se nÃ£o, permitimos o input da requisiÃ§Ã£o)
+            // Snapshot Híbrido (Se a apólice forçar corretora, usamos ela. Se não, permitimos o input da requisição)
             CorretoraId = apolice.CorretoraId ?? request.CorretoraId,
             
-            // VÃ­nculos FÃ­sicos (Vida)
+            // Vínculos Físicos (Vida)
             ClienteId = apoliceVida.ClienteId,
-            ClienteVinculoId = apoliceVida.ClienteVinculoId ?? 0, 
-            PessoaId = apoliceVida.ClienteId, 
+            ClienteVinculoId = identidade.ClienteVinculoId,
+            PessoaId = identidade.PessoaId,
             
-            // Campos Financeiros/Pessoais MutÃ¡veis (Input Livre)
+            // Campos Financeiros/Pessoais Mutáveis (Input Livre)
             ConvenioCobrancaId = request.ConvenioCobrancaId,
             ContaCobrancaId = request.ContaCobrancaId,
             PremioLiquido = request.PremioLiquido,
@@ -72,7 +98,7 @@ public class CriarPropostaHandler : IRequestHandler<CriarPropostaCommand, Guid>
             BancoAgencia = request.BancoAgencia,
             BancoContaCorrente = request.BancoContaCorrente,
             
-            StatusId = 1,
+            StatusId = status.Id,
             Vigente = true,
             VisivelOperacional = true,
             Versao = 1,
@@ -83,6 +109,7 @@ public class CriarPropostaHandler : IRequestHandler<CriarPropostaCommand, Guid>
         _dbContext.Proposta.Add(proposta);
         await _dbContext.SaveChangesAsync(cancellationToken);
 
-        return proposta.PublicId;
+        return (proposta.PublicId, proposta.PublicId.ToString(), null, new { proposta.PublicId, proposta.ApoliceVidaId, proposta.ClienteId });
+        }, cancellationToken);
     }
 }

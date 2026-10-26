@@ -10,8 +10,9 @@ public class AuditoriaDbContextFactory : IDesignTimeDbContextFactory<AuditoriaDb
     {
         var optionsBuilder = new DbContextOptionsBuilder<AuditoriaDbContext>();
         
-        var connectionString = Environment.GetEnvironmentVariable("ConnectionStrings__PostgreSql") 
-            ?? "Host=localhost;Port=5432;Database=webapolice;Username=postgres;Password=postgres";
+        var connectionString = Environment.GetEnvironmentVariable("ConnectionStrings__PostgreSql");
+        if (string.IsNullOrWhiteSpace(connectionString))
+            throw new InvalidOperationException("Defina ConnectionStrings__PostgreSql para executar ferramentas EF.");
 
         optionsBuilder.UseNpgsql(connectionString, 
             o => 

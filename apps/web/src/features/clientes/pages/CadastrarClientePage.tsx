@@ -3,7 +3,12 @@ import { useNavigate } from 'react-router-dom';
 import { ClienteForm, type ClienteFormData } from '../components/ClienteForm';
 import { cadastrarCliente } from '../api/clienteWriteApi';
 import { Alert } from '../../../components/ui/Alert';
-import { PageHeader, Breadcrumbs, UsersIcon, HomeIcon } from '../../../components/ui';
+import {
+  PageHeader,
+  Breadcrumbs,
+  UsersIcon,
+  HomeIcon,
+} from '../../../components/ui';
 
 import { HttpApiError } from '../../../services/http/httpError';
 
@@ -26,12 +31,12 @@ export const CadastrarClientePage: React.FC = () => {
         falecido: data.falecido,
         dataObito: data.dataObito || undefined,
         re: data.re || undefined,
-        contatos: data.contatos.map(c => ({
+        contatos: data.contatos.map((c) => ({
           tipoContato: c.tipoContato,
           valor: c.valor,
           principal: c.principal,
         })),
-        enderecos: data.enderecos.map(e => ({
+        enderecos: data.enderecos.map((e) => ({
           tipoEndereco: e.tipoEndereco,
           cep: e.cep || undefined,
           logradouro: e.logradouro || undefined,
@@ -46,13 +51,15 @@ export const CadastrarClientePage: React.FC = () => {
       navigate(`/clientes/${response.id}`);
     } catch (err: unknown) {
       console.error('Erro ao cadastrar cliente:', err);
-      
+
       if (err instanceof HttpApiError) {
         setError(err.message);
       } else if (err instanceof Error) {
         setError(err.message);
       } else {
-        setError('Ocorreu um erro ao cadastrar o cliente. Verifique os dados e tente novamente.');
+        setError(
+          'Ocorreu um erro ao cadastrar o cliente. Verifique os dados e tente novamente.',
+        );
       }
     } finally {
       setIsSubmitting(false);
@@ -66,12 +73,12 @@ export const CadastrarClientePage: React.FC = () => {
   const breadcrumbItems = [
     { label: 'Início', href: '/', icon: <HomeIcon size={14} /> },
     { label: 'Clientes', href: '/clientes', icon: <UsersIcon size={14} /> },
-    { label: 'Novo Cliente' }
+    { label: 'Novo Cliente' },
   ];
 
   return (
     <div className="clientes-page" role="main">
-      <PageHeader 
+      <PageHeader
         title="Novo Cliente"
         description="Preencha os dados abaixo para cadastrar um novo cliente."
         icon={<UsersIcon size={24} />}
@@ -81,11 +88,13 @@ export const CadastrarClientePage: React.FC = () => {
       <div className="page-content" style={{ maxWidth: '800px' }}>
         {error && (
           <div className="mb-4">
-            <Alert variant="error" title="Erro no Cadastro">{error}</Alert>
+            <Alert variant="error" title="Erro no Cadastro">
+              {error}
+            </Alert>
           </div>
         )}
-        
-        <ClienteForm 
+
+        <ClienteForm
           onSubmit={handleSubmit}
           onCancel={handleCancel}
           isSubmitting={isSubmitting}

@@ -17,7 +17,10 @@ import {
   Input,
 } from '../../../components/ui';
 import type { Column } from '../../../components/ui/DataTable/DataTable';
-import type { AuditoriaListDto, AuditoriaQuery } from '../types/seguranca.types';
+import type {
+  AuditoriaListDto,
+  AuditoriaQuery,
+} from '../types/seguranca.types';
 
 const PAGE_SIZE = 20;
 
@@ -43,12 +46,12 @@ export const AuditoriaListPage: React.FC = () => {
     dataInicial: '',
     dataFinal: '',
   });
-  
+
   const [query, setQuery] = useState<AuditoriaQuery>({
     page: 1,
     pageSize: PAGE_SIZE,
   });
-  
+
   const navigate = useNavigate();
 
   const { data, isLoading, error, retry } = useAuditoriaList(query);
@@ -74,7 +77,7 @@ export const AuditoriaListPage: React.FC = () => {
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
-    setQuery(prev => ({ ...prev, page }));
+    setQuery((prev) => ({ ...prev, page }));
   }, [page]);
 
   useEffect(() => {
@@ -87,9 +90,7 @@ export const AuditoriaListPage: React.FC = () => {
     {
       key: 'acao',
       label: 'Ação',
-      render: (a) => (
-        <span className="seguranca-user-name">{a.acao}</span>
-      ),
+      render: (a) => <span className="seguranca-user-name">{a.acao}</span>,
     },
     {
       key: 'entidadeTipo',
@@ -116,7 +117,11 @@ export const AuditoriaListPage: React.FC = () => {
             label: 'Visualizar',
             icon: <EyeIcon />,
             onClick: () =>
-              navigate(createPath(ROUTES.SEGURANCA_AUDITORIA_DETALHES, { publicId: a.publicId })),
+              navigate(
+                createPath(ROUTES.SEGURANCA_AUDITORIA_DETALHES, {
+                  publicId: a.publicId,
+                }),
+              ),
           }}
           actions={[]}
           ariaLabel={`Ver detalhes da auditoria ${a.publicId}`}
@@ -151,7 +156,11 @@ export const AuditoriaListPage: React.FC = () => {
           </Button>
         </div>
       ) : isLoading && !data ? (
-        <div aria-busy="true" aria-live="polite" className="seguranca-skeletons">
+        <div
+          aria-busy="true"
+          aria-live="polite"
+          className="seguranca-skeletons"
+        >
           <Skeleton className="seguranca-skeleton-row" />
           <Skeleton className="seguranca-skeleton-row" />
           <Skeleton className="seguranca-skeleton-row" />
@@ -163,13 +172,25 @@ export const AuditoriaListPage: React.FC = () => {
         />
       ) : (
         <div className="seguranca-content">
-          <form className="seguranca-filters" onSubmit={handleFilter} style={{ display: 'flex', gap: '16px', marginBottom: '24px', flexWrap: 'wrap', alignItems: 'flex-end' }}>
+          <form
+            className="seguranca-filters"
+            onSubmit={handleFilter}
+            style={{
+              display: 'flex',
+              gap: '16px',
+              marginBottom: '24px',
+              flexWrap: 'wrap',
+              alignItems: 'flex-end',
+            }}
+          >
             <div style={{ flex: '1', minWidth: '150px' }}>
               <label className="ui-label text-sm font-medium">Ação</label>
               <Input
                 placeholder="Ex: USUARIO_CRIADO"
                 value={filters.acao}
-                onChange={(e) => setFilters(f => ({ ...f, acao: e.target.value }))}
+                onChange={(e) =>
+                  setFilters((f) => ({ ...f, acao: e.target.value }))
+                }
               />
             </div>
             <div style={{ flex: '1', minWidth: '150px' }}>
@@ -177,15 +198,21 @@ export const AuditoriaListPage: React.FC = () => {
               <Input
                 placeholder="Ex: USUARIO"
                 value={filters.entidade}
-                onChange={(e) => setFilters(f => ({ ...f, entidade: e.target.value }))}
+                onChange={(e) =>
+                  setFilters((f) => ({ ...f, entidade: e.target.value }))
+                }
               />
             </div>
             <div style={{ flex: '1', minWidth: '150px' }}>
-              <label className="ui-label text-sm font-medium">Data Inicial</label>
+              <label className="ui-label text-sm font-medium">
+                Data Inicial
+              </label>
               <Input
                 type="date"
                 value={filters.dataInicial}
-                onChange={(e) => setFilters(f => ({ ...f, dataInicial: e.target.value }))}
+                onChange={(e) =>
+                  setFilters((f) => ({ ...f, dataInicial: e.target.value }))
+                }
               />
             </div>
             <div style={{ flex: '1', minWidth: '150px' }}>
@@ -193,12 +220,22 @@ export const AuditoriaListPage: React.FC = () => {
               <Input
                 type="date"
                 value={filters.dataFinal}
-                onChange={(e) => setFilters(f => ({ ...f, dataFinal: e.target.value }))}
+                onChange={(e) =>
+                  setFilters((f) => ({ ...f, dataFinal: e.target.value }))
+                }
               />
             </div>
             <div style={{ display: 'flex', gap: '8px' }}>
-              <Button type="submit" variant="primary">Filtrar</Button>
-              <Button type="button" variant="secondary" onClick={handleClearFilters}>Limpar</Button>
+              <Button type="submit" variant="primary">
+                Filtrar
+              </Button>
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={handleClearFilters}
+              >
+                Limpar
+              </Button>
             </div>
           </form>
 

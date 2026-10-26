@@ -1,3 +1,5 @@
+using WebApolice.Integration.Tests.Setup;
+using WebApolice.Modulos.Cadastro.Domain.Clientes;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -36,7 +38,7 @@ public class AtualizarEstipulanteHandlerTests
         _repositoryMock.Setup(r => r.ObterContatosInstitucionaisAtivosAsync(It.IsAny<long>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new System.Collections.Generic.List<PessoaContatoInstitucionalModel>());
 
-        _handler = new AtualizarEstipulanteHandler(_repositoryMock.Object, _auditoriaMock.Object);
+        _handler = new AtualizarEstipulanteHandler(_repositoryMock.Object, new OperacaoCadastroSimulada(_auditoriaMock.Object, _transactionMock.Object));
     }
 
     [Fact]

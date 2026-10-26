@@ -25,10 +25,20 @@ export const listarModulos = async (): Promise<ModuloDto[]> => {
   return data;
 };
 
-export const alterarHabilitacaoModulo = async (publicId: string, habilitado: boolean): Promise<void> => {
-  await httpClient.put(`/api/seguranca/modulos/${publicId}/habilitacao`, { habilitado });
+export const alterarHabilitacaoModulo = async (
+  publicId: string,
+  habilitado: boolean,
+): Promise<void> => {
+  await httpClient.put(`/api/seguranca/modulos/${publicId}/habilitacao`, {
+    habilitado,
+  });
 };
 
-export const alterarHabilitacaoRecurso = async (publicId: string, habilitado: boolean): Promise<void> => {
-  await httpClient.put(`/api/seguranca/recursos/${publicId}/habilitacao`, { habilitado });
+export const alterarHabilitacaoRecurso = async (
+  publicId: string,
+  habilitado: boolean,
+): Promise<void> => {
+  await httpClient.put(`/api/seguranca/recursos/${publicId}/habilitacao`, {
+    habilitado,
+  });
 };

@@ -1,14 +1,13 @@
-
 import { cleanup } from '@testing-library/react';
 import { afterEach, vi, beforeEach } from 'vitest';
 
 // 1. Limpeza global da árvore do React Testing Library
 afterEach(() => {
   cleanup();
-  
+
   // Limpa todos os mocks após cada teste para garantir isolamento
   vi.clearAllMocks();
-  
+
   // Restaura timers caso algum teste tenha feito mock de setTimeout/setInterval
   vi.useRealTimers();
 });
@@ -26,6 +25,6 @@ beforeEach(() => {
       addEventListener: vi.fn(),
       removeEventListener: vi.fn(),
       dispatchEvent: vi.fn(),
-    }))
+    })),
   );
 });

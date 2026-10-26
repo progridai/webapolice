@@ -3,6 +3,8 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import * as api from '../api/apolices.api';
 import { HttpApiError } from '../../../services/http/httpError';
 import { useApolices } from './useApolices';
+import { useApoliceVidas } from './useApoliceVidas';
+import { useApoliceUniversoPermitido } from './useApoliceUniversoPermitido';
 import { useApoliceDetalhe } from './useApoliceDetalhe';
 import { useApoliceHistorico } from './useApoliceHistorico';
 import { useApoliceModulos } from './useApoliceModulos';
@@ -29,6 +31,33 @@ interface Scenario {
 }
 
 const scenarios: Scenario[] = [
+  {
+    name: 'Vidas',
+    useHook: () => useApoliceVidas('apolice-1', { page: 1 }),
+    reject: (error) =>
+      vi.mocked(api.listarApoliceVidas).mockRejectedValueOnce(error),
+    resolve: () =>
+      vi.mocked(api.listarApoliceVidas).mockResolvedValue({
+        items: [],
+        page: 1,
+        pageSize: 20,
+        totalCount: 0,
+      }),
+    fallback: 'Erro ao carregar vidas da apólice',
+    ignoresAbort: true,
+  },
+  {
+    name: 'Universo Permitido',
+    useHook: () => useApoliceUniversoPermitido('apolice-1'),
+    reject: (error) =>
+      vi.mocked(api.obterApoliceUniversoPermitido).mockRejectedValueOnce(error),
+    resolve: () =>
+      vi
+        .mocked(api.obterApoliceUniversoPermitido)
+        .mockResolvedValue({ produtos: [] }),
+    fallback: 'Não foi possível carregar o Universo Permitido.',
+    ignoresAbort: true,
+  },
   {
     name: 'Listagem',
     useHook: () => useApolices({ page: 1, busca: 'Contrato' }),
@@ -58,7 +87,7 @@ const scenarios: Scenario[] = [
         ramos: [],
       }),
     fallback: 'Erro ao carregar detalhes da apólice',
-    ignoresAbort: false,
+    ignoresAbort: true,
   },
   {
     name: 'Histórico',
@@ -143,12 +172,21 @@ describe.each(scenarios)(
     );
 
     if (ignoresAbort) {
-      it('não apresenta cancelamento como falha de consulta', async () => {
-        reject(new DOMException('Consulta cancelada', 'AbortError'));
-        const { result } = renderHook(() => useHook(1));
-        await waitFor(() => expect(result.current.isLoading).toBe(false));
-        expect(result.current.error).toBeNull();
-      });
+      it.each([
+        new DOMException('Consulta cancelada', 'AbortError'),
+        Object.assign(new Error('Consulta cancelada'), { name: 'AbortError' }),
+        Object.assign(new Error('Consulta cancelada'), {
+          name: 'CanceledError',
+        }),
+      ])(
+        'não apresenta cancelamento ($name) como falha de consulta',
+        async (error) => {
+          reject(error);
+          const { result } = renderHook(() => useHook(1));
+          await waitFor(() => expect(result.current.isLoading).toBe(false));
+          expect(result.current.error).toBeNull();
+        },
+      );
     }
   },
 );

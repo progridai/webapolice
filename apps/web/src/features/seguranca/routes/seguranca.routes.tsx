@@ -7,45 +7,65 @@ import { AuthenticatedLayout } from '../../../layouts/AuthenticatedLayout';
 import { PageLoading } from '../../../components/application/PageLoading';
 
 const PerfisListPage = lazy(() =>
-  import('../pages/PerfisListPage').then((m) => ({ default: m.PerfisListPage }))
+  import('../pages/PerfisListPage').then((m) => ({
+    default: m.PerfisListPage,
+  })),
 );
 const CadastrarPerfilPage = lazy(() =>
-  import('../pages/CadastrarPerfilPage').then((m) => ({ default: m.CadastrarPerfilPage }))
+  import('../pages/CadastrarPerfilPage').then((m) => ({
+    default: m.CadastrarPerfilPage,
+  })),
 );
 const EditarPerfilPage = lazy(() =>
-  import('../pages/EditarPerfilPage').then((m) => ({ default: m.EditarPerfilPage }))
+  import('../pages/EditarPerfilPage').then((m) => ({
+    default: m.EditarPerfilPage,
+  })),
 );
 const DetalhesPerfilPage = lazy(() =>
-  import('../pages/DetalhesPerfilPage').then((m) => ({ default: m.DetalhesPerfilPage }))
+  import('../pages/DetalhesPerfilPage').then((m) => ({
+    default: m.DetalhesPerfilPage,
+  })),
 );
 
 const UsuariosListPage = lazy(() =>
-  import('../pages/UsuariosListPage').then((m) => ({ default: m.UsuariosListPage }))
+  import('../pages/UsuariosListPage').then((m) => ({
+    default: m.UsuariosListPage,
+  })),
 );
 const CadastrarUsuarioPage = lazy(() =>
-  import('../pages/CadastrarUsuarioPage').then((m) => ({ default: m.CadastrarUsuarioPage }))
+  import('../pages/CadastrarUsuarioPage').then((m) => ({
+    default: m.CadastrarUsuarioPage,
+  })),
 );
 const EditarUsuarioPage = lazy(() =>
-  import('../pages/EditarUsuarioPage').then((m) => ({ default: m.EditarUsuarioPage }))
+  import('../pages/EditarUsuarioPage').then((m) => ({
+    default: m.EditarUsuarioPage,
+  })),
 );
 const DetalhesUsuarioPage = lazy(() =>
-  import('../pages/DetalhesUsuarioPage').then((m) => ({ default: m.DetalhesUsuarioPage }))
+  import('../pages/DetalhesUsuarioPage').then((m) => ({
+    default: m.DetalhesUsuarioPage,
+  })),
 );
 
 const ModulosPage = lazy(() =>
-  import('../pages/ModulosPage').then((m) => ({ default: m.ModulosPage }))
+  import('../pages/ModulosPage').then((m) => ({ default: m.ModulosPage })),
 );
 
 const CatalogoPage = lazy(() =>
-  import('../pages/CatalogoPage').then((m) => ({ default: m.CatalogoPage }))
+  import('../pages/CatalogoPage').then((m) => ({ default: m.CatalogoPage })),
 );
 
 const AuditoriaListPage = lazy(() =>
-  import('../pages/AuditoriaListPage').then((m) => ({ default: m.AuditoriaListPage }))
+  import('../pages/AuditoriaListPage').then((m) => ({
+    default: m.AuditoriaListPage,
+  })),
 );
 
 const AuditoriaDetalhesPage = lazy(() =>
-  import('../pages/AuditoriaDetalhesPage').then((m) => ({ default: m.AuditoriaDetalhesPage }))
+  import('../pages/AuditoriaDetalhesPage').then((m) => ({
+    default: m.AuditoriaDetalhesPage,
+  })),
 );
 
 export const SegurancaRoutes = (

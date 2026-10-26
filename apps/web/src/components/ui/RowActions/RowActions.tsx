@@ -23,7 +23,11 @@ export interface RowActionsProps {
   ariaLabel?: string;
 }
 
-export const RowActions: React.FC<RowActionsProps> = ({ primaryAction, actions, ariaLabel = 'Ações' }) => {
+export const RowActions: React.FC<RowActionsProps> = ({
+  primaryAction,
+  actions,
+  ariaLabel = 'Ações',
+}) => {
   return (
     <div className="row-actions" role="group" aria-label={ariaLabel}>
       {primaryAction && (
@@ -33,7 +37,11 @@ export const RowActions: React.FC<RowActionsProps> = ({ primaryAction, actions, 
           onClick={primaryAction.onClick}
           disabled={primaryAction.disabled}
         >
-          {primaryAction.icon && <span className="row-actions-btn-icon" aria-hidden="true">{primaryAction.icon}</span>}
+          {primaryAction.icon && (
+            <span className="row-actions-btn-icon" aria-hidden="true">
+              {primaryAction.icon}
+            </span>
+          )}
           {primaryAction.label}
         </Button>
       )}
@@ -57,7 +65,9 @@ export const RowActions: React.FC<RowActionsProps> = ({ primaryAction, actions, 
               onClick={action.onClick}
               disabled={action.disabled}
               icon={action.icon}
-              className={action.variant === 'danger' ? 'row-actions-item-danger' : ''}
+              className={
+                action.variant === 'danger' ? 'row-actions-item-danger' : ''
+              }
             >
               {action.label}
             </DropdownMenuItem>
@@ -67,4 +77,3 @@ export const RowActions: React.FC<RowActionsProps> = ({ primaryAction, actions, 
     </div>
   );
 };
-

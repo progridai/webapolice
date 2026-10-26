@@ -1,5 +1,7 @@
 # WebApolice - ERP Web
 
+Revisão técnica atual, de 23/10/2026: consulte a [análise de arquitetura, segurança, qualidade e documentação](docs/76-revisao-arquitetura-seguranca-qualidade.md). Ela registra os achados pendentes e o alcance das validações atuais; afirmações históricas de conclusão abaixo não substituem essa avaliação.
+
 ## Descrição Resumida
 O **WebApolice** é a nova versão web e responsiva do sistema de ERP, concebida para substituir progressivamente o sistema ERP legado em VB.NET com banco SQL Server. Ele servirá como o motor centralizado de dados e processos, operando de forma 100% web.
 
@@ -148,7 +150,7 @@ Para iniciar a API corretamente, o projeto exige a configuração das variáveis
 **Sobre o gerenciamento de configurações locais:**
 * O arquivo `backend/.env.local` é pessoal e **nunca deve ser commitado** (já configurado no `.gitignore`).
 * As chaves com `__` são mapeadas automaticamente para as configurações aninhadas no .NET.
-* A separação das connection strings (`PostgreSqlProducao`, `PostgreSql` e `PostgreSqlTestes`) garante segurança contra execução acidental de comandos nocivos no banco de produção por scripts locais.
+* A separação dos nomes das connection strings organiza os destinos, mas não garante isolamento. As ferramentas exigem configuração externa explícita; conferir servidor, base e permissões antes de qualquer execução autorizada, conforme o documento 78.
 
 **Outros comandos úteis (Diretório `backend/`):**
 
@@ -167,19 +169,19 @@ Para iniciar a API corretamente, o projeto exige a configuração das variáveis
 
 ---
 
-## Status da Fundação Técnica e Módulos de Negócio
-A fundação técnica inicial e o primeiro módulo de negócio foram finalizados com êxito:
-* Frontend e backend utilizam as versões estáveis mais recentes das tecnologias de base (React 19, Vite 8, .NET 10).
-* Endpoints técnicos `/api/health`, `/api/health/live` e `/api/health/ready` encontram-se disponíveis no backend.
-* A fundação de Persistência com PostgreSQL 18.4 e Entity Framework Core está completa, com isolamento transacional local via `ClientesTransactionManager` (sem MSDTC, 100% suportado no Linux/Docker).
-* **Módulo Clientes (Backend)**: Totalmente implementado com regras estritas de domínio, concorrência otimizada, paginação dinâmica na base, proteção de dados pessoais (CPF mascarado) e matriz de autorização via JWT/Keycloak.
-* **Listagem de Clientes (Frontend)**: Disponível em `/#/clientes`, integrada ao endpoint `GET /api/clientes`, com filtros responsivos, tratamento seguro de erros de rede e autorização por roles `admin`, `gestor` e `operador`.
-* **Testes de Arquitetura**: Os testes arquiteturais em `WebApolice.Architecture.Tests` garantem o fluxo unidirecional e isolamento dos módulos.
-* **Bateria de Testes**: Suíte robusta com 147 testes (100% aprovados) executados localmente e em ambiente Linux nativo (Docker SDK 10).
+## Estado Atual — Consolidação de 23/10/2026
+
+A [revisão 76](docs/76-revisao-arquitetura-seguranca-qualidade.md) é o índice de achados, correções, testes e pendências. A stack e o monólito modular foram preservados; implementação e verificações locais não equivalem a homologação com o legado.
+
+- Configurações operacionais são externas; audiência JWT é obrigatória, erros internos recebem resposta genérica e catálogo indisponível/inativo nega acesso, inclusive AcessoTotal.
+- Clientes usam portas sem Infrastructure/EF em Application; alterações auditadas desse fluxo, Cooperados e Estipulantes usam o coordenador transacional existente. Outras dependências indevidas ainda são detectadas pelos testes arquiteturais e impedem declarar conformidade integral.
+- O frontend obtém permissões de `/api/seguranca/me` por AuthorizationProvider. Roles do Keycloak permanecem nas políticas técnicas; não concedem automaticamente permissão de negócio no ERP.
+- [Propostas](docs/77-consolidacao-propostas.md): vínculo Cliente/Pessoa e matriz aprovados, implementação em consolidação; código de status inicial e homologação integrada continuam pendentes. Regras financeiras serão definidas posteriormente.
+- [Operação e validação](docs/78-operacao-e-validacao-consolidacao.md): gate local e workflow versionados, dependências corretivas e controles HTTP. Docker/Keycloak reais, implantação, restauração e execução remota do CI ainda precisam de evidência.
 
 > [!NOTE]
 > **Identidade Visual e Design System Reutilizável (Concluído)**:
-> A identidade visual oficial, os design tokens com suporte a temas claro/escuro/sistema e o catálogo completo de componentes UI reutilizáveis estão totalmente implementados e homologados. Os 16 componentes (`Button`, `FormField`, `Input`, `Textarea`, `Select`, `Checkbox`, `Alert`, `Spinner`, `Skeleton`, `Card`, `Badge`, `EmptyState`, `Modal`, `ConfirmDialog`, `Table`, `Pagination`) estão disponíveis via barril `src/components/ui`. O script `npm run lint:design-system` verifica continuamente a conformidade de tokens (zero cores hex/rgb fixadas nos componentes). O catálogo visual está disponível em `/#design-system`.
+> A identidade visual oficial, os design tokens com suporte a temas claro/escuro/sistema e o catálogo completo de componentes UI reutilizáveis estão implementados; validações locais e limitações de homologação estão na revisão 76. Os componentes (`Button`, `FormField`, `Input`, `Textarea`, `Select`, `Checkbox`, `Alert`, `Spinner`, `Skeleton`, `Card`, `Badge`, `EmptyState`, `Modal`, `ConfirmDialog`, `Table`, `Pagination`) estão disponíveis via barril `src/components/ui`. O script `npm run lint:design-system` verifica continuamente a conformidade de tokens (zero cores hex/rgb fixadas nos componentes). O catálogo visual está disponível em `/#design-system`.
 > 
 > - [docs/12-identidade-visual-design-system.md](file:///c:/PROJETOS/Rsul%20Automacoes/Projetos/webapolice/docs/12-identidade-visual-design-system.md) — Guia de marca e tokens
 > - [docs/13-componentes-design-system.md](file:///c:/PROJETOS/Rsul%20Automacoes/Projetos/webapolice/docs/13-componentes-design-system.md) — Catálogo de componentes e regras de uso

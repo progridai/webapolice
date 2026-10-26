@@ -1,3 +1,4 @@
+using WebApolice.Modulos.Seguranca.Api.Authorization;
 using System.Collections.Generic;
 using System.Security.Claims;
 using System.Threading;
@@ -33,7 +34,7 @@ public class PermissaoAuthorizationHandlerTests : IClassFixture<SegurancaIntegra
             _contextoMock.Object,
             _permissoesServiceMock.Object,
             _httpContextAccessorMock.Object,
-            dbContext);
+            new DisponibilidadeCatalogo(dbContext));
     }
 
     [Fact]
@@ -139,7 +140,7 @@ public class PermissaoAuthorizationHandlerTests : IClassFixture<SegurancaIntegra
         _permissoesServiceMock.Setup(p => p.CalcularPermissoesAsync("123", It.IsAny<CancellationToken>()))
             .ReturnsAsync(new PermissoesEfetivasUsuario(true, true, true, false, new HashSet<string>(), new HashSet<string>(), new HashSet<string>()));
         
-        var requirement = new PermissaoRequirement("qualquer.permissao");
+        var requirement = new PermissaoRequirement("clientes.visualizar");
         var context = new AuthorizationHandlerContext(new[] { requirement }, new ClaimsPrincipal(), null);
 
         await _handler.HandleAsync(context);

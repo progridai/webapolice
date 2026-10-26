@@ -1,79 +1,30 @@
-import { useState, useCallback, useRef, useEffect } from 'react';
+import { useCallback } from 'react';
 import { listarCooperados } from '../api/cooperadosApi';
-import type { CooperadoListDto, CooperadosFiltersState, ListagemPaginadaResult } from '../types/cooperados.types';
+import type { CooperadosFiltersState } from '../types/cooperados.types';
 import { HttpApiError } from '../../../services/http';
-
-interface UseCooperadosState {
-  data: ListagemPaginadaResult<CooperadoListDto> | null;
-  isLoading: boolean;
-  error: Error | null;
-}
+import { useConsulta } from '../../../shared/hooks/useConsulta';
 
 export function useCooperados(query: CooperadosFiltersState) {
-  const [state, setState] = useState<UseCooperadosState>({
-    data: null,
-    isLoading: true,
-    error: null,
-  });
-
-  const abortControllerRef = useRef<AbortController | null>(null);
-
-  const fetchCooperados = useCallback(async (currentQuery: CooperadosFiltersState) => {
-    if (abortControllerRef.current) {
-      abortControllerRef.current.abort();
-    }
-
-    const controller = new AbortController();
-    abortControllerRef.current = controller;
-
-    setState((prev) => ({ ...prev, isLoading: true, error: null }));
-
-    try {
-      const data = await listarCooperados(currentQuery, controller.signal);
-      setState({ data, isLoading: false, error: null });
-    } catch (err: unknown) {
-      if (err instanceof Error && err.name === 'AbortError') {
-        return;
+  const { page, limit, nome, cpf, status, sortBy, direction } = query;
+  const load = useCallback(
+    async (signal: AbortSignal) => {
+      try {
+        return await listarCooperados(
+          { page, limit, nome, cpf, status, sortBy, direction },
+          signal,
+        );
+      } catch (error: unknown) {
+        // Preserva a mensagem e a conversão de erros HTTP já usadas pela listagem.
+        if (error instanceof HttpApiError) {
+          throw new Error(error.message || 'Erro ao comunicar com a API', {
+            cause: error,
+          });
+        }
+        throw error;
       }
-      if (err instanceof DOMException && err.name === 'AbortError') {
-        return;
-      }
-
-      const normalizedError =
-        err instanceof HttpApiError
-          ? new Error(err.message || 'Erro ao comunicar com a API')
-          : err instanceof Error
-          ? err
-          : new Error('Erro desconhecido');
-
-      setState((prev) => ({ ...prev, isLoading: false, error: normalizedError }));
-    }
-  }, []);
-
-  useEffect(() => {
-    fetchCooperados(query);
-    return () => {
-      if (abortControllerRef.current) {
-        abortControllerRef.current.abort();
-      }
-    };
-  }, [
-    query.page,
-    query.limit,
-    query.nome,
-    query.cpf,
-    query.status,
-    query.sortBy,
-    query.direction,
-    fetchCooperados,
-  ]);
-
-  const retry = useCallback(() => {
-    fetchCooperados(query);
-  }, [fetchCooperados, query]);
-
-  return {
-    ...state,
-    retry,
-  };
+    },
+    [page, limit, nome, cpf, status, sortBy, direction],
+  );
+  const { refetch, ...state } = useConsulta(load, 'Erro desconhecido');
+  return { ...state, retry: refetch };
 }

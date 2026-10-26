@@ -1,6 +1,13 @@
 import React, { useState } from 'react';
 import { useApoliceSubestipulantes } from '../../hooks/useApoliceSubestipulantes';
-import { DataTable, StatusBadge, Alert, Button, EmptyState, ConfirmDialog } from '../../../../components/ui';
+import {
+  DataTable,
+  StatusBadge,
+  Alert,
+  Button,
+  EmptyState,
+  ConfirmDialog,
+} from '../../../../components/ui';
 import type { Column } from '../../../../components/ui/DataTable/DataTable';
 import type { ApoliceSubestipulanteResult } from '../../types/apolice.types';
 import { useAuthorization } from '../../../../auth/AuthorizationProvider';
@@ -11,8 +18,11 @@ interface SubestipulantesTabProps {
   publicId: string;
 }
 
-export const SubestipulantesTab: React.FC<SubestipulantesTabProps> = ({ publicId }) => {
-  const { data, isLoading, error, refetch } = useApoliceSubestipulantes(publicId);
+export const SubestipulantesTab: React.FC<SubestipulantesTabProps> = ({
+  publicId,
+}) => {
+  const { data, isLoading, error, refetch } =
+    useApoliceSubestipulantes(publicId);
   const { possuiPermissao } = useAuthorization();
 
   const podeInserir = possuiPermissao('apolices.subestipulantes.inserir');
@@ -20,8 +30,10 @@ export const SubestipulantesTab: React.FC<SubestipulantesTabProps> = ({ publicId
   const podeInativar = possuiPermissao('apolices.subestipulantes.inativar');
 
   const [modalAberto, setModalAberto] = useState(false);
-  const [subParaEditar, setSubParaEditar] = useState<ApoliceSubestipulanteResult | undefined>();
-  
+  const [subParaEditar, setSubParaEditar] = useState<
+    ApoliceSubestipulanteResult | undefined
+  >();
+
   const [inativarSubId, setInativarSubId] = useState<string | null>(null);
   const [inativando, setInativando] = useState(false);
   const [inativarErro, setInativarErro] = useState<string | null>(null);
@@ -46,7 +58,9 @@ export const SubestipulantesTab: React.FC<SubestipulantesTabProps> = ({ publicId
       refetch();
     } catch (err: unknown) {
       setInativarErro(
-        err instanceof Error && err.message ? err.message : 'Ocorreu um erro ao inativar o vínculo.',
+        err instanceof Error && err.message
+          ? err.message
+          : 'Ocorreu um erro ao inativar o vínculo.',
       );
     } finally {
       setInativando(false);
@@ -73,7 +87,9 @@ export const SubestipulantesTab: React.FC<SubestipulantesTabProps> = ({ publicId
       render: (item) => (
         <div className="flex flex-col">
           <span className="font-medium text-texto-principal">{item.nome}</span>
-          <span className="text-sm text-texto-secundario">{item.documento || item.codigo || '—'}</span>
+          <span className="text-sm text-texto-secundario">
+            {item.documento || item.codigo || '—'}
+          </span>
         </div>
       ),
     },
@@ -81,15 +97,29 @@ export const SubestipulantesTab: React.FC<SubestipulantesTabProps> = ({ publicId
       key: 'vigencia',
       label: 'Vigência do Vínculo',
       render: (item) => {
-        const inicio = item.dataInicio ? new Date(item.dataInicio).toLocaleDateString('pt-BR', { timeZone: 'UTC' }) : '—';
-        const fim = item.dataFim ? new Date(item.dataFim).toLocaleDateString('pt-BR', { timeZone: 'UTC' }) : '—';
-        return <span className="text-texto-secundario">{inicio} até {fim}</span>;
+        const inicio = item.dataInicio
+          ? new Date(item.dataInicio).toLocaleDateString('pt-BR', {
+              timeZone: 'UTC',
+            })
+          : '—';
+        const fim = item.dataFim
+          ? new Date(item.dataFim).toLocaleDateString('pt-BR', {
+              timeZone: 'UTC',
+            })
+          : '—';
+        return (
+          <span className="text-texto-secundario">
+            {inicio} até {fim}
+          </span>
+        );
       },
     },
     {
       key: 'status',
       label: 'Status do Vínculo',
-      render: (item) => <StatusBadge status={item.ativo ? 'ativo' : 'inativo'} />,
+      render: (item) => (
+        <StatusBadge status={item.ativo ? 'ativo' : 'inativo'} />
+      ),
     },
     {
       key: 'acoes',
@@ -98,12 +128,20 @@ export const SubestipulantesTab: React.FC<SubestipulantesTabProps> = ({ publicId
       render: (item) => (
         <div className="flex gap-2 justify-end">
           {podeAlterar && item.ativo && (
-            <Button variant="secondary" size="small" onClick={() => handleEditar(item)}>
+            <Button
+              variant="secondary"
+              size="small"
+              onClick={() => handleEditar(item)}
+            >
               Editar
             </Button>
           )}
           {podeInativar && item.ativo && (
-            <Button variant="danger" size="small" onClick={() => setInativarSubId(item.subestipulantePublicId)}>
+            <Button
+              variant="danger"
+              size="small"
+              onClick={() => setInativarSubId(item.subestipulantePublicId)}
+            >
               Inativar
             </Button>
           )}
@@ -116,8 +154,12 @@ export const SubestipulantesTab: React.FC<SubestipulantesTabProps> = ({ publicId
     <div className="flex flex-col gap-4">
       <div className="flex justify-between items-center mb-2">
         <div>
-          <h2 className="text-xl font-semibold text-texto-principal">Subestipulantes Vinculados</h2>
-          <p className="text-sm text-texto-terciario mt-1">Gerencie os vínculos de subestipulantes da apólice.</p>
+          <h2 className="text-xl font-semibold text-texto-principal">
+            Subestipulantes Vinculados
+          </h2>
+          <p className="text-sm text-texto-terciario mt-1">
+            Gerencie os vínculos de subestipulantes da apólice.
+          </p>
         </div>
         {podeInserir && (
           <Button onClick={handleAdicionar} variant="primary">
@@ -127,7 +169,11 @@ export const SubestipulantesTab: React.FC<SubestipulantesTabProps> = ({ publicId
       </div>
 
       {inativarErro && (
-        <Alert variant="error" title="Atenção" onClose={() => setInativarErro(null)}>
+        <Alert
+          variant="error"
+          title="Atenção"
+          onClose={() => setInativarErro(null)}
+        >
           {inativarErro}
         </Alert>
       )}

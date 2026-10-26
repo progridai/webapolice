@@ -1,3 +1,4 @@
+using WebApolice.Modulos.Seguranca.Contracts.Authorization;
 using System;
 using System.Security.Claims;
 using System.Threading;
@@ -6,7 +7,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using WebApolice.Modulos.Cadastro.Api.Requests;
 using WebApolice.Modulos.Seguranca.Application.Authorization;
-using WebApolice.Modulos.Seguranca.Infrastructure.Authorization;
 using WebApolice.Modulos.Cadastro.Application.UseCases.CadastrarCooperado;
 using WebApolice.Modulos.Cadastro.Application.UseCases.AlterarCooperado;
 using WebApolice.Modulos.Cadastro.Application.UseCases.AtivarCooperado;

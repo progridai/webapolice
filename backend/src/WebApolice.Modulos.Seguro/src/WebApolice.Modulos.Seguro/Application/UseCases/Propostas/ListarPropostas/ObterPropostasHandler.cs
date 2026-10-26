@@ -19,6 +19,9 @@ public class ObterPropostasHandler : IRequestHandler<ObterPropostasQuery, PagedR
 
     public async Task<PagedResult<PropostaDto>> Handle(ObterPropostasQuery request, CancellationToken cancellationToken)
     {
+        if (request.Pagina < 1 || request.TamanhoPagina is < 1 or > 100 ||
+            ((long)request.Pagina - 1) * request.TamanhoPagina > int.MaxValue)
+            throw new WebApolice.SharedKernel.Application.Exceptions.ValidacaoException("Paginação inválida: página >= 1 e tamanho entre 1 e 100.");
         var query = _dbContext.Proposta
             .Include(p => p.Status)
             .AsNoTracking()
@@ -33,6 +36,7 @@ public class ObterPropostasHandler : IRequestHandler<ObterPropostasQuery, PagedR
 
         var propostas = await query
             .OrderByDescending(p => p.CreatedAt)
+            .ThenByDescending(p => p.Id)
             .Skip((request.Pagina - 1) * request.TamanhoPagina)
             .Take(request.TamanhoPagina)
             .Select(p => new PropostaDto

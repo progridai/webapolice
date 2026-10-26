@@ -15,13 +15,13 @@ public record AlterarHabilitacaoModuloCommand(Guid PublicId, bool Habilitado);
 public class AlterarHabilitacaoModuloUseCase
 {
     private readonly SegurancaDbContext _dbContext;
-    private readonly IRegistradorAuditoria _auditoria;
+    private readonly IOperacaoSegurancaAuditada _operacao;
     private readonly IContextoUsuarioAutenticado _contexto;
 
-    public AlterarHabilitacaoModuloUseCase(SegurancaDbContext dbContext, IRegistradorAuditoria auditoria, IContextoUsuarioAutenticado contexto)
+    public AlterarHabilitacaoModuloUseCase(SegurancaDbContext dbContext, IOperacaoSegurancaAuditada operacao, IContextoUsuarioAutenticado contexto)
     {
         _dbContext = dbContext;
-        _auditoria = auditoria;
+        _operacao = operacao;
         _contexto = contexto;
     }
 
@@ -37,22 +37,12 @@ public class AlterarHabilitacaoModuloUseCase
         if (modulo.Habilitado == command.Habilitado)
             return;
 
-        if (command.Habilitado)
-            modulo.Habilitar();
-        else
-            modulo.Desabilitar();
-
         var evento = command.Habilitado ? "MODULO_HABILITADO" : "MODULO_DESABILITADO";
-
-        await _auditoria.RegistrarAsync(new WebApolice.Auditoria.Domain.RegistroAuditoria
+        await _operacao.ExecutarAsync<bool>("modulo", evento, async ct =>
         {
-            Acao = evento,
-            Modulo = "Seguranca",
-            Recurso = "modulo",
-            RecursoId = modulo.PublicId.ToString(),
-            Resultado = WebApolice.Auditoria.Domain.ResultadoAuditoria.Sucesso,
-            DadosPosteriores = JsonSerializer.SerializeToDocument(new { modulo.Codigo, modulo.Nome, modulo.Habilitado })
-        }, cancellationToken);
+        if (command.Habilitado) modulo.Habilitar();
+        else modulo.Desabilitar();
+
 
         var executor = await _dbContext.Usuarios.FirstOrDefaultAsync(u => u.KeycloakSub == _contexto.KeycloakSub, cancellationToken);
         var auditoriaInterna = new WebApolice.Modulos.Seguranca.Domain.Auditoria.AuditoriaPermissao(
@@ -65,5 +55,7 @@ public class AlterarHabilitacaoModuloUseCase
         _dbContext.AuditoriaPermissoes.Add(auditoriaInterna);
 
         await _dbContext.SaveChangesAsync(cancellationToken);
+        return (true, modulo.PublicId.ToString(), null, JsonSerializer.SerializeToDocument(new { modulo.Codigo, modulo.Nome, modulo.Habilitado }));
+        }, cancellationToken);
     }
 }

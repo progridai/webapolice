@@ -1,5 +1,11 @@
 import React from 'react';
-import { DataTable, StatusBadge, RowActions, Button, EyeIcon } from '../../../components/ui';
+import {
+  DataTable,
+  StatusBadge,
+  RowActions,
+  Button,
+  EyeIcon,
+} from '../../../components/ui';
 import type { Column } from '../../../components/ui/DataTable/DataTable';
 import type { ApoliceListItem } from '../types/apolice.types';
 
@@ -18,7 +24,6 @@ export const ApolicesTable: React.FC<ApolicesTableProps> = ({
   onClearFilters,
   onDetalhar,
 }) => {
-
   const formatDate = (dateString: string | undefined | null) => {
     if (!dateString) return '—';
     try {
@@ -34,25 +39,34 @@ export const ApolicesTable: React.FC<ApolicesTableProps> = ({
       key: 'identificacao',
       label: 'Identificação',
       render: (apolice) => (
-        <span className="font-medium text-texto-principal">{apolice.numeroPrincipal || '—'}</span>
+        <span className="font-medium text-texto-principal">
+          {apolice.numeroPrincipal || '—'}
+        </span>
       ),
     },
     {
       key: 'estipulante',
       label: 'Estipulante',
-      render: (apolice) => <span className="text-texto-secundario">{apolice.estipulanteNome}</span>,
+      render: (apolice) => (
+        <span className="text-texto-secundario">{apolice.estipulanteNome}</span>
+      ),
     },
     {
       key: 'seguradora',
       label: 'Seguradora',
-      render: (apolice) => <span className="text-texto-secundario">{apolice.seguradoraNome}</span>,
+      render: (apolice) => (
+        <span className="text-texto-secundario">{apolice.seguradoraNome}</span>
+      ),
     },
     {
       key: 'ramos',
       label: 'Ramos',
       render: (apolice) => (
         <span className="text-texto-secundario font-mono text-sm">
-          {apolice.resumoRamos || (apolice.quantidadeRamos > 0 ? `${apolice.quantidadeRamos} Ramos` : '—')}
+          {apolice.resumoRamos ||
+            (apolice.quantidadeRamos > 0
+              ? `${apolice.quantidadeRamos} Ramos`
+              : '—')}
         </span>
       ),
     },
@@ -61,14 +75,17 @@ export const ApolicesTable: React.FC<ApolicesTableProps> = ({
       label: 'Vigência',
       render: (apolice) => (
         <span className="text-texto-secundario">
-          {formatDate(apolice.dataInicioVigencia)} até {formatDate(apolice.dataFimVigencia)}
+          {formatDate(apolice.dataInicioVigencia)} até{' '}
+          {formatDate(apolice.dataFimVigencia)}
         </span>
       ),
     },
     {
       key: 'status',
       label: 'Status',
-      render: (apolice) => <StatusBadge status={apolice.ativo ? 'ativo' : 'inativo'} />,
+      render: (apolice) => (
+        <StatusBadge status={apolice.ativo ? 'ativo' : 'inativo'} />
+      ),
     },
     {
       key: 'acoes',
@@ -77,11 +94,15 @@ export const ApolicesTable: React.FC<ApolicesTableProps> = ({
       render: (apolice) => {
         return (
           <RowActions
-            primaryAction={onDetalhar ? {
-              label: 'Visualizar',
-              icon: <EyeIcon />,
-              onClick: () => onDetalhar(apolice.publicId),
-            } : undefined}
+            primaryAction={
+              onDetalhar
+                ? {
+                    label: 'Visualizar',
+                    icon: <EyeIcon />,
+                    onClick: () => onDetalhar(apolice.publicId),
+                  }
+                : undefined
+            }
             actions={[]}
             ariaLabel={`Ações para Apólice ${apolice.numeroPrincipal}`}
           />
@@ -97,7 +118,11 @@ export const ApolicesTable: React.FC<ApolicesTableProps> = ({
       keyExtractor={(item) => item.publicId}
       isLoading={isLoading}
       aria-label="Lista de apólices"
-      emptyTitle={hasActiveFilters ? 'Nenhuma apólice encontrada' : 'Nenhuma apólice cadastrada'}
+      emptyTitle={
+        hasActiveFilters
+          ? 'Nenhuma apólice encontrada'
+          : 'Nenhuma apólice cadastrada'
+      }
       emptyDescription={
         hasActiveFilters
           ? 'Não encontramos nenhuma apólice com os filtros informados.'
@@ -105,9 +130,7 @@ export const ApolicesTable: React.FC<ApolicesTableProps> = ({
       }
       emptyAction={
         hasActiveFilters && onClearFilters ? (
-          <Button onClick={onClearFilters}>
-            Limpar filtros
-          </Button>
+          <Button onClick={onClearFilters}>Limpar filtros</Button>
         ) : undefined
       }
     />

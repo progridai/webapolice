@@ -1,3 +1,4 @@
+using WebApolice.Modulos.Seguranca.Contracts.Authorization;
 using System;
 using System.Linq;
 using System.Threading;
@@ -14,7 +15,6 @@ using WebApolice.Modulos.Cadastro.Application.UseCases.ExcluirEstipulante;
 using WebApolice.Modulos.Cadastro.Application.UseCases.ListarEstipulantes;
 using WebApolice.Modulos.Cadastro.Application.UseCases.ReativarEstipulante;
 using WebApolice.Modulos.Seguranca.Application.Authorization;
-using WebApolice.Modulos.Seguranca.Infrastructure.Authorization;
 
 namespace WebApolice.Modulos.Cadastro.Api.Controllers;
 

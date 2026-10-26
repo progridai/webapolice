@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using WebApolice.Modulos.Financeiro.Contracts;
 using WebApolice.Modulos.Financeiro.Application.UseCases.ConveniosCobranca;
 using WebApolice.Modulos.Seguranca.Application.Authorization;
-using WebApolice.Modulos.Seguranca.Infrastructure.Authorization;
+using WebApolice.Modulos.Seguranca.Contracts.Authorization;
 namespace WebApolice.Modulos.Financeiro.Api.Controllers;
 [ApiController, Authorize, Route("api/convenios-cobranca")]
 public sealed class ConveniosCobrancaController(ConveniosCobrancaHandler handler) : ControllerBase

@@ -18,7 +18,11 @@
  */
 import { normalizeHumanData } from './titleCase';
 import { API_CONFIG } from './apiConfig';
-import { HttpApiError, normalizeError, normalizeNetworkError } from './httpError';
+import {
+  HttpApiError,
+  normalizeError,
+  normalizeNetworkError,
+} from './httpError';
 import type { HttpOptions, HttpResponse } from './http.types';
 
 /** Função injetável para obter o token de acesso — evita acoplamento ao Keycloak */
@@ -35,11 +39,14 @@ export function setTokenProvider(provider: TokenProvider): void {
 }
 
 /** Constrói a URL completa a partir do path */
-function buildUrl(path: string, params?: Record<string, string | number | boolean>): string {
+function buildUrl(
+  path: string,
+  params?: Record<string, string | number | boolean>,
+): string {
   const base = API_CONFIG.BASE_URL.replace(/\/$/, '');
   const normalizedPath = path.startsWith('/') ? path : `/${path}`;
   let url = `${base}${normalizedPath}`;
-  
+
   if (params) {
     const searchParams = new URLSearchParams();
     Object.entries(params).forEach(([key, value]) => {
@@ -59,21 +66,62 @@ function buildUrl(path: string, params?: Record<string, string | number | boolea
 async function fetchWithTimeout(
   url: string,
   options: RequestInit,
-  timeoutMs: number
-): Promise<Response> {
+  timeoutMs: number,
+): Promise<{ response: Response; bodyText: string }> {
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+  const timeoutId = setTimeout(
+    () =>
+      controller.abort(
+        new DOMException('Tempo de resposta excedido.', 'TimeoutError'),
+      ),
+    timeoutMs,
+  );
 
   // Combina o signal externo com o de timeout
-  const externalSignal = (options as { signal?: AbortSignal }).signal;
-  if (externalSignal) {
-    externalSignal.addEventListener('abort', () => controller.abort());
-  }
+  const externalSignal = options.signal;
+  const abort = () => controller.abort();
+  externalSignal?.addEventListener('abort', abort, { once: true });
 
   try {
-    return await fetch(url, { ...options, signal: controller.signal });
+    if (externalSignal?.aborted) abort();
+    controller.signal.throwIfAborted();
+    const response = await fetch(url, {
+      ...options,
+      signal: controller.signal,
+    });
+    const bodyText = response.status === 204 ? '' : await response.text();
+    controller.signal.throwIfAborted();
+    return { response, bodyText };
   } finally {
     clearTimeout(timeoutId);
+    externalSignal?.removeEventListener('abort', abort);
+  }
+}
+
+async function getToken(
+  provider: NonNullable<TokenProvider>,
+  signal?: AbortSignal,
+) {
+  signal?.throwIfAborted();
+  let timeoutId: ReturnType<typeof setTimeout> | undefined;
+  let abort: (() => void) | undefined;
+  try {
+    return await Promise.race([
+      provider(),
+      new Promise<never>((_, reject) => {
+        timeoutId = setTimeout(
+          () => reject(new Error('Timeout ao obter token')),
+          5000,
+        );
+        abort = () =>
+          reject(new DOMException('Requisição cancelada.', 'AbortError'));
+        signal?.addEventListener('abort', abort, { once: true });
+        if (signal?.aborted) abort();
+      }),
+    ]);
+  } finally {
+    clearTimeout(timeoutId);
+    if (abort) signal?.removeEventListener('abort', abort);
   }
 }
 
@@ -82,29 +130,33 @@ async function request<T>(
   method: string,
   path: string,
   body?: unknown,
-  options: HttpOptions = {}
+  options: HttpOptions = {},
 ): Promise<HttpResponse<T>> {
-  const { headers = {}, signal, timeoutMs = API_CONFIG.DEFAULT_TIMEOUT_MS, skipAuth = false } =
-    options;
+  const {
+    headers = {},
+    signal,
+    timeoutMs = API_CONFIG.DEFAULT_TIMEOUT_MS,
+    skipAuth = false,
+  } = options;
+
+  signal?.throwIfAborted();
 
   // Obtém o token de acesso (se disponível e necessário)
   const authHeaders: Record<string, string> = {};
   if (!skipAuth && _tokenProvider) {
     try {
-      // Adiciona um timeout de 5 segundos para a obtenção do token
-      const tokenPromise = _tokenProvider();
-      const timeoutPromise = new Promise<never>((_, reject) => {
-        setTimeout(() => reject(new Error('Timeout ao obter token')), 5000);
-      });
-      const token = await Promise.race([tokenPromise, timeoutPromise]);
+      const token = await getToken(_tokenProvider, signal);
       if (token) {
         authHeaders['Authorization'] = `Bearer ${token}`;
       }
     } catch (err) {
+      signal?.throwIfAborted();
       console.warn('[httpClient] Falha ao obter token de acesso:', err);
       // Falha silenciosa — a API retornará 401 e o fluxo de renovação cuidará disso
     }
   }
+
+  signal?.throwIfAborted();
 
   const requestOptions: RequestInit = {
     method,
@@ -122,9 +174,16 @@ async function request<T>(
 
   const url = buildUrl(path, options.params);
   let response: Response;
+  let bodyText: string;
   try {
-    response = await fetchWithTimeout(url, requestOptions, timeoutMs);
+    ({ response, bodyText } = await fetchWithTimeout(
+      url,
+      requestOptions,
+      timeoutMs,
+    ));
   } catch (error) {
+    if (signal?.aborted)
+      throw new DOMException('Requisição cancelada.', 'AbortError');
     console.error(`[httpClient] Falha de rede ao acessar ${url}:`, error);
     throw normalizeNetworkError(error);
   }
@@ -133,8 +192,6 @@ async function request<T>(
   if (response.status === 204) {
     return { data: undefined as T, status: 204 };
   }
-
-  const bodyText = await response.text();
 
   // Resposta de erro
   if (!response.ok) {
@@ -162,21 +219,33 @@ export const httpClient = {
   /**
    * POST — cria um recurso
    */
-  post<T>(path: string, body?: unknown, options?: HttpOptions): Promise<HttpResponse<T>> {
+  post<T>(
+    path: string,
+    body?: unknown,
+    options?: HttpOptions,
+  ): Promise<HttpResponse<T>> {
     return request<T>('POST', path, body, options);
   },
 
   /**
    * PUT — substitui um recurso
    */
-  put<T>(path: string, body?: unknown, options?: HttpOptions): Promise<HttpResponse<T>> {
+  put<T>(
+    path: string,
+    body?: unknown,
+    options?: HttpOptions,
+  ): Promise<HttpResponse<T>> {
     return request<T>('PUT', path, body, options);
   },
 
   /**
    * PATCH — atualiza parcialmente um recurso
    */
-  patch<T>(path: string, body?: unknown, options?: HttpOptions): Promise<HttpResponse<T>> {
+  patch<T>(
+    path: string,
+    body?: unknown,
+    options?: HttpOptions,
+  ): Promise<HttpResponse<T>> {
     return request<T>('PATCH', path, body, options);
   },
 

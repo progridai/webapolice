@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using WebApolice.Modulos.Seguro.Application.Ports;
 using WebApolice.Modulos.Seguro.Application.UseCases.Catalogos;
 using WebApolice.Modulos.Seguranca.Application.Authorization;
-using WebApolice.Modulos.Seguranca.Infrastructure.Authorization;
+using WebApolice.Modulos.Seguranca.Contracts.Authorization;
 namespace WebApolice.Modulos.Seguro.Api.Controllers;
 [ApiController,Authorize,Route("api/coberturas")]
 public sealed class CoberturasController(CatalogosSeguroHandler handler):ControllerBase

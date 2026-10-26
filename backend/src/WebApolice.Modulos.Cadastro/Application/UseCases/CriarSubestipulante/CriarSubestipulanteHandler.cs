@@ -1,3 +1,4 @@
+using WebApolice.Modulos.Cadastro.Domain.Clientes;
 using System;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -27,7 +28,7 @@ public sealed class CriarSubestipulanteHandler
     public async Task<Guid> Handle(CriarSubestipulanteCommand command, CancellationToken cancellationToken)
     {
         if (string.IsNullOrWhiteSpace(command.Nome))
-            throw new InvalidOperationException("O nome do subestipulante é obrigatório.");
+            throw new WebApolice.SharedKernel.Application.Exceptions.ValidacaoException("O nome do subestipulante é obrigatório.");
 
         string? cnpjLimpo = null;
         if (!string.IsNullOrWhiteSpace(command.Cnpj))
@@ -36,7 +37,7 @@ public sealed class CriarSubestipulanteHandler
 
             var cnpjJaExiste = await _repository.CnpjJaExisteAsync(cnpjLimpo, null, cancellationToken);
             if (cnpjJaExiste)
-                throw new InvalidOperationException("Já existe um subestipulante cadastrado com este CNPJ.");
+                throw new WebApolice.SharedKernel.Application.Exceptions.ValidacaoException("Já existe um subestipulante cadastrado com este CNPJ.");
         }
 
         await using var transaction = await _transactionManager.BeginTransactionAsync(cancellationToken);
@@ -52,7 +53,7 @@ public sealed class CriarSubestipulanteHandler
                 if (pessoaExistente != null)
                 {
                     if (!string.Equals(pessoaExistente.Nome, command.Nome, StringComparison.OrdinalIgnoreCase))
-                        throw new InvalidOperationException("O CNPJ informado já pertence a outra pessoa com nome divergente no sistema.");
+                        throw new WebApolice.SharedKernel.Application.Exceptions.ValidacaoException("O CNPJ informado já pertence a outra pessoa com nome divergente no sistema.");
 
                     pessoaId = pessoaExistente.Id;
                 }

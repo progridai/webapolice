@@ -26,7 +26,8 @@ export const DetalhesUsuarioPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const podeEditar = possuiAcessoTotal() || possuiPermissao('seguranca.usuarios.alterar');
+  const podeEditar =
+    possuiAcessoTotal() || possuiPermissao('seguranca.usuarios.alterar');
 
   useEffect(() => {
     const load = async () => {
@@ -50,12 +51,19 @@ export const DetalhesUsuarioPage: React.FC = () => {
   }, [isLoading]);
 
   useEffect(() => {
-    document.title = usuario ? `${usuario.nome} | Usuários | WebApolice` : 'Detalhes do Usuário | WebApolice';
+    document.title = usuario
+      ? `${usuario.nome} | Usuários | WebApolice`
+      : 'Detalhes do Usuário | WebApolice';
   }, [usuario]);
 
   if (isLoading) {
     return (
-      <main ref={mainRef} tabIndex={-1} className="flex flex-col gap-6 w-full max-w-[1440px] mx-auto p-0 focus:outline-none" aria-busy="true">
+      <main
+        ref={mainRef}
+        tabIndex={-1}
+        className="flex flex-col gap-6 w-full max-w-[1440px] mx-auto p-0 focus:outline-none"
+        aria-busy="true"
+      >
         <Skeleton className="w-32 h-10 mb-4" />
         <Skeleton className="w-full h-32 mb-4" />
         <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
@@ -68,8 +76,16 @@ export const DetalhesUsuarioPage: React.FC = () => {
 
   if (error || !usuario) {
     return (
-      <main ref={mainRef} tabIndex={-1} className="flex flex-col gap-6 w-full max-w-[1440px] mx-auto p-0 focus:outline-none">
-        <Button variant="text" onClick={() => navigate('/seguranca/usuarios')} className="mb-4">
+      <main
+        ref={mainRef}
+        tabIndex={-1}
+        className="flex flex-col gap-6 w-full max-w-[1440px] mx-auto p-0 focus:outline-none"
+      >
+        <Button
+          variant="text"
+          onClick={() => navigate('/seguranca/usuarios')}
+          className="mb-4"
+        >
           ← Voltar para usuários
         </Button>
         <EmptyState
@@ -81,11 +97,21 @@ export const DetalhesUsuarioPage: React.FC = () => {
   }
 
   return (
-    <main ref={mainRef} tabIndex={-1} className="flex flex-col gap-6 w-full max-w-[1440px] mx-auto p-0 focus:outline-none">
+    <main
+      ref={mainRef}
+      tabIndex={-1}
+      className="flex flex-col gap-6 w-full max-w-[1440px] mx-auto p-0 focus:outline-none"
+    >
       <PageHeader
         title={usuario.nome}
-        titleExtras={<StatusBadge status={usuario.ativo ? 'ativo' : 'inativo'} />}
-        description={usuario.username.toLowerCase() !== usuario.nome.toLowerCase() ? usuario.username : undefined}
+        titleExtras={
+          <StatusBadge status={usuario.ativo ? 'ativo' : 'inativo'} />
+        }
+        description={
+          usuario.username.toLowerCase() !== usuario.nome.toLowerCase()
+            ? usuario.username
+            : undefined
+        }
         breadcrumbs={
           <Breadcrumbs
             items={[
@@ -98,13 +124,18 @@ export const DetalhesUsuarioPage: React.FC = () => {
         }
         actions={
           <div className="flex flex-wrap gap-2">
-            <Button variant="secondary" onClick={() => navigate('/seguranca/usuarios')}>
+            <Button
+              variant="secondary"
+              onClick={() => navigate('/seguranca/usuarios')}
+            >
               Voltar
             </Button>
             {podeEditar && (
               <Button
                 variant="primary"
-                onClick={() => navigate(`/seguranca/usuarios/${publicId}/editar`)}
+                onClick={() =>
+                  navigate(`/seguranca/usuarios/${publicId}/editar`)
+                }
               >
                 Alterar Usuário
               </Button>
@@ -115,17 +146,33 @@ export const DetalhesUsuarioPage: React.FC = () => {
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-3">
         <DetailsSection title="Dados Gerais">
           <DescriptionList columns={1} density="compact">
-            <DescriptionItem 
-              label="E-mail" 
-              value={<a href={`mailto:${usuario.email}`}>{usuario.email}</a>} 
+            <DescriptionItem
+              label="E-mail"
+              value={<a href={`mailto:${usuario.email}`}>{usuario.email}</a>}
             />
-            <DescriptionItem 
-              label="Data de Cadastro" 
-              value={new Intl.DateTimeFormat('pt-BR', { dateStyle: 'short', timeStyle: 'short' }).format(new Date(usuario.createdAt)).replace(',', ' às')} 
+            <DescriptionItem
+              label="Data de Cadastro"
+              value={new Intl.DateTimeFormat('pt-BR', {
+                dateStyle: 'short',
+                timeStyle: 'short',
+              })
+                .format(new Date(usuario.createdAt))
+                .replace(',', ' às')}
             />
-            <DescriptionItem 
-              label="Último acesso" 
-              value={usuario.ultimoLoginEm ? new Intl.DateTimeFormat('pt-BR', { dateStyle: 'short', timeStyle: 'short' }).format(new Date(usuario.ultimoLoginEm)).replace(',', ' às') : <span className="desc-item-empty">Nunca acessou</span>} 
+            <DescriptionItem
+              label="Último acesso"
+              value={
+                usuario.ultimoLoginEm ? (
+                  new Intl.DateTimeFormat('pt-BR', {
+                    dateStyle: 'short',
+                    timeStyle: 'short',
+                  })
+                    .format(new Date(usuario.ultimoLoginEm))
+                    .replace(',', ' às')
+                ) : (
+                  <span className="desc-item-empty">Nunca acessou</span>
+                )
+              }
             />
           </DescriptionList>
         </DetailsSection>
@@ -137,11 +184,19 @@ export const DetalhesUsuarioPage: React.FC = () => {
         >
           <div className="flex flex-col gap-2">
             {usuario.perfisAtribuidos.map((perfil) => (
-              <div key={perfil.publicId} className="flex justify-between items-center p-3 rounded-lg border border-borda bg-fundo-aplicacao">
+              <div
+                key={perfil.publicId}
+                className="flex justify-between items-center p-3 rounded-lg border border-borda bg-fundo-aplicacao"
+              >
                 <div className="flex flex-col">
-                  <span className="font-medium text-sm text-texto-principal">{perfil.nome}</span>
-                  {perfil.codigo.toLowerCase() !== perfil.nome.toLowerCase() && (
-                    <span className="text-xs text-texto-secundario font-mono">{perfil.codigo}</span>
+                  <span className="font-medium text-sm text-texto-principal">
+                    {perfil.nome}
+                  </span>
+                  {perfil.codigo.toLowerCase() !==
+                    perfil.nome.toLowerCase() && (
+                    <span className="text-xs text-texto-secundario font-mono">
+                      {perfil.codigo}
+                    </span>
                   )}
                 </div>
                 {perfil.perfilSistema && (

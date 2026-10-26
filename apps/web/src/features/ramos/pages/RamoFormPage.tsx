@@ -29,7 +29,7 @@ export const RamoFormPage: React.FC = () => {
           nome: ramo.nome,
           descricao: ramo.descricao,
         });
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error(err);
         setError('Não foi possível carregar os dados do Ramo.');
       } finally {
@@ -59,9 +59,13 @@ export const RamoFormPage: React.FC = () => {
       }
 
       navigate(ROUTES.RAMOS);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
-      setError(err?.response?.data?.message || 'Ocorreu um erro ao salvar o Ramo.');
+      setError(
+        err instanceof Error && err.message
+          ? err.message
+          : 'Ocorreu um erro ao salvar o Ramo.',
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -81,13 +85,17 @@ export const RamoFormPage: React.FC = () => {
 
   return (
     <div className="flex flex-col gap-6">
-      <PageHeader 
-        title={isEdit ? 'Editar Ramo' : 'Novo Ramo'} 
+      <PageHeader
+        title={isEdit ? 'Editar Ramo' : 'Novo Ramo'}
         description="Preencha os dados abaixo para o cadastro de Ramo"
       />
 
       {error && (
-        <Alert variant="error" title="Erro ao salvar" onClose={() => setError(null)}>
+        <Alert
+          variant="error"
+          title="Erro ao salvar"
+          onClose={() => setError(null)}
+        >
           {error}
         </Alert>
       )}

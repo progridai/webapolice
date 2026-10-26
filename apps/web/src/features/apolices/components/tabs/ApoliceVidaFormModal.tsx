@@ -1,17 +1,20 @@
 import React, { useEffect } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { 
-  Modal, 
-  Button, 
-  Select, 
-  Input, 
-  FormGrid, 
-  FormField, 
-  ReadOnlyField 
+import {
+  Modal,
+  Button,
+  Select,
+  Input,
+  FormGrid,
+  FormField,
+  ReadOnlyField,
 } from '../../../../components/ui';
 import { ClienteAsyncSelect } from './ClienteAsyncSelect';
-import { apoliceVidaSchema, type ApoliceVidaFormValues } from '../../schemas/apoliceVida.schema';
+import {
+  apoliceVidaSchema,
+  type ApoliceVidaFormValues,
+} from '../../schemas/apoliceVida.schema';
 import { useApoliceSubgrupos } from '../../hooks/useApoliceSubgrupos';
 import { useApoliceModulos } from '../../hooks/useApoliceModulos';
 import type { ApoliceVidaListItem } from '../../types/apolice.types';
@@ -31,17 +34,19 @@ export const ApoliceVidaFormModal: React.FC<ApoliceVidaFormModalProps> = ({
   onSubmit,
   apolicePublicId,
   initialData,
-  isSubmitting = false
+  isSubmitting = false,
 }) => {
   const isEdit = !!initialData;
-  const { data: subgrupos, isLoading: loadingSubgrupos } = useApoliceSubgrupos(apolicePublicId);
-  const { data: modulos, isLoading: loadingModulos } = useApoliceModulos(apolicePublicId);
+  const { data: subgrupos, isLoading: loadingSubgrupos } =
+    useApoliceSubgrupos(apolicePublicId);
+  const { data: modulos, isLoading: loadingModulos } =
+    useApoliceModulos(apolicePublicId);
 
   const {
     control,
     handleSubmit,
     reset,
-    formState: { errors }
+    formState: { errors },
   } = useForm<ApoliceVidaFormValues>({
     resolver: zodResolver(apoliceVidaSchema),
     defaultValues: {
@@ -50,8 +55,8 @@ export const ApoliceVidaFormModal: React.FC<ApoliceVidaFormModalProps> = ({
       apoliceModuloPublicId: '',
       dataInicioVigencia: '',
       dataFimVigencia: '',
-      observacao: ''
-    }
+      observacao: '',
+    },
   });
 
   useEffect(() => {
@@ -61,9 +66,10 @@ export const ApoliceVidaFormModal: React.FC<ApoliceVidaFormModalProps> = ({
           clientePublicId: initialData.clientePublicId,
           apoliceSubgrupoPublicId: initialData.apoliceSubgrupoPublicId || '',
           apoliceModuloPublicId: initialData.apoliceModuloPublicId || '',
-          dataInicioVigencia: initialData.dataInicioVigencia?.split('T')[0] || '',
+          dataInicioVigencia:
+            initialData.dataInicioVigencia?.split('T')[0] || '',
           dataFimVigencia: initialData.dataFimVigencia?.split('T')[0] || '',
-          observacao: initialData.observacao || ''
+          observacao: initialData.observacao || '',
         });
       } else {
         reset({
@@ -72,15 +78,25 @@ export const ApoliceVidaFormModal: React.FC<ApoliceVidaFormModalProps> = ({
           apoliceModuloPublicId: '',
           dataInicioVigencia: '',
           dataFimVigencia: '',
-          observacao: ''
+          observacao: '',
         });
       }
     }
   }, [isOpen, initialData, reset]);
 
   // Se estiver editando e o item atual está inativo, ainda o mantemos na lista de disponíveis para não sumir.
-  const subgruposDisponiveis = subgrupos?.filter(s => s.ativo || (isEdit && initialData?.apoliceSubgrupoPublicId === s.subgrupoPublicId)) || [];
-  const modulosDisponiveis = modulos?.filter(m => m.ativo || (isEdit && initialData?.apoliceModuloPublicId === m.publicId)) || [];
+  const subgruposDisponiveis =
+    subgrupos?.filter(
+      (s) =>
+        s.ativo ||
+        (isEdit && initialData?.apoliceSubgrupoPublicId === s.subgrupoPublicId),
+    ) || [];
+  const modulosDisponiveis =
+    modulos?.filter(
+      (m) =>
+        m.ativo ||
+        (isEdit && initialData?.apoliceModuloPublicId === m.publicId),
+    ) || [];
 
   return (
     <Modal
@@ -91,23 +107,33 @@ export const ApoliceVidaFormModal: React.FC<ApoliceVidaFormModalProps> = ({
       title={isEdit ? 'Editar Participação de Vida' : 'Adicionar Vida'}
       size="large"
     >
-      <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-6" noValidate>
+      <form
+        onSubmit={handleSubmit(onSubmit)}
+        className="flex flex-col gap-6"
+        noValidate
+      >
         <div className="flex flex-col gap-4">
-          <h3 className="text-sm font-medium text-texto-secundario uppercase tracking-wider mb-2">Identificação do Cliente</h3>
+          <h3 className="text-sm font-medium text-texto-secundario uppercase tracking-wider mb-2">
+            Identificação do Cliente
+          </h3>
           <div>
             {isEdit && initialData ? (
               <FormField label="Cliente">
                 <ReadOnlyField value={initialData.clienteNome} />
               </FormField>
             ) : (
-              <FormField label="Cliente" required error={errors.clientePublicId?.message}>
+              <FormField
+                label="Cliente"
+                required
+                error={errors.clientePublicId?.message}
+              >
                 <Controller
                   name="clientePublicId"
                   control={control}
                   render={({ field }) => (
-                    <ClienteAsyncSelect 
-                      value={field.value} 
-                      onChange={field.onChange} 
+                    <ClienteAsyncSelect
+                      value={field.value}
+                      onChange={field.onChange}
                       error={!!errors.clientePublicId}
                       disabled={isSubmitting}
                     />
@@ -116,10 +142,15 @@ export const ApoliceVidaFormModal: React.FC<ApoliceVidaFormModalProps> = ({
               </FormField>
             )}
           </div>
-          
-          <h3 className="text-sm font-medium text-texto-secundario uppercase tracking-wider mt-4 mb-2">Vínculo na Apólice</h3>
+
+          <h3 className="text-sm font-medium text-texto-secundario uppercase tracking-wider mt-4 mb-2">
+            Vínculo na Apólice
+          </h3>
           <FormGrid>
-            <FormField label="Subgrupo da Apólice" error={errors.apoliceSubgrupoPublicId?.message}>
+            <FormField
+              label="Subgrupo da Apólice"
+              error={errors.apoliceSubgrupoPublicId?.message}
+            >
               <Controller
                 name="apoliceSubgrupoPublicId"
                 control={control}
@@ -131,15 +162,23 @@ export const ApoliceVidaFormModal: React.FC<ApoliceVidaFormModalProps> = ({
                     disabled={isSubmitting || loadingSubgrupos}
                   >
                     <option value="">Selecione...</option>
-                    {subgruposDisponiveis.map(s => (
-                      <option key={s.subgrupoPublicId} value={s.subgrupoPublicId}>{s.nome}</option>
+                    {subgruposDisponiveis.map((s) => (
+                      <option
+                        key={s.subgrupoPublicId}
+                        value={s.subgrupoPublicId}
+                      >
+                        {s.nome}
+                      </option>
                     ))}
                   </Select>
                 )}
               />
             </FormField>
 
-            <FormField label="Módulo da Apólice" error={errors.apoliceModuloPublicId?.message}>
+            <FormField
+              label="Módulo da Apólice"
+              error={errors.apoliceModuloPublicId?.message}
+            >
               <Controller
                 name="apoliceModuloPublicId"
                 control={control}
@@ -151,8 +190,10 @@ export const ApoliceVidaFormModal: React.FC<ApoliceVidaFormModalProps> = ({
                     disabled={isSubmitting || loadingModulos}
                   >
                     <option value="">Selecione...</option>
-                    {modulosDisponiveis.map(m => (
-                      <option key={m.publicId} value={m.publicId}>{m.nome}</option>
+                    {modulosDisponiveis.map((m) => (
+                      <option key={m.publicId} value={m.publicId}>
+                        {m.nome}
+                      </option>
                     ))}
                   </Select>
                 )}
@@ -162,24 +203,44 @@ export const ApoliceVidaFormModal: React.FC<ApoliceVidaFormModalProps> = ({
         </div>
 
         <div className="flex flex-col gap-4 border-t border-borda pt-4">
-          <h3 className="text-sm font-medium text-texto-secundario uppercase tracking-wider mb-2">Período e Observações</h3>
+          <h3 className="text-sm font-medium text-texto-secundario uppercase tracking-wider mb-2">
+            Período e Observações
+          </h3>
           <FormGrid>
-            <FormField label="Data de Início" error={errors.dataInicioVigencia?.message}>
+            <FormField
+              label="Data de Início"
+              error={errors.dataInicioVigencia?.message}
+            >
               <Controller
                 name="dataInicioVigencia"
                 control={control}
                 render={({ field }) => (
-                  <Input type="date" {...field} value={field.value || ''} error={!!errors.dataInicioVigencia} disabled={isSubmitting} />
+                  <Input
+                    type="date"
+                    {...field}
+                    value={field.value || ''}
+                    error={!!errors.dataInicioVigencia}
+                    disabled={isSubmitting}
+                  />
                 )}
               />
             </FormField>
-            
-            <FormField label="Data de Fim" error={errors.dataFimVigencia?.message}>
+
+            <FormField
+              label="Data de Fim"
+              error={errors.dataFimVigencia?.message}
+            >
               <Controller
                 name="dataFimVigencia"
                 control={control}
                 render={({ field }) => (
-                  <Input type="date" {...field} value={field.value || ''} error={!!errors.dataFimVigencia} disabled={isSubmitting} />
+                  <Input
+                    type="date"
+                    {...field}
+                    value={field.value || ''}
+                    error={!!errors.dataFimVigencia}
+                    disabled={isSubmitting}
+                  />
                 )}
               />
             </FormField>
@@ -191,7 +252,13 @@ export const ApoliceVidaFormModal: React.FC<ApoliceVidaFormModalProps> = ({
                 name="observacao"
                 control={control}
                 render={({ field }) => (
-                  <Input type="text" {...field} value={field.value || ''} error={!!errors.observacao} disabled={isSubmitting} />
+                  <Input
+                    type="text"
+                    {...field}
+                    value={field.value || ''}
+                    error={!!errors.observacao}
+                    disabled={isSubmitting}
+                  />
                 )}
               />
             </FormField>
@@ -199,7 +266,12 @@ export const ApoliceVidaFormModal: React.FC<ApoliceVidaFormModalProps> = ({
         </div>
 
         <div className="flex justify-end gap-2 mt-4 pt-4 border-t border-borda">
-          <Button type="button" variant="text" onClick={onClose} disabled={isSubmitting}>
+          <Button
+            type="button"
+            variant="text"
+            onClick={onClose}
+            disabled={isSubmitting}
+          >
             Cancelar
           </Button>
           <Button type="submit" variant="primary" loading={isSubmitting}>

@@ -16,11 +16,13 @@ public class EnderecosController : ControllerBase
 {
     private readonly ICEPProvider _cepProvider;
     private readonly ILocalidadeResolver _localidadeResolver;
+    private readonly ILogger<EnderecosController> _logger;
 
-    public EnderecosController(ICEPProvider cepProvider, ILocalidadeResolver localidadeResolver)
+    public EnderecosController(ICEPProvider cepProvider, ILocalidadeResolver localidadeResolver, ILogger<EnderecosController> logger)
     {
         _cepProvider = cepProvider;
         _localidadeResolver = localidadeResolver;
+        _logger = logger;
     }
 
     [HttpGet("cep/{cep}")]
@@ -42,10 +44,23 @@ public class EnderecosController : ControllerBase
         {
             enderecoProvedor = await _cepProvider.ConsultarCEPAsync(cepLimpo, cancellationToken);
         }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            throw;
+        }
         catch (System.Exception ex)
         {
             // Erro de integração com o provedor externo
-            return StatusCode(StatusCodes.Status502BadGateway, new { Message = ex.Message });
+            _logger.LogError(ex, "Falha no provedor de CEP. TraceId: {TraceId}", HttpContext.TraceIdentifier);
+            return StatusCode(StatusCodes.Status502BadGateway, new ProblemDetails
+            {
+                Status = StatusCodes.Status502BadGateway,
+                Type = "https://webapolice/errors/provedor-cep-indisponivel",
+                Title = "Serviço de endereços indisponível",
+                Detail = "Não foi possível consultar o CEP. Tente novamente mais tarde.",
+                Instance = Request.Path,
+                Extensions = { ["traceId"] = HttpContext.TraceIdentifier }
+            });
         }
 
         if (enderecoProvedor == null)

@@ -39,7 +39,7 @@ O DbContext base `InfraestruturaDbContext` possui a sua implementação de tempo
 
 Para criar uma migration:
 ```bash
-$env:ConnectionStrings__PostgreSql = "Host=localhost;Port=5432;Database=webapolice;Username=webapolice_admin;Password=alterar_localmente"
+$env:ConnectionStrings__PostgreSql = "Host=localhost;Port=5432;Database=webapolice;Username=webapolice_admin;Password=<SENHA_LOCAL>"
 dotnet ef migrations add <NomeDaMigration> --project src/WebApolice.Shared.Infrastructure --startup-project src/WebApolice.Api --context InfraestruturaDbContext
 ```
 

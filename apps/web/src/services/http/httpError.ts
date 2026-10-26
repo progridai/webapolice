@@ -82,7 +82,8 @@ export function normalizeNetworkError(error: unknown): HttpApiError {
 
   return new HttpApiError({
     code: 'NETWORK_ERROR',
-    message: 'Não foi possível conectar ao servidor. Verifique sua conexão e tente novamente.',
+    message:
+      'Não foi possível conectar ao servidor. Verifique sua conexão e tente novamente.',
     details: error instanceof Error ? { name: error.name } : undefined,
   });
 }
@@ -93,7 +94,7 @@ export function normalizeNetworkError(error: unknown): HttpApiError {
  */
 export async function normalizeError(
   response: Response,
-  bodyText: string
+  bodyText: string,
 ): Promise<HttpApiError> {
   let body: Record<string, unknown> = {};
 
@@ -127,11 +128,13 @@ export async function normalizeError(
  * @param errors - `ValidationErrors` extraídos do erro da API
  * @returns Objeto com o primeiro erro de cada campo
  */
-export function flattenValidationErrors(errors: ValidationErrors): Record<string, string> {
+export function flattenValidationErrors(
+  errors: ValidationErrors,
+): Record<string, string> {
   return Object.fromEntries(
     Object.entries(errors).map(([field, messages]) => [
       field.charAt(0).toLowerCase() + field.slice(1), // camelCase
       messages[0] ?? '',
-    ])
+    ]),
   );
 }

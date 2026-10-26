@@ -160,7 +160,7 @@ public class ProvisionamentoUsuarioServiceTests
 
         // Usar reflection para criar a PostgresException
         var pgExType = typeof(Npgsql.PostgresException);
-        var pgEx = (Npgsql.PostgresException)System.Runtime.Serialization.FormatterServices.GetUninitializedObject(pgExType);
+        var pgEx = (Npgsql.PostgresException)System.Runtime.CompilerServices.RuntimeHelpers.GetUninitializedObject(pgExType);
         
         foreach (var field in pgExType.GetFields(System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Public))
         {

@@ -1,38 +1,16 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useMemo } from 'react';
 import { listarApoliceSubestipulantes } from '../api/apolices.api';
-import type { ApoliceSubestipulanteResult } from '../types/apolice.types';
+import { useConsultaApolice } from './useConsultaApolice';
 
 export function useApoliceSubestipulantes(publicId: string | undefined) {
-  const [data, setData] = useState<ApoliceSubestipulanteResult[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<Error | null>(null);
-
-  const fetchSubestipulantes = useCallback(async () => {
-    if (!publicId) return;
-    try {
-      setIsLoading(true);
-      setError(null);
-      const result = await listarApoliceSubestipulantes(publicId);
-      setData(result);
-    } catch (err: unknown) {
-      if (
-        (err instanceof Error || err instanceof DOMException) &&
-        err.name === 'AbortError'
-      )
-        return;
-      setError(
-        err instanceof Error
-          ? err
-          : new Error('Erro ao carregar subestipulantes da apólice'),
-      );
-    } finally {
-      setIsLoading(false);
-    }
+  const load = useMemo(() => {
+    if (!publicId) return null;
+    return (signal: AbortSignal) =>
+      listarApoliceSubestipulantes(publicId, signal);
   }, [publicId]);
-
-  useEffect(() => {
-    fetchSubestipulantes();
-  }, [fetchSubestipulantes]);
-
-  return { data, isLoading, error, refetch: fetchSubestipulantes };
+  const result = useConsultaApolice(
+    load,
+    'Erro ao carregar subestipulantes da apólice',
+  );
+  return { ...result, data: result.data ?? [] };
 }

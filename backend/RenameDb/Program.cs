@@ -5,7 +5,9 @@ class Program
 {
     static void Main()
     {
-        string connString = "Host=painel.bravida.com.br;Port=5432;Database=postgres;Username=bravito;Password=Bravida@2023!";
+        string connString = Environment.GetEnvironmentVariable("WEBAPOLICE_ADMIN_CONNECTION")
+            ?? throw new InvalidOperationException("Defina WEBAPOLICE_ADMIN_CONNECTION antes de executar a ferramenta.");
+        if (string.IsNullOrWhiteSpace(connString)) throw new InvalidOperationException("WEBAPOLICE_ADMIN_CONNECTION não pode estar vazia.");
         using var conn = new NpgsqlConnection(connString);
         conn.Open();
 

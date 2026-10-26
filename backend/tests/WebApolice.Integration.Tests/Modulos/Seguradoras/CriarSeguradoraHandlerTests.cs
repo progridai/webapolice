@@ -68,7 +68,7 @@ public class CriarSeguradoraHandlerTests
 
         var act = () => _handler.Handle(command, CancellationToken.None);
 
-        await act.Should().ThrowAsync<InvalidOperationException>().WithMessage("Já existe uma seguradora cadastrada com este CNPJ.");
+        await act.Should().ThrowAsync<WebApolice.SharedKernel.Application.Exceptions.ValidacaoException>().WithMessage("Já existe uma seguradora cadastrada com este CNPJ.");
         _repositoryMock.Verify(r => r.Adicionar(It.IsAny<SeguradoraModel>()), Times.Never);
         _dbTransactionMock.Verify(t => t.CommitAsync(It.IsAny<CancellationToken>()), Times.Never);
     }
@@ -83,7 +83,7 @@ public class CriarSeguradoraHandlerTests
 
         var act = () => _handler.Handle(command, CancellationToken.None);
 
-        await act.Should().ThrowAsync<InvalidOperationException>().WithMessage("O nome da seguradora é obrigatório.");
+        await act.Should().ThrowAsync<WebApolice.SharedKernel.Application.Exceptions.ValidacaoException>().WithMessage("O nome da seguradora é obrigatório.");
         _repositoryMock.Verify(r => r.Adicionar(It.IsAny<SeguradoraModel>()), Times.Never);
     }
 }

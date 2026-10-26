@@ -1,17 +1,21 @@
 import React from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { 
-  Button, 
-  Input, 
+import {
+  Button,
+  Input,
   Textarea,
   Checkbox,
   FormField,
   FormGrid,
   FormSection,
-  FormActions
+  FormActions,
 } from '../../../components/ui';
-import { moduloFormSchema, type ModuloFormData, type ModuloFormInput } from '../schemas/modulo.schema';
+import {
+  moduloFormSchema,
+  type ModuloFormData,
+  type ModuloFormInput,
+} from '../schemas/modulo.schema';
 
 export interface ModuloFormProps {
   initialData?: Partial<ModuloFormData>;
@@ -44,7 +48,11 @@ export const ModuloForm: React.FC<ModuloFormProps> = ({
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
       <FormSection title="Dados do Módulo" icon={undefined}>
         <FormGrid>
-          <FormField label="Nome do Módulo" error={errors.nome?.message} required>
+          <FormField
+            label="Nome do Módulo"
+            error={errors.nome?.message}
+            required
+          >
             <Input
               placeholder="Ex: Vida, Automóvel, Consórcio"
               {...register('nome')}
@@ -79,19 +87,15 @@ export const ModuloForm: React.FC<ModuloFormProps> = ({
       </FormSection>
 
       <FormActions>
-        <Button 
-          type="button" 
-          variant="secondary" 
+        <Button
+          type="button"
+          variant="secondary"
           onClick={onCancel}
           disabled={isSubmitting}
         >
           Cancelar
         </Button>
-        <Button 
-          type="submit" 
-          variant="primary" 
-          loading={isSubmitting}
-        >
+        <Button type="submit" variant="primary" loading={isSubmitting}>
           Salvar
         </Button>
       </FormActions>

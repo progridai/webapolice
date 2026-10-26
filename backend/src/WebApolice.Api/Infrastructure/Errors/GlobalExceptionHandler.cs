@@ -8,12 +8,10 @@ namespace WebApolice.Api.Infrastructure.Errors;
 public class GlobalExceptionHandler : IExceptionHandler
 {
     private readonly ILogger<GlobalExceptionHandler> _logger;
-    private readonly IWebHostEnvironment _env;
 
-    public GlobalExceptionHandler(ILogger<GlobalExceptionHandler> logger, IWebHostEnvironment env)
+    public GlobalExceptionHandler(ILogger<GlobalExceptionHandler> logger)
     {
         _logger = logger;
-        _env = env;
     }
 
     public async ValueTask<bool> TryHandleAsync(HttpContext httpContext, Exception exception, CancellationToken cancellationToken)
@@ -111,7 +109,7 @@ public class GlobalExceptionHandler : IExceptionHandler
                 Type = "https://webapolice/errors/erro-interno",
                 Title = "Ocorreu um erro inesperado no servidor.",
                 Status = StatusCodes.Status500InternalServerError,
-                Detail = exception.ToString(),
+                Detail = "Consulte os logs para obter mais informações.",
                 Instance = context.Request.Path
             }
         };

@@ -11,6 +11,10 @@ Este documento descreve o padrão adotado para as respostas de sucesso e erro da
 - **Traceabilidade**: Todas as respostas de erro contêm um `traceId` (rastreabilidade central).
 - **Segurança**: Nunca se exibe *stack traces* no retorno aos clientes. Detalhes internos são registrados em log e o cliente recebe apenas mensagens amigáveis.
 
+Correção aplicada em 23/10/2026 (A02): erros 500 recebem a mesma mensagem genérica em todos os ambientes, mantendo traceId. O TestController existe apenas no assembly de testes. A consulta de CEP devolve 502 genérico com traceId e preserva cancelamento; exceções internas não são devolvidas pelo controller. Seguradoras/Subestipulantes capturam somente ValidacaoException para suas respostas 400 existentes; InvalidOperationException técnica passa pelo tratamento global. Esses ajustes preservam os status de validação publicados, sem transformar erros internos em mensagens de negócio.
+
+Compatibilidade: a negação por catálogo passa a usar o ProblemDetails 403 `acesso-negado` central, em lugar dos tipos específicos `modulo-nao-habilitado`/`recurso-nao-habilitado`. O 502 da consulta de CEP passa do objeto `{ Message }` para ProblemDetails com `detail` e `traceId`. O cliente HTTP atual já normaliza esses campos; integrações externas devem considerar essas alterações de erro. Os contratos de sucesso não mudaram.
+
 ---
 
 ## Estrutura Base de Erros (`ProblemDetails`)

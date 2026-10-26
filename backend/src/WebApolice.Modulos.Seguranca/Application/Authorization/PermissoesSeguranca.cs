@@ -2,6 +2,13 @@ namespace WebApolice.Modulos.Seguranca.Application.Authorization;
 
 public static class PermissoesSeguranca
 {
+    public static class Propostas
+    {
+        public const string Visualizar = "propostas.visualizar";
+        public const string Inserir = "propostas.inserir";
+        public const string Alterar = "propostas.alterar";
+    }
+
     public static class ConveniosCobranca
     {
         public const string Visualizar = "convenios_cobranca.visualizar";

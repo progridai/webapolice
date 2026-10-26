@@ -9,19 +9,19 @@ import { PageLoading } from '../../../components/application/PageLoading';
 const ApolicesListPage = lazy(() =>
   import('../pages/ApolicesListPage').then((m) => ({
     default: m.ApolicesListPage,
-  }))
+  })),
 );
 
 const ApoliceDetalhesPage = lazy(() =>
   import('../pages/ApoliceDetalhesPage').then((m) => ({
     default: m.ApoliceDetalhesPage,
-  }))
+  })),
 );
 
 const ApoliceFormPage = lazy(() =>
   import('../pages/ApoliceFormPage').then((m) => ({
     default: m.ApoliceFormPage,
-  }))
+  })),
 );
 
 export const ApolicesRoutes = (

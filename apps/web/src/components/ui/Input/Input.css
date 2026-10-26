@@ -11,7 +11,9 @@
   color: var(--cor-texto-principal);
   outline: none;
   width: 100%;
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
 }
 
 .form-input::placeholder {

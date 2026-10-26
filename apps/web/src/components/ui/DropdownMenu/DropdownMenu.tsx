@@ -17,7 +17,10 @@ export const DropdownMenu: React.FC<DropdownMenuProps> = ({
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
         setIsOpen(false);
       }
     };
@@ -39,11 +42,20 @@ export const DropdownMenu: React.FC<DropdownMenuProps> = ({
 
   return (
     <div className="dropdown-menu-container" ref={dropdownRef}>
-      <div className="dropdown-menu-trigger" onClick={toggleDropdown} aria-haspopup="menu" aria-expanded={isOpen}>
+      <div
+        className="dropdown-menu-trigger"
+        onClick={toggleDropdown}
+        aria-haspopup="menu"
+        aria-expanded={isOpen}
+      >
         {trigger}
       </div>
       {isOpen && (
-        <div className={`dropdown-menu-content dropdown-menu-align-${align}`} role="menu" onClick={handleMenuClick}>
+        <div
+          className={`dropdown-menu-content dropdown-menu-align-${align}`}
+          role="menu"
+          onClick={handleMenuClick}
+        >
           {children}
         </div>
       )}
@@ -56,9 +68,18 @@ export interface DropdownMenuItemProps extends React.ButtonHTMLAttributes<HTMLBu
   icon?: ReactNode;
 }
 
-export const DropdownMenuItem: React.FC<DropdownMenuItemProps> = ({ children, icon, className = '', ...props }) => {
+export const DropdownMenuItem: React.FC<DropdownMenuItemProps> = ({
+  children,
+  icon,
+  className = '',
+  ...props
+}) => {
   return (
-    <button className={`dropdown-menu-item ${className}`} role="menuitem" {...props}>
+    <button
+      className={`dropdown-menu-item ${className}`}
+      role="menuitem"
+      {...props}
+    >
       {icon && <span className="dropdown-menu-item-icon">{icon}</span>}
       {children}
     </button>

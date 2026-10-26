@@ -38,7 +38,6 @@ export const SearchField: React.FC<SearchFieldProps> = ({
     setLocalValue(value);
   }, [value]);
 
-
   // Cleanup debounce on unmount
   useEffect(() => {
     return () => {
@@ -48,17 +47,20 @@ export const SearchField: React.FC<SearchFieldProps> = ({
     };
   }, []);
 
-  const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const newValue = e.target.value;
-    setLocalValue(newValue);
+  const handleChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const newValue = e.target.value;
+      setLocalValue(newValue);
 
-    if (debounceRef.current) {
-      clearTimeout(debounceRef.current);
-    }
-    debounceRef.current = setTimeout(() => {
-      onChangeRef.current(newValue);
-    }, debounceMs);
-  }, [debounceMs]);
+      if (debounceRef.current) {
+        clearTimeout(debounceRef.current);
+      }
+      debounceRef.current = setTimeout(() => {
+        onChangeRef.current(newValue);
+      }, debounceMs);
+    },
+    [debounceMs],
+  );
 
   const handleClear = useCallback(() => {
     setLocalValue('');

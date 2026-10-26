@@ -145,21 +145,30 @@ describe.each([
       await selectEntity('Estipulante', labels._estipulanteNome);
       await selectEntity('Seguradora', labels._seguradoraNome);
       await selectEntity('Corretora (Opcional)', labels._corretoraNome);
-      expect(listarEstipulantes).toHaveBeenCalledWith({
-        nome: '',
-        page: 1,
-        pageSize: 20,
-      });
-      expect(seguradorasApi.listar).toHaveBeenCalledWith({
-        busca: '',
-        pagina: 1,
-        tamanhoPagina: 20,
-      });
-      expect(corretorasApi.listar).toHaveBeenCalledWith({
-        busca: '',
-        pagina: 1,
-        tamanhoPagina: 20,
-      });
+      expect(listarEstipulantes).toHaveBeenCalledWith(
+        {
+          nome: '',
+          page: 1,
+          pageSize: 20,
+        },
+        expect.any(AbortSignal),
+      );
+      expect(seguradorasApi.listar).toHaveBeenCalledWith(
+        {
+          busca: '',
+          pagina: 1,
+          tamanhoPagina: 20,
+        },
+        expect.any(AbortSignal),
+      );
+      expect(corretorasApi.listar).toHaveBeenCalledWith(
+        {
+          busca: '',
+          pagina: 1,
+          tamanhoPagina: 20,
+        },
+        expect.any(AbortSignal),
+      );
       submit();
       await waitFor(() => expect(onSubmit).toHaveBeenCalledOnce());
       expect(onSubmit.mock.calls[0][0]).toMatchObject({
@@ -250,11 +259,14 @@ describe('Edição e validação de Apólices', () => {
     fireEvent.change(field, { target: { value: 'Nova Empresa' } });
     expect(field.value).toBe('Nova Empresa');
     await waitFor(() =>
-      expect(listarEstipulantes).toHaveBeenCalledWith({
-        nome: 'Nova Empresa',
-        page: 1,
-        pageSize: 20,
-      }),
+      expect(listarEstipulantes).toHaveBeenCalledWith(
+        {
+          nome: 'Nova Empresa',
+          page: 1,
+          pageSize: 20,
+        },
+        expect.any(AbortSignal),
+      ),
     );
   });
 
@@ -309,6 +321,7 @@ describe('Edição e validação de Apólices', () => {
     );
     const field = screen.getByLabelText('Estipulante');
     fireEvent.focus(field);
+    await waitFor(() => expect(listarEstipulantes).toHaveBeenCalledOnce());
     fireEvent.change(field, { target: { value: 'Atual' } });
     expect(await screen.findByText('Empresa Atual')).toBeTruthy();
     await act(async () =>

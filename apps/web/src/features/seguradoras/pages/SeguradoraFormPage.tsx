@@ -5,7 +5,13 @@
  */
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { PageHeader, Card, Alert, Spinner, Breadcrumbs } from '../../../components/ui';
+import {
+  PageHeader,
+  Card,
+  Alert,
+  Spinner,
+  Breadcrumbs,
+} from '../../../components/ui';
 import { ROUTES } from '../../../app/routes/routePaths';
 import { SeguradoraForm } from '../components/SeguradoraForm';
 import { seguradorasApi } from '../api/seguradoras.api';
@@ -19,7 +25,9 @@ export const SeguradoraFormPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(isEdit);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [initialData, setInitialData] = useState<Partial<SeguradoraFormData>>({});
+  const [initialData, setInitialData] = useState<Partial<SeguradoraFormData>>(
+    {},
+  );
 
   useEffect(() => {
     if (!isEdit || !publicId) return;
@@ -36,12 +44,12 @@ export const SeguradoraFormPage: React.FC = () => {
           cnpj: seguradora.cnpj || '',
           observacao: seguradora.observacao || '',
         });
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error('Erro ao carregar dados da seguradora:', err);
         setError(
-          err?.response?.data?.message ||
-            err?.message ||
-            'Não foi possível carregar os dados da seguradora.'
+          err instanceof Error && err.message
+            ? err.message
+            : 'Não foi possível carregar os dados da seguradora.',
         );
       } finally {
         setIsLoading(false);
@@ -76,10 +84,13 @@ export const SeguradoraFormPage: React.FC = () => {
       }
 
       navigate(ROUTES.SEGURADORAS);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Erro ao salvar seguradora:', err);
-      const apiMsg = err?.response?.data?.message || err?.message;
-      setError(apiMsg || 'Ocorreu um erro ao salvar a seguradora. Verifique os dados informados.');
+      setError(
+        err instanceof Error && err.message
+          ? err.message
+          : 'Ocorreu um erro ao salvar a seguradora. Verifique os dados informados.',
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -91,7 +102,10 @@ export const SeguradoraFormPage: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="flex justify-center items-center h-64" aria-label="Carregando seguradora">
+      <div
+        className="flex justify-center items-center h-64"
+        aria-label="Carregando seguradora"
+      >
         <Spinner size="large" />
       </div>
     );
@@ -114,7 +128,11 @@ export const SeguradoraFormPage: React.FC = () => {
       />
 
       {error && (
-        <Alert variant="error" title="Erro ao salvar" onClose={() => setError(null)}>
+        <Alert
+          variant="error"
+          title="Erro ao salvar"
+          onClose={() => setError(null)}
+        >
           {error}
         </Alert>
       )}

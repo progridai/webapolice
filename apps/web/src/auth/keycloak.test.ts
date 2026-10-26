@@ -3,9 +3,11 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 const initMock = vi.fn();
 
 vi.mock('keycloak-js', () => ({
-  default: vi.fn().mockImplementation(() => ({
-    init: initMock,
-  })),
+  default: vi.fn(
+    class {
+      init = initMock;
+    },
+  ),
 }));
 
 describe('keycloak singleton', () => {

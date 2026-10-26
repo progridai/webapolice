@@ -7,7 +7,9 @@ namespace SqlRunner
     {
         static void Main(string[] args)
         {
-            string connectionString = "Host=painel.bravida.com.br;Database=webapolice_teste;Username=bravito;Password=Bravida@2023!";
+            string connectionString = Environment.GetEnvironmentVariable("ConnectionStrings__PostgreSql")
+            ?? throw new InvalidOperationException("Defina ConnectionStrings__PostgreSql antes de executar a ferramenta.");
+        if (string.IsNullOrWhiteSpace(connectionString)) throw new InvalidOperationException("ConnectionStrings__PostgreSql não pode estar vazia.");
 
             using var connection = new NpgsqlConnection(connectionString);
             connection.Open();

@@ -1,3 +1,4 @@
+using WebApolice.Modulos.Cadastro.Domain.Clientes;
 using System;
 using System.Linq;
 using System.Threading;
@@ -57,6 +58,12 @@ public sealed class ClienteRepository : IClienteRepository
             .OrderByDescending(e => e.Id)
             .FirstOrDefaultAsync(cancellationToken);
     }
+
+    public Task<List<PessoaContatoModel>> ObterContatosAtivosAsync(long pessoaId, CancellationToken cancellationToken) =>
+        _dbContext.Contatos.Where(x => x.PessoaId == pessoaId && x.Ativo).ToListAsync(cancellationToken);
+
+    public Task<List<PessoaEnderecoModel>> ObterEnderecosAtivosAsync(long pessoaId, CancellationToken cancellationToken) =>
+        _dbContext.Enderecos.Where(x => x.PessoaId == pessoaId && x.Ativo).ToListAsync(cancellationToken);
 
     public void AdicionarPessoa(PessoaModel pessoa)
     {

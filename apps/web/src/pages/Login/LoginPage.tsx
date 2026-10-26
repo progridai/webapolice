@@ -18,7 +18,8 @@ export const LoginPage: React.FC = () => {
   const { isAuthenticated, isLoading, login } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const from = (location.state as { from?: Location })?.from?.pathname ?? ROUTES.APP;
+  const from =
+    (location.state as { from?: Location })?.from?.pathname ?? ROUTES.APP;
 
   useEffect(() => {
     document.title = 'Login | WebApólice';

@@ -1,3 +1,4 @@
+using WebApolice.Modulos.Cadastro.Domain.Clientes;
 using System;
 using System.Linq;
 using System.Threading;
@@ -7,7 +8,6 @@ using System.Text.RegularExpressions;
 using WebApolice.Modulos.Cadastro.Application.Ports;
 using WebApolice.Modulos.Cadastro.Domain;
 using WebApolice.Modulos.Cadastro.Domain.Exceptions;
-using WebApolice.Modulos.Cadastro.Infrastructure.Persistence;
 using WebApolice.Modulos.Cadastro.Infrastructure.Persistence.Models;
 using WebApolice.Auditoria.Contracts;
 using WebApolice.Auditoria.Domain;
@@ -48,14 +48,12 @@ public sealed record AlterarCooperadoCommand(
 public sealed class AlterarCooperadoHandler
 {
     private readonly ICooperadoRepository _repository;
-    private readonly CadastroDbContext _dbContext;
-    private readonly IRegistradorAuditoria _auditoria;
+    private readonly IOperacaoCadastroAuditada _operacao;
 
-    public AlterarCooperadoHandler(ICooperadoRepository repository, CadastroDbContext dbContext, IRegistradorAuditoria auditoria)
+    public AlterarCooperadoHandler(ICooperadoRepository repository, IOperacaoCadastroAuditada operacao)
     {
         _repository = repository;
-        _dbContext = dbContext;
-        _auditoria = auditoria;
+        _operacao = operacao;
     }
 
     public async Task Handle(AlterarCooperadoCommand command, string usuarioSub, CancellationToken cancellationToken)
@@ -70,9 +68,7 @@ public sealed class AlterarCooperadoHandler
         RegrasCadastraisValidator.ValidarAgencia(command.Agencia);
         RegrasCadastraisValidator.ValidarContaCorrente(command.ContaCorrente);
 
-        await using var transaction = await _dbContext.BeginTransactionAsync(cancellationToken);
-
-        try
+        await _operacao.ExecutarAsync<bool>("Cadastro", "COOPERADOS", "ALTERAR", async ct =>
         {
             var agenciador = await _repository.ObterPorPublicIdAsync(command.PublicId, cancellationToken)
                 ?? throw new CooperadoNaoEncontradoException("Cooperado não encontrado.");
@@ -176,15 +172,10 @@ public sealed class AlterarCooperadoHandler
             );
 
             await _repository.SalvarAlteracoesAsync(cancellationToken);
-            await transaction.CommitAsync(cancellationToken);
 
             var payloadAuditoria = JsonSerializer.SerializeToDocument(new { PublicId = agenciador.PublicId, Codigo = command.Codigo });
-            await _auditoria.RegistrarAsync(new RegistroAuditoria { Acao = "ALTERAR", Modulo = "Cadastro", Recurso = "COOPERADOS", RecursoId = agenciador.PublicId.ToString(), Resultado = ResultadoAuditoria.Sucesso, DadosPosteriores = payloadAuditoria }, cancellationToken);
-        }
-        catch
-        {
-            await transaction.RollbackAsync(cancellationToken);
-            throw;
-        }
+
+            return (true, agenciador.PublicId.ToString(), null, payloadAuditoria);
+        }, cancellationToken);
     }
 }

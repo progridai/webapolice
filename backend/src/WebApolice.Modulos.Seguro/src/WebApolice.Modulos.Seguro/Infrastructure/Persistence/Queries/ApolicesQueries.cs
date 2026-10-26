@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -131,8 +131,8 @@ public class ApolicesQueries : IApolicesQueries
                 a.Status,
                 a.Ativo,
                 a.Observacao,
-                Ramos = a.Ramos.Select(ar => new WebApolice.Modulos.Seguro.Application.UseCases.Apolices.ObterApolice.ApoliceRamoResult(
-                    ar.Ramo.PublicId,
+                Ramos = a.Ramos.Where(ar => ar.Ramo != null).Select(ar => new WebApolice.Modulos.Seguro.Application.UseCases.Apolices.ObterApolice.ApoliceRamoResult(
+                    ar.Ramo!.PublicId,
                     ar.Ramo.Codigo,
                     ar.Ramo.Nome,
                     ar.NumeroApolice,

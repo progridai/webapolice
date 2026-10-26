@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using WebApolice.Modulos.Financeiro.Contracts;
 using WebApolice.Modulos.Seguranca.Application.Authorization;
-using WebApolice.Modulos.Seguranca.Infrastructure.Authorization;
+using WebApolice.Modulos.Seguranca.Contracts.Authorization;
 namespace WebApolice.Modulos.Seguro.Api.Controllers;
 [ApiController,Authorize,Route("api/apolices/convenios-cobranca/opcoes")]
 public sealed class ConveniosApoliceController(IConveniosCobrancaConsulta convenios):ControllerBase

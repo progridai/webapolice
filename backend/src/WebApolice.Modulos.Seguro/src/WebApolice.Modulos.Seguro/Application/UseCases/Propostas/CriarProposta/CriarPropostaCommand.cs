@@ -8,14 +8,14 @@ public class CriarPropostaCommand : IRequest<Guid>
     public Guid ApoliceId { get; set; }
     public Guid ApoliceVidaId { get; set; }
     
-    // O ClienteId precisa ser enviado para provar que a requisiÃ§Ã£o nÃ£o estÃ¡
+    // O ClienteId precisa ser enviado para provar que a requisição não está
     // forjando a ApoliceVidaId de um terceiro.
     public long ClienteId { get; set; }
     
-    // Opcional, sÃ³ usado se a ApÃ³lice nÃ£o forÃ§ar uma Corretora.
+    // Opcional, só usado se a Apólice não forçar uma Corretora.
     public long? CorretoraId { get; set; }
     
-    // Totalmente independente (nÃ£o-obrigatÃ³rio derivar da Apolice)
+    // Totalmente independente (não-obrigatório derivar da Apolice)
     public long? ConvenioCobrancaId { get; set; }
     public long? ContaCobrancaId { get; set; }
     

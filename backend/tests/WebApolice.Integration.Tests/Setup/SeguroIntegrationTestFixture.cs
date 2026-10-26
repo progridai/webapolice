@@ -8,8 +8,7 @@ namespace WebApolice.Integration.Tests.Setup;
 
 public class SeguroIntegrationTestFixture : IAsyncLifetime
 {
-    private readonly PostgreSqlContainer _postgreSqlContainer = new PostgreSqlBuilder()
-        .WithImage("postgres:16")
+    private readonly PostgreSqlContainer _postgreSqlContainer = new PostgreSqlBuilder("postgres:18.4")
         .Build();
 
     private WebApolice.Modulos.Financeiro.src.WebApolice.Modulos.Financeiro.Infrastructure.Persistence.FinanceiroDbContext _financeiro = default!;

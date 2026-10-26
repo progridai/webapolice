@@ -27,7 +27,7 @@ describe('clientesApi', () => {
 
     expect(httpClient.get).toHaveBeenCalledTimes(1);
     const callArgs = vi.mocked(httpClient.get).mock.calls[0];
-    
+
     // Verifica a URL serializada corretamente
     expect(callArgs[0]).toContain('/api/clientes?');
     expect(callArgs[0]).toContain('pagina=2');

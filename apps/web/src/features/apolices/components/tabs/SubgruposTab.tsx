@@ -2,13 +2,13 @@ import React, { useState } from 'react';
 import { useApoliceSubgrupos } from '../../hooks/useApoliceSubgrupos';
 import { inativarApoliceSubgrupo } from '../../api/apolices.api';
 import type { ApoliceSubgrupoResult } from '../../types/apolice.types';
-import { 
-  Button, 
-  Alert, 
-  EmptyState, 
-  DataTable, 
+import {
+  Button,
+  Alert,
+  EmptyState,
+  DataTable,
   StatusBadge,
-  ConfirmDialog
+  ConfirmDialog,
 } from '../../../../components/ui';
 import type { Column } from '../../../../components/ui/DataTable/DataTable';
 import { SubgrupoApoliceModal } from '../modals/SubgrupoApoliceModal';
@@ -21,15 +21,18 @@ interface SubgruposTabProps {
 export const SubgruposTab: React.FC<SubgruposTabProps> = ({ publicId }) => {
   const { data, isLoading, error, refetch } = useApoliceSubgrupos(publicId);
   const { possuiPermissao } = useAuthorization();
-  
+
   const podeInserir = possuiPermissao('apolices.subgrupos.inserir');
   const podeAlterar = possuiPermissao('apolices.subgrupos.alterar');
   const podeInativar = possuiPermissao('apolices.subgrupos.inativar');
 
   const [modalAberto, setModalAberto] = useState(false);
-  const [subgrupoEdicao, setSubgrupoEdicao] = useState<ApoliceSubgrupoResult | undefined>();
-  
-  const [subgrupoInativacao, setSubgrupoInativacao] = useState<ApoliceSubgrupoResult | null>(null);
+  const [subgrupoEdicao, setSubgrupoEdicao] = useState<
+    ApoliceSubgrupoResult | undefined
+  >();
+
+  const [subgrupoInativacao, setSubgrupoInativacao] =
+    useState<ApoliceSubgrupoResult | null>(null);
   const [inativando, setInativando] = useState(false);
   const [inativarErro, setInativarErro] = useState<string | null>(null);
 
@@ -48,12 +51,17 @@ export const SubgruposTab: React.FC<SubgruposTabProps> = ({ publicId }) => {
     try {
       setInativando(true);
       setInativarErro(null);
-      await inativarApoliceSubgrupo(publicId, subgrupoInativacao.subgrupoPublicId);
+      await inativarApoliceSubgrupo(
+        publicId,
+        subgrupoInativacao.subgrupoPublicId,
+      );
       setSubgrupoInativacao(null);
       refetch();
     } catch (err: unknown) {
       setInativarErro(
-        err instanceof Error && err.message ? err.message : 'Erro ao inativar o subgrupo.',
+        err instanceof Error && err.message
+          ? err.message
+          : 'Erro ao inativar o subgrupo.',
       );
     } finally {
       setInativando(false);
@@ -64,21 +72,29 @@ export const SubgruposTab: React.FC<SubgruposTabProps> = ({ publicId }) => {
     {
       key: 'nome',
       label: 'Nome',
-      render: (row) => <span className="font-medium text-texto-principal">{row.nome}</span>,
+      render: (row) => (
+        <span className="font-medium text-texto-principal">{row.nome}</span>
+      ),
     },
     {
       key: 'convenioCobrancaNome',
       label: 'Convênio de Cobrança',
-      render: row => row.convenioCobrancaNome ? `${row.convenioCobrancaNome}${row.convenioCobrancaAtivo === false ? ' (inativo)' : ''}` : 'Pendente',
+      render: (row) =>
+        row.convenioCobrancaNome
+          ? `${row.convenioCobrancaNome}${row.convenioCobrancaAtivo === false ? ' (inativo)' : ''}`
+          : 'Pendente',
     },
     {
       key: 'observacao',
       label: 'Observação',
       render: (row) => {
-        if (!row.observacao) return <span className="text-texto-secundario">—</span>;
+        if (!row.observacao)
+          return <span className="text-texto-secundario">—</span>;
         return (
           <span className="text-texto-secundario" title={row.observacao}>
-            {row.observacao.length > 50 ? `${row.observacao.substring(0, 50)}...` : row.observacao}
+            {row.observacao.length > 50
+              ? `${row.observacao.substring(0, 50)}...`
+              : row.observacao}
           </span>
         );
       },
@@ -86,9 +102,7 @@ export const SubgruposTab: React.FC<SubgruposTabProps> = ({ publicId }) => {
     {
       key: 'status',
       label: 'Status',
-      render: (row) => (
-        <StatusBadge status={row.ativo ? 'ativo' : 'inativo'} />
-      ),
+      render: (row) => <StatusBadge status={row.ativo ? 'ativo' : 'inativo'} />,
     },
     {
       key: 'acoes',
@@ -97,27 +111,41 @@ export const SubgruposTab: React.FC<SubgruposTabProps> = ({ publicId }) => {
       render: (row) => (
         <div className="flex justify-end gap-2">
           {podeAlterar && row.ativo && (
-            <Button variant="secondary" size="small" onClick={() => handleEditar(row)}>
+            <Button
+              variant="secondary"
+              size="small"
+              onClick={() => handleEditar(row)}
+            >
               Editar
             </Button>
           )}
           {podeInativar && row.ativo && (
-            <Button variant="danger" size="small" onClick={() => setSubgrupoInativacao(row)}>
+            <Button
+              variant="danger"
+              size="small"
+              onClick={() => setSubgrupoInativacao(row)}
+            >
               Inativar
             </Button>
           )}
         </div>
       ),
-    }
+    },
   ];
 
   if (error) {
     return (
       <div className="flex flex-col gap-4 items-start">
         <Alert variant="error" title="Erro ao carregar Subgrupos">
-          {error.message || 'Não foi possível carregar os subgrupos desta apólice.'}
+          {error.message ||
+            'Não foi possível carregar os subgrupos desta apólice.'}
         </Alert>
-        <Button onClick={refetch} variant="primary" size="small" loading={isLoading}>
+        <Button
+          onClick={refetch}
+          variant="primary"
+          size="small"
+          loading={isLoading}
+        >
           Tentar novamente
         </Button>
       </div>
@@ -128,8 +156,12 @@ export const SubgruposTab: React.FC<SubgruposTabProps> = ({ publicId }) => {
     <div className="flex flex-col gap-4">
       <div className="flex justify-between items-center mb-2">
         <div>
-          <h2 className="text-xl font-semibold text-texto-principal">Subgrupos da Apólice</h2>
-          <p className="text-sm text-texto-terciario mt-1">Gestão de divisões contextuais da Apólice.</p>
+          <h2 className="text-xl font-semibold text-texto-principal">
+            Subgrupos da Apólice
+          </h2>
+          <p className="text-sm text-texto-terciario mt-1">
+            Gestão de divisões contextuais da Apólice.
+          </p>
         </div>
         {podeInserir && (
           <Button onClick={handleNovo} variant="primary">
@@ -139,7 +171,11 @@ export const SubgruposTab: React.FC<SubgruposTabProps> = ({ publicId }) => {
       </div>
 
       {inativarErro && (
-        <Alert variant="error" title="Atenção" onClose={() => setInativarErro(null)}>
+        <Alert
+          variant="error"
+          title="Atenção"
+          onClose={() => setInativarErro(null)}
+        >
           {inativarErro}
         </Alert>
       )}

@@ -113,3 +113,10 @@ Se um container apresentar estado de saúde instável ou permanentemente `unheal
 
 > [!CAUTION]
 > **Esta configuração de Docker Compose e variáveis de ambiente é destinada única e exclusivamente para o ambiente local de desenvolvimento (start-dev). Ela não é segura para implantações de produção, pois carece de configurações de criptografia de rede (TLS/HTTPS), redundância de dados e restrições rígidas adicionais de firewall.**
+
+
+## Consolidação de 23/10/2026
+
+Os Dockerfiles de aplicação fixam SDK .NET 10.0.301/runtime 10.0.9, Node 24.18.0 e Nginx 1.30.6-alpine3.24; fixtures PostgreSQL usam 18.4. Backend executa com APP_UID e frontend com nginx sem privilégios. A porta do container frontend passou a **8080**: revisar mapeamentos da implantação. Tags explícitas ainda exigem homologação, registro de digests e atualização periódica.
+
+API aplica HSTS fora de Development/Testing, forwarded headers com proxies explicitamente confiáveis e limite por usuário/IP. Configurações e limites estão no [documento 78](../docs/78-operacao-e-validacao-consolidacao.md). Docker Engine estava indisponível na execução: imagens, compatibilidade PostgreSQL/Keycloak, proxy/TLS, backup/restore, alertas e implantação não foram homologados. Nenhuma base existente foi alterada e nenhuma migration foi aplicada. Não remover volumes para executar testes: usar containers e bases efêmeras.

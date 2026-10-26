@@ -1,5 +1,12 @@
 import React from 'react';
-import { DataTable, StatusBadge, RowActions, EyeIcon, EditIcon, Button } from '../../../components/ui';
+import {
+  DataTable,
+  StatusBadge,
+  RowActions,
+  EyeIcon,
+  EditIcon,
+  Button,
+} from '../../../components/ui';
 import type { Column } from '../../../components/ui/DataTable/DataTable';
 import { ROUTES, createPath } from '../../../app/routes/routePaths';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -45,12 +52,18 @@ export const ClientesTable: React.FC<ClientesTableProps> = ({
       key: 'nome',
       label: 'Nome do cliente',
       sortable: true,
-      render: (cliente) => <span className="clientes-table-name">{cliente.nome}</span>,
+      render: (cliente) => (
+        <span className="clientes-table-name">{cliente.nome}</span>
+      ),
     },
     {
       key: 'documentoMascarado',
       label: 'CPF',
-      render: (cliente) => <span className="clientes-table-muted">{cliente.documentoMascarado}</span>,
+      render: (cliente) => (
+        <span className="clientes-table-muted">
+          {cliente.documentoMascarado}
+        </span>
+      ),
     },
     {
       key: 'status',
@@ -80,11 +93,15 @@ export const ClientesTable: React.FC<ClientesTableProps> = ({
             onClick: () => handleVerDetalhes(cliente.id),
           }}
           actions={[
-            ...(podeAlterar ? [{
-              label: 'Editar',
-              icon: <EditIcon />,
-              onClick: () => handleEditar(cliente.id),
-            }] : []),
+            ...(podeAlterar
+              ? [
+                  {
+                    label: 'Editar',
+                    icon: <EditIcon />,
+                    onClick: () => handleEditar(cliente.id),
+                  },
+                ]
+              : []),
           ]}
           ariaLabel={`Ações para ${cliente.nome}`}
         />
@@ -102,7 +119,11 @@ export const ClientesTable: React.FC<ClientesTableProps> = ({
       direction={direction}
       onSort={onSort}
       aria-label="Lista de clientes"
-      emptyTitle={hasActiveFilters ? 'Nenhum cliente encontrado' : 'Nenhum cliente cadastrado'}
+      emptyTitle={
+        hasActiveFilters
+          ? 'Nenhum cliente encontrado'
+          : 'Nenhum cliente cadastrado'
+      }
       emptyDescription={
         hasActiveFilters
           ? 'Não encontramos nenhum cliente com os filtros informados.'
@@ -110,9 +131,7 @@ export const ClientesTable: React.FC<ClientesTableProps> = ({
       }
       emptyAction={
         hasActiveFilters && onClearFilters ? (
-          <Button onClick={onClearFilters}>
-            Limpar filtros
-          </Button>
+          <Button onClick={onClearFilters}>Limpar filtros</Button>
         ) : undefined
       }
     />

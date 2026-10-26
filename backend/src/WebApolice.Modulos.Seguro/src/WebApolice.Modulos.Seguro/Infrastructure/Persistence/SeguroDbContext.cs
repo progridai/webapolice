@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Infrastructure.Persistence.Models;
@@ -382,6 +382,9 @@ public partial class SeguroDbContext : global::WebApolice.Shared.Infrastructure.
 
         modelBuilder.Entity<PropostaItem>(entity =>
         {
+            entity.HasIndex(e => e.PublicId).IsUnique();
+            entity.Property(e => e.PublicId).HasColumnName("public_id").HasDefaultValueSql("gen_random_uuid()");
+
             entity.HasKey(e => e.Id).HasName("proposta_item_pkey");
 
             entity.ToTable("proposta_item", "seguro");

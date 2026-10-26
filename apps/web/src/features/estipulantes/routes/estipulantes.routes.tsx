@@ -7,25 +7,36 @@ import { AuthenticatedLayout } from '../../../layouts/AuthenticatedLayout';
 import { PageLoading } from '../../../components/application/PageLoading';
 
 const EstipulantesListPage = lazy(() =>
-  import('../pages/EstipulantesListPage').then((m) => ({ default: m.EstipulantesListPage }))
+  import('../pages/EstipulantesListPage').then((m) => ({
+    default: m.EstipulantesListPage,
+  })),
 );
 
 const CadastrarEstipulantePage = lazy(() =>
-  import('../pages/CadastrarEstipulantePage').then((m) => ({ default: m.CadastrarEstipulantePage }))
+  import('../pages/CadastrarEstipulantePage').then((m) => ({
+    default: m.CadastrarEstipulantePage,
+  })),
 );
 
 const EstipulanteDetalhePage = lazy(() =>
-  import('../pages/EstipulanteDetalhePage').then((m) => ({ default: m.EstipulanteDetalhePage }))
+  import('../pages/EstipulanteDetalhePage').then((m) => ({
+    default: m.EstipulanteDetalhePage,
+  })),
 );
 
 const EditarEstipulantePage = lazy(() =>
-  import('../pages/EditarEstipulantePage').then((m) => ({ default: m.EditarEstipulantePage }))
+  import('../pages/EditarEstipulantePage').then((m) => ({
+    default: m.EditarEstipulantePage,
+  })),
 );
 
 export const EstipulantesRoutes = (
   <Route
     element={
-      <PermissionProtectedRoute moduloCodigo="ESTIPULANTES" permissaoCodigo="estipulantes.visualizar">
+      <PermissionProtectedRoute
+        moduloCodigo="ESTIPULANTES"
+        permissaoCodigo="estipulantes.visualizar"
+      >
         <AuthenticatedLayout />
       </PermissionProtectedRoute>
     }
@@ -41,7 +52,10 @@ export const EstipulantesRoutes = (
     <Route
       path={ROUTES.ESTIPULANTE_NOVO}
       element={
-        <PermissionProtectedRoute moduloCodigo="ESTIPULANTES" permissaoCodigo="estipulantes.inserir">
+        <PermissionProtectedRoute
+          moduloCodigo="ESTIPULANTES"
+          permissaoCodigo="estipulantes.inserir"
+        >
           <Suspense fallback={<PageLoading />}>
             <CadastrarEstipulantePage />
           </Suspense>
@@ -51,7 +65,10 @@ export const EstipulantesRoutes = (
     <Route
       path={ROUTES.ESTIPULANTE_DETALHES}
       element={
-        <PermissionProtectedRoute moduloCodigo="ESTIPULANTES" permissaoCodigo="estipulantes.visualizar">
+        <PermissionProtectedRoute
+          moduloCodigo="ESTIPULANTES"
+          permissaoCodigo="estipulantes.visualizar"
+        >
           <Suspense fallback={<PageLoading />}>
             <EstipulanteDetalhePage />
           </Suspense>
@@ -61,7 +78,10 @@ export const EstipulantesRoutes = (
     <Route
       path={ROUTES.ESTIPULANTE_EDITAR}
       element={
-        <PermissionProtectedRoute moduloCodigo="ESTIPULANTES" permissaoCodigo="estipulantes.alterar">
+        <PermissionProtectedRoute
+          moduloCodigo="ESTIPULANTES"
+          permissaoCodigo="estipulantes.alterar"
+        >
           <Suspense fallback={<PageLoading />}>
             <EditarEstipulantePage />
           </Suspense>

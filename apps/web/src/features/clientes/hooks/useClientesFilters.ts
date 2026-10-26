@@ -16,9 +16,11 @@ export function useClientesFilters() {
     const nome = searchParams.get('nome') || '';
     const cpf = searchParams.get('cpf') || '';
     const statusParam = searchParams.get('status');
-    const status: StatusClienteEnum | '' = statusParam === '1' ? 1 : statusParam === '2' ? 2 : '';
+    const status: StatusClienteEnum | '' =
+      statusParam === '1' ? 1 : statusParam === '2' ? 2 : '';
     const sortBy = searchParams.get('sortBy') || '';
-    const direction = searchParams.get('direction') as 'asc' | 'desc' | null || 'asc';
+    const direction =
+      (searchParams.get('direction') as 'asc' | 'desc' | null) || 'asc';
 
     return {
       page: isNaN(page) || page < 1 ? 1 : page,
@@ -31,30 +33,36 @@ export function useClientesFilters() {
     };
   }, [searchParams]);
 
-  const setFilters = useCallback((newFilters: Partial<ClientesQuery>) => {
-    setSearchParams((prev) => {
-      const next = new URLSearchParams(prev);
-      
-      Object.entries(newFilters).forEach(([key, value]) => {
-        if (value === '' || value === null || value === undefined) {
-          next.delete(key);
-        } else {
-          next.set(key, String(value));
-        }
-      });
+  const setFilters = useCallback(
+    (newFilters: Partial<ClientesQuery>) => {
+      setSearchParams(
+        (prev) => {
+          const next = new URLSearchParams(prev);
 
-      // Se alterou algum filtro além da página e ordenação, reseta para a página 1
-      const isPageOrSortChange = Object.keys(newFilters).every(
-        (k) => k === 'page' || k === 'sortBy' || k === 'direction'
+          Object.entries(newFilters).forEach(([key, value]) => {
+            if (value === '' || value === null || value === undefined) {
+              next.delete(key);
+            } else {
+              next.set(key, String(value));
+            }
+          });
+
+          // Se alterou algum filtro além da página e ordenação, reseta para a página 1
+          const isPageOrSortChange = Object.keys(newFilters).every(
+            (k) => k === 'page' || k === 'sortBy' || k === 'direction',
+          );
+
+          if (!isPageOrSortChange) {
+            next.set('page', '1');
+          }
+
+          return next;
+        },
+        { replace: true },
       );
-      
-      if (!isPageOrSortChange) {
-        next.set('page', '1');
-      }
-
-      return next;
-    }, { replace: true });
-  }, [setSearchParams]);
+    },
+    [setSearchParams],
+  );
 
   const clearFilters = useCallback(() => {
     setSearchParams(new URLSearchParams(), { replace: true });

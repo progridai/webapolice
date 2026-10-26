@@ -1,9 +1,15 @@
 import { httpClient } from '../../../services/http/httpClient';
-import type { CooperadoListDto, CooperadosFiltersState, ListagemPaginadaResult, CooperadoDetalheDto, CooperadoFormData } from '../types/cooperados.types';
+import type {
+  CooperadoListDto,
+  CooperadosFiltersState,
+  ListagemPaginadaResult,
+  CooperadoDetalheDto,
+  CooperadoFormData,
+} from '../types/cooperados.types';
 
 export async function listarCooperados(
   query: CooperadosFiltersState,
-  signal?: AbortSignal
+  signal?: AbortSignal,
 ): Promise<ListagemPaginadaResult<CooperadoListDto>> {
   const params = new URLSearchParams();
 
@@ -16,23 +22,41 @@ export async function listarCooperados(
   if (query.direction) params.append('direcao', query.direction);
 
   const queryString = params.toString();
-  const url = queryString ? `/api/cooperados?${queryString}` : '/api/cooperados';
+  const url = queryString
+    ? `/api/cooperados?${queryString}`
+    : '/api/cooperados';
 
-  const response = await httpClient.get<ListagemPaginadaResult<CooperadoListDto>>(url, { signal });
+  const response = await httpClient.get<
+    ListagemPaginadaResult<CooperadoListDto>
+  >(url, { signal });
   return response.data;
 }
 
-export async function obterCooperadoDetalhe(id: string, signal?: AbortSignal): Promise<CooperadoDetalheDto> {
-  const response = await httpClient.get<CooperadoDetalheDto>(`/api/cooperados/${id}`, { signal });
+export async function obterCooperadoDetalhe(
+  id: string,
+  signal?: AbortSignal,
+): Promise<CooperadoDetalheDto> {
+  const response = await httpClient.get<CooperadoDetalheDto>(
+    `/api/cooperados/${id}`,
+    { signal },
+  );
   return response.data;
 }
 
-export async function cadastrarCooperado(data: CooperadoFormData): Promise<{ publicId: string }> {
-  const response = await httpClient.post<{ publicId: string }>('/api/cooperados', data);
+export async function cadastrarCooperado(
+  data: CooperadoFormData,
+): Promise<{ publicId: string }> {
+  const response = await httpClient.post<{ publicId: string }>(
+    '/api/cooperados',
+    data,
+  );
   return response.data;
 }
 
-export async function alterarCooperado(id: string, data: CooperadoFormData): Promise<void> {
+export async function alterarCooperado(
+  id: string,
+  data: CooperadoFormData,
+): Promise<void> {
   await httpClient.put(`/api/cooperados/${id}`, data);
 }
 
@@ -45,6 +69,8 @@ export async function ativarCooperado(id: string): Promise<void> {
 }
 
 export async function listarCoordenadoresAtivos(): Promise<CooperadoListDto[]> {
-  const response = await httpClient.get<ListagemPaginadaResult<CooperadoListDto>>('/api/cooperados?tipo=2&status=1&tamanho_pagina=100');
+  const response = await httpClient.get<
+    ListagemPaginadaResult<CooperadoListDto>
+  >('/api/cooperados?tipo=2&status=1&tamanho_pagina=100');
   return response.data.itens;
 }

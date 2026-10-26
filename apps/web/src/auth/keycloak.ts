@@ -36,7 +36,9 @@ export function getKeycloakInstance(): Keycloak {
  * falha se `init()` for chamado novamente na mesma instância, então mantemos a
  * promessa de inicialização em módulo para reutilizar o resultado.
  */
-export function initKeycloakOnce(options: KeycloakInitOptions): Promise<boolean> {
+export function initKeycloakOnce(
+  options: KeycloakInitOptions,
+): Promise<boolean> {
   if (!_initPromise) {
     _initPromise = getKeycloakInstance().init(options);
   }

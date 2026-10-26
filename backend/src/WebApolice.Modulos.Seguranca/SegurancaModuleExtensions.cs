@@ -1,3 +1,4 @@
+using WebApolice.Modulos.Seguranca.Api.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -5,7 +6,7 @@ using Microsoft.AspNetCore.Authorization;
 using WebApolice.Modulos.Seguranca.Application.Ports;
 using WebApolice.Modulos.Seguranca.Application.Services;
 using WebApolice.Modulos.Seguranca.Application.UseCases.Modulos;
-using WebApolice.Modulos.Seguranca.Infrastructure.Authentication;
+using WebApolice.Modulos.Seguranca.Api.Authentication;
 using WebApolice.Modulos.Seguranca.Infrastructure.Authorization;
 using WebApolice.Modulos.Seguranca.Infrastructure.Persistence;
 using WebApolice.Modulos.Seguranca.Infrastructure.Persistence.Repositories;
@@ -26,6 +27,8 @@ public static class SegurancaModuleExtensions
         });
 
         services.AddScoped<IUsuarioRepository, UsuarioRepository>();
+        services.AddScoped<IOperacaoSegurancaAuditada, OperacaoSegurancaAuditada>();
+        services.AddScoped<WebApolice.Modulos.Seguranca.Contracts.IDisponibilidadeCatalogo, DisponibilidadeCatalogo>();
         services.AddScoped<IPermissoesEfetivasService, PermissoesEfetivasService>();
         services.AddScoped<IAcessoOperadorSistemaService, AcessoOperadorSistemaService>();
         services.AddScoped<IContextoUsuarioAutenticado, ContextoUsuarioAutenticado>();

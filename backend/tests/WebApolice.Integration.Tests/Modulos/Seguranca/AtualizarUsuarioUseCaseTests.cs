@@ -47,9 +47,9 @@ public class AtualizarUsuarioUseCaseTests : IClassFixture<SegurancaIntegrationTe
     {
         if (_usuariosCriados.Any())
         {
-            await _dbContext.Database.ExecuteSqlRawAsync($"DELETE FROM seguranca.auditoria_permissao WHERE usuario_afetado_id IN (SELECT id FROM seguranca.usuario WHERE public_id = ANY(ARRAY['{string.Join("','", _usuariosCriados)}']::uuid[]))");
-            await _dbContext.Database.ExecuteSqlRawAsync($"DELETE FROM seguranca.usuario_perfil WHERE usuario_id IN (SELECT id FROM seguranca.usuario WHERE public_id = ANY(ARRAY['{string.Join("','", _usuariosCriados)}']::uuid[]))");
-            await _dbContext.Database.ExecuteSqlRawAsync($"DELETE FROM seguranca.usuario WHERE public_id = ANY(ARRAY['{string.Join("','", _usuariosCriados)}']::uuid[])");
+            await _dbContext.Database.ExecuteSqlAsync($"DELETE FROM seguranca.auditoria_permissao WHERE usuario_afetado_id IN (SELECT id FROM seguranca.usuario WHERE public_id = ANY({_usuariosCriados.ToArray()}))");
+            await _dbContext.Database.ExecuteSqlAsync($"DELETE FROM seguranca.usuario_perfil WHERE usuario_id IN (SELECT id FROM seguranca.usuario WHERE public_id = ANY({_usuariosCriados.ToArray()}))");
+            await _dbContext.Database.ExecuteSqlAsync($"DELETE FROM seguranca.usuario WHERE public_id = ANY({_usuariosCriados.ToArray()})");
         }
     }
 
@@ -66,7 +66,7 @@ public class AtualizarUsuarioUseCaseTests : IClassFixture<SegurancaIntegrationTe
         _usuariosCriados.Add(usuario.PublicId);
 
         _keycloakClientMock.Setup(x => x.ObterUsuarioPorSubAsync(keycloakSub, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new KeycloakUsuarioRecord(keycloakSub, usuario.Username, usuario.Email, "Nome", "Antigo", true));
+            .ReturnsAsync(new KeycloakUsuarioRecord(keycloakSub, Assert.IsType<string>(usuario.Username), Assert.IsType<string>(usuario.Email), "Nome", "Antigo", true));
             
         await _sut.ExecuteAsync(usuario.PublicId, "Nome Novo", $"novo_{runId}@exemplo.local", false, new List<Guid>(), CancellationToken.None);
 
@@ -96,17 +96,17 @@ public class AtualizarUsuarioUseCaseTests : IClassFixture<SegurancaIntegrationTe
         _usuariosCriados.Add(usuario2.PublicId);
 
         _keycloakClientMock.Setup(x => x.ObterUsuarioPorSubAsync(keycloakSub1, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new KeycloakUsuarioRecord(keycloakSub1, usuario1.Username, usuario1.Email, "Nome", "Um", true));
+            .ReturnsAsync(new KeycloakUsuarioRecord(keycloakSub1, Assert.IsType<string>(usuario1.Username), Assert.IsType<string>(usuario1.Email), "Nome", "Um", true));
             
         // Força constraint ao tentar atualizar com nome maior que 150 caracteres
         var nomeInvalido = new string('A', 200);
         await Assert.ThrowsAsync<DbUpdateException>(() => 
-            _sut.ExecuteAsync(usuario1.PublicId, nomeInvalido, usuario1.Email, true, new List<Guid>(), CancellationToken.None));
+            _sut.ExecuteAsync(usuario1.PublicId, nomeInvalido, Assert.IsType<string>(usuario1.Email), true, new List<Guid>(), CancellationToken.None));
 
         // Deve ter chamado a atualização inicialmente com o nome longo
-        _keycloakClientMock.Verify(x => x.AtualizarUsuarioAsync(keycloakSub1, usuario1.Email, nomeInvalido, true, It.IsAny<CancellationToken>()), Times.Once);
+        _keycloakClientMock.Verify(x => x.AtualizarUsuarioAsync(keycloakSub1, Assert.IsType<string>(usuario1.Email), nomeInvalido, true, It.IsAny<CancellationToken>()), Times.Once);
 
         // Deve ter chamado a compensação restaurando os dados originais (no Keycloak)
-        _keycloakClientMock.Verify(x => x.AtualizarUsuarioAsync(keycloakSub1, usuario1.Email, "Nome Um", true, It.IsAny<CancellationToken>()), Times.Once);
+        _keycloakClientMock.Verify(x => x.AtualizarUsuarioAsync(keycloakSub1, Assert.IsType<string>(usuario1.Email), "Nome Um", true, It.IsAny<CancellationToken>()), Times.Once);
     }
 }

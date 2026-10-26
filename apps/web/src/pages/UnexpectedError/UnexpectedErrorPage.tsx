@@ -29,7 +29,9 @@ export const UnexpectedErrorPage: React.FC = () => {
       <EmptyState
         title="Algo deu errado"
         description="Ocorreu um erro inesperado no sistema. Nossa equipe já foi notificada. Tente novamente ou retorne ao início."
-        icon={<ErrorIcon size={48} className="error-page-icon" aria-hidden="true" />}
+        icon={
+          <ErrorIcon size={48} className="error-page-icon" aria-hidden="true" />
+        }
         action={
           <div className="error-page-actions">
             <Button
@@ -39,10 +41,7 @@ export const UnexpectedErrorPage: React.FC = () => {
             >
               Tentar novamente
             </Button>
-            <Button
-              variant="secondary"
-              onClick={() => navigate(ROUTES.APP)}
-            >
+            <Button variant="secondary" onClick={() => navigate(ROUTES.APP)}>
               Voltar ao início
             </Button>
           </div>

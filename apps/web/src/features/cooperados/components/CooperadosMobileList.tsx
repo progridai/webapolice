@@ -1,6 +1,15 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Card, CardHeader, CardContent, RowActions, EyeIcon, EditIcon, StatusBadge, Badge } from '../../../components/ui';
+import {
+  Card,
+  CardHeader,
+  CardContent,
+  RowActions,
+  EyeIcon,
+  EditIcon,
+  StatusBadge,
+  Badge,
+} from '../../../components/ui';
 import { ROUTES, createPath } from '../../../app/routes/routePaths';
 import type { CooperadoListDto } from '../types/cooperados.types';
 
@@ -9,7 +18,10 @@ interface CooperadosMobileListProps {
   podeAlterar?: boolean;
 }
 
-export const CooperadosMobileList: React.FC<CooperadosMobileListProps> = ({ cooperados, podeAlterar = false }) => {
+export const CooperadosMobileList: React.FC<CooperadosMobileListProps> = ({
+  cooperados,
+  podeAlterar = false,
+}) => {
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -39,7 +51,9 @@ export const CooperadosMobileList: React.FC<CooperadosMobileListProps> = ({ coop
                   </span>
                 )}
               </div>
-              <h3 className="font-semibold text-texto-primario text-lg">{item.nome}</h3>
+              <h3 className="font-semibold text-texto-primario text-lg">
+                {item.nome}
+              </h3>
               <p className="text-sm text-texto-secundario mt-1">
                 {item.cpfMascarado}
               </p>
@@ -54,7 +68,8 @@ export const CooperadosMobileList: React.FC<CooperadosMobileListProps> = ({ coop
 
             <div className="flex justify-between items-end border-t border-borda pt-4">
               <span className="text-xs text-texto-secundario">
-                Cadastro: {new Date(item.dataCadastroUtc).toLocaleDateString('pt-BR')}
+                Cadastro:{' '}
+                {new Date(item.dataCadastroUtc).toLocaleDateString('pt-BR')}
               </span>
               <RowActions
                 primaryAction={{
@@ -63,11 +78,15 @@ export const CooperadosMobileList: React.FC<CooperadosMobileListProps> = ({ coop
                   onClick: () => handleVerDetalhes(item.publicId),
                 }}
                 actions={[
-                  ...(podeAlterar ? [{
-                    label: 'Editar',
-                    icon: <EditIcon />,
-                    onClick: () => handleEditar(item.publicId),
-                  }] : []),
+                  ...(podeAlterar
+                    ? [
+                        {
+                          label: 'Editar',
+                          icon: <EditIcon />,
+                          onClick: () => handleEditar(item.publicId),
+                        },
+                      ]
+                    : []),
                 ]}
                 ariaLabel={`Ações para ${item.nome}`}
               />

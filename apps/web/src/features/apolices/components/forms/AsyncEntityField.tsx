@@ -1,16 +1,24 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { Controller } from 'react-hook-form';
 import type { Control } from 'react-hook-form';
 import type { ApoliceFormValues } from '../../schemas/apoliceForm.schema';
 import { Alert, Button, Input, Spinner } from '../../../../components/ui';
+import { useConsultaApolice } from '../../hooks/useConsultaApolice';
 
-function useDebounce<T>(value: T, delay: number): T {
-  const [debouncedValue, setDebouncedValue] = useState<T>(value);
-  useEffect(() => {
-    const handler = setTimeout(() => setDebouncedValue(value), delay);
-    return () => clearTimeout(handler);
-  }, [value, delay]);
-  return debouncedValue;
+// O atraso agrupa a digitação; abortar a consulta também cancela o timer.
+function aguardarBusca(delay: number, signal: AbortSignal): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const cancel = () => {
+      clearTimeout(timer);
+      reject(new DOMException('Busca cancelada', 'AbortError'));
+    };
+    const timer = setTimeout(() => {
+      signal.removeEventListener('abort', cancel);
+      resolve();
+    }, delay);
+    if (signal.aborted) cancel();
+    else signal.addEventListener('abort', cancel, { once: true });
+  });
 }
 
 export interface AsyncEntityOption {
@@ -18,7 +26,10 @@ export interface AsyncEntityOption {
   label: string;
 }
 
-type FieldAccessibilityProps = Pick<React.InputHTMLAttributes<HTMLInputElement>, 'id' | 'aria-describedby' | 'aria-invalid'>;
+type FieldAccessibilityProps = Pick<
+  React.InputHTMLAttributes<HTMLInputElement>,
+  'id' | 'aria-describedby' | 'aria-invalid'
+>;
 
 interface EntitySearchFieldProps extends FieldAccessibilityProps {
   placeholder?: string;
@@ -28,10 +39,16 @@ interface EntitySearchFieldProps extends FieldAccessibilityProps {
   initialLabel?: string;
   onChange: (id: string) => void;
   onBlur?: () => void;
-  searcher: (term: string) => Promise<AsyncEntityOption[]>;
+  searcher: (
+    term: string,
+    signal?: AbortSignal,
+  ) => Promise<AsyncEntityOption[]>;
+  searchDelay?: number;
+  emptyMessage?: string;
+  clearSearchOnFocus?: boolean;
 }
 
-const EntitySearchField: React.FC<EntitySearchFieldProps> = ({
+export const EntitySearchField: React.FC<EntitySearchFieldProps> = ({
   id,
   placeholder,
   error,
@@ -41,110 +58,120 @@ const EntitySearchField: React.FC<EntitySearchFieldProps> = ({
   onChange,
   onBlur,
   searcher,
+  searchDelay = 350,
+  emptyMessage = 'Nenhum resultado encontrado.',
+  clearSearchOnFocus = true,
   ...accessibilityProps
 }) => {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [options, setOptions] = useState<AsyncEntityOption[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [searchError, setSearchError] = useState(false);
-  const [isOpen, setIsOpen] = useState(false);
-  const [selectedLabel, setSelectedLabel] = useState<string | null>(null);
+  const [selected, setSelected] = useState<
+    (AsyncEntityOption & { initialLabel?: string }) | null
+  >(null);
+  const [interaction, setInteraction] = useState<{
+    value: string;
+    initialLabel?: string;
+    term: string;
+  } | null>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
-  const debouncedSearch = useDebounce(searchTerm, 350);
-  const initialised = useRef(false);
-  const searchRequestId = useRef(0);
+  // Ajuste condicionado ao contexto, sem efeito de sincronização de estado.
+  if (
+    interaction &&
+    (disabled ||
+      interaction.value !== value ||
+      interaction.initialLabel !== initialLabel)
+  ) {
+    setInteraction(null);
+  }
+  if (
+    selected &&
+    (selected.value !== value || selected.initialLabel !== initialLabel)
+  ) {
+    setSelected(null);
+  }
+  const selectedLabel = value
+    ? selected?.value === value && selected.initialLabel === initialLabel
+      ? selected.label
+      : initialLabel || ''
+    : '';
+  // O rascunho pertence ao valor externo atual; resets não reutilizam buscas antigas.
+  const current =
+    interaction?.value === value && interaction.initialLabel === initialLabel
+      ? interaction
+      : null;
+  const isOpen = current !== null && !disabled;
+  const term = isOpen ? current.term : '';
+  const load = useMemo(() => {
+    if (!isOpen) return null;
+    return async (signal: AbortSignal) => {
+      await aguardarBusca(searchDelay, signal);
+      return searcher(term, signal);
+    };
+  }, [isOpen, term, searcher, searchDelay]);
+  const {
+    data,
+    error: searchError,
+    isLoading: loading,
+    refetch,
+  } = useConsultaApolice(load, 'Não foi possível carregar as opções.');
 
-  useEffect(() => () => { searchRequestId.current += 1; }, []);
-
-  // Set label when editing (initialLabel provided from parent, no API call needed)
   useEffect(() => {
-    if (value && initialLabel && !initialised.current) {
-      setSelectedLabel(initialLabel);
-      setSearchTerm(initialLabel);
-      initialised.current = true;
-    }
-    if (!value && selectedLabel) {
-      setSelectedLabel(null);
-      setSearchTerm('');
-      initialised.current = false;
-    }
-  }, [value, initialLabel, selectedLabel]);
-
-  const fetchOptions = useCallback(async (term: string) => {
-    const requestId = ++searchRequestId.current;
-    setLoading(true);
-    setSearchError(false);
-    try {
-      const result = await searcher(term);
-      if (requestId === searchRequestId.current) setOptions(result);
-    } catch {
-      if (requestId === searchRequestId.current) {
-        setOptions([]);
-        setSearchError(true);
-      }
-    } finally {
-      if (requestId === searchRequestId.current) setLoading(false);
-    }
-  }, [searcher]);
-
-  useEffect(() => {
-    if (isOpen) {
-      fetchOptions(debouncedSearch);
-    }
-  }, [debouncedSearch, isOpen, fetchOptions]);
-
-  // Close on click outside
-  useEffect(() => {
-    function handleClickOutside(e: MouseEvent) {
-      if (wrapperRef.current && !wrapperRef.current.contains(e.target as Node)) {
-        setIsOpen(false);
-        if (selectedLabel) {
-          setSearchTerm(selectedLabel);
-        } else {
-          setSearchTerm('');
-        }
+    function handleClickOutside(event: MouseEvent) {
+      if (
+        event.target instanceof Node &&
+        !wrapperRef.current?.contains(event.target)
+      ) {
+        setInteraction(null);
       }
     }
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [selectedLabel]);
+  }, []);
 
-  const handleSelect = (opt: AsyncEntityOption) => {
-    setSelectedLabel(opt.label);
-    setSearchTerm(opt.label);
-    setIsOpen(false);
-    initialised.current = true;
-    onChange(opt.value);
-  };
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchTerm(e.target.value);
-    setIsOpen(true);
-    if (selectedLabel) {
-      setSelectedLabel(null);
-      onChange('');
-      initialised.current = false;
-    }
-  };
-
-  const handleFocus = () => {
-    setIsOpen(true);
-    if (selectedLabel) {
-      setSearchTerm('');
-    }
+  const handleSelect = (option: AsyncEntityOption) => {
+    setSelected({ ...option, initialLabel });
+    setInteraction(null);
+    onChange(option.value);
   };
 
   return (
-    <div ref={wrapperRef} className="relative w-full">
+    <div
+      ref={wrapperRef}
+      className="relative w-full"
+      onBlur={(event) => {
+        if (
+          !(event.relatedTarget instanceof Node) ||
+          !wrapperRef.current?.contains(event.relatedTarget)
+        ) {
+          setInteraction(null);
+        }
+      }}
+      onKeyDown={(event) => {
+        if (event.key === 'Escape') setInteraction(null);
+      }}
+    >
       <div className="relative">
         <Input
           id={id}
           {...accessibilityProps}
           type="text"
           placeholder={placeholder || 'Buscar...'}
-          value={searchTerm}
-          onChange={handleInputChange}
-          onFocus={handleFocus}
+          value={isOpen ? current.term : selectedLabel}
+          onChange={(event) => {
+            const nextValue = value ? '' : value;
+            setSelected(null);
+            setInteraction({
+              value: nextValue,
+              initialLabel,
+              term: event.target.value,
+            });
+            if (value) onChange('');
+          }}
+          onFocus={() =>
+            setInteraction({
+              value,
+              initialLabel,
+              term: clearSearchOnFocus ? '' : selectedLabel,
+            })
+          }
           onBlur={onBlur}
           error={error}
           disabled={disabled}
@@ -157,37 +184,47 @@ const EntitySearchField: React.FC<EntitySearchFieldProps> = ({
           </div>
         )}
       </div>
-
-      {isOpen && !disabled && (
+      {isOpen && (
         <div className="absolute z-50 w-full mt-1 bg-fundo-elevado border border-borda rounded shadow-lg max-h-60 overflow-y-auto">
           {searchError ? (
             <Alert variant="error" title="Erro ao buscar registros">
               Não foi possível carregar as opções.
-              <Button type="button" variant="secondary" size="small" onClick={() => fetchOptions(debouncedSearch)}>
+              <Button
+                type="button"
+                variant="secondary"
+                size="small"
+                onClick={() => void refetch()}
+              >
                 Tentar novamente
               </Button>
             </Alert>
-          ) : options.length === 0 && !loading ? (
+          ) : !loading && !data?.length ? (
             <div className="p-3 text-sm text-texto-secundario text-center">
-              Nenhum resultado encontrado.
+              {emptyMessage}
             </div>
           ) : (
-            <ul className="py-1">
-              {options.map((opt) => (
-                <li
-                  key={opt.value}
-                  className={`px-3 py-2 cursor-pointer text-sm hover:bg-fundo-superficie transition-colors ${
-                    opt.value === value ? 'bg-fundo-superficie font-medium' : ''
-                  }`}
-                  onMouseDown={(e) => {
-                    e.preventDefault();
-                    handleSelect(opt);
-                  }}
-                >
-                  <div className="text-texto-principal">{opt.label}</div>
-                </li>
-              ))}
-            </ul>
+            !loading && (
+              <ul className="py-1">
+                {data?.map((option) => (
+                  <li key={option.value}>
+                    <Button
+                      type="button"
+                      variant="text"
+                      className={`w-full text-left justify-start hover:bg-fundo-superficie ${option.value === value ? 'bg-fundo-superficie font-medium' : ''}`}
+                      onMouseDown={(event) => {
+                        event.preventDefault();
+                        handleSelect(option);
+                      }}
+                      onClick={() => handleSelect(option)}
+                    >
+                      <span className="text-texto-principal">
+                        {option.label}
+                      </span>
+                    </Button>
+                  </li>
+                ))}
+              </ul>
+            )
           )}
         </div>
       )}
@@ -201,7 +238,10 @@ interface AsyncEntityFieldProps extends FieldAccessibilityProps {
   disabled?: boolean;
   placeholder?: string;
   initialLabel?: string;
-  searcher: (term: string) => Promise<AsyncEntityOption[]>;
+  searcher: (
+    term: string,
+    signal?: AbortSignal,
+  ) => Promise<AsyncEntityOption[]>;
 }
 
 export const AsyncEntityField: React.FC<AsyncEntityFieldProps> = ({

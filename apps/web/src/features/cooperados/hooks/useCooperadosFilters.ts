@@ -12,7 +12,8 @@ export function useCooperadosFilters() {
     const cpf = searchParams.get('cpf') || '';
     const status = searchParams.get('status') || '';
     const sortBy = searchParams.get('sortBy') || '';
-    const direction = searchParams.get('direction') as 'asc' | 'desc' | null || 'asc';
+    const direction =
+      (searchParams.get('direction') as 'asc' | 'desc' | null) || 'asc';
 
     return {
       page: isNaN(page) || page < 1 ? 1 : page,
@@ -25,30 +26,33 @@ export function useCooperadosFilters() {
     };
   }, [searchParams]);
 
-  const setFilters = useCallback((newFilters: Partial<CooperadosFiltersState>) => {
-    setSearchParams((prev) => {
-      const next = new URLSearchParams(prev);
-      
-      Object.entries(newFilters).forEach(([key, value]) => {
-        if (value === '' || value === null || value === undefined) {
-          next.delete(key);
-        } else {
-          next.set(key, String(value));
+  const setFilters = useCallback(
+    (newFilters: Partial<CooperadosFiltersState>) => {
+      setSearchParams((prev) => {
+        const next = new URLSearchParams(prev);
+
+        Object.entries(newFilters).forEach(([key, value]) => {
+          if (value === '' || value === null || value === undefined) {
+            next.delete(key);
+          } else {
+            next.set(key, String(value));
+          }
+        });
+
+        // Se alterou algum filtro além da página e ordenação, reseta para a página 1
+        const isPageOrSortChange = Object.keys(newFilters).every(
+          (k) => k === 'page' || k === 'sortBy' || k === 'direction',
+        );
+
+        if (!isPageOrSortChange) {
+          next.set('page', '1');
         }
+
+        return next;
       });
-
-      // Se alterou algum filtro além da página e ordenação, reseta para a página 1
-      const isPageOrSortChange = Object.keys(newFilters).every(
-        (k) => k === 'page' || k === 'sortBy' || k === 'direction'
-      );
-      
-      if (!isPageOrSortChange) {
-        next.set('page', '1');
-      }
-
-      return next;
-    });
-  }, [setSearchParams]);
+    },
+    [setSearchParams],
+  );
 
   const clearFilters = useCallback(() => {
     setSearchParams(new URLSearchParams());

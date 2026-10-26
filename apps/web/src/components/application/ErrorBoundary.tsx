@@ -29,7 +29,10 @@ interface ErrorBoundaryState {
   errorId: string | null;
 }
 
-export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundaryState> {
+export class ErrorBoundary extends React.Component<
+  ErrorBoundaryProps,
+  ErrorBoundaryState
+> {
   constructor(props: ErrorBoundaryProps) {
     super(props);
     this.state = { hasError: false, errorId: null };
@@ -43,7 +46,11 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
     // Hook para observabilidade futura (ex: Sentry.captureException)
     // Não logar o erro completo para evitar expor dados sensíveis
     if (ENV.IS_DEV) {
-      console.error('[ErrorBoundary] Erro capturado:', error.name, error.message);
+      console.error(
+        '[ErrorBoundary] Erro capturado:',
+        error.name,
+        error.message,
+      );
       console.error('[ErrorBoundary] Component stack:', info.componentStack);
     }
   }
@@ -64,7 +71,11 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
       }
 
       return (
-        <div className="error-boundary-container" role="alert" aria-live="assertive">
+        <div
+          className="error-boundary-container"
+          role="alert"
+          aria-live="assertive"
+        >
           <EmptyState
             title="Algo deu errado"
             description="Ocorreu um erro inesperado. Nossa equipe foi notificada. Tente novamente ou retorne ao início."

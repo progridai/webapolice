@@ -27,11 +27,22 @@ export interface AlterarRamoRequest {
 }
 
 export const ramosApi = {
-  listar: async (params: { pagina: number; tamanhoPagina: number; busca?: string; ativo?: boolean }) => {
-    const res = await httpClient.get<ListarRamosResponse>('/api/ramos', { params });
+  listar: async (
+    params: {
+      pagina: number;
+      tamanhoPagina: number;
+      busca?: string;
+      ativo?: boolean;
+    },
+    signal?: AbortSignal,
+  ) => {
+    const res = await httpClient.get<ListarRamosResponse>('/api/ramos', {
+      params,
+      signal,
+    });
     return res.data;
   },
-  
+
   obter: async (publicId: string) => {
     const res = await httpClient.get<RamoDto>(`/api/ramos/${publicId}`);
     return res.data;
@@ -52,5 +63,5 @@ export const ramosApi = {
 
   reativar: async (publicId: string) => {
     await httpClient.patch(`/api/ramos/${publicId}/reativar`);
-  }
+  },
 };

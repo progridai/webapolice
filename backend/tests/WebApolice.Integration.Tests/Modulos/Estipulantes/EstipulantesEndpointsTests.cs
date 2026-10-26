@@ -1,4 +1,5 @@
-﻿using System.Linq;
+using WebApolice.Modulos.Seguranca.Contracts.Authorization;
+using System.Linq;
 using System.Reflection;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

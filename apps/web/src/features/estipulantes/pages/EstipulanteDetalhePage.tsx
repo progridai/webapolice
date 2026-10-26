@@ -1,19 +1,23 @@
+import { HttpApiError } from '../../../services/http/httpError';
 import React, { useEffect, useRef } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
-import { 
-  Button, 
-  Alert, 
-  Skeleton, 
+import {
+  Button,
+  Alert,
+  Skeleton,
   EmptyState,
   Breadcrumbs,
   PageHeader,
   DetailsSection,
   DescriptionList,
-  StatusBadge
+  StatusBadge,
 } from '../../../components/ui';
 import { DescriptionItem } from '../../../components/ui/DescriptionList';
 import { useEstipulanteDetalhe } from '../hooks/useEstipulanteDetalhe';
-import { formatarValorContato, formatarCep } from '../../../shared/utils/formatters';
+import {
+  formatarValorContato,
+  formatarCep,
+} from '../../../shared/utils/formatters';
 import { useAuthorization } from '../../../auth/AuthorizationProvider';
 
 // Data formatter helper inline for configuration
@@ -27,10 +31,11 @@ export const EstipulanteDetalhePage: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const mainRef = useRef<HTMLElement>(null);
-  
+
   const { possuiPermissao, possuiAcessoTotal } = useAuthorization();
-  const podeAlterar = possuiAcessoTotal() || possuiPermissao('estipulantes.alterar');
-  
+  const podeAlterar =
+    possuiAcessoTotal() || possuiPermissao('estipulantes.alterar');
+
   const { data, isLoading, error, retry } = useEstipulanteDetalhe(publicId);
 
   // Foco acessível ao entrar na página
@@ -59,7 +64,12 @@ export const EstipulanteDetalhePage: React.FC = () => {
 
   if (isLoading) {
     return (
-      <main ref={mainRef} tabIndex={-1} className="p-6 max-w-7xl mx-auto focus:outline-none" aria-busy="true">
+      <main
+        ref={mainRef}
+        tabIndex={-1}
+        className="p-6 max-w-7xl mx-auto focus:outline-none"
+        aria-busy="true"
+      >
         <div className="mb-6">
           <Skeleton className="w-32 h-10 mb-4" />
           <Skeleton className="w-full h-32" />
@@ -73,11 +83,19 @@ export const EstipulanteDetalhePage: React.FC = () => {
   }
 
   if (error) {
-    const errorResponse = error as any;
-    if (errorResponse?.status === 404) {
+    if (error instanceof HttpApiError && error.isNotFound()) {
       return (
-        <main ref={mainRef} tabIndex={-1} className="p-6 max-w-7xl mx-auto focus:outline-none">
-          <Button variant="text" onClick={handleVoltar} className="mb-4" aria-label="Voltar para listagem">
+        <main
+          ref={mainRef}
+          tabIndex={-1}
+          className="p-6 max-w-7xl mx-auto focus:outline-none"
+        >
+          <Button
+            variant="text"
+            onClick={handleVoltar}
+            className="mb-4"
+            aria-label="Voltar para listagem"
+          >
             &larr; Voltar para estipulantes
           </Button>
           <EmptyState
@@ -87,31 +105,47 @@ export const EstipulanteDetalhePage: React.FC = () => {
         </main>
       );
     }
-    
-    if (errorResponse?.status === 403) {
+
+    if (error instanceof HttpApiError && error.isForbidden()) {
       return (
-        <main ref={mainRef} tabIndex={-1} className="p-6 max-w-7xl mx-auto focus:outline-none">
-          <Button variant="text" onClick={handleVoltar} className="mb-4" aria-label="Voltar para listagem">
+        <main
+          ref={mainRef}
+          tabIndex={-1}
+          className="p-6 max-w-7xl mx-auto focus:outline-none"
+        >
+          <Button
+            variant="text"
+            onClick={handleVoltar}
+            className="mb-4"
+            aria-label="Voltar para listagem"
+          >
             &larr; Voltar para estipulantes
           </Button>
           <Alert variant="error" title="Acesso negado" role="alert">
-            Você não tem permissão para visualizar os detalhes deste estipulante.
+            Você não tem permissão para visualizar os detalhes deste
+            estipulante.
           </Alert>
         </main>
       );
     }
 
     return (
-      <main ref={mainRef} tabIndex={-1} className="p-6 max-w-7xl mx-auto focus:outline-none">
-        <Button variant="text" onClick={handleVoltar} className="mb-4" aria-label="Voltar para listagem">
+      <main
+        ref={mainRef}
+        tabIndex={-1}
+        className="p-6 max-w-7xl mx-auto focus:outline-none"
+      >
+        <Button
+          variant="text"
+          onClick={handleVoltar}
+          className="mb-4"
+          aria-label="Voltar para listagem"
+        >
           &larr; Voltar para estipulantes
         </Button>
-        <Alert
-          variant="error"
-          title="Erro ao carregar detalhes"
-          role="alert"
-        >
-          {error.message || 'Não foi possível carregar os dados do estipulante.'}
+        <Alert variant="error" title="Erro ao carregar detalhes" role="alert">
+          {error.message ||
+            'Não foi possível carregar os dados do estipulante.'}
           <Button variant="primary" size="small" onClick={retry}>
             Tentar novamente
           </Button>
@@ -124,36 +158,55 @@ export const EstipulanteDetalhePage: React.FC = () => {
 
   const { estipulante, configuracao } = data;
 
-  const contatosAtivos = estipulante.contatos?.sort((a, b) => (a.principal === b.principal ? 0 : a.principal ? -1 : 1)) || [];
-  
+  const contatosAtivos =
+    estipulante.contatos?.sort((a, b) =>
+      a.principal === b.principal ? 0 : a.principal ? -1 : 1,
+    ) || [];
+
   // Format CNPJ Helper
   const formatCnpj = (cnpj: string) => {
     if (!cnpj) return '';
     const unmasked = cnpj.replace(/\D/g, '');
     if (unmasked.length === 14) {
-      return unmasked.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, '$1.$2.$3/$4-$5');
+      return unmasked.replace(
+        /^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/,
+        '$1.$2.$3/$4-$5',
+      );
     }
     return cnpj;
   };
 
   return (
-    <main ref={mainRef} tabIndex={-1} className="flex flex-col gap-6 w-full max-w-[1440px] mx-auto p-0 focus:outline-none">
+    <main
+      ref={mainRef}
+      tabIndex={-1}
+      className="flex flex-col gap-6 w-full max-w-[1440px] mx-auto p-0 focus:outline-none"
+    >
       <PageHeader
         title={estipulante.razaoSocial}
-        titleExtras={<StatusBadge status={estipulante.ativo ? 'ativo' : 'inativo'} />}
+        titleExtras={
+          <StatusBadge status={estipulante.ativo ? 'ativo' : 'inativo'} />
+        }
         breadcrumbs={
           <Breadcrumbs
             items={[
               { label: 'Estipulantes', href: '/estipulantes' },
-              { label: 'Detalhes' }
+              { label: 'Detalhes' },
             ]}
           />
         }
         actions={
           <div className="flex gap-2">
-            <Button variant="text" onClick={handleVoltar}>Voltar</Button>
+            <Button variant="text" onClick={handleVoltar}>
+              Voltar
+            </Button>
             {podeAlterar && (
-              <Button variant="primary" onClick={() => navigate(`/estipulantes/${publicId}/editar`)}>Editar Estipulante</Button>
+              <Button
+                variant="primary"
+                onClick={() => navigate(`/estipulantes/${publicId}/editar`)}
+              >
+                Editar Estipulante
+              </Button>
             )}
           </div>
         }
@@ -163,77 +216,170 @@ export const EstipulanteDetalhePage: React.FC = () => {
         <div className="flex flex-col gap-3">
           <DetailsSection title="Dados principais">
             <DescriptionList columns={2} density="compact">
-              <DescriptionItem label="Razão Social" value={estipulante.razaoSocial} />
+              <DescriptionItem
+                label="Razão Social"
+                value={estipulante.razaoSocial}
+              />
               {estipulante.nomeFantasia && (
-                <DescriptionItem label="Nome Fantasia" value={estipulante.nomeFantasia} />
+                <DescriptionItem
+                  label="Nome Fantasia"
+                  value={estipulante.nomeFantasia}
+                />
               )}
-              <DescriptionItem label="CNPJ" value={formatCnpj(estipulante.cnpj)} />
-              <DescriptionItem label="Código" value={estipulante.codigo || '-'} />
-              <DescriptionItem label="Grupo" value={estipulante.grupoPublicId || 'Não vinculado'} />
-              <DescriptionItem label="Seguradora" value={estipulante.seguradoraPublicId || 'Não vinculada'} />
-              <DescriptionItem label="Observação" value={estipulante.observacao || '-'} className="sm:col-span-2" />
+              <DescriptionItem
+                label="CNPJ"
+                value={formatCnpj(estipulante.cnpj)}
+              />
+              <DescriptionItem
+                label="Código"
+                value={estipulante.codigo || '-'}
+              />
+              <DescriptionItem
+                label="Grupo"
+                value={estipulante.grupoPublicId || 'Não vinculado'}
+              />
+              <DescriptionItem
+                label="Seguradora"
+                value={estipulante.seguradoraPublicId || 'Não vinculada'}
+              />
+              <DescriptionItem
+                label="Observação"
+                value={estipulante.observacao || '-'}
+                className="sm:col-span-2"
+              />
             </DescriptionList>
           </DetailsSection>
 
-          <DetailsSection title="Configuração Operacional" isEmpty={!configuracao} emptyState="Nenhuma configuração cadastrada.">
+          <DetailsSection
+            title="Configuração Operacional"
+            isEmpty={!configuracao}
+            emptyState="Nenhuma configuração cadastrada."
+          >
             {configuracao && (
               <DescriptionList columns={2} density="compact">
-                <DescriptionItem label="Início da Vigência" value={formatDate(configuracao.dataInicioVigencia)} />
-                <DescriptionItem label="Fim da Vigência" value={formatDate(configuracao.dataFimVigencia)} />
+                <DescriptionItem
+                  label="Início da Vigência"
+                  value={formatDate(configuracao.dataInicioVigencia)}
+                />
+                <DescriptionItem
+                  label="Fim da Vigência"
+                  value={formatDate(configuracao.dataFimVigencia)}
+                />
               </DescriptionList>
             )}
           </DetailsSection>
         </div>
 
         <div className="flex flex-col gap-3">
-          <DetailsSection title="Endereço principal" isEmpty={!estipulante.endereco} emptyState="Nenhum endereço cadastrado.">
+          <DetailsSection
+            title="Endereço principal"
+            isEmpty={!estipulante.endereco}
+            emptyState="Nenhum endereço cadastrado."
+          >
             {estipulante.endereco && (
               <DescriptionList columns={4} density="compact">
-                <DescriptionItem label="Logradouro" value={`${estipulante.endereco.logradouro}, ${estipulante.endereco.numero}`} className="sm:col-span-2 lg:col-span-3" />
+                <DescriptionItem
+                  label="Logradouro"
+                  value={`${estipulante.endereco.logradouro}, ${estipulante.endereco.numero}`}
+                  className="sm:col-span-2 lg:col-span-3"
+                />
                 {estipulante.endereco.complemento && (
-                  <DescriptionItem label="Complemento" value={estipulante.endereco.complemento} className="sm:col-span-1" />
+                  <DescriptionItem
+                    label="Complemento"
+                    value={estipulante.endereco.complemento}
+                    className="sm:col-span-1"
+                  />
                 )}
-                <DescriptionItem label="Bairro" value={estipulante.endereco.bairro} className="sm:col-span-1 lg:col-span-1" />
-                <DescriptionItem label="Cidade / UF" value={`${estipulante.endereco.cidadeNome || estipulante.endereco.cidadeId} / ${estipulante.endereco.uf}`} className="sm:col-span-1 lg:col-span-2" />
-                <DescriptionItem label="CEP" value={formatarCep(estipulante.endereco.cep)} className="sm:col-span-1" />
+                <DescriptionItem
+                  label="Bairro"
+                  value={estipulante.endereco.bairro}
+                  className="sm:col-span-1 lg:col-span-1"
+                />
+                <DescriptionItem
+                  label="Cidade / UF"
+                  value={`${estipulante.endereco.cidadeNome || estipulante.endereco.cidadeId} / ${estipulante.endereco.uf}`}
+                  className="sm:col-span-1 lg:col-span-2"
+                />
+                <DescriptionItem
+                  label="CEP"
+                  value={formatarCep(estipulante.endereco.cep)}
+                  className="sm:col-span-1"
+                />
               </DescriptionList>
             )}
           </DetailsSection>
 
-          <DetailsSection title="Contatos" isEmpty={contatosAtivos.length === 0} emptyState="Nenhum contato cadastrado.">
+          <DetailsSection
+            title="Contatos"
+            isEmpty={contatosAtivos.length === 0}
+            emptyState="Nenhum contato cadastrado."
+          >
             <DescriptionList columns={2} density="compact">
               {contatosAtivos.map((contato, index) => (
-                <DescriptionItem 
-                  key={index} 
+                <DescriptionItem
+                  key={index}
                   label={contato.tipoContato}
                   value={
                     <span className="flex items-center gap-2">
                       {formatarValorContato(contato.tipoContato, contato.valor)}
-                      {contato.principal && <span className="bg-marca-principal/10 text-marca-principal px-1 rounded text-[9px] font-bold">PRINCIPAL</span>}
+                      {contato.principal && (
+                        <span className="bg-marca-principal/10 text-marca-principal px-1 rounded text-[9px] font-bold">
+                          PRINCIPAL
+                        </span>
+                      )}
                     </span>
-                  } 
-                  className={contato.tipoContato.toUpperCase() === 'EMAIL' ? 'sm:col-span-2' : 'sm:col-span-1'}
+                  }
+                  className={
+                    contato.tipoContato.toUpperCase() === 'EMAIL'
+                      ? 'sm:col-span-2'
+                      : 'sm:col-span-1'
+                  }
                 />
               ))}
             </DescriptionList>
           </DetailsSection>
 
-          <DetailsSection title="Contatos Institucionais" isEmpty={!estipulante.contatosInstitucionais || estipulante.contatosInstitucionais.length === 0} emptyState="Nenhum contato institucional cadastrado.">
-            {estipulante.contatosInstitucionais && estipulante.contatosInstitucionais.length > 0 && (
-              <DescriptionList columns={2} density="compact">
-                {estipulante.contatosInstitucionais.map((contato, index) => (
-                  <React.Fragment key={index}>
-                    <DescriptionItem label="Nome / Departamento" value={`${contato.nome} - ${contato.departamento}`} className="sm:col-span-2" />
-                    <DescriptionItem label="E-mail" value={contato.email || '-'} className="sm:col-span-2" />
-                    <DescriptionItem label="Telefone" value={contato.telefone || '-'} className="sm:col-span-1" />
-                    <DescriptionItem label="Ramal" value={contato.ramal || '-'} className="sm:col-span-1" />
-                    {index < estipulante.contatosInstitucionais!.length - 1 && (
-                      <div className="sm:col-span-2 border-b border-borda my-1" />
-                    )}
-                  </React.Fragment>
-                ))}
-              </DescriptionList>
-            )}
+          <DetailsSection
+            title="Contatos Institucionais"
+            isEmpty={
+              !estipulante.contatosInstitucionais ||
+              estipulante.contatosInstitucionais.length === 0
+            }
+            emptyState="Nenhum contato institucional cadastrado."
+          >
+            {estipulante.contatosInstitucionais &&
+              estipulante.contatosInstitucionais.length > 0 && (
+                <DescriptionList columns={2} density="compact">
+                  {estipulante.contatosInstitucionais.map((contato, index) => (
+                    <React.Fragment key={index}>
+                      <DescriptionItem
+                        label="Nome / Departamento"
+                        value={`${contato.nome} - ${contato.departamento}`}
+                        className="sm:col-span-2"
+                      />
+                      <DescriptionItem
+                        label="E-mail"
+                        value={contato.email || '-'}
+                        className="sm:col-span-2"
+                      />
+                      <DescriptionItem
+                        label="Telefone"
+                        value={contato.telefone || '-'}
+                        className="sm:col-span-1"
+                      />
+                      <DescriptionItem
+                        label="Ramal"
+                        value={contato.ramal || '-'}
+                        className="sm:col-span-1"
+                      />
+                      {index <
+                        estipulante.contatosInstitucionais!.length - 1 && (
+                        <div className="sm:col-span-2 border-b border-borda my-1" />
+                      )}
+                    </React.Fragment>
+                  ))}
+                </DescriptionList>
+              )}
           </DetailsSection>
         </div>
       </div>

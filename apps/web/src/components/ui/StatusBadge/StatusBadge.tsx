@@ -2,14 +2,24 @@ import React from 'react';
 import { Badge } from '../Badge';
 import type { BadgeVariant } from '../Badge';
 
-export type StatusValue = 'ativo' | 'inativo' | 'pendente' | 'bloqueado' | 'falecido' | 'extinto' | string;
+export type StatusValue =
+  | 'ativo'
+  | 'inativo'
+  | 'pendente'
+  | 'bloqueado'
+  | 'falecido'
+  | 'extinto'
+  | string;
 
 export interface StatusBadgeProps {
   status: StatusValue;
   className?: string;
 }
 
-export const StatusBadge: React.FC<StatusBadgeProps> = ({ status, className = '' }) => {
+export const StatusBadge: React.FC<StatusBadgeProps> = ({
+  status,
+  className = '',
+}) => {
   const normalizedStatus = status.toLowerCase();
 
   let variant: BadgeVariant;
@@ -33,7 +43,8 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({ status, className = ''
   }
 
   // Capitalize the first letter for display
-  const displayStatus = status.charAt(0).toUpperCase() + status.slice(1).toLowerCase();
+  const displayStatus =
+    status.charAt(0).toUpperCase() + status.slice(1).toLowerCase();
 
   return (
     <Badge variant={variant} className={className}>

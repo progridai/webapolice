@@ -200,8 +200,8 @@ export interface AlterarSubgrupoApoliceRequest {
 // moduloPublicId → publicId do cadastro global (cadastro.modulo)
 
 export interface ApoliceModuloResult {
-  publicId: string;          // apoliceModuloPublicId — identificador do vínculo
-  moduloPublicId: string;    // publicId do cadastro.modulo
+  publicId: string; // apoliceModuloPublicId — identificador do vínculo
+  moduloPublicId: string; // publicId do cadastro.modulo
   nome: string;
   descricao?: string;
   dataInicio?: string;
@@ -211,7 +211,7 @@ export interface ApoliceModuloResult {
 }
 
 export interface CriarModuloApoliceRequest {
-  moduloPublicId: string;    // obrigatório — publicId do cadastro.modulo
+  moduloPublicId: string; // obrigatório — publicId do cadastro.modulo
   dataInicio?: string | null;
   dataFim?: string | null;
   observacao?: string | null;
@@ -222,4 +222,3 @@ export interface AlterarModuloApoliceRequest {
   dataFim?: string | null;
   observacao?: string | null;
 }
-

@@ -15,3 +15,7 @@ O projeto WebApólice adotará um modelo arquitetural de **Monólito Modular** u
 ## Consequências
 - A adoção do schema no PostgreSQL fornecerá organização visual, com facilidade na separação, além de facilitar a extração do schema inteiro com suas respectivas tabelas em caso de desacoplamento completo futuro.
 - A divisão de um DbContext por módulo (e não um DbContext gigante, nem o contexto compartilhado) fará a modelagem de cada módulo manter-se limpa. O isolamento transacional local necessitará planejamento se uma operação disparar ações em dois módulos distintos ao mesmo tempo (serão tratadas transacionalmente pelo fluxo).
+
+## Estado da Implementação — 23/10/2026
+
+A decisão permanece em vigor. PostgreSQL/EF Core já estão implementados; Application ainda contém violações registradas na revisão 76. O recorte de Clientes foi corrigido para depender de portas e tipos de Domain.Clientes. As portas de operação auditada são específicas do módulo e seus adaptadores reutilizam OperacaoAuditada com uma conexão/transação física compartilhada. Isso não autoriza ler tabelas de outro módulo diretamente nem cria exceção ao limite de EF em Infrastructure. Testes arquiteturais agora carregam os módulos e falham nas dependências remanescentes. Atomicidade real requer executar as integrações PostgreSQL isoladas.

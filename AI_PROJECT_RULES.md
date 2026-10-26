@@ -31,7 +31,7 @@ Este documento é de leitura **obrigatória e prioritária** para qualquer agent
 17. **Sempre validar autorizações e permissões no backend**, mesmo que a interface do frontend oculte ou desabilite determinados botões ou páginas.
 18. **Sempre manter a documentação interna e os testes automatizados atualizados** de forma síncrona com qualquer alteração realizada no código de produção.
 19. **Sempre apresentar um resumo claro dos arquivos criados ou alterados** ao final de cada iteração de trabalho.
-20. **Sempre executar todas as validações e testes disponíveis** (build, tests, lint, typecheck) localmente antes de sinalizar a conclusão de uma tarefa.
+20. **Sempre executar todas as validações e testes disponíveis** localmente antes de sinalizar a conclusão de uma tarefa. No frontend, seguir o [guia obrigatório de padrões](docs/guias/guia-padroes-frontend.md): `format:check`, `typecheck`, `lint`, `lint:design-system`, `test:run` e `build` devem passar. Manter zero pendências no Prettier global, zero erros de tipos, zero erros/avisos de lint e zero ocorrências no scanner; não flexibilizar configurações para obter aprovação.
 21. **Não criar módulos de negócio** ou projetos adicionais na solução .NET sem que haja uma definição de domínio prévia e documentada.
 22. **Identidade visual e temas**:
     * Toda tela nova ou componente implementado no frontend deve obrigatoriamente funcionar e ser testado nos temas claro (`light`), escuro (`dark`) e modo sistema (`sistema`).

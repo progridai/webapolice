@@ -91,7 +91,7 @@ public partial class Propostum
 
     public string? Observacao { get; set; }
 
-    public int LegadoId { get; set; }
+    public int? LegadoId { get; set; }
 
     public int? LegadoPropostaAnt { get; set; }
 

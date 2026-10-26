@@ -3,7 +3,12 @@
  */
 import { useState, useEffect, useCallback } from 'react';
 import { listarAuditoria, obterAuditoria } from '../api/auditoriaApi';
-import type { AuditoriaDetalheDto, AuditoriaListDto, AuditoriaQuery, PagedResult } from '../types/seguranca.types';
+import type {
+  AuditoriaDetalheDto,
+  AuditoriaListDto,
+  AuditoriaQuery,
+  PagedResult,
+} from '../types/seguranca.types';
 
 // ── Listagem ───────────────────────────────────────────────────────────────────
 
@@ -29,7 +34,9 @@ export function useAuditoriaList(query: AuditoriaQuery) {
       setState((prev) => ({
         ...prev,
         isLoading: false,
-        error: new Error('Não foi possível carregar os registros de auditoria.'),
+        error: new Error(
+          'Não foi possível carregar os registros de auditoria.',
+        ),
       }));
     }
   };
@@ -37,8 +44,15 @@ export function useAuditoriaList(query: AuditoriaQuery) {
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     fetch();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [query.page, query.pageSize, query.acao, query.entidade, query.dataInicial, query.dataFinal]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    query.page,
+    query.pageSize,
+    query.acao,
+    query.entidade,
+    query.dataInicial,
+    query.dataFinal,
+  ]);
 
   return { ...state, retry: fetch };
 }
@@ -67,7 +81,9 @@ export function useAuditoriaDetalhe(publicId: string) {
       setState((prev) => ({
         ...prev,
         isLoading: false,
-        error: new Error('Não foi possível carregar o detalhe do registro de auditoria.'),
+        error: new Error(
+          'Não foi possível carregar o detalhe do registro de auditoria.',
+        ),
       }));
     }
   }, [publicId]);

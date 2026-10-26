@@ -16,25 +16,35 @@ describe('useClientes', () => {
   it('deve iniciar com estado de loading', async () => {
     let resolveFirst: Function;
     vi.mocked(api.listarClientes).mockImplementation(
-      () => new Promise((resolve) => { resolveFirst = resolve; })
+      () =>
+        new Promise((resolve) => {
+          resolveFirst = resolve;
+        }),
     );
 
-    const { result } = renderHook((q) => useClientes(q), { initialProps: { page: 1 } });
+    const { result } = renderHook((q) => useClientes(q), {
+      initialProps: { page: 1 },
+    });
 
     expect(result.current.isLoading).toBe(true);
     expect(result.current.data).toBeNull();
     expect(result.current.error).toBeNull();
-    
+
     // Resolvemos para não vazar a promise
     resolveFirst!({ itens: [], totalPaginas: 0 });
     await waitFor(() => expect(result.current.isLoading).toBe(false));
   });
 
   it('deve atualizar o estado ao carregar com sucesso', async () => {
-    const mockData = { itens: [{ id: 1, nome: 'Teste' }], totalPaginas: 1 } as any;
+    const mockData = {
+      itens: [{ id: 1, nome: 'Teste' }],
+      totalPaginas: 1,
+    } as any;
     vi.mocked(api.listarClientes).mockResolvedValueOnce(mockData);
 
-    const { result } = renderHook((q) => useClientes(q), { initialProps: { page: 1 } });
+    const { result } = renderHook((q) => useClientes(q), {
+      initialProps: { page: 1 },
+    });
 
     await waitFor(() => {
       expect(result.current.isLoading).toBe(false);
@@ -48,13 +58,17 @@ describe('useClientes', () => {
     const error = new Error('Falha de rede');
     vi.mocked(api.listarClientes).mockRejectedValueOnce(error);
 
-    const { result } = renderHook((q) => useClientes(q), { initialProps: { page: 1 } });
+    const { result } = renderHook((q) => useClientes(q), {
+      initialProps: { page: 1 },
+    });
 
     await waitFor(() => {
       expect(result.current.isLoading).toBe(false);
     });
 
-    expect(result.current.error?.message).toContain('Não foi possível conectar ao servidor');
+    expect(result.current.error?.message).toContain(
+      'Não foi possível conectar ao servidor',
+    );
     expect(result.current.data).toBeNull();
   });
 
@@ -62,24 +76,27 @@ describe('useClientes', () => {
     const error = new DOMException('Aborted', 'AbortError');
     vi.mocked(api.listarClientes).mockRejectedValueOnce(error);
 
-    const { result } = renderHook((q) => useClientes(q), { initialProps: { page: 1 } });
+    const { result } = renderHook((q) => useClientes(q), {
+      initialProps: { page: 1 },
+    });
 
     expect(result.current.error).toBeNull();
   });
 
   it('deve cancelar chamadas antigas se a query mudar rapidamente', async () => {
     let resolveFirst: Function;
-    const firstPromise = new Promise((resolve) => { resolveFirst = resolve; });
+    const firstPromise = new Promise((resolve) => {
+      resolveFirst = resolve;
+    });
     const secondPromise = Promise.resolve({ itens: [{ id: 2 }] } as any);
 
     vi.mocked(api.listarClientes)
       .mockReturnValueOnce(firstPromise as any)
       .mockReturnValueOnce(secondPromise);
 
-    const { rerender, result } = renderHook(
-      (q) => useClientes(q),
-      { initialProps: { page: 1 } }
-    );
+    const { rerender, result } = renderHook((q) => useClientes(q), {
+      initialProps: { page: 1 },
+    });
 
     rerender({ page: 2 });
 
@@ -87,7 +104,7 @@ describe('useClientes', () => {
       expect(result.current.isLoading).toBe(false);
       expect(result.current.data?.itens[0].id).toBe(2);
     });
-    
+
     resolveFirst!({ itens: [{ id: 1 }] });
     await firstPromise;
   });

@@ -33,9 +33,7 @@ export const SelecaoPerfis: React.FC<SelecaoPerfisProps> = ({
 
   if (perfis.length === 0) {
     return (
-      <p className="text-sm text-texto-secundario">
-        Nenhum perfil disponível.
-      </p>
+      <p className="text-sm text-texto-secundario">Nenhum perfil disponível.</p>
     );
   }
 

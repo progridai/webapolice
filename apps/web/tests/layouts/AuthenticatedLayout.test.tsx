@@ -14,7 +14,9 @@ import { APP_ROLES } from '../../src/auth/roles';
 import { useAuthorization } from '../../src/auth/AuthorizationProvider';
 import { makeAuthorization } from '../helpers/authorization';
 
-vi.mock('../../src/auth/AuthorizationProvider', () => ({ useAuthorization: vi.fn() }));
+vi.mock('../../src/auth/AuthorizationProvider', () => ({
+  useAuthorization: vi.fn(),
+}));
 
 vi.mock('../../src/app/config/env', () => ({
   ENV: {
@@ -61,23 +63,33 @@ const renderLayout = () =>
           <AuthenticatedLayout />
         </AuthContext.Provider>
       </MemoryRouter>
-    </ThemeProvider>
+    </ThemeProvider>,
   );
 
 describe('AuthenticatedLayout', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.mocked(useAuthorization).mockReturnValue(makeAuthorization());
-    vi.stubGlobal('matchMedia', vi.fn().mockImplementation((query) => ({
-      matches: false, media: query, onchange: null,
-      addListener: vi.fn(), removeListener: vi.fn(),
-      addEventListener: vi.fn(), removeEventListener: vi.fn(), dispatchEvent: vi.fn(),
-    })));
+    vi.stubGlobal(
+      'matchMedia',
+      vi.fn().mockImplementation((query) => ({
+        matches: false,
+        media: query,
+        onchange: null,
+        addListener: vi.fn(),
+        removeListener: vi.fn(),
+        addEventListener: vi.fn(),
+        removeEventListener: vi.fn(),
+        dispatchEvent: vi.fn(),
+      })),
+    );
   });
 
   it('deve renderizar a navegação principal', () => {
     renderLayout();
-    expect(screen.getByRole('navigation', { name: /navegação principal/i })).not.toBeNull();
+    expect(
+      screen.getByRole('navigation', { name: /navegação principal/i }),
+    ).not.toBeNull();
     expect(screen.getByText('Início')).not.toBeNull();
   });
 
@@ -94,7 +106,9 @@ describe('AuthenticatedLayout', () => {
     fireEvent.click(menuBtn);
 
     // Clica em "Sair da conta"
-    const logoutBtn = await screen.findByRole('menuitem', { name: /sair da conta/i });
+    const logoutBtn = await screen.findByRole('menuitem', {
+      name: /sair da conta/i,
+    });
     fireEvent.click(logoutBtn);
 
     await waitFor(() => expect(mockLogout).toHaveBeenCalledTimes(1));
@@ -107,14 +121,18 @@ describe('AuthenticatedLayout', () => {
     expect(screen.queryByRole('dialog')).toBeNull();
 
     // Abre o menu (botão hambúrguer no header)
-    const menuBtn = screen.getByRole('button', { name: /abrir menu de navegação/i });
+    const menuBtn = screen.getByRole('button', {
+      name: /abrir menu de navegação/i,
+    });
     fireEvent.click(menuBtn);
 
     expect(screen.getByRole('dialog')).not.toBeNull();
 
     // Fecha com o botão de fechar que está dentro do dialog
     const dialog = screen.getByRole('dialog');
-    const closeBtn = dialog.querySelector('button[aria-label="Fechar menu de navegação"]');
+    const closeBtn = dialog.querySelector(
+      'button[aria-label="Fechar menu de navegação"]',
+    );
     expect(closeBtn).not.toBeNull();
     fireEvent.click(closeBtn!);
 
@@ -124,7 +142,9 @@ describe('AuthenticatedLayout', () => {
   it('deve fechar o menu mobile ao pressionar Escape', () => {
     renderLayout();
 
-    const menuBtn = screen.getByRole('button', { name: /abrir menu de navegação/i });
+    const menuBtn = screen.getByRole('button', {
+      name: /abrir menu de navegação/i,
+    });
     fireEvent.click(menuBtn);
     const dialog = screen.getByRole('dialog');
     expect(dialog).not.toBeNull();

@@ -19,14 +19,19 @@ export const corretorasApi = {
   /**
    * Lista corretoras de forma paginada.
    */
-  listar: async (query?: ListarCorretorasQuery): Promise<PagedResult<CorretoraListItem>> => {
+  listar: async (
+    query?: ListarCorretorasQuery,
+    signal?: AbortSignal,
+  ): Promise<PagedResult<CorretoraListItem>> => {
     const params: Record<string, string | number | boolean> = {};
     if (query?.pagina !== undefined) params.pagina = query.pagina;
-    if (query?.tamanhoPagina !== undefined) params.tamanhoPagina = query.tamanhoPagina;
+    if (query?.tamanhoPagina !== undefined)
+      params.tamanhoPagina = query.tamanhoPagina;
     if (query?.busca !== undefined) params.busca = query.busca;
     if (query?.ativo !== undefined) params.ativo = query.ativo;
     const res = await httpClient.get<PagedResult<CorretoraListItem>>(BASE_URL, {
       params,
+      signal,
     });
     return res.data;
   },
@@ -35,7 +40,9 @@ export const corretorasApi = {
    * Obtém detalhes de uma corretora específica.
    */
   obterPorId: async (publicId: string): Promise<CorretoraDetalhe> => {
-    const res = await httpClient.get<CorretoraDetalhe>(`${BASE_URL}/${publicId}`);
+    const res = await httpClient.get<CorretoraDetalhe>(
+      `${BASE_URL}/${publicId}`,
+    );
     return res.data;
   },
 
@@ -50,7 +57,10 @@ export const corretorasApi = {
   /**
    * Altera uma corretora existente.
    */
-  alterar: async (publicId: string, data: Omit<AlterarCorretoraRequest, 'publicId'>): Promise<void> => {
+  alterar: async (
+    publicId: string,
+    data: Omit<AlterarCorretoraRequest, 'publicId'>,
+  ): Promise<void> => {
     await httpClient.put<void>(`${BASE_URL}/${publicId}`, {
       publicId,
       ...data,

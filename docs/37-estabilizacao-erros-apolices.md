@@ -53,6 +53,8 @@ Documentação: este registro e continuidade nos documentos 29 e 36. As alteraç
 
 ## Próxima etapa
 
-Continuar a tipagem do tratamento de erros nos consumidores de API dos demais cadastros, reutilizando `HttpApiError` e preservando as mensagens e os dados dos formulários. Os 21 apontamentos de `no-explicit-any` restantes incluem outros domínios e componentes de campos/seletores; devem ser tratados em lotes próprios.
+Atualização de 22/10/2026: o [lote de erros dos formulários de cadastros](38-estabilizacao-erros-cadastros.md) corrigiu Módulos, Ramos, Seguradoras e Subestipulantes. A suíte passou a 549 testes aprovados, com TypeScript e build aprovados; restam 42 erros e quatro avisos no lint global. Os resultados acima preservam o encerramento do lote de Apólices.
+
+Continuar a tipagem do tratamento de erros nos consumidores de API dos demais cadastros, reutilizando `HttpApiError` e preservando as mensagens e os dados dos formulários. Os 21 apontamentos de `no-explicit-any` existentes no encerramento deste lote incluíam outros domínios e componentes de campos/seletores; devem ser tratados em lotes próprios.
 
 Depois, revisar os efeitos, suas dependências e os estados de requisições concorrentes. Permanecem pendentes design system, formatação geral e homologação integrada, conforme o [plano de estabilização](29-estabilizacao-frontend.md).

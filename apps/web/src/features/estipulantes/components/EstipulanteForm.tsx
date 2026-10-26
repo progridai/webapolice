@@ -2,7 +2,22 @@ import React, { useEffect, useState, useRef } from 'react';
 import { useForm, useWatch, useFieldArray, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { FormField, Input, Select, Textarea, Button, FormSection, FormGrid, FormActions, HomeIcon, InfoIcon, BriefcaseIcon, ReadOnlyField, Checkbox, PlusIcon } from '../../../components/ui';
+import {
+  FormField,
+  Input,
+  Select,
+  Textarea,
+  Button,
+  FormSection,
+  FormGrid,
+  FormActions,
+  HomeIcon,
+  InfoIcon,
+  BriefcaseIcon,
+  ReadOnlyField,
+  Checkbox,
+  PlusIcon,
+} from '../../../components/ui';
 import { CnpjInput } from '../../../components/fields/CnpjInput';
 import { CepInput } from '../../../components/fields/CepInput';
 import { PhoneInput } from '../../../components/fields/PhoneInput';
@@ -10,73 +25,182 @@ import { EmailInput } from '../../../components/fields/EmailInput';
 import { DateInput } from '../../../components/fields/DateInput';
 import { consultarCep } from '../../../shared/api/enderecosApi';
 import { isValidCnpj, isValidPhone } from '../../../shared/utils/validators';
-import { normalizeCnpj, normalizeCep, normalizePhone } from '../../../shared/utils/normalizers';
-import { buscarCidadesPorUf, type CidadeResponse } from '../../clientes/api/localidadesApi';
+import {
+  normalizeCnpj,
+  normalizeCep,
+  normalizePhone,
+} from '../../../shared/utils/normalizers';
+import {
+  buscarCidadesPorUf,
+  type CidadeResponse,
+} from '../../clientes/api/localidadesApi';
 
 const ESTADOS_BRASILEIROS = [
-  'AC', 'AL', 'AP', 'AM', 'BA', 'CE', 'DF', 'ES', 'GO', 'MA', 'MT', 'MS', 'MG',
-  'PA', 'PB', 'PR', 'PE', 'PI', 'RJ', 'RN', 'RS', 'RO', 'RR', 'SC', 'SP', 'SE', 'TO'
+  'AC',
+  'AL',
+  'AP',
+  'AM',
+  'BA',
+  'CE',
+  'DF',
+  'ES',
+  'GO',
+  'MA',
+  'MT',
+  'MS',
+  'MG',
+  'PA',
+  'PB',
+  'PR',
+  'PE',
+  'PI',
+  'RJ',
+  'RN',
+  'RS',
+  'RO',
+  'RR',
+  'SC',
+  'SP',
+  'SE',
+  'TO',
 ];
 
-const contatoSchema = z.object({
-  tipoContato: z.string().min(1, 'Selecione o tipo de contato'),
-  valor: z.string().optional().or(z.literal('')).default(''),
-  principal: z.boolean().default(false),
-}).superRefine((data, ctx) => {
-  if (!data.valor || data.valor.trim() === '') return;
-  const val = data.valor.trim();
-  if (data.tipoContato === 'EMAIL' && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)) {
-    ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'E-mail inválido', path: ['valor'] });
-  } else if ((data.tipoContato === 'TELEFONE' || data.tipoContato === 'CELULAR') && !isValidPhone(val)) {
-    ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'Telefone/Celular inválido', path: ['valor'] });
-  } else if (val.length < 3) {
-    ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'O contato deve ter no mínimo 3 caracteres', path: ['valor'] });
-  }
-});
+const contatoSchema = z
+  .object({
+    tipoContato: z.string().min(1, 'Selecione o tipo de contato'),
+    valor: z.string().optional().or(z.literal('')).default(''),
+    principal: z.boolean().default(false),
+  })
+  .superRefine((data, ctx) => {
+    if (!data.valor || data.valor.trim() === '') return;
+    const val = data.valor.trim();
+    if (
+      data.tipoContato === 'EMAIL' &&
+      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)
+    ) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'E-mail inválido',
+        path: ['valor'],
+      });
+    } else if (
+      (data.tipoContato === 'TELEFONE' || data.tipoContato === 'CELULAR') &&
+      !isValidPhone(val)
+    ) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'Telefone/Celular inválido',
+        path: ['valor'],
+      });
+    } else if (val.length < 3) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'O contato deve ter no mínimo 3 caracteres',
+        path: ['valor'],
+      });
+    }
+  });
 
 const estipulanteSchema = z.object({
-  razaoSocial: z.string().trim().min(3, 'A Razão Social deve ter no mínimo 3 caracteres').max(150, 'Máximo de 150 caracteres'),
-  nomeFantasia: z.string().trim().max(100, 'Máximo de 100 caracteres').optional(),
-  cnpj: z.string().min(14, 'CNPJ inválido').refine(isValidCnpj, 'CNPJ inválido'),
+  razaoSocial: z
+    .string()
+    .trim()
+    .min(3, 'A Razão Social deve ter no mínimo 3 caracteres')
+    .max(150, 'Máximo de 150 caracteres'),
+  nomeFantasia: z
+    .string()
+    .trim()
+    .max(100, 'Máximo de 100 caracteres')
+    .optional(),
+  cnpj: z
+    .string()
+    .min(14, 'CNPJ inválido')
+    .refine(isValidCnpj, 'CNPJ inválido'),
   codigo: z.string().trim().max(50, 'Máximo de 50 caracteres').optional(),
   grupoPublicId: z.string().optional(),
   seguradoraPublicId: z.string().optional(),
-  observacao: z.string().trim().max(1000, 'Máximo de 1000 caracteres').optional(),
-  
-  endereco: z.object({
-    cep: z.string().optional().or(z.literal('')),
-    logradouro: z.string().max(100, 'Máximo de 100 caracteres').optional().or(z.literal('')),
-    numero: z.string().max(20, 'Máximo de 20 caracteres').optional().or(z.literal('')),
-    complemento: z.string().max(100, 'Máximo de 100 caracteres').optional().or(z.literal('')),
-    bairro: z.string().max(100, 'Máximo de 100 caracteres').optional().or(z.literal('')),
-    uf: z.string().max(2).optional().or(z.literal('')),
-    cidadeId: z.coerce.number<string | number>().optional().or(z.literal(0)),
-  }).optional(),
-  
+  observacao: z
+    .string()
+    .trim()
+    .max(1000, 'Máximo de 1000 caracteres')
+    .optional(),
+
+  endereco: z
+    .object({
+      cep: z.string().optional().or(z.literal('')),
+      logradouro: z
+        .string()
+        .max(100, 'Máximo de 100 caracteres')
+        .optional()
+        .or(z.literal('')),
+      numero: z
+        .string()
+        .max(20, 'Máximo de 20 caracteres')
+        .optional()
+        .or(z.literal('')),
+      complemento: z
+        .string()
+        .max(100, 'Máximo de 100 caracteres')
+        .optional()
+        .or(z.literal('')),
+      bairro: z
+        .string()
+        .max(100, 'Máximo de 100 caracteres')
+        .optional()
+        .or(z.literal('')),
+      uf: z.string().max(2).optional().or(z.literal('')),
+      cidadeId: z.coerce.number<string | number>().optional().or(z.literal(0)),
+    })
+    .optional(),
+
   contatos: z.array(contatoSchema),
-  
-  contatosInstitucionais: z.array(z.object({
-    nome: z.string().min(1, 'O Nome é obrigatório').max(100, 'Máximo de 100 caracteres'),
-    departamento: z.string().min(1, 'O Departamento é obrigatório').max(50, 'Máximo de 50 caracteres'),
-    email: z.string().email('E-mail inválido').optional().or(z.literal('')),
-    telefone: z.string().optional().or(z.literal('')).refine(val => !val || isValidPhone(val), 'Telefone inválido'),
-    ramal: z.string().max(20, 'Máximo de 20 caracteres').optional().or(z.literal('')),
-  })).optional(),
-  
-  configuracao: z.object({
-    dataInicioVigencia: z.string().min(1, 'A data de início da vigência é obrigatória'),
-    dataFimVigencia: z.string().optional().or(z.literal('')),
-  }).superRefine((data, ctx) => {
-    if (data.dataInicioVigencia && data.dataFimVigencia) {
-      if (new Date(data.dataFimVigencia) < new Date(data.dataInicioVigencia)) {
-        ctx.addIssue({
-          path: ['dataFimVigencia'],
-          code: z.ZodIssueCode.custom,
-          message: 'Data final deve ser maior ou igual a inicial',
-        });
+
+  contatosInstitucionais: z
+    .array(
+      z.object({
+        nome: z
+          .string()
+          .min(1, 'O Nome é obrigatório')
+          .max(100, 'Máximo de 100 caracteres'),
+        departamento: z
+          .string()
+          .min(1, 'O Departamento é obrigatório')
+          .max(50, 'Máximo de 50 caracteres'),
+        email: z.string().email('E-mail inválido').optional().or(z.literal('')),
+        telefone: z
+          .string()
+          .optional()
+          .or(z.literal(''))
+          .refine((val) => !val || isValidPhone(val), 'Telefone inválido'),
+        ramal: z
+          .string()
+          .max(20, 'Máximo de 20 caracteres')
+          .optional()
+          .or(z.literal('')),
+      }),
+    )
+    .optional(),
+
+  configuracao: z
+    .object({
+      dataInicioVigencia: z
+        .string()
+        .min(1, 'A data de início da vigência é obrigatória'),
+      dataFimVigencia: z.string().optional().or(z.literal('')),
+    })
+    .superRefine((data, ctx) => {
+      if (data.dataInicioVigencia && data.dataFimVigencia) {
+        if (
+          new Date(data.dataFimVigencia) < new Date(data.dataInicioVigencia)
+        ) {
+          ctx.addIssue({
+            path: ['dataFimVigencia'],
+            code: z.ZodIssueCode.custom,
+            message: 'Data final deve ser maior ou igual a inicial',
+          });
+        }
       }
-    }
-  }),
+    }),
 });
 
 type EstipulanteFormInput = z.input<typeof estipulanteSchema>;
@@ -125,7 +249,9 @@ export const EstipulanteForm: React.FC<EstipulanteFormProps> = ({
         uf: '',
         cidadeId: undefined,
       },
-      contatos: initialData?.contatos || [{ tipoContato: 'EMAIL', valor: '', principal: true }],
+      contatos: initialData?.contatos || [
+        { tipoContato: 'EMAIL', valor: '', principal: true },
+      ],
       contatosInstitucionais: initialData?.contatosInstitucionais || [],
       configuracao: initialData?.configuracao || {
         dataInicioVigencia: '',
@@ -145,14 +271,22 @@ export const EstipulanteForm: React.FC<EstipulanteFormProps> = ({
         seguradoraPublicId: initialData.seguradoraPublicId || '',
         observacao: initialData.observacao || '',
         endereco: initialData.endereco || {
-          cep: '', logradouro: '', numero: '', complemento: '', bairro: '', uf: '', cidadeId: undefined
+          cep: '',
+          logradouro: '',
+          numero: '',
+          complemento: '',
+          bairro: '',
+          uf: '',
+          cidadeId: undefined,
         },
-        contatos: initialData.contatos && initialData.contatos.length > 0 
-          ? initialData.contatos 
-          : [{ tipoContato: 'EMAIL', valor: '', principal: true }],
+        contatos:
+          initialData.contatos && initialData.contatos.length > 0
+            ? initialData.contatos
+            : [{ tipoContato: 'EMAIL', valor: '', principal: true }],
         contatosInstitucionais: initialData.contatosInstitucionais || [],
         configuracao: initialData.configuracao || {
-          dataInicioVigencia: '', dataFimVigencia: ''
+          dataInicioVigencia: '',
+          dataFimVigencia: '',
         },
       });
     }
@@ -203,7 +337,9 @@ export const EstipulanteForm: React.FC<EstipulanteFormProps> = ({
     name: 'contatos',
   });
 
-  const lastFetchedCep = useRef(initialData?.endereco?.cep ? normalizeCep(initialData.endereco.cep) : '');
+  const lastFetchedCep = useRef(
+    initialData?.endereco?.cep ? normalizeCep(initialData.endereco.cep) : '',
+  );
 
   // Gatilho CEP
   useEffect(() => {
@@ -216,15 +352,23 @@ export const EstipulanteForm: React.FC<EstipulanteFormProps> = ({
     async function fetchCep() {
       try {
         const enderecoCompleto = await consultarCep(rawCep, controller.signal);
-        
-        setValue('endereco.logradouro', enderecoCompleto.logradouro || '', { shouldValidate: true });
-        setValue('endereco.bairro', enderecoCompleto.bairro || '', { shouldValidate: true });
-        setValue('endereco.uf', enderecoCompleto.uf || '', { shouldValidate: true });
-        
+
+        setValue('endereco.logradouro', enderecoCompleto.logradouro || '', {
+          shouldValidate: true,
+        });
+        setValue('endereco.bairro', enderecoCompleto.bairro || '', {
+          shouldValidate: true,
+        });
+        setValue('endereco.uf', enderecoCompleto.uf || '', {
+          shouldValidate: true,
+        });
+
         if (enderecoCompleto.cidadeId) {
-          setValue('endereco.cidadeId', enderecoCompleto.cidadeId, { shouldValidate: true });
+          setValue('endereco.cidadeId', enderecoCompleto.cidadeId, {
+            shouldValidate: true,
+          });
         }
-        
+
         lastFetchedCep.current = rawCep;
       } catch (err: unknown) {
         if (err instanceof Error && err.name !== 'AbortError') {
@@ -259,61 +403,92 @@ export const EstipulanteForm: React.FC<EstipulanteFormProps> = ({
 
   const handleFormSubmit = (data: EstipulanteFormData) => {
     // Sanitização dos dados antes do envio
-    const hasEndereco = data.endereco && (
-      data.endereco.cep || data.endereco.logradouro || data.endereco.cidadeId || data.endereco.uf
-    );
+    const hasEndereco =
+      data.endereco &&
+      (data.endereco.cep ||
+        data.endereco.logradouro ||
+        data.endereco.cidadeId ||
+        data.endereco.uf);
     const contatosFiltrados = data.contatos
-      .filter(c => c.valor && c.valor.trim() !== '')
-      .map(c => ({
+      .filter((c) => c.valor && c.valor.trim() !== '')
+      .map((c) => ({
         ...c,
-        valor: (c.tipoContato === 'TELEFONE' || c.tipoContato === 'CELULAR') 
-          ? normalizePhone(c.valor)
-          : c.valor
+        valor:
+          c.tipoContato === 'TELEFONE' || c.tipoContato === 'CELULAR'
+            ? normalizePhone(c.valor)
+            : c.valor,
       }));
-      
+
     const contatosInstFiltrados = data.contatosInstitucionais
-      ?.filter(c => c.nome.trim() !== '' && c.departamento.trim() !== '')
-      .map(c => ({
+      ?.filter((c) => c.nome.trim() !== '' && c.departamento.trim() !== '')
+      .map((c) => ({
         ...c,
-        telefone: c.telefone ? normalizePhone(c.telefone) : c.telefone
+        telefone: c.telefone ? normalizePhone(c.telefone) : c.telefone,
       }));
 
     onSubmit({
       ...data,
       cnpj: normalizeCnpj(data.cnpj),
-      endereco: hasEndereco ? {
-        ...data.endereco,
-        cep: normalizeCep(data.endereco!.cep || '')
-      } : undefined,
+      endereco: hasEndereco
+        ? {
+            ...data.endereco,
+            cep: normalizeCep(data.endereco!.cep || ''),
+          }
+        : undefined,
       contatos: contatosFiltrados,
       contatosInstitucionais: contatosInstFiltrados,
     });
   };
 
   return (
-    <form onSubmit={handleSubmit(handleFormSubmit)} className="flex flex-col gap-6">
+    <form
+      onSubmit={handleSubmit(handleFormSubmit)}
+      className="flex flex-col gap-6"
+    >
       <FormSection title="Dados Principais" icon={<BriefcaseIcon size={20} />}>
         <FormGrid>
           <div className="lg:col-span-12">
-            <FormField label="Razão Social" required error={errors.razaoSocial?.message}>
-              <Input {...register('razaoSocial')} placeholder="Digite a Razão Social da empresa" />
+            <FormField
+              label="Razão Social"
+              required
+              error={errors.razaoSocial?.message}
+            >
+              <Input
+                {...register('razaoSocial')}
+                placeholder="Digite a Razão Social da empresa"
+              />
             </FormField>
           </div>
 
           <div className="lg:col-span-6">
-            <FormField label="Nome Fantasia" error={errors.nomeFantasia?.message}>
-              <Input {...register('nomeFantasia')} placeholder="Digite o Nome Fantasia (opcional)" />
+            <FormField
+              label="Nome Fantasia"
+              error={errors.nomeFantasia?.message}
+            >
+              <Input
+                {...register('nomeFantasia')}
+                placeholder="Digite o Nome Fantasia (opcional)"
+              />
             </FormField>
           </div>
 
           <div className="lg:col-span-6">
             <FormField label="CNPJ" required error={errors.cnpj?.message}>
               {isEdit ? (
-                <ReadOnlyField value={initialData?.cnpj ? initialData.cnpj.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, '$1.$2.$3/$4-$5') : ''} />
+                <ReadOnlyField
+                  value={
+                    initialData?.cnpj
+                      ? initialData.cnpj.replace(
+                          /^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/,
+                          '$1.$2.$3/$4-$5',
+                        )
+                      : ''
+                  }
+                />
               ) : (
-                <CnpjInput 
-                  {...register('cnpj')} 
-                  placeholder="00.000.000/0000-00" 
+                <CnpjInput
+                  {...register('cnpj')}
+                  placeholder="00.000.000/0000-00"
                 />
               )}
             </FormField>
@@ -334,7 +509,10 @@ export const EstipulanteForm: React.FC<EstipulanteFormProps> = ({
           </div>
 
           <div className="lg:col-span-4">
-            <FormField label="Seguradora" error={errors.seguradoraPublicId?.message}>
+            <FormField
+              label="Seguradora"
+              error={errors.seguradoraPublicId?.message}
+            >
               <Select {...register('seguradoraPublicId')} disabled={true}>
                 <option value="">Selecione uma seguradora (Em breve)</option>
               </Select>
@@ -343,7 +521,11 @@ export const EstipulanteForm: React.FC<EstipulanteFormProps> = ({
 
           <div className="lg:col-span-12">
             <FormField label="Observações" error={errors.observacao?.message}>
-              <Textarea {...register('observacao')} placeholder="Observações internas..." rows={3} />
+              <Textarea
+                {...register('observacao')}
+                placeholder="Observações internas..."
+                rows={3}
+              />
             </FormField>
           </div>
         </FormGrid>
@@ -368,8 +550,14 @@ export const EstipulanteForm: React.FC<EstipulanteFormProps> = ({
           </div>
 
           <div className="lg:col-span-7">
-            <FormField label="Logradouro" error={errors.endereco?.logradouro?.message}>
-              <Input {...register('endereco.logradouro')} placeholder="Rua, Avenida..." />
+            <FormField
+              label="Logradouro"
+              error={errors.endereco?.logradouro?.message}
+            >
+              <Input
+                {...register('endereco.logradouro')}
+                placeholder="Rua, Avenida..."
+              />
             </FormField>
           </div>
 
@@ -380,8 +568,14 @@ export const EstipulanteForm: React.FC<EstipulanteFormProps> = ({
           </div>
 
           <div className="lg:col-span-3">
-            <FormField label="Complemento" error={errors.endereco?.complemento?.message}>
-              <Input {...register('endereco.complemento')} placeholder="Andar, Sala..." />
+            <FormField
+              label="Complemento"
+              error={errors.endereco?.complemento?.message}
+            >
+              <Input
+                {...register('endereco.complemento')}
+                placeholder="Andar, Sala..."
+              />
             </FormField>
           </div>
 
@@ -395,8 +589,10 @@ export const EstipulanteForm: React.FC<EstipulanteFormProps> = ({
             <FormField label="UF" error={errors.endereco?.uf?.message}>
               <Select {...register('endereco.uf')}>
                 <option value="">...</option>
-                {ESTADOS_BRASILEIROS.map(uf => (
-                  <option key={uf} value={uf}>{uf}</option>
+                {ESTADOS_BRASILEIROS.map((uf) => (
+                  <option key={uf} value={uf}>
+                    {uf}
+                  </option>
                 ))}
               </Select>
             </FormField>
@@ -407,15 +603,22 @@ export const EstipulanteForm: React.FC<EstipulanteFormProps> = ({
               name="endereco.cidadeId"
               control={control}
               render={({ field }) => (
-                <FormField label="Cidade" error={errors.endereco?.cidadeId?.message}>
-                  <Select 
-                    {...field} 
-                    value={field.value || ""} 
+                <FormField
+                  label="Cidade"
+                  error={errors.endereco?.cidadeId?.message}
+                >
+                  <Select
+                    {...field}
+                    value={field.value || ''}
                     disabled={loadingCidades || cidades.length === 0}
                   >
-                    <option value="">{loadingCidades ? 'Carregando...' : 'Selecione'}</option>
-                    {cidades.map(c => (
-                      <option key={c.id} value={c.id}>{c.nome}</option>
+                    <option value="">
+                      {loadingCidades ? 'Carregando...' : 'Selecione'}
+                    </option>
+                    {cidades.map((c) => (
+                      <option key={c.id} value={c.id}>
+                        {c.nome}
+                      </option>
                     ))}
                   </Select>
                 </FormField>
@@ -428,10 +631,17 @@ export const EstipulanteForm: React.FC<EstipulanteFormProps> = ({
       <FormSection title="Contatos" icon={<InfoIcon size={20} />}>
         <div className="flex flex-col gap-2">
           {contatoFields.map((field, index) => (
-            <div key={field.id} className="p-3 rounded-lg bg-fundo-aplicacao border border-borda">
+            <div
+              key={field.id}
+              className="p-3 rounded-lg bg-fundo-aplicacao border border-borda"
+            >
               <FormGrid>
                 <div className="lg:col-span-3">
-                  <FormField label="Tipo de Contato" required error={errors.contatos?.[index]?.tipoContato?.message}>
+                  <FormField
+                    label="Tipo de Contato"
+                    required
+                    error={errors.contatos?.[index]?.tipoContato?.message}
+                  >
                     <Select {...register(`contatos.${index}.tipoContato`)}>
                       <option value="EMAIL">E-mail</option>
                       <option value="TELEFONE">Telefone</option>
@@ -440,27 +650,42 @@ export const EstipulanteForm: React.FC<EstipulanteFormProps> = ({
                   </FormField>
                 </div>
                 <div className="lg:col-span-6">
-                  <FormField label="Contato" error={errors.contatos?.[index]?.valor?.message}>
+                  <FormField
+                    label="Contato"
+                    error={errors.contatos?.[index]?.valor?.message}
+                  >
                     {(() => {
-                      const type = watchedContatos?.[index]?.tipoContato || field.tipoContato;
+                      const type =
+                        watchedContatos?.[index]?.tipoContato ||
+                        field.tipoContato;
                       if (type === 'EMAIL') {
-                        return <EmailInput {...register(`contatos.${index}.valor`)} placeholder="Digite o e-mail" />;
+                        return (
+                          <EmailInput
+                            {...register(`contatos.${index}.valor`)}
+                            placeholder="Digite o e-mail"
+                          />
+                        );
                       } else if (type === 'TELEFONE' || type === 'CELULAR') {
                         return (
                           <Controller
                             name={`contatos.${index}.valor`}
                             control={control}
                             render={({ field: phoneField }) => (
-                              <PhoneInput 
-                                {...phoneField} 
-                                value={phoneField.value || ''} 
-                                placeholder="Digite o número" 
+                              <PhoneInput
+                                {...phoneField}
+                                value={phoneField.value || ''}
+                                placeholder="Digite o número"
                               />
                             )}
                           />
                         );
                       }
-                      return <Input {...register(`contatos.${index}.valor`)} placeholder="Digite o valor" />;
+                      return (
+                        <Input
+                          {...register(`contatos.${index}.valor`)}
+                          placeholder="Digite o valor"
+                        />
+                      );
                     })()}
                   </FormField>
                 </div>
@@ -502,7 +727,13 @@ export const EstipulanteForm: React.FC<EstipulanteFormProps> = ({
             <Button
               type="button"
               variant="secondary"
-              onClick={() => appendContato({ tipoContato: 'EMAIL', valor: '', principal: false })}
+              onClick={() =>
+                appendContato({
+                  tipoContato: 'EMAIL',
+                  valor: '',
+                  principal: false,
+                })
+              }
             >
               <PlusIcon size={16} className="mr-2" />
               Adicionar Contato
@@ -511,10 +742,16 @@ export const EstipulanteForm: React.FC<EstipulanteFormProps> = ({
         </div>
       </FormSection>
 
-      <FormSection title="Contatos Institucionais" icon={<BriefcaseIcon size={20} />}>
+      <FormSection
+        title="Contatos Institucionais"
+        icon={<BriefcaseIcon size={20} />}
+      >
         <div className="flex flex-col gap-2">
           {contatoInstFields.map((field, index) => (
-            <div key={field.id} className="p-3 pt-8 rounded-lg bg-fundo-aplicacao border border-borda relative">
+            <div
+              key={field.id}
+              className="p-3 pt-8 rounded-lg bg-fundo-aplicacao border border-borda relative"
+            >
               <div className="absolute top-4 right-4">
                 <Button
                   type="button"
@@ -527,18 +764,51 @@ export const EstipulanteForm: React.FC<EstipulanteFormProps> = ({
               </div>
               <FormGrid>
                 <div className="lg:col-span-6">
-                  <FormField label="Nome" required error={errors.contatosInstitucionais?.[index]?.nome?.message}>
-                    <Input {...register(`contatosInstitucionais.${index}.nome` as const)} placeholder="Nome do contato" />
+                  <FormField
+                    label="Nome"
+                    required
+                    error={
+                      errors.contatosInstitucionais?.[index]?.nome?.message
+                    }
+                  >
+                    <Input
+                      {...register(
+                        `contatosInstitucionais.${index}.nome` as const,
+                      )}
+                      placeholder="Nome do contato"
+                    />
                   </FormField>
                 </div>
                 <div className="lg:col-span-6">
-                  <FormField label="Departamento" required error={errors.contatosInstitucionais?.[index]?.departamento?.message}>
-                    <Input {...register(`contatosInstitucionais.${index}.departamento` as const)} placeholder="Ex: Financeiro, RH" />
+                  <FormField
+                    label="Departamento"
+                    required
+                    error={
+                      errors.contatosInstitucionais?.[index]?.departamento
+                        ?.message
+                    }
+                  >
+                    <Input
+                      {...register(
+                        `contatosInstitucionais.${index}.departamento` as const,
+                      )}
+                      placeholder="Ex: Financeiro, RH"
+                    />
                   </FormField>
                 </div>
                 <div className="lg:col-span-6">
-                  <FormField label="E-mail" error={errors.contatosInstitucionais?.[index]?.email?.message}>
-                    <EmailInput {...register(`contatosInstitucionais.${index}.email` as const)} placeholder="email@empresa.com" />
+                  <FormField
+                    label="E-mail"
+                    error={
+                      errors.contatosInstitucionais?.[index]?.email?.message
+                    }
+                  >
+                    <EmailInput
+                      {...register(
+                        `contatosInstitucionais.${index}.email` as const,
+                      )}
+                      placeholder="email@empresa.com"
+                    />
                   </FormField>
                 </div>
                 <div className="lg:col-span-3">
@@ -546,19 +816,35 @@ export const EstipulanteForm: React.FC<EstipulanteFormProps> = ({
                     name={`contatosInstitucionais.${index}.telefone`}
                     control={control}
                     render={({ field: phoneInstField }) => (
-                      <FormField label="Telefone" error={errors.contatosInstitucionais?.[index]?.telefone?.message}>
-                        <PhoneInput 
-                          {...phoneInstField} 
-                          value={phoneInstField.value || ''} 
-                          placeholder="(00) 0000-0000" 
+                      <FormField
+                        label="Telefone"
+                        error={
+                          errors.contatosInstitucionais?.[index]?.telefone
+                            ?.message
+                        }
+                      >
+                        <PhoneInput
+                          {...phoneInstField}
+                          value={phoneInstField.value || ''}
+                          placeholder="(00) 0000-0000"
                         />
                       </FormField>
                     )}
                   />
                 </div>
                 <div className="lg:col-span-3">
-                  <FormField label="Ramal" error={errors.contatosInstitucionais?.[index]?.ramal?.message}>
-                    <Input {...register(`contatosInstitucionais.${index}.ramal` as const)} placeholder="Ex: 123" />
+                  <FormField
+                    label="Ramal"
+                    error={
+                      errors.contatosInstitucionais?.[index]?.ramal?.message
+                    }
+                  >
+                    <Input
+                      {...register(
+                        `contatosInstitucionais.${index}.ramal` as const,
+                      )}
+                      placeholder="Ex: 123"
+                    />
                   </FormField>
                 </div>
               </FormGrid>
@@ -568,7 +854,15 @@ export const EstipulanteForm: React.FC<EstipulanteFormProps> = ({
             <Button
               type="button"
               variant="secondary"
-              onClick={() => appendContatoInst({ nome: '', departamento: '', email: '', telefone: '', ramal: '' })}
+              onClick={() =>
+                appendContatoInst({
+                  nome: '',
+                  departamento: '',
+                  email: '',
+                  telefone: '',
+                  ramal: '',
+                })
+              }
             >
               <PlusIcon size={16} className="mr-2" />
               Adicionar Contato Institucional
@@ -577,18 +871,25 @@ export const EstipulanteForm: React.FC<EstipulanteFormProps> = ({
         </div>
       </FormSection>
 
-      <FormSection title="Configuração Operacional" icon={<BriefcaseIcon size={20} />}>
+      <FormSection
+        title="Configuração Operacional"
+        icon={<BriefcaseIcon size={20} />}
+      >
         <FormGrid>
           <div className="lg:col-span-6">
             <Controller
               name="configuracao.dataInicioVigencia"
               control={control}
               render={({ field: dateInitField }) => (
-                <FormField label="Início de Vigência" required error={errors.configuracao?.dataInicioVigencia?.message}>
-                  <DateInput 
-                    {...dateInitField} 
-                    value={dateInitField.value || ''} 
-                    placeholder="DD/MM/YYYY" 
+                <FormField
+                  label="Início de Vigência"
+                  required
+                  error={errors.configuracao?.dataInicioVigencia?.message}
+                >
+                  <DateInput
+                    {...dateInitField}
+                    value={dateInitField.value || ''}
+                    placeholder="DD/MM/YYYY"
                   />
                 </FormField>
               )}
@@ -599,11 +900,14 @@ export const EstipulanteForm: React.FC<EstipulanteFormProps> = ({
               name="configuracao.dataFimVigencia"
               control={control}
               render={({ field: dateFimField }) => (
-                <FormField label="Fim de Vigência" error={errors.configuracao?.dataFimVigencia?.message}>
-                  <DateInput 
-                    {...dateFimField} 
-                    value={dateFimField.value || ''} 
-                    placeholder="DD/MM/YYYY" 
+                <FormField
+                  label="Fim de Vigência"
+                  error={errors.configuracao?.dataFimVigencia?.message}
+                >
+                  <DateInput
+                    {...dateFimField}
+                    value={dateFimField.value || ''}
+                    placeholder="DD/MM/YYYY"
                   />
                 </FormField>
               )}
@@ -615,15 +919,30 @@ export const EstipulanteForm: React.FC<EstipulanteFormProps> = ({
       <FormActions>
         <div className="flex-grow flex justify-start">
           {isEdit && onDelete && (
-            <Button type="button" variant="danger" onClick={onDelete} disabled={isSubmitting}>
+            <Button
+              type="button"
+              variant="danger"
+              onClick={onDelete}
+              disabled={isSubmitting}
+            >
               Excluir
             </Button>
           )}
         </div>
-        <Button type="button" variant="text" onClick={onCancel} disabled={isSubmitting}>
+        <Button
+          type="button"
+          variant="text"
+          onClick={onCancel}
+          disabled={isSubmitting}
+        >
           Cancelar
         </Button>
-        <Button type="submit" variant="primary" disabled={isSubmitting} loading={isSubmitting}>
+        <Button
+          type="submit"
+          variant="primary"
+          disabled={isSubmitting}
+          loading={isSubmitting}
+        >
           Salvar Estipulante
         </Button>
       </FormActions>

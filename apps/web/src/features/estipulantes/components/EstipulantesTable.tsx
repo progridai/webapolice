@@ -1,5 +1,15 @@
 import React, { useState } from 'react';
-import { DataTable, StatusBadge, RowActions, Button, ConfirmDialog, XCircleIcon, CheckCircleIcon, EditIcon, EyeIcon } from '../../../components/ui';
+import {
+  DataTable,
+  StatusBadge,
+  RowActions,
+  Button,
+  ConfirmDialog,
+  XCircleIcon,
+  CheckCircleIcon,
+  EditIcon,
+  EyeIcon,
+} from '../../../components/ui';
 import type { Column } from '../../../components/ui/DataTable/DataTable';
 import type { RowActionItem } from '../../../components/ui/RowActions/RowActions';
 import type { EstipulanteListItem } from '../types/estipulante.types';
@@ -47,7 +57,10 @@ export const EstipulantesTable: React.FC<EstipulantesTableProps> = ({
     if (!cnpj) return '';
     const unmasked = cnpj.replace(/\D/g, '');
     if (unmasked.length === 14) {
-      return unmasked.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, '$1.$2.$3/$4-$5');
+      return unmasked.replace(
+        /^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/,
+        '$1.$2.$3/$4-$5',
+      );
     }
     return cnpj;
   };
@@ -62,13 +75,13 @@ export const EstipulantesTable: React.FC<EstipulantesTableProps> = ({
 
   const confirmAction = () => {
     if (!confirmDialog.estipulante) return;
-    
+
     if (confirmDialog.action === 'inativar' && onInativar) {
       onInativar(confirmDialog.estipulante.publicId);
     } else if (confirmDialog.action === 'reativar' && onReativar) {
       onReativar(confirmDialog.estipulante.publicId);
     }
-    
+
     setConfirmDialog({ isOpen: false, action: 'inativar', estipulante: null });
   };
 
@@ -84,18 +97,28 @@ export const EstipulantesTable: React.FC<EstipulantesTableProps> = ({
     {
       key: 'cnpj',
       label: 'CNPJ',
-      render: (est) => <span className="estipulantes-table-secundario">{formatCnpj(est.cnpj)}</span>,
+      render: (est) => (
+        <span className="estipulantes-table-secundario">
+          {formatCnpj(est.cnpj)}
+        </span>
+      ),
     },
     {
       key: 'codigo',
       label: 'Código',
       sortable: true,
-      render: (est) => est.codigo ? <span className="estipulantes-table-secundario">{est.codigo}</span> : <span>&mdash;</span>,
+      render: (est) =>
+        est.codigo ? (
+          <span className="estipulantes-table-secundario">{est.codigo}</span>
+        ) : (
+          <span>&mdash;</span>
+        ),
     },
     {
       key: 'grupo',
       label: 'Grupo',
-      render: (est) => est.grupo ? <span>{est.grupo}</span> : <span>&mdash;</span>,
+      render: (est) =>
+        est.grupo ? <span>{est.grupo}</span> : <span>&mdash;</span>,
     },
     {
       key: 'status',
@@ -131,14 +154,18 @@ export const EstipulantesTable: React.FC<EstipulantesTableProps> = ({
             onClick: () => handleReativarClick(est),
           });
         }
-        
+
         return (
           <RowActions
-            primaryAction={onDetalhar ? {
-              label: 'Visualizar',
-              icon: <EyeIcon />,
-              onClick: () => onDetalhar(est.publicId),
-            } : undefined}
+            primaryAction={
+              onDetalhar
+                ? {
+                    label: 'Visualizar',
+                    icon: <EyeIcon />,
+                    onClick: () => onDetalhar(est.publicId),
+                  }
+                : undefined
+            }
             actions={actions}
             ariaLabel={`Ações para ${est.razaoSocial}`}
           />
@@ -158,7 +185,11 @@ export const EstipulantesTable: React.FC<EstipulantesTableProps> = ({
         direction={direction}
         onSort={onSort}
         aria-label="Lista de estipulantes"
-        emptyTitle={hasActiveFilters ? 'Nenhum estipulante encontrado' : 'Nenhum estipulante cadastrado'}
+        emptyTitle={
+          hasActiveFilters
+            ? 'Nenhum estipulante encontrado'
+            : 'Nenhum estipulante cadastrado'
+        }
         emptyDescription={
           hasActiveFilters
             ? 'Não encontramos nenhum estipulante com os filtros informados.'
@@ -166,26 +197,36 @@ export const EstipulantesTable: React.FC<EstipulantesTableProps> = ({
         }
         emptyAction={
           hasActiveFilters && onClearFilters ? (
-            <Button onClick={onClearFilters}>
-              Limpar filtros
-            </Button>
+            <Button onClick={onClearFilters}>Limpar filtros</Button>
           ) : undefined
         }
       />
 
       <ConfirmDialog
         aberto={confirmDialog.isOpen}
-        title={confirmDialog.action === 'inativar' ? 'Inativar Estipulante?' : 'Reativar Estipulante?'}
+        title={
+          confirmDialog.action === 'inativar'
+            ? 'Inativar Estipulante?'
+            : 'Reativar Estipulante?'
+        }
         description={
           confirmDialog.action === 'inativar'
             ? `O estipulante ${confirmDialog.estipulante?.razaoSocial} deixará de ficar disponível para uso operacional, mas seus dados serão preservados.`
             : `O estipulante ${confirmDialog.estipulante?.razaoSocial} voltará a ficar disponível para uso operacional.`
         }
-        confirmText={confirmDialog.action === 'inativar' ? 'Inativar' : 'Reativar'}
+        confirmText={
+          confirmDialog.action === 'inativar' ? 'Inativar' : 'Reativar'
+        }
         cancelText="Cancelar"
         variant={confirmDialog.action === 'inativar' ? 'danger' : 'primary'}
         onConfirm={confirmAction}
-        onClose={() => setConfirmDialog({ isOpen: false, action: 'inativar', estipulante: null })}
+        onClose={() =>
+          setConfirmDialog({
+            isOpen: false,
+            action: 'inativar',
+            estipulante: null,
+          })
+        }
       />
     </>
   );

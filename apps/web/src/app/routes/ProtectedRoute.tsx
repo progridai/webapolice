@@ -32,11 +32,7 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
   // Redireciona não-autenticado, preservando a rota de destino
   if (!isAuthenticated) {
     return (
-      <Navigate
-        to={ROUTES.UNAUTHORIZED}
-        state={{ from: location }}
-        replace
-      />
+      <Navigate to={ROUTES.UNAUTHORIZED} state={{ from: location }} replace />
     );
   }
 

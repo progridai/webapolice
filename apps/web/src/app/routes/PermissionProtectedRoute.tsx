@@ -9,14 +9,20 @@ interface PermissionProtectedRouteProps {
   somenteOperador?: boolean;
 }
 
-export const PermissionProtectedRoute: React.FC<PermissionProtectedRouteProps> = ({
-  children,
-  moduloCodigo,
-  permissaoCodigo,
-  somenteOperador,
-}) => {
+export const PermissionProtectedRoute: React.FC<
+  PermissionProtectedRouteProps
+> = ({ children, moduloCodigo, permissaoCodigo, somenteOperador }) => {
   const location = useLocation();
-  const { isLoading, error, usuarioEncontrado, usuarioAtivo, ehOperadorSistema, possuiModulo, possuiPermissao, possuiAcessoTotal } = useAuthorization();
+  const {
+    isLoading,
+    error,
+    usuarioEncontrado,
+    usuarioAtivo,
+    ehOperadorSistema,
+    possuiModulo,
+    possuiPermissao,
+    possuiAcessoTotal,
+  } = useAuthorization();
 
   if (isLoading) {
     return <div>Carregando...</div>;
@@ -34,7 +40,11 @@ export const PermissionProtectedRoute: React.FC<PermissionProtectedRouteProps> =
     return <Navigate to="/forbidden" state={{ from: location }} replace />;
   }
 
-  if (permissaoCodigo && !possuiAcessoTotal() && !possuiPermissao(permissaoCodigo)) {
+  if (
+    permissaoCodigo &&
+    !possuiAcessoTotal() &&
+    !possuiPermissao(permissaoCodigo)
+  ) {
     return <Navigate to="/forbidden" state={{ from: location }} replace />;
   }
 

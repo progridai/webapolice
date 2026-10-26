@@ -1,65 +1,159 @@
-import React, { useEffect, useState, useRef } from 'react';
-import { useForm, Controller } from 'react-hook-form';
+import { HttpApiError } from '../../../services/http/httpError';
+import React, { useEffect, useMemo, useState, useRef } from 'react';
+import { useForm, Controller, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { FormField, Input, Textarea, Checkbox, FormSection, FormGrid, FormActions, Button, Select } from '../../../components/ui';
-import { CpfInput, PhoneInput, CepInput, DateInput, EmailInput } from '../../../components/fields';
-import { buscarCidadesPorUf, type CidadeResponse } from '../../clientes/api/localidadesApi';
+import {
+  FormField,
+  Input,
+  Textarea,
+  Checkbox,
+  FormSection,
+  FormGrid,
+  FormActions,
+  Button,
+  Select,
+} from '../../../components/ui';
+import {
+  CpfInput,
+  PhoneInput,
+  CepInput,
+  DateInput,
+  EmailInput,
+} from '../../../components/fields';
+import { buscarCidadesPorUf } from '../../clientes/api/localidadesApi';
 import { listarCoordenadoresAtivos } from '../api/cooperadosApi';
 import { consultarCep } from '../../../shared/api/enderecosApi';
-import { isValidCpf, isValidPhone, isValidCep } from '../../../shared/utils/validators';
+import {
+  isValidCpf,
+  isValidPhone,
+  isValidCep,
+} from '../../../shared/utils/validators';
 import { toCadastrarCooperadoRequest } from '../utils/cooperados.mappers';
-import type { CooperadoFormData, CooperadoListDto } from '../types/cooperados.types';
+import { useConsulta } from '../../../shared/hooks/useConsulta';
+import type {
+  CooperadoFormData,
+  CooperadoListDto,
+} from '../types/cooperados.types';
 
 const ESTADOS_BRASILEIROS = [
-  'AC', 'AL', 'AP', 'AM', 'BA', 'CE', 'DF', 'ES', 'GO', 'MA', 'MT', 'MS', 'MG',
-  'PA', 'PB', 'PR', 'PE', 'PI', 'RJ', 'RN', 'RS', 'RO', 'RR', 'SC', 'SP', 'SE', 'TO'
+  'AC',
+  'AL',
+  'AP',
+  'AM',
+  'BA',
+  'CE',
+  'DF',
+  'ES',
+  'GO',
+  'MA',
+  'MT',
+  'MS',
+  'MG',
+  'PA',
+  'PB',
+  'PR',
+  'PE',
+  'PI',
+  'RJ',
+  'RN',
+  'RS',
+  'RO',
+  'RR',
+  'SC',
+  'SP',
+  'SE',
+  'TO',
 ];
 
-const formSchema = z.object({
-  tipo: z.coerce.number<string | number>().min(1).max(2).pipe(z.union([z.literal(1), z.literal(2)])),
-  nome: z.string().min(3, 'Nome é obrigatório e deve ter no mínimo 3 caracteres'),
-  cpf: z.string().refine(isValidCpf, 'CPF inválido'),
-  dataNascimento: z.string().optional().or(z.literal('')),
-  codigo: z.string().optional().or(z.literal('')),
-  coordenadorId: z.string().optional().or(z.literal('')),
-  
-  rg: z.string().trim().max(20, 'Máximo 20 caracteres').regex(/^[a-zA-Z0-9- ]*$/, 'Apenas letras, números, espaços e hífen').optional().or(z.literal('')),
-  orgaoEmissor: z.string().trim().max(10, 'Máximo 10 caracteres').optional().or(z.literal('')),
-  dataEmissaoRg: z.string().optional().or(z.literal('')),
-  susep: z.string().optional().or(z.literal('')),
-  inss: z.string().optional().or(z.literal('')),
-  issqn: z.string().optional().or(z.literal('')),
-  
-  telefone: z.string().optional().or(z.literal('')).refine(val => !val || isValidPhone(val), 'Telefone inválido'),
-  email: z.string().trim().email('E-mail inválido').optional().or(z.literal('')),
-  
-  cep: z.string().optional().or(z.literal('')).refine(val => !val || isValidCep(val), 'CEP inválido'),
-  logradouro: z.string().optional().or(z.literal('')),
-  numero: z.string().optional().or(z.literal('')),
-  complemento: z.string().optional().or(z.literal('')),
-  bairro: z.string().optional().or(z.literal('')),
-  uf: z.string().max(2).optional().or(z.literal('')),
-  cidadeId: z.coerce.number<string | number>().optional().or(z.literal(0)),
-  
-  numeroDependentes: z.coerce.number<string | number>().optional(),
-  dataInscricao: z.string().optional().or(z.literal('')),
-  credenciado: z.boolean().default(false),
-  
-  bancoId: z.coerce.number<string | number>().optional().or(z.literal(0)),
-  agencia: z.string().trim().max(10, 'Máximo 10 caracteres').regex(/^[a-zA-Z0-9-]*$/, 'Formato inválido').optional().or(z.literal('')),
-  contaCorrente: z.string().trim().max(20, 'Máximo 20 caracteres').regex(/^[a-zA-Z0-9-]*$/, 'Formato inválido').optional().or(z.literal('')),
-  
-  observacao: z.string().optional().or(z.literal('')),
-}).superRefine((data, ctx) => {
-  if (data.tipo === 1 && !data.coordenadorId) {
-    ctx.addIssue({
-      path: ['coordenadorId'],
-      code: z.ZodIssueCode.custom,
-      message: 'Coordenador responsável é obrigatório para Cooperados',
-    });
-  }
-});
+const formSchema = z
+  .object({
+    tipo: z.coerce
+      .number<string | number>()
+      .min(1)
+      .max(2)
+      .pipe(z.union([z.literal(1), z.literal(2)])),
+    nome: z
+      .string()
+      .min(3, 'Nome é obrigatório e deve ter no mínimo 3 caracteres'),
+    cpf: z.string().refine(isValidCpf, 'CPF inválido'),
+    dataNascimento: z.string().optional().or(z.literal('')),
+    codigo: z.string().optional().or(z.literal('')),
+    coordenadorId: z.string().optional().or(z.literal('')),
+
+    rg: z
+      .string()
+      .trim()
+      .max(20, 'Máximo 20 caracteres')
+      .regex(/^[a-zA-Z0-9- ]*$/, 'Apenas letras, números, espaços e hífen')
+      .optional()
+      .or(z.literal('')),
+    orgaoEmissor: z
+      .string()
+      .trim()
+      .max(10, 'Máximo 10 caracteres')
+      .optional()
+      .or(z.literal('')),
+    dataEmissaoRg: z.string().optional().or(z.literal('')),
+    susep: z.string().optional().or(z.literal('')),
+    inss: z.string().optional().or(z.literal('')),
+    issqn: z.string().optional().or(z.literal('')),
+
+    telefone: z
+      .string()
+      .optional()
+      .or(z.literal(''))
+      .refine((val) => !val || isValidPhone(val), 'Telefone inválido'),
+    email: z
+      .string()
+      .trim()
+      .email('E-mail inválido')
+      .optional()
+      .or(z.literal('')),
+
+    cep: z
+      .string()
+      .optional()
+      .or(z.literal(''))
+      .refine((val) => !val || isValidCep(val), 'CEP inválido'),
+    logradouro: z.string().optional().or(z.literal('')),
+    numero: z.string().optional().or(z.literal('')),
+    complemento: z.string().optional().or(z.literal('')),
+    bairro: z.string().optional().or(z.literal('')),
+    uf: z.string().max(2).optional().or(z.literal('')),
+    cidadeId: z.coerce.number<string | number>().optional().or(z.literal(0)),
+
+    numeroDependentes: z.coerce.number<string | number>().optional(),
+    dataInscricao: z.string().optional().or(z.literal('')),
+    credenciado: z.boolean().default(false),
+
+    bancoId: z.coerce.number<string | number>().optional().or(z.literal(0)),
+    agencia: z
+      .string()
+      .trim()
+      .max(10, 'Máximo 10 caracteres')
+      .regex(/^[a-zA-Z0-9-]*$/, 'Formato inválido')
+      .optional()
+      .or(z.literal('')),
+    contaCorrente: z
+      .string()
+      .trim()
+      .max(20, 'Máximo 20 caracteres')
+      .regex(/^[a-zA-Z0-9-]*$/, 'Formato inválido')
+      .optional()
+      .or(z.literal('')),
+
+    observacao: z.string().optional().or(z.literal('')),
+  })
+  .superRefine((data, ctx) => {
+    if (data.tipo === 1 && !data.coordenadorId) {
+      ctx.addIssue({
+        path: ['coordenadorId'],
+        code: z.ZodIssueCode.custom,
+        message: 'Coordenador responsável é obrigatório para Cooperados',
+      });
+    }
+  });
 
 type FormSchemaInput = z.input<typeof formSchema>;
 type FormSchemaType = z.output<typeof formSchema>;
@@ -75,60 +169,71 @@ export const CooperadoForm: React.FC<CooperadoFormProps> = ({
   initialData,
   onSubmit,
   onCancel,
-  isLoading
+  isLoading,
 }) => {
-  const [cidades, setCidades] = useState<CidadeResponse[]>([]);
-  const [loadingCidades, setLoadingCidades] = useState(false);
   const [coordenadores, setCoordenadores] = useState<CooperadoListDto[]>([]);
 
   const [isBuscandoCep, setIsBuscandoCep] = useState(false);
-  const [pendingCidadeId, setPendingCidadeId] = useState<number | null>(null);
   const lastFetchedCepRef = useRef<string | null>(initialData?.cep || null);
+  const cepRequestRef = useRef<AbortController | null>(null);
 
-  const { register, control, handleSubmit, formState: { errors }, watch, setValue, setError, clearErrors } = useForm<FormSchemaInput, unknown, FormSchemaType>({
+  const {
+    register,
+    control,
+    handleSubmit,
+    formState: { errors },
+    setValue,
+    setError,
+    clearErrors,
+  } = useForm<FormSchemaInput, unknown, FormSchemaType>({
     resolver: zodResolver(formSchema),
     defaultValues: initialData || {
       tipo: 1,
       credenciado: false,
-    }
+    },
   });
 
-  const ufSelecionada = watch('uf');
-  const tipoSelecionado = Number(watch('tipo'));
+  const ufSelecionada = useWatch({ control, name: 'uf' });
+  const tipoSelecionado = Number(useWatch({ control, name: 'tipo' }));
+  const cepValue = useWatch({ control, name: 'cep' });
+  const cidadeId = useWatch({ control, name: 'cidadeId' });
+  const loadCidades = useMemo(
+    () =>
+      ufSelecionada?.length === 2
+        ? (signal: AbortSignal) => buscarCidadesPorUf(ufSelecionada, signal)
+        : null,
+    [ufSelecionada],
+  );
+  const consultaCidades = useConsulta(
+    loadCidades,
+    'Não foi possível carregar as cidades.',
+  );
+  const loadingCidades = consultaCidades.isLoading;
+  const cidades =
+    !loadingCidades && !consultaCidades.error
+      ? (consultaCidades.data ?? [])
+      : [];
 
   useEffect(() => {
-    async function carregarCidades() {
-      if (!ufSelecionada || ufSelecionada.length !== 2) {
-        setCidades([]);
-        return;
-      }
-      setLoadingCidades(true);
-      try {
-        const data = await buscarCidadesPorUf(ufSelecionada);
-        setCidades(data);
-
-        if (pendingCidadeId) {
-          const cidadeExiste = data.some(c => c.id === pendingCidadeId);
-          if (cidadeExiste) {
-            setValue('cidadeId', pendingCidadeId);
-          }
-          setPendingCidadeId(null);
-        }
-      } catch (err) {
-        console.error('Erro ao carregar cidades', err);
-        setCidades([]);
-      } finally {
-        setLoadingCidades(false);
-      }
+    if (
+      !loadingCidades &&
+      cidadeId &&
+      (consultaCidades.error ||
+        !consultaCidades.data?.some((c) => c.id === Number(cidadeId)))
+    ) {
+      setValue('cidadeId', 0);
     }
-    carregarCidades();
-  }, [ufSelecionada, pendingCidadeId, setValue]);
-
-  const cepValue = watch('cep');
+  }, [
+    cidadeId,
+    consultaCidades.data,
+    consultaCidades.error,
+    loadingCidades,
+    setValue,
+  ]);
 
   useEffect(() => {
     const cepClean = cepValue?.replace(/\D/g, '') || '';
-    
+
     if (cepClean.length !== 8) {
       if (lastFetchedCepRef.current && lastFetchedCepRef.current !== cepValue) {
         setValue('logradouro', '');
@@ -145,40 +250,47 @@ export const CooperadoForm: React.FC<CooperadoFormProps> = ({
     }
 
     const abortController = new AbortController();
+    cepRequestRef.current = abortController;
 
     async function fetchCep() {
       setIsBuscandoCep(true);
       clearErrors('cep');
-      
+
       try {
         const result = await consultarCep(cepClean, abortController.signal);
-        
+        if (abortController.signal.aborted) return;
+
         lastFetchedCepRef.current = cepValue!;
         setValue('logradouro', result.logradouro || '');
         setValue('bairro', result.bairro || '');
         setValue('uf', result.uf);
-        
-        if (result.cidadeId) {
-          setPendingCidadeId(result.cidadeId);
-        } else {
-          setValue('cidadeId', 0);
-        }
-      } catch (err: any) {
-        if (err.name === 'CanceledError' || err.code === 'ERR_CANCELED') return;
-        
+
+        setValue('cidadeId', result.cidadeId ?? 0);
+      } catch (err: unknown) {
+        if (
+          abortController.signal.aborted ||
+          ((err instanceof Error || err instanceof DOMException) &&
+            (err.name === 'AbortError' || err.name === 'CanceledError')) ||
+          (err instanceof HttpApiError && err.code === 'ERR_CANCELED')
+        )
+          return;
+
         lastFetchedCepRef.current = cepValue!;
         setValue('logradouro', '');
         setValue('bairro', '');
         setValue('uf', '');
         setValue('cidadeId', 0);
 
-        if (err.response?.status === 404) {
+        if (err instanceof HttpApiError && err.isNotFound()) {
           setError('cep', { type: 'manual', message: 'CEP não encontrado' });
         } else {
-          setError('cep', { type: 'manual', message: 'Serviço indisponível. Preencha manualmente.' });
+          setError('cep', {
+            type: 'manual',
+            message: 'Serviço indisponível. Preencha manualmente.',
+          });
         }
       } finally {
-        setIsBuscandoCep(false);
+        if (!abortController.signal.aborted) setIsBuscandoCep(false);
       }
     }
 
@@ -186,6 +298,9 @@ export const CooperadoForm: React.FC<CooperadoFormProps> = ({
 
     return () => {
       abortController.abort();
+      if (cepRequestRef.current === abortController)
+        cepRequestRef.current = null;
+      setIsBuscandoCep(false);
     };
   }, [cepValue, setValue, clearErrors, setError]);
 
@@ -202,13 +317,27 @@ export const CooperadoForm: React.FC<CooperadoFormProps> = ({
   }, []);
 
   const handleFormSubmit = async (data: FormSchemaType) => {
-    const payload = toCadastrarCooperadoRequest(data);
+    if (isLoading || isBuscandoCep || loadingCidades) return;
+    // A validação pode ter capturado o valor antes do efeito de limpeza da cidade.
+    const payload = toCadastrarCooperadoRequest({
+      ...data,
+      cidadeId: cidades.some((c) => c.id === data.cidadeId) ? data.cidadeId : 0,
+    });
     await onSubmit(payload);
   };
+  const ufField = register('uf');
 
   return (
-    <form onSubmit={handleSubmit(handleFormSubmit, (errors) => console.error('Form Validation Errors:', errors))} noValidate>
-      <FormSection title="Identificação" description="Dados principais do cooperado ou coordenador.">
+    <form
+      onSubmit={handleSubmit(handleFormSubmit, (errors) =>
+        console.error('Form Validation Errors:', errors),
+      )}
+      noValidate
+    >
+      <FormSection
+        title="Identificação"
+        description="Dados principais do cooperado ou coordenador."
+      >
         <FormGrid>
           <FormField label="Tipo" required error={errors.tipo?.message}>
             <Select {...register('tipo')}>
@@ -216,7 +345,7 @@ export const CooperadoForm: React.FC<CooperadoFormProps> = ({
               <option value="2">Coordenador</option>
             </Select>
           </FormField>
-          
+
           <FormField label="Código" error={errors.codigo?.message}>
             <Input {...register('codigo')} placeholder="Código interno" />
           </FormField>
@@ -231,17 +360,26 @@ export const CooperadoForm: React.FC<CooperadoFormProps> = ({
             <CpfInput {...register('cpf')} placeholder="000.000.000-00" />
           </FormField>
 
-          <FormField label="Data de Nascimento" error={errors.dataNascimento?.message}>
+          <FormField
+            label="Data de Nascimento"
+            error={errors.dataNascimento?.message}
+          >
             <DateInput {...register('dataNascimento')} />
           </FormField>
 
           {tipoSelecionado === 1 && (
             <div className="md:col-span-2">
-              <FormField label="Coordenador responsável" required error={errors.coordenadorId?.message}>
+              <FormField
+                label="Coordenador responsável"
+                required
+                error={errors.coordenadorId?.message}
+              >
                 <Select {...register('coordenadorId')}>
                   <option value="">Selecione um coordenador...</option>
-                  {coordenadores.map(c => (
-                    <option key={c.publicId} value={c.publicId}>{c.nome}</option>
+                  {coordenadores.map((c) => (
+                    <option key={c.publicId} value={c.publicId}>
+                      {c.nome}
+                    </option>
                   ))}
                 </Select>
               </FormField>
@@ -250,7 +388,10 @@ export const CooperadoForm: React.FC<CooperadoFormProps> = ({
         </FormGrid>
       </FormSection>
 
-      <FormSection title="Documentação" description="Documentos adicionais e registros profissionais.">
+      <FormSection
+        title="Documentação"
+        description="Documentos adicionais e registros profissionais."
+      >
         <FormGrid>
           <FormField label="RG" error={errors.rg?.message}>
             <Input {...register('rg')} placeholder="Número do RG" />
@@ -258,7 +399,10 @@ export const CooperadoForm: React.FC<CooperadoFormProps> = ({
           <FormField label="Órgão Emissor" error={errors.orgaoEmissor?.message}>
             <Input {...register('orgaoEmissor')} placeholder="Ex: SSP" />
           </FormField>
-          <FormField label="Data de Emissão" error={errors.dataEmissaoRg?.message}>
+          <FormField
+            label="Data de Emissão"
+            error={errors.dataEmissaoRg?.message}
+          >
             <DateInput {...register('dataEmissaoRg')} />
           </FormField>
           <FormField label="SUSEP" error={errors.susep?.message}>
@@ -276,60 +420,133 @@ export const CooperadoForm: React.FC<CooperadoFormProps> = ({
       <FormSection title="Contato" description="Telefone e E-mail principais.">
         <FormGrid>
           <FormField label="Telefone" error={errors.telefone?.message}>
-            <PhoneInput {...register('telefone')} placeholder="(00) 00000-0000" />
+            <PhoneInput
+              {...register('telefone')}
+              placeholder="(00) 00000-0000"
+            />
           </FormField>
           <FormField label="E-mail" error={errors.email?.message}>
-            <EmailInput {...register('email')} placeholder="email@exemplo.com" />
+            <EmailInput
+              {...register('email')}
+              placeholder="email@exemplo.com"
+            />
           </FormField>
         </FormGrid>
       </FormSection>
 
-      <FormSection title="Endereço" description="Endereço residencial ou comercial.">
+      <FormSection
+        title="Endereço"
+        description="Endereço residencial ou comercial."
+      >
         <FormGrid>
-          <FormField label={`CEP${isBuscandoCep ? ' (Buscando...)' : ''}`} error={errors.cep?.message}>
-            <CepInput {...register('cep')} placeholder="00000-000" />
+          <FormField
+            label={`CEP${isBuscandoCep ? ' (Buscando...)' : ''}`}
+            error={errors.cep?.message}
+          >
+            <CepInput
+              {...register('cep', { onChange: () => setValue('cidadeId', 0) })}
+              placeholder="00000-000"
+            />
           </FormField>
           <div className="md:col-span-2">
             <FormField label="Logradouro" error={errors.logradouro?.message}>
-              <Input {...register('logradouro')} placeholder="Rua, Avenida, etc." />
+              <Input
+                {...register('logradouro')}
+                placeholder="Rua, Avenida, etc."
+              />
             </FormField>
           </div>
           <FormField label="Número" error={errors.numero?.message}>
             <Input {...register('numero')} placeholder="Número" />
           </FormField>
           <FormField label="Complemento" error={errors.complemento?.message}>
-            <Input {...register('complemento')} placeholder="Apto, Sala, etc." />
+            <Input
+              {...register('complemento')}
+              placeholder="Apto, Sala, etc."
+            />
           </FormField>
           <FormField label="Bairro" error={errors.bairro?.message}>
             <Input {...register('bairro')} placeholder="Bairro" />
           </FormField>
           <FormField label="Estado (UF)" error={errors.uf?.message}>
-            <Select {...register('uf')}>
+            <Select
+              {...ufField}
+              onChange={(event) => {
+                void ufField.onChange(event);
+                cepRequestRef.current?.abort();
+                setIsBuscandoCep(false);
+                setValue('cidadeId', 0);
+              }}
+            >
               <option value="">Selecione...</option>
-              {ESTADOS_BRASILEIROS.map(estado => (
-                <option key={estado} value={estado}>{estado}</option>
+              {ESTADOS_BRASILEIROS.map((estado) => (
+                <option key={estado} value={estado}>
+                  {estado}
+                </option>
               ))}
             </Select>
           </FormField>
           <div className="md:col-span-2">
-            <FormField label="Cidade" error={errors.cidadeId?.message}>
-              <Select {...register('cidadeId')} disabled={loadingCidades || !ufSelecionada}>
-                <option value="">{loadingCidades ? 'Carregando...' : 'Selecione uma cidade...'}</option>
-                {cidades.map(c => (
-                  <option key={c.id} value={c.id}>{c.nome}</option>
-                ))}
-              </Select>
-            </FormField>
+            <Controller
+              control={control}
+              name="cidadeId"
+              render={({ field }) => (
+                <FormField
+                  label="Cidade"
+                  error={
+                    errors.cidadeId?.message ??
+                    (consultaCidades.error
+                      ? 'Não foi possível carregar as cidades.'
+                      : undefined)
+                  }
+                >
+                  <Select
+                    {...field}
+                    value={field.value || ''}
+                    disabled={loadingCidades || isBuscandoCep || !ufSelecionada}
+                  >
+                    <option value="">
+                      {loadingCidades
+                        ? 'Carregando...'
+                        : 'Selecione uma cidade...'}
+                    </option>
+                    {cidades.map((c) => (
+                      <option key={c.id} value={c.id}>
+                        {c.nome}
+                      </option>
+                    ))}
+                  </Select>
+                </FormField>
+              )}
+            />
+            {consultaCidades.error && (
+              <Button
+                type="button"
+                variant="text"
+                onClick={() => void consultaCidades.refetch()}
+              >
+                Tentar novamente
+              </Button>
+            )}
           </div>
         </FormGrid>
       </FormSection>
 
-      <FormSection title="Dados Operacionais" description="Informações operacionais e inscrições.">
+      <FormSection
+        title="Dados Operacionais"
+        description="Informações operacionais e inscrições."
+      >
         <FormGrid>
-          <FormField label="Número de Dependentes" error={errors.numeroDependentes?.message}>
+          <FormField
+            label="Número de Dependentes"
+            error={errors.numeroDependentes?.message}
+          >
             <Input type="number" {...register('numeroDependentes')} />
           </FormField>
-          <FormField label="Data de Inscrição" error={errors.dataInscricao?.message}>
+          <FormField
+            label="Data de Inscrição"
+            error={errors.dataInscricao?.message}
+          >
             <DateInput {...register('dataInscricao')} />
           </FormField>
           <div className="md:col-span-2 flex items-center h-full pt-6">
@@ -349,33 +566,59 @@ export const CooperadoForm: React.FC<CooperadoFormProps> = ({
         </FormGrid>
       </FormSection>
 
-      <FormSection title="Dados Bancários" description="Informações para repasse financeiro.">
+      <FormSection
+        title="Dados Bancários"
+        description="Informações para repasse financeiro."
+      >
         <FormGrid>
           <div className="md:col-span-2">
             <FormField label="Banco" error={errors.bancoId?.message}>
-              <Input type="number" {...register('bancoId')} placeholder="ID do Banco" />
+              <Input
+                type="number"
+                {...register('bancoId')}
+                placeholder="ID do Banco"
+              />
             </FormField>
           </div>
           <FormField label="Agência" error={errors.agencia?.message}>
             <Input {...register('agencia')} placeholder="Número da agência" />
           </FormField>
-          <FormField label="Conta Corrente" error={errors.contaCorrente?.message}>
-            <Input {...register('contaCorrente')} placeholder="Número da conta" />
+          <FormField
+            label="Conta Corrente"
+            error={errors.contaCorrente?.message}
+          >
+            <Input
+              {...register('contaCorrente')}
+              placeholder="Número da conta"
+            />
           </FormField>
         </FormGrid>
       </FormSection>
 
       <FormSection title="Observações" description="Informações adicionais.">
         <FormField label="Observações" error={errors.observacao?.message}>
-          <Textarea {...register('observacao')} placeholder="Observações..." rows={4} />
+          <Textarea
+            {...register('observacao')}
+            placeholder="Observações..."
+            rows={4}
+          />
         </FormField>
       </FormSection>
 
       <FormActions>
-        <Button type="button" variant="secondary" onClick={onCancel} disabled={isLoading}>
+        <Button
+          type="button"
+          variant="secondary"
+          onClick={onCancel}
+          disabled={isLoading}
+        >
           Cancelar
         </Button>
-        <Button type="submit" variant="primary" disabled={isLoading}>
+        <Button
+          type="submit"
+          variant="primary"
+          disabled={isLoading || isBuscandoCep || loadingCidades}
+        >
           {isLoading ? 'Salvando...' : 'Salvar'}
         </Button>
       </FormActions>

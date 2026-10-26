@@ -1,3 +1,4 @@
+import { HttpApiError } from '../../../services/http/httpError';
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { PageHeader, Breadcrumbs, Alert } from '../../../components/ui';
@@ -17,14 +18,20 @@ export const NovoCooperadoPage: React.FC = () => {
     try {
       await cadastrarCooperado(data);
       navigate(ROUTES.COOPERADOS);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
-      if (typeof err.isValidationError === 'function' && err.isValidationError()) {
+      if (err instanceof HttpApiError && err.isValidationError()) {
         const validationErrors = err.getValidationErrors();
-        const flat = Object.entries(validationErrors).map(([field, msgs]) => `${field}: ${(msgs as string[])[0]}`).join(' | ');
+        const flat = Object.entries(validationErrors)
+          .map(([field, msgs]) => `${field}: ${msgs[0]}`)
+          .join(' | ');
         setError(`Erro de validação: ${flat || err.message}`);
       } else {
-        setError(err?.message || 'Ocorreu um erro ao cadastrar o cooperado/coordenador.');
+        setError(
+          err instanceof Error && err.message
+            ? err.message
+            : 'Ocorreu um erro ao cadastrar o cooperado/coordenador.',
+        );
       }
     } finally {
       setIsSubmitting(false);
@@ -36,7 +43,11 @@ export const NovoCooperadoPage: React.FC = () => {
   };
 
   return (
-    <main className="flex flex-col gap-6 p-6 max-w-4xl mx-auto focus:outline-none" role="main" tabIndex={-1}>
+    <main
+      className="flex flex-col gap-6 p-6 max-w-4xl mx-auto focus:outline-none"
+      role="main"
+      tabIndex={-1}
+    >
       <PageHeader
         title="Novo Cooperado"
         description="Cadastre um novo cooperado ou coordenador no sistema."

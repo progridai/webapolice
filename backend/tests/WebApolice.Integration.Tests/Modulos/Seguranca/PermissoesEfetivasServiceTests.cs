@@ -40,34 +40,34 @@ public class PermissoesEfetivasServiceTests : IClassFixture<SegurancaIntegration
     {
         if (_usuariosCriados.Any())
         {
-            var subs = string.Join("','", _usuariosCriados);
-            await _dbContext.Database.ExecuteSqlRawAsync($"DELETE FROM seguranca.usuario_perfil WHERE usuario_id IN (SELECT id FROM seguranca.usuario WHERE keycloak_sub IN ('{subs}'))");
+            var subs = _usuariosCriados.ToArray();
+            await _dbContext.Database.ExecuteSqlAsync($"DELETE FROM seguranca.usuario_perfil WHERE usuario_id IN (SELECT id FROM seguranca.usuario WHERE keycloak_sub = ANY({subs}))");
         }
 
         if (_perfisCriados.Any())
         {
-            var perfis = string.Join("','", _perfisCriados);
-            await _dbContext.Database.ExecuteSqlRawAsync($"DELETE FROM seguranca.perfil_permissao WHERE perfil_id IN (SELECT id FROM seguranca.perfil WHERE codigo IN ('{perfis}'))");
-            await _dbContext.Database.ExecuteSqlRawAsync($"DELETE FROM seguranca.usuario_perfil WHERE perfil_id IN (SELECT id FROM seguranca.perfil WHERE codigo IN ('{perfis}'))");
+            var perfis = _perfisCriados.ToArray();
+            await _dbContext.Database.ExecuteSqlAsync($"DELETE FROM seguranca.perfil_permissao WHERE perfil_id IN (SELECT id FROM seguranca.perfil WHERE codigo = ANY({perfis}))");
+            await _dbContext.Database.ExecuteSqlAsync($"DELETE FROM seguranca.usuario_perfil WHERE perfil_id IN (SELECT id FROM seguranca.perfil WHERE codigo = ANY({perfis}))");
         }
 
         if (_modulosCriados.Any()) 
         {
-            var codigos = string.Join("','", _modulosCriados);
-            await _dbContext.Database.ExecuteSqlRawAsync($"DELETE FROM seguranca.perfil_permissao WHERE permissao_id IN (SELECT id FROM seguranca.permissao WHERE recurso_id IN (SELECT id FROM seguranca.recurso WHERE modulo_id IN (SELECT id FROM seguranca.modulo WHERE codigo IN ('{codigos}'))))");
-            await _dbContext.Database.ExecuteSqlRawAsync($"DELETE FROM seguranca.permissao WHERE recurso_id IN (SELECT id FROM seguranca.recurso WHERE modulo_id IN (SELECT id FROM seguranca.modulo WHERE codigo IN ('{codigos}')))");
-            await _dbContext.Database.ExecuteSqlRawAsync($"DELETE FROM seguranca.recurso WHERE modulo_id IN (SELECT id FROM seguranca.modulo WHERE codigo IN ('{codigos}'))");
-            await _dbContext.Database.ExecuteSqlRawAsync($"DELETE FROM seguranca.modulo WHERE codigo IN ('{codigos}')");
+            var codigos = _modulosCriados.ToArray();
+            await _dbContext.Database.ExecuteSqlAsync($"DELETE FROM seguranca.perfil_permissao WHERE permissao_id IN (SELECT id FROM seguranca.permissao WHERE recurso_id IN (SELECT id FROM seguranca.recurso WHERE modulo_id IN (SELECT id FROM seguranca.modulo WHERE codigo = ANY({codigos}))))");
+            await _dbContext.Database.ExecuteSqlAsync($"DELETE FROM seguranca.permissao WHERE recurso_id IN (SELECT id FROM seguranca.recurso WHERE modulo_id IN (SELECT id FROM seguranca.modulo WHERE codigo = ANY({codigos})))");
+            await _dbContext.Database.ExecuteSqlAsync($"DELETE FROM seguranca.recurso WHERE modulo_id IN (SELECT id FROM seguranca.modulo WHERE codigo = ANY({codigos}))");
+            await _dbContext.Database.ExecuteSqlAsync($"DELETE FROM seguranca.modulo WHERE codigo = ANY({codigos})");
         }
         
         if (_perfisCriados.Any())
         {
-            await _dbContext.Database.ExecuteSqlRawAsync($"DELETE FROM seguranca.perfil WHERE codigo IN ('{string.Join("','", _perfisCriados)}')");
+            await _dbContext.Database.ExecuteSqlAsync($"DELETE FROM seguranca.perfil WHERE codigo = ANY({_perfisCriados.ToArray()})");
         }
 
         if (_usuariosCriados.Any())
         {
-            await _dbContext.Database.ExecuteSqlRawAsync($"DELETE FROM seguranca.usuario WHERE keycloak_sub IN ('{string.Join("','", _usuariosCriados)}')");
+            await _dbContext.Database.ExecuteSqlAsync($"DELETE FROM seguranca.usuario WHERE keycloak_sub = ANY({_usuariosCriados.ToArray()})");
         }
     }
 

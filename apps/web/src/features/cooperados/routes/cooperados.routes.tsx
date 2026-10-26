@@ -1,21 +1,14 @@
-import { lazy } from 'react';
 import { Route } from 'react-router-dom';
 import { ROUTES } from '../../../app/routes/routePaths';
 import { PermissionProtectedRoute } from '../../../app/routes/PermissionProtectedRoute';
 import { AuthenticatedLayout } from '../../../layouts/AuthenticatedLayout';
 
-const CooperadosListPage = lazy(() =>
-  import('../pages/CooperadosListPage').then((m) => ({ default: m.CooperadosListPage }))
-);
-const NovoCooperadoPage = lazy(() =>
-  import('../pages/NovoCooperadoPage').then((m) => ({ default: m.NovoCooperadoPage }))
-);
-const EditarCooperadoPage = lazy(() =>
-  import('../pages/EditarCooperadoPage').then((m) => ({ default: m.EditarCooperadoPage }))
-);
-const CooperadoDetalhePage = lazy(() =>
-  import('../pages/CooperadoDetalhePage').then((m) => ({ default: m.CooperadoDetalhePage }))
-);
+import {
+  CooperadosListRoute,
+  NovoCooperadoRoute,
+  EditarCooperadoRoute,
+  CooperadoDetalheRoute,
+} from './CooperadosRoutePages';
 
 export const CooperadosRoutes = (
   <Route path={ROUTES.COOPERADOS} element={<AuthenticatedLayout />}>
@@ -23,7 +16,7 @@ export const CooperadosRoutes = (
       index
       element={
         <PermissionProtectedRoute permissaoCodigo="cooperados.visualizar">
-          <CooperadosListPage />
+          <CooperadosListRoute />
         </PermissionProtectedRoute>
       }
     />
@@ -31,7 +24,7 @@ export const CooperadosRoutes = (
       path="novo"
       element={
         <PermissionProtectedRoute permissaoCodigo="cooperados.inserir">
-          <NovoCooperadoPage />
+          <NovoCooperadoRoute />
         </PermissionProtectedRoute>
       }
     />
@@ -39,7 +32,7 @@ export const CooperadosRoutes = (
       path=":id"
       element={
         <PermissionProtectedRoute permissaoCodigo="cooperados.visualizar">
-          <CooperadoDetalhePage />
+          <CooperadoDetalheRoute />
         </PermissionProtectedRoute>
       }
     />
@@ -47,7 +40,7 @@ export const CooperadosRoutes = (
       path=":id/editar"
       element={
         <PermissionProtectedRoute permissaoCodigo="cooperados.alterar">
-          <EditarCooperadoPage />
+          <EditarCooperadoRoute />
         </PermissionProtectedRoute>
       }
     />

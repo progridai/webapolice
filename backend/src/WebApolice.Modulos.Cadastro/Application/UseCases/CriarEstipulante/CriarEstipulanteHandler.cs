@@ -1,3 +1,4 @@
+using WebApolice.Modulos.Cadastro.Domain.Clientes;
 using System;
 using System.Linq;
 using System.Text.Json;
@@ -15,12 +16,12 @@ namespace WebApolice.Modulos.Cadastro.Application.UseCases.CriarEstipulante;
 public sealed class CriarEstipulanteHandler
 {
     private readonly IEstipulanteRepository _repository;
-    private readonly IRegistradorAuditoria _auditoria;
+    private readonly IOperacaoCadastroAuditada _operacao;
 
-    public CriarEstipulanteHandler(IEstipulanteRepository repository, IRegistradorAuditoria auditoria)
+    public CriarEstipulanteHandler(IEstipulanteRepository repository, IOperacaoCadastroAuditada operacao)
     {
         _repository = repository;
-        _auditoria = auditoria;
+        _operacao = operacao;
     }
 
     public async Task<CriarEstipulanteResult> Handle(CriarEstipulanteCommand command, CancellationToken cancellationToken)
@@ -38,9 +39,7 @@ public sealed class CriarEstipulanteHandler
         if (command.Configuracao.DataFimVigencia.HasValue && command.Configuracao.DataFimVigencia < command.Configuracao.DataInicioVigencia)
             throw new EstipulanteInvalidoException("A data de fim de vigência não pode ser menor que a data de início.");
 
-        await using var transaction = await _repository.BeginTransactionAsync(cancellationToken);
-
-        try
+        return await _operacao.ExecutarAsync<CriarEstipulanteResult>("Estipulantes", "estipulante", "ESTIPULANTE_CRIADO", async ct =>
         {
             // Valida Grupo
             if (command.GrupoId.HasValue)
@@ -204,37 +203,24 @@ public sealed class CriarEstipulanteHandler
             _repository.AdicionarConfiguracao(configuracao);
 
             await _repository.SalvarAlteracoesAsync(cancellationToken);
-            await transaction.CommitAsync(cancellationToken);
 
             // Auditoria
             var cnpjMascarado = MascararDocumento(cnpjLimpo);
-            await _auditoria.RegistrarAsync(new RegistroAuditoria
-            {
-                Acao = "ESTIPULANTE_CRIADO",
-                Modulo = "Estipulantes",
-                Recurso = "estipulante",
-                RecursoId = estipulante.PublicId.ToString(),
-                Resultado = ResultadoAuditoria.Sucesso,
-                DadosPosteriores = JsonSerializer.SerializeToDocument(new { 
-                    RazaoSocial = command.RazaoSocial, 
-                    Cnpj = cnpjMascarado, 
-                    TipoPessoa = 2 
-                })
-            }, cancellationToken);
 
-            return new CriarEstipulanteResult(
+
+            var resultado = new CriarEstipulanteResult(
                 estipulante.PublicId,
                 estipulante.Nome,
                 estipulante.Cnpj,
                 "Ativo",
                 estipulante.CreatedAt
             );
-        }
-        catch (Exception)
-        {
-            await transaction.RollbackAsync(cancellationToken);
-            throw;
-        }
+            return (resultado, estipulante.PublicId.ToString(), null, JsonSerializer.SerializeToDocument(new {
+                    RazaoSocial = command.RazaoSocial,
+                    Cnpj = cnpjMascarado,
+                    TipoPessoa = 2
+                }));
+        }, cancellationToken);
     }
 
     private static string LimparDocumento(string? doc)

@@ -1,8 +1,9 @@
+using WebApolice.Modulos.Cadastro.Domain.Clientes;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
 using WebApolice.Modulos.Cadastro.Domain;
-using WebApolice.Modulos.Cadastro.Infrastructure.Persistence.Models;
+
 
 namespace WebApolice.Modulos.Cadastro.Application.Ports;
 
@@ -15,6 +16,9 @@ public interface IClienteRepository
     Task<PessoaContatoModel?> ObterContatoPrincipalAsync(long pessoaId, string tipoContato, CancellationToken cancellationToken);
     Task<PessoaEnderecoModel?> ObterEnderecoPrincipalAsync(long pessoaId, CancellationToken cancellationToken);
     
+    Task<List<PessoaContatoModel>> ObterContatosAtivosAsync(long pessoaId, CancellationToken cancellationToken);
+    Task<List<PessoaEnderecoModel>> ObterEnderecosAtivosAsync(long pessoaId, CancellationToken cancellationToken);
+
     void AdicionarPessoa(PessoaModel pessoa);
     void AdicionarCliente(Cliente cliente);
     void AdicionarContato(PessoaContatoModel contato);

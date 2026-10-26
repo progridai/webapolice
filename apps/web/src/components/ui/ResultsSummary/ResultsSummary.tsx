@@ -21,7 +21,8 @@ export const ResultsSummary: React.FC<ResultsSummaryProps> = ({
 
   return (
     <div className={`results-summary ${className}`} aria-live="polite">
-      Exibindo {startItem}–{endItem} de {totalItems} {totalItems === 1 ? 'registro' : 'registros'}
+      Exibindo {startItem}–{endItem} de {totalItems}{' '}
+      {totalItems === 1 ? 'registro' : 'registros'}
     </div>
   );
 };

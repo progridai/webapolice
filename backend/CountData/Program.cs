@@ -5,7 +5,9 @@ class Program
 {
     static void Main()
     {
-        string connString = "Host=painel.bravida.com.br;Port=5432;Database=webapolice_antigo;Username=bravito;Password=Bravida@2023!";
+        string connString = Environment.GetEnvironmentVariable("WEBAPOLICE_SOURCE_CONNECTION")
+            ?? throw new InvalidOperationException("Defina WEBAPOLICE_SOURCE_CONNECTION antes de executar a ferramenta.");
+        if (string.IsNullOrWhiteSpace(connString)) throw new InvalidOperationException("WEBAPOLICE_SOURCE_CONNECTION não pode estar vazia.");
         using var conn = new NpgsqlConnection(connString);
         conn.Open();
         
@@ -16,9 +18,12 @@ class Program
         reader.Close();
         
         long totalRows = 0;
+        using var sqlBuilder = new NpgsqlCommandBuilder();
         foreach(var table in tables) {
-            using var cmd2 = new NpgsqlCommand($"SELECT count(*) FROM "{table}"", conn);
-            long count = (long)cmd2.ExecuteScalar();
+            using var cmd2 = new NpgsqlCommand("SELECT count(*) FROM " + sqlBuilder.QuoteIdentifier(table), conn);
+            long count = cmd2.ExecuteScalar() is long result
+                ? result
+                : throw new InvalidOperationException("A consulta de contagem não retornou um inteiro.");
             Console.WriteLine($"Table {table}: {count} rows");
             totalRows += count;
         }

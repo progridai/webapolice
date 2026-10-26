@@ -5,15 +5,21 @@ import { alterarCliente } from '../api/clienteWriteApi';
 import { obterClienteDetalhe } from '../api/obterClienteDetalhe';
 import { Alert } from '../../../components/ui/Alert';
 import { Spinner } from '../../../components/ui/Spinner';
-import { PageHeader, Breadcrumbs, UsersIcon, HomeIcon } from '../../../components/ui';
+import {
+  PageHeader,
+  Breadcrumbs,
+  UsersIcon,
+  HomeIcon,
+} from '../../../components/ui';
 
 import { HttpApiError } from '../../../services/http/httpError';
 
 export const EditarClientePage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  
-  const [initialData, setInitialData] = useState<Partial<ClienteFormData> | null>(null);
+
+  const [initialData, setInitialData] =
+    useState<Partial<ClienteFormData> | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -23,34 +29,40 @@ export const EditarClientePage: React.FC = () => {
       if (!id) return;
       try {
         const data = await obterClienteDetalhe(id);
-        
+
         // Mapeia o ClienteDetalheResponse para ClienteFormData
         setInitialData({
           tipoPessoa: data.documento?.replace(/\D/g, '').length === 11 ? 1 : 2,
           nome: data.nome,
           documento: data.documento || data.documentoMascarado || '',
-          dataNascimento: data.dataNascimento ? new Date(data.dataNascimento).toISOString().split('T')[0] : '',
+          dataNascimento: data.dataNascimento
+            ? new Date(data.dataNascimento).toISOString().split('T')[0]
+            : '',
           sexo: data.sexo,
           observacao: data.observacao || '',
           re: data.re || '',
           falecido: data.falecido || false,
-          dataObito: data.dataObito ? new Date(data.dataObito).toISOString().split('T')[0] : '',
-          contatos: data.contatos?.map(c => ({
-            tipoContato: c.tipo,
-            valor: c.valor,
-            principal: c.principal,
-          })) || [],
-          enderecos: data.enderecos?.map(e => ({
-            tipoEndereco: e.tipo || 'RESIDENCIAL',
-            cep: e.cep || '',
-            logradouro: e.logradouro || '',
-            numero: e.numero || '',
-            complemento: e.complemento || '',
-            bairro: e.bairro || '',
-            cidadeId: e.cidadeId || undefined,
-            uf: e.uf || '',
-            principal: e.principal || false,
-          })) || [],
+          dataObito: data.dataObito
+            ? new Date(data.dataObito).toISOString().split('T')[0]
+            : '',
+          contatos:
+            data.contatos?.map((c) => ({
+              tipoContato: c.tipo,
+              valor: c.valor,
+              principal: c.principal,
+            })) || [],
+          enderecos:
+            data.enderecos?.map((e) => ({
+              tipoEndereco: e.tipo || 'RESIDENCIAL',
+              cep: e.cep || '',
+              logradouro: e.logradouro || '',
+              numero: e.numero || '',
+              complemento: e.complemento || '',
+              bairro: e.bairro || '',
+              cidadeId: e.cidadeId || undefined,
+              uf: e.uf || '',
+              principal: e.principal || false,
+            })) || [],
         });
       } catch (err) {
         console.error('Erro ao carregar cliente:', err);
@@ -77,12 +89,12 @@ export const EditarClientePage: React.FC = () => {
         falecido: data.falecido,
         dataObito: data.dataObito || undefined,
         re: data.re || undefined,
-        contatos: data.contatos.map(c => ({
+        contatos: data.contatos.map((c) => ({
           tipoContato: c.tipoContato,
           valor: c.valor,
           principal: c.principal,
         })),
-        enderecos: data.enderecos.map(e => ({
+        enderecos: data.enderecos.map((e) => ({
           tipoEndereco: e.tipoEndereco,
           cep: e.cep || undefined,
           logradouro: e.logradouro || undefined,
@@ -97,13 +109,15 @@ export const EditarClientePage: React.FC = () => {
       navigate(`/clientes/${id}`);
     } catch (err: unknown) {
       console.error('Erro ao alterar cliente:', err);
-      
+
       if (err instanceof HttpApiError) {
         setError(err.message);
       } else if (err instanceof Error) {
         setError(err.message);
       } else {
-        setError('Ocorreu um erro ao salvar o cliente. Verifique os dados e tente novamente.');
+        setError(
+          'Ocorreu um erro ao salvar o cliente. Verifique os dados e tente novamente.',
+        );
       }
     } finally {
       setIsSubmitting(false);
@@ -125,8 +139,12 @@ export const EditarClientePage: React.FC = () => {
   if (error && !initialData) {
     return (
       <div className="page-container">
-        <Alert variant="error" title="Erro">{error}</Alert>
-        <button className="btn mt-4" onClick={() => navigate('/clientes')}>Voltar</button>
+        <Alert variant="error" title="Erro">
+          {error}
+        </Alert>
+        <button className="btn mt-4" onClick={() => navigate('/clientes')}>
+          Voltar
+        </button>
       </div>
     );
   }
@@ -134,12 +152,16 @@ export const EditarClientePage: React.FC = () => {
   const breadcrumbItems = [
     { label: 'Início', href: '/', icon: <HomeIcon size={14} /> },
     { label: 'Clientes', href: '/clientes', icon: <UsersIcon size={14} /> },
-    { label: 'Editar Cliente' }
+    { label: 'Editar Cliente' },
   ];
 
   return (
-    <main className="flex flex-col gap-6 p-6 max-w-4xl mx-auto focus:outline-none" role="main" tabIndex={-1}>
-      <PageHeader 
+    <main
+      className="flex flex-col gap-6 p-6 max-w-4xl mx-auto focus:outline-none"
+      role="main"
+      tabIndex={-1}
+    >
+      <PageHeader
         title="Editar Cliente"
         icon={<UsersIcon size={24} />}
         breadcrumbs={<Breadcrumbs items={breadcrumbItems} />}
@@ -148,12 +170,14 @@ export const EditarClientePage: React.FC = () => {
       <div className="w-full">
         {error && (
           <div className="mb-4">
-            <Alert variant="error" title="Erro ao Salvar">{error}</Alert>
+            <Alert variant="error" title="Erro ao Salvar">
+              {error}
+            </Alert>
           </div>
         )}
-        
+
         {initialData && (
-          <ClienteForm 
+          <ClienteForm
             initialData={initialData}
             isEdit={true}
             onSubmit={handleSubmit}

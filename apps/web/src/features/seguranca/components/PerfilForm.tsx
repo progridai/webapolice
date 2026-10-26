@@ -15,8 +15,14 @@ import { SelecaoPermissoes } from './SelecaoPermissoes';
 import type { CatalogoModuloDto } from '../types/seguranca.types';
 
 const perfilSchema = z.object({
-  codigo: z.string().min(1, 'Código é obrigatório').max(50, 'Máximo 50 caracteres'),
-  nome: z.string().min(1, 'Nome é obrigatório').max(100, 'Máximo 100 caracteres'),
+  codigo: z
+    .string()
+    .min(1, 'Código é obrigatório')
+    .max(50, 'Máximo 50 caracteres'),
+  nome: z
+    .string()
+    .min(1, 'Nome é obrigatório')
+    .max(100, 'Máximo 100 caracteres'),
   descricao: z.string().max(255, 'Máximo 255 caracteres').optional(),
   ativo: z.boolean(),
   permissaoPublicIds: z.array(z.string()),
@@ -64,8 +70,15 @@ export const PerfilForm: React.FC<PerfilFormProps> = ({
   }, [initialData, reset]);
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-8" noValidate>
-      <FormSection title="Dados Gerais" description="Informações básicas do perfil.">
+    <form
+      onSubmit={handleSubmit(onSubmit)}
+      className="flex flex-col gap-8"
+      noValidate
+    >
+      <FormSection
+        title="Dados Gerais"
+        description="Informações básicas do perfil."
+      >
         <FormGrid>
           <FormField label="Código" error={errors.codigo?.message} required>
             <Input
@@ -75,7 +88,7 @@ export const PerfilForm: React.FC<PerfilFormProps> = ({
               error={!!errors.codigo}
             />
           </FormField>
-          
+
           <FormField label="Nome" error={errors.nome?.message} required>
             <Input
               {...register('nome')}
@@ -84,7 +97,7 @@ export const PerfilForm: React.FC<PerfilFormProps> = ({
               error={!!errors.nome}
             />
           </FormField>
-          
+
           <div className="col-span-1 md:col-span-2">
             <FormField label="Descrição" error={errors.descricao?.message}>
               <Input
@@ -116,7 +129,10 @@ export const PerfilForm: React.FC<PerfilFormProps> = ({
         </FormGrid>
       </FormSection>
 
-      <FormSection title="Permissões" description="Selecione as permissões que este perfil terá.">
+      <FormSection
+        title="Permissões"
+        description="Selecione as permissões que este perfil terá."
+      >
         <div className="bg-fundo-aplicacao border border-borda rounded-lg p-4">
           <Controller
             name="permissaoPublicIds"
@@ -134,7 +150,12 @@ export const PerfilForm: React.FC<PerfilFormProps> = ({
       </FormSection>
 
       <FormActions>
-        <Button type="button" variant="text" onClick={onCancel} disabled={isSubmitting}>
+        <Button
+          type="button"
+          variant="text"
+          onClick={onCancel}
+          disabled={isSubmitting}
+        >
           Cancelar
         </Button>
         <Button type="submit" variant="primary" loading={isSubmitting}>

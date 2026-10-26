@@ -18,7 +18,8 @@ export const DescriptionItem: React.FC<DescriptionItemProps> = ({
     <div className={`desc-item ${className}`}>
       <dt className="desc-item-label">
         {icon && <span className="desc-item-label-icon">{icon}</span>}
-        {label}{typeof label === 'string' && !label.endsWith(':') ? ':' : ''}
+        {label}
+        {typeof label === 'string' && !label.endsWith(':') ? ':' : ''}
       </dt>
       <dd className="desc-item-value">
         {value === null || value === undefined || value === '' ? (
@@ -60,7 +61,9 @@ export const DescriptionList: React.FC<DescriptionListProps> = ({
   };
 
   return (
-    <dl className={`desc-list-grid ${getGridColsClass()} desc-list-density-${density} ${className}`}>
+    <dl
+      className={`desc-list-grid ${getGridColsClass()} desc-list-density-${density} ${className}`}
+    >
       {children}
     </dl>
   );

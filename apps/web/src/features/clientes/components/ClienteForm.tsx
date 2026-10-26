@@ -1,5 +1,14 @@
 import React, { useEffect, useState } from 'react';
-import { useForm, Controller, useFieldArray, useWatch, type UseFormRegister, type UseFormSetValue, type Control, type FieldErrors } from 'react-hook-form';
+import {
+  useForm,
+  Controller,
+  useFieldArray,
+  useWatch,
+  type UseFormRegister,
+  type UseFormSetValue,
+  type Control,
+  type FieldErrors,
+} from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { FormField } from '../../../components/ui/FormField';
@@ -8,38 +17,101 @@ import { Select } from '../../../components/ui/Select';
 import { Textarea } from '../../../components/ui/Textarea';
 import { Checkbox } from '../../../components/ui/Checkbox';
 import { Button } from '../../../components/ui/Button';
-import { FormSection, FormGrid, FormActions, ReadOnlyField, UsersIcon, HomeIcon, InfoIcon, PlusIcon } from '../../../components/ui';
-import { CpfInput, CnpjInput, DateInput, EmailInput, PhoneInput, CepInput } from '../../../components/fields';
+import {
+  FormSection,
+  FormGrid,
+  FormActions,
+  ReadOnlyField,
+  UsersIcon,
+  HomeIcon,
+  InfoIcon,
+  PlusIcon,
+} from '../../../components/ui';
+import {
+  CpfInput,
+  CnpjInput,
+  DateInput,
+  EmailInput,
+  PhoneInput,
+  CepInput,
+} from '../../../components/fields';
 import { buscarCidadesPorUf, type CidadeResponse } from '../api/localidadesApi';
 import { consultarCep } from '../../../shared/api/enderecosApi';
-import { isValidCpf, isValidCnpj, isValidPhone } from '../../../shared/utils/validators';
-import { normalizeCpf, normalizeCnpj, normalizePhone, normalizeCep } from '../../../shared/utils/normalizers';
+import {
+  isValidCpf,
+  isValidCnpj,
+  isValidPhone,
+} from '../../../shared/utils/validators';
+import {
+  normalizeCpf,
+  normalizeCnpj,
+  normalizePhone,
+  normalizeCep,
+} from '../../../shared/utils/normalizers';
 import { useAuthorization } from '../../../auth/AuthorizationProvider';
 
 const ESTADOS_BRASILEIROS = [
-  'AC', 'AL', 'AP', 'AM', 'BA', 'CE', 'DF', 'ES', 'GO', 'MA', 'MT', 'MS', 'MG',
-  'PA', 'PB', 'PR', 'PE', 'PI', 'RJ', 'RN', 'RS', 'RO', 'RR', 'SC', 'SP', 'SE', 'TO'
+  'AC',
+  'AL',
+  'AP',
+  'AM',
+  'BA',
+  'CE',
+  'DF',
+  'ES',
+  'GO',
+  'MA',
+  'MT',
+  'MS',
+  'MG',
+  'PA',
+  'PB',
+  'PR',
+  'PE',
+  'PI',
+  'RJ',
+  'RN',
+  'RS',
+  'RO',
+  'RR',
+  'SC',
+  'SP',
+  'SE',
+  'TO',
 ];
 
 // Esquemas de Validação
-const contatoSchema = z.object({
-  tipoContato: z.string().min(1, 'Selecione o tipo de contato'),
-  valor: z.string().trim().optional().or(z.literal('')).default(''),
-  principal: z.boolean().default(false),
-}).superRefine((data, ctx) => {
-  if (!data.valor) return;
-  const tipo = data.tipoContato;
-  if (tipo === 'EMAIL') {
-    const emailResult = z.string().email('E-mail inválido').safeParse(data.valor);
-    if (!emailResult.success) {
-      ctx.addIssue({ path: ['valor'], code: z.ZodIssueCode.custom, message: 'E-mail inválido' });
+const contatoSchema = z
+  .object({
+    tipoContato: z.string().min(1, 'Selecione o tipo de contato'),
+    valor: z.string().trim().optional().or(z.literal('')).default(''),
+    principal: z.boolean().default(false),
+  })
+  .superRefine((data, ctx) => {
+    if (!data.valor) return;
+    const tipo = data.tipoContato;
+    if (tipo === 'EMAIL') {
+      const emailResult = z
+        .string()
+        .email('E-mail inválido')
+        .safeParse(data.valor);
+      if (!emailResult.success) {
+        ctx.addIssue({
+          path: ['valor'],
+          code: z.ZodIssueCode.custom,
+          message: 'E-mail inválido',
+        });
+      }
+    } else if (tipo === 'TELEFONE' || tipo === 'CELULAR') {
+      if (!isValidPhone(data.valor)) {
+        ctx.addIssue({
+          path: ['valor'],
+          code: z.ZodIssueCode.custom,
+          message: 'Telefone inválido',
+        });
+      }
     }
-  } else if (tipo === 'TELEFONE' || tipo === 'CELULAR') {
-    if (!isValidPhone(data.valor)) {
-      ctx.addIssue({ path: ['valor'], code: z.ZodIssueCode.custom, message: 'Telefone inválido' });
-    }
-  }
-});
+  });
 
 const enderecoSchema = z.object({
   tipoEndereco: z.string().min(1, 'Selecione o tipo de endereço'),
@@ -61,37 +133,62 @@ const isNotFutureDate = (dateString?: string | null) => {
   return dateString <= todayString;
 };
 
-const clienteSchema = z.object({
-  tipoPessoa: z.coerce.number<string | number>().min(1, 'Selecione o tipo de pessoa').max(2),
-  nome: z.string().trim().min(3, 'O nome deve ter no mínimo 3 caracteres'),
-  documento: z.string().trim().min(11, 'Documento inválido'),
-  dataNascimento: z.string().min(1, 'A data de nascimento é obrigatória').refine(isNotFutureDate, { message: 'A data não pode estar no futuro' }),
-  sexo: z.coerce.number<string | number>().optional(),
-  re: z.string().trim().max(32, 'O RE pode ter no máximo 32 caracteres').optional().or(z.literal('')),
-  observacao: z.string().trim().optional(),
-  falecido: z.boolean().default(false),
-  dataObito: z.string().optional().or(z.literal('')).refine(isNotFutureDate, { message: 'A data não pode estar no futuro' }),
-  contatos: z.array(contatoSchema),
-  enderecos: z.array(enderecoSchema),
-}).superRefine((data, ctx) => {
-  if (data.tipoPessoa === 1) {
-    if (!isValidCpf(data.documento)) {
-      ctx.addIssue({ path: ['documento'], code: z.ZodIssueCode.custom, message: 'CPF inválido' });
+const clienteSchema = z
+  .object({
+    tipoPessoa: z.coerce
+      .number<string | number>()
+      .min(1, 'Selecione o tipo de pessoa')
+      .max(2),
+    nome: z.string().trim().min(3, 'O nome deve ter no mínimo 3 caracteres'),
+    documento: z.string().trim().min(11, 'Documento inválido'),
+    dataNascimento: z
+      .string()
+      .min(1, 'A data de nascimento é obrigatória')
+      .refine(isNotFutureDate, { message: 'A data não pode estar no futuro' }),
+    sexo: z.coerce.number<string | number>().optional(),
+    re: z
+      .string()
+      .trim()
+      .max(32, 'O RE pode ter no máximo 32 caracteres')
+      .optional()
+      .or(z.literal('')),
+    observacao: z.string().trim().optional(),
+    falecido: z.boolean().default(false),
+    dataObito: z
+      .string()
+      .optional()
+      .or(z.literal(''))
+      .refine(isNotFutureDate, { message: 'A data não pode estar no futuro' }),
+    contatos: z.array(contatoSchema),
+    enderecos: z.array(enderecoSchema),
+  })
+  .superRefine((data, ctx) => {
+    if (data.tipoPessoa === 1) {
+      if (!isValidCpf(data.documento)) {
+        ctx.addIssue({
+          path: ['documento'],
+          code: z.ZodIssueCode.custom,
+          message: 'CPF inválido',
+        });
+      }
+    } else if (data.tipoPessoa === 2) {
+      if (!isValidCnpj(data.documento)) {
+        ctx.addIssue({
+          path: ['documento'],
+          code: z.ZodIssueCode.custom,
+          message: 'CNPJ inválido',
+        });
+      }
     }
-  } else if (data.tipoPessoa === 2) {
-    if (!isValidCnpj(data.documento)) {
-      ctx.addIssue({ path: ['documento'], code: z.ZodIssueCode.custom, message: 'CNPJ inválido' });
-    }
-  }
 
-  if (data.falecido && !data.dataObito) {
-    ctx.addIssue({
-      path: ['dataObito'],
-      code: z.ZodIssueCode.custom,
-      message: 'Data de óbito é obrigatória se falecido.',
-    });
-  }
-});
+    if (data.falecido && !data.dataObito) {
+      ctx.addIssue({
+        path: ['dataObito'],
+        code: z.ZodIssueCode.custom,
+        message: 'Data de óbito é obrigatória se falecido.',
+      });
+    }
+  });
 
 type ClienteFormInput = z.input<typeof clienteSchema>;
 export type ClienteFormData = z.output<typeof clienteSchema>;
@@ -149,17 +246,25 @@ const EnderecoRow: React.FC<EnderecoRowProps> = ({
     // Call the original register onChange
     const val = e.target.value;
     const apenasNumeros = val.replace(/\D/g, '');
-    
+
     if (apenasNumeros.length === 8) {
       try {
         const dadosCep = await consultarCep(apenasNumeros);
         if (dadosCep) {
-          setValue(`enderecos.${index}.logradouro`, dadosCep.logradouro ?? '', { shouldValidate: true });
-          setValue(`enderecos.${index}.bairro`, dadosCep.bairro ?? '', { shouldValidate: true });
-          setValue(`enderecos.${index}.uf`, dadosCep.uf, { shouldValidate: true });
-          
+          setValue(`enderecos.${index}.logradouro`, dadosCep.logradouro ?? '', {
+            shouldValidate: true,
+          });
+          setValue(`enderecos.${index}.bairro`, dadosCep.bairro ?? '', {
+            shouldValidate: true,
+          });
+          setValue(`enderecos.${index}.uf`, dadosCep.uf, {
+            shouldValidate: true,
+          });
+
           if (dadosCep.cidadeId) {
-            setValue(`enderecos.${index}.cidadeId`, dadosCep.cidadeId, { shouldValidate: true });
+            setValue(`enderecos.${index}.cidadeId`, dadosCep.cidadeId, {
+              shouldValidate: true,
+            });
           }
         }
       } catch (err) {
@@ -175,7 +280,11 @@ const EnderecoRow: React.FC<EnderecoRowProps> = ({
     <div className="border border-borda p-3 rounded-lg bg-fundo-aplicacao">
       <FormGrid>
         <div className="lg:col-span-3">
-          <FormField label="Tipo de Endereço" required error={errors?.tipoEndereco?.message}>
+          <FormField
+            label="Tipo de Endereço"
+            required
+            error={errors?.tipoEndereco?.message}
+          >
             <Select {...register(`enderecos.${index}.tipoEndereco`)}>
               <option value="RESIDENCIAL">Residencial</option>
               <option value="COMERCIAL">Comercial</option>
@@ -187,38 +296,50 @@ const EnderecoRow: React.FC<EnderecoRowProps> = ({
 
         <div className="lg:col-span-3">
           <FormField label="CEP" error={errors?.cep?.message}>
-            <CepInput 
-              {...cepRegister} 
+            <CepInput
+              {...cepRegister}
               onChange={(e) => {
                 cepRegister.onChange(e);
                 handleCepChange(e);
               }}
-              placeholder="00000-000" 
+              placeholder="00000-000"
             />
           </FormField>
         </div>
 
         <div className="lg:col-span-6">
           <FormField label="Logradouro" error={errors?.logradouro?.message}>
-            <Input {...register(`enderecos.${index}.logradouro`)} placeholder="Rua, Avenida..." />
+            <Input
+              {...register(`enderecos.${index}.logradouro`)}
+              placeholder="Rua, Avenida..."
+            />
           </FormField>
         </div>
 
         <div className="lg:col-span-2">
           <FormField label="Número" error={errors?.numero?.message}>
-            <Input {...register(`enderecos.${index}.numero`)} placeholder="123" />
+            <Input
+              {...register(`enderecos.${index}.numero`)}
+              placeholder="123"
+            />
           </FormField>
         </div>
 
         <div className="lg:col-span-5">
           <FormField label="Complemento" error={errors?.complemento?.message}>
-            <Input {...register(`enderecos.${index}.complemento`)} placeholder="Apto, Bloco..." />
+            <Input
+              {...register(`enderecos.${index}.complemento`)}
+              placeholder="Apto, Bloco..."
+            />
           </FormField>
         </div>
 
         <div className="lg:col-span-5">
           <FormField label="Bairro" error={errors?.bairro?.message}>
-            <Input {...register(`enderecos.${index}.bairro`)} placeholder="Bairro" />
+            <Input
+              {...register(`enderecos.${index}.bairro`)}
+              placeholder="Bairro"
+            />
           </FormField>
         </div>
 
@@ -226,8 +347,10 @@ const EnderecoRow: React.FC<EnderecoRowProps> = ({
           <FormField label="UF" error={errors?.uf?.message}>
             <Select {...register(`enderecos.${index}.uf`)}>
               <option value="">...</option>
-              {ESTADOS_BRASILEIROS.map(uf => (
-                <option key={uf} value={uf}>{uf}</option>
+              {ESTADOS_BRASILEIROS.map((uf) => (
+                <option key={uf} value={uf}>
+                  {uf}
+                </option>
               ))}
             </Select>
           </FormField>
@@ -239,14 +362,18 @@ const EnderecoRow: React.FC<EnderecoRowProps> = ({
             control={control}
             render={({ field }) => (
               <FormField label="Cidade" error={errors?.cidadeId?.message}>
-                <Select 
-                  {...field} 
-                  value={field.value || ""} 
+                <Select
+                  {...field}
+                  value={field.value || ''}
                   disabled={loadingCidades || cidades.length === 0}
                 >
-                  <option value="">{loadingCidades ? 'Carregando...' : 'Selecione'}</option>
-                  {cidades.map(c => (
-                    <option key={c.id} value={c.id}>{c.nome}</option>
+                  <option value="">
+                    {loadingCidades ? 'Carregando...' : 'Selecione'}
+                  </option>
+                  {cidades.map((c) => (
+                    <option key={c.id} value={c.id}>
+                      {c.nome}
+                    </option>
                   ))}
                 </Select>
               </FormField>
@@ -311,7 +438,6 @@ export const ClienteForm: React.FC<ClienteFormProps> = ({
     register,
     handleSubmit,
     control,
-    watch,
     reset,
     setValue,
     getValues,
@@ -328,20 +454,46 @@ export const ClienteForm: React.FC<ClienteFormProps> = ({
       observacao: initialData?.observacao || '',
       falecido: initialData?.falecido || false,
       dataObito: initialData?.dataObito || '',
-      contatos: initialData?.contatos || [{ tipoContato: 'EMAIL', valor: '', principal: true }],
-      enderecos: initialData?.enderecos || [{ tipoEndereco: 'RESIDENCIAL', cep: '', logradouro: '', numero: '', complemento: '', bairro: '', cidadeId: undefined, uf: '', principal: true }],
+      contatos: initialData?.contatos || [
+        { tipoContato: 'EMAIL', valor: '', principal: true },
+      ],
+      enderecos: initialData?.enderecos || [
+        {
+          tipoEndereco: 'RESIDENCIAL',
+          cep: '',
+          logradouro: '',
+          numero: '',
+          complemento: '',
+          bairro: '',
+          cidadeId: undefined,
+          uf: '',
+          principal: true,
+        },
+      ],
     },
   });
 
-  const { fields: contatoFields, append: appendContato, remove: removeContato } = useFieldArray({
+  const {
+    fields: contatoFields,
+    append: appendContato,
+    remove: removeContato,
+  } = useFieldArray({
     control,
     name: 'contatos',
   });
 
-  const { fields: enderecoFields, append: appendEndereco, remove: removeEndereco } = useFieldArray({
+  const {
+    fields: enderecoFields,
+    append: appendEndereco,
+    remove: removeEndereco,
+  } = useFieldArray({
     control,
     name: 'enderecos',
   });
+
+  const isFalecido = useWatch({ control, name: 'falecido' });
+  const tipoPessoa = Number(useWatch({ control, name: 'tipoPessoa' }));
+  const contatos = useWatch({ control, name: 'contatos' });
 
   useEffect(() => {
     if (initialData) {
@@ -355,26 +507,38 @@ export const ClienteForm: React.FC<ClienteFormProps> = ({
         observacao: initialData.observacao || '',
         falecido: initialData.falecido || false,
         dataObito: initialData.dataObito || '',
-        contatos: initialData.contatos && initialData.contatos.length > 0
-          ? initialData.contatos
-          : [{ tipoContato: 'EMAIL', valor: '', principal: true }],
-        enderecos: initialData.enderecos && initialData.enderecos.length > 0
-          ? initialData.enderecos
-          : [{ tipoEndereco: 'RESIDENCIAL', cep: '', logradouro: '', numero: '', complemento: '', bairro: '', cidadeId: undefined, uf: '', principal: true }],
+        contatos:
+          initialData.contatos && initialData.contatos.length > 0
+            ? initialData.contatos
+            : [{ tipoContato: 'EMAIL', valor: '', principal: true }],
+        enderecos:
+          initialData.enderecos && initialData.enderecos.length > 0
+            ? initialData.enderecos
+            : [
+                {
+                  tipoEndereco: 'RESIDENCIAL',
+                  cep: '',
+                  logradouro: '',
+                  numero: '',
+                  complemento: '',
+                  bairro: '',
+                  cidadeId: undefined,
+                  uf: '',
+                  principal: true,
+                },
+              ],
       });
     }
   }, [initialData, reset]);
-
-  // eslint-disable-next-line react-hooks/incompatible-library
-  const isFalecido = watch('falecido');
-  const tipoPessoa = Number(watch('tipoPessoa'));
 
   const handleMakeContatoPrincipal = (index: number) => {
     const contatos = getValues('contatos');
     const isEmail = contatos[index].tipoContato === 'EMAIL';
     contatos.forEach((contato, idx) => {
       if ((contato.tipoContato === 'EMAIL') === isEmail) {
-        setValue(`contatos.${idx}.principal`, idx === index, { shouldDirty: true });
+        setValue(`contatos.${idx}.principal`, idx === index, {
+          shouldDirty: true,
+        });
       }
     });
   };
@@ -387,23 +551,25 @@ export const ClienteForm: React.FC<ClienteFormProps> = ({
 
   const handleFormSubmit = (data: ClienteFormData) => {
     const contatosFiltrados = data.contatos
-      .filter(c => c.valor && c.valor.trim() !== '')
-      .map(c => ({
+      .filter((c) => c.valor && c.valor.trim() !== '')
+      .map((c) => ({
         ...c,
-        valor: (c.tipoContato === 'TELEFONE' || c.tipoContato === 'CELULAR') 
-          ? normalizePhone(c.valor)
-          : c.valor
+        valor:
+          c.tipoContato === 'TELEFONE' || c.tipoContato === 'CELULAR'
+            ? normalizePhone(c.valor)
+            : c.valor,
       }));
-      
+
     const enderecosFiltrados = data.enderecos
-      .filter(e => 
-        (e.cep && e.cep.trim() !== '') || 
-        (e.logradouro && e.logradouro.trim() !== '') || 
-        (e.cidadeId && Number(e.cidadeId) !== 0)
+      .filter(
+        (e) =>
+          (e.cep && e.cep.trim() !== '') ||
+          (e.logradouro && e.logradouro.trim() !== '') ||
+          (e.cidadeId && Number(e.cidadeId) !== 0),
       )
-      .map(e => ({
+      .map((e) => ({
         ...e,
-        cep: e.cep ? normalizeCep(e.cep) : e.cep
+        cep: e.cep ? normalizeCep(e.cep) : e.cep,
       }));
 
     let documentoFormatado = data.documento;
@@ -426,7 +592,11 @@ export const ClienteForm: React.FC<ClienteFormProps> = ({
       <FormSection title="Dados Principais" icon={<UsersIcon size={20} />}>
         <FormGrid>
           <div className="lg:col-span-6">
-            <FormField label="Tipo de Pessoa" required error={errors.tipoPessoa?.message}>
+            <FormField
+              label="Tipo de Pessoa"
+              required
+              error={errors.tipoPessoa?.message}
+            >
               <Select {...register('tipoPessoa')} disabled={isEdit}>
                 <option value={1}>Pessoa Física</option>
                 <option value={2}>Pessoa Jurídica</option>
@@ -435,27 +605,46 @@ export const ClienteForm: React.FC<ClienteFormProps> = ({
           </div>
 
           <div className="lg:col-span-6">
-            <FormField label="Documento (CPF/CNPJ)" required error={errors.documento?.message}>
+            <FormField
+              label="Documento (CPF/CNPJ)"
+              required
+              error={errors.documento?.message}
+            >
               {isEdit ? (
                 <ReadOnlyField value={initialData?.documento || ''} />
+              ) : tipoPessoa === 1 ? (
+                <CpfInput
+                  {...register('documento')}
+                  placeholder="Digite apenas números"
+                />
               ) : (
-                tipoPessoa === 1 ? (
-                  <CpfInput {...register('documento')} placeholder="Digite apenas números" />
-                ) : (
-                  <CnpjInput {...register('documento')} placeholder="Digite apenas números" />
-                )
+                <CnpjInput
+                  {...register('documento')}
+                  placeholder="Digite apenas números"
+                />
               )}
             </FormField>
           </div>
 
           <div className="lg:col-span-12">
-            <FormField label="Nome Completo / Razão Social" required error={errors.nome?.message}>
-              <Input {...register('nome')} placeholder="Digite o nome completo" />
+            <FormField
+              label="Nome Completo / Razão Social"
+              required
+              error={errors.nome?.message}
+            >
+              <Input
+                {...register('nome')}
+                placeholder="Digite o nome completo"
+              />
             </FormField>
           </div>
 
           <div className="lg:col-span-6">
-            <FormField label="Data de Nascimento" required error={errors.dataNascimento?.message}>
+            <FormField
+              label="Data de Nascimento"
+              required
+              error={errors.dataNascimento?.message}
+            >
               <DateInput {...register('dataNascimento')} />
             </FormField>
           </div>
@@ -473,7 +662,11 @@ export const ClienteForm: React.FC<ClienteFormProps> = ({
           {possuiRecurso('RE') && (
             <div className="lg:col-span-6">
               <FormField label="RE" error={errors.re?.message}>
-                <Input {...register('re')} placeholder="Número do RE (Opcional)" maxLength={32} />
+                <Input
+                  {...register('re')}
+                  placeholder="Número do RE (Opcional)"
+                  maxLength={32}
+                />
               </FormField>
             </div>
           )}
@@ -483,17 +676,26 @@ export const ClienteForm: React.FC<ClienteFormProps> = ({
       <FormSection title="Contatos" icon={<InfoIcon size={20} />}>
         <div className="flex flex-col gap-2">
           {contatoFields.map((field, index) => (
-            <div key={field.id} className="border border-borda p-3 rounded-lg bg-fundo-aplicacao">
+            <div
+              key={field.id}
+              className="border border-borda p-3 rounded-lg bg-fundo-aplicacao"
+            >
               <FormGrid>
                 <div className="lg:col-span-3">
-                  <FormField label="Tipo de Contato" required error={errors.contatos?.[index]?.tipoContato?.message}>
-                    <Select {...register(`contatos.${index}.tipoContato`, {
-                      onChange: () => {
-                        if (getValues(`contatos.${index}.principal`)) {
-                          handleMakeContatoPrincipal(index);
-                        }
-                      },
-                    })}>
+                  <FormField
+                    label="Tipo de Contato"
+                    required
+                    error={errors.contatos?.[index]?.tipoContato?.message}
+                  >
+                    <Select
+                      {...register(`contatos.${index}.tipoContato`, {
+                        onChange: () => {
+                          if (getValues(`contatos.${index}.principal`)) {
+                            handleMakeContatoPrincipal(index);
+                          }
+                        },
+                      })}
+                    >
                       <option value="EMAIL">E-mail</option>
                       <option value="TELEFONE">Telefone</option>
                       <option value="CELULAR">Celular</option>
@@ -501,11 +703,20 @@ export const ClienteForm: React.FC<ClienteFormProps> = ({
                   </FormField>
                 </div>
                 <div className="lg:col-span-6">
-                  <FormField label="Contato" error={errors.contatos?.[index]?.valor?.message}>
-                    {watch(`contatos.${index}.tipoContato`) === 'EMAIL' ? (
-                      <EmailInput {...register(`contatos.${index}.valor`)} placeholder="Digite o e-mail" />
+                  <FormField
+                    label="Contato"
+                    error={errors.contatos?.[index]?.valor?.message}
+                  >
+                    {contatos[index]?.tipoContato === 'EMAIL' ? (
+                      <EmailInput
+                        {...register(`contatos.${index}.valor`)}
+                        placeholder="Digite o e-mail"
+                      />
                     ) : (
-                      <PhoneInput {...register(`contatos.${index}.valor`)} placeholder="Digite o número" />
+                      <PhoneInput
+                        {...register(`contatos.${index}.valor`)}
+                        placeholder="Digite o número"
+                      />
                     )}
                   </FormField>
                 </div>
@@ -547,7 +758,13 @@ export const ClienteForm: React.FC<ClienteFormProps> = ({
             <Button
               type="button"
               variant="secondary"
-              onClick={() => appendContato({ tipoContato: 'EMAIL', valor: '', principal: false })}
+              onClick={() =>
+                appendContato({
+                  tipoContato: 'EMAIL',
+                  valor: '',
+                  principal: false,
+                })
+              }
             >
               <PlusIcon size={16} className="mr-2" />
               Adicionar Contato
@@ -575,7 +792,19 @@ export const ClienteForm: React.FC<ClienteFormProps> = ({
             <Button
               type="button"
               variant="secondary"
-              onClick={() => appendEndereco({ tipoEndereco: 'RESIDENCIAL', cep: '', logradouro: '', numero: '', complemento: '', bairro: '', cidadeId: undefined, uf: '', principal: false })}
+              onClick={() =>
+                appendEndereco({
+                  tipoEndereco: 'RESIDENCIAL',
+                  cep: '',
+                  logradouro: '',
+                  numero: '',
+                  complemento: '',
+                  bairro: '',
+                  cidadeId: undefined,
+                  uf: '',
+                  principal: false,
+                })
+              }
             >
               <PlusIcon size={16} className="mr-2" />
               Adicionar Endereço
@@ -603,7 +832,11 @@ export const ClienteForm: React.FC<ClienteFormProps> = ({
 
           {isFalecido && (
             <div className="lg:col-span-6">
-              <FormField label="Data de Óbito" required error={errors.dataObito?.message}>
+              <FormField
+                label="Data de Óbito"
+                required
+                error={errors.dataObito?.message}
+              >
                 <DateInput {...register('dataObito')} />
               </FormField>
             </div>
@@ -611,17 +844,31 @@ export const ClienteForm: React.FC<ClienteFormProps> = ({
 
           <div className="lg:col-span-12">
             <FormField label="Observações" error={errors.observacao?.message}>
-              <Textarea {...register('observacao')} placeholder="Observações internas..." rows={3} />
+              <Textarea
+                {...register('observacao')}
+                placeholder="Observações internas..."
+                rows={3}
+              />
             </FormField>
           </div>
         </FormGrid>
       </FormSection>
 
       <FormActions>
-        <Button type="button" variant="text" onClick={onCancel} disabled={isSubmitting}>
+        <Button
+          type="button"
+          variant="text"
+          onClick={onCancel}
+          disabled={isSubmitting}
+        >
           Cancelar
         </Button>
-        <Button type="submit" variant="primary" disabled={isSubmitting} loading={isSubmitting}>
+        <Button
+          type="submit"
+          variant="primary"
+          disabled={isSubmitting}
+          loading={isSubmitting}
+        >
           Salvar Cliente
         </Button>
       </FormActions>

@@ -15,7 +15,7 @@ vi.mock('../../../auth/AuthorizationProvider', () => ({
     possuiPermissao: vi.fn().mockReturnValue(true),
     possuiAcessoTotal: vi.fn().mockReturnValue(true),
   }),
-  AuthorizationProvider: ({ children }: any) => <>{children}</>
+  AuthorizationProvider: ({ children }: any) => <>{children}</>,
 }));
 
 const Wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
@@ -41,7 +41,7 @@ describe('ApoliceDetalhesPage', () => {
       status: 'Ativa',
       ativo: true,
       ramos: [],
-      configuracao: null
+      configuracao: null,
     };
     vi.mocked(api.obterApolice).mockResolvedValueOnce(mockData as any);
 
@@ -50,14 +50,16 @@ describe('ApoliceDetalhesPage', () => {
     await waitFor(() => {
       expect(screen.getByText('Apólice 999123')).not.toBeNull();
     });
-    
+
     expect(screen.getByText('Estipulante Teste • Seguradora X')).not.toBeNull();
     expect(screen.getByText('Resumo')).not.toBeNull();
     expect(screen.getByText('Ramos')).not.toBeNull();
   });
 
   it('deve exibir mensagem de erro quando falhar', async () => {
-    vi.mocked(api.obterApolice).mockRejectedValueOnce(new Error('Failed to fetch'));
+    vi.mocked(api.obterApolice).mockRejectedValueOnce(
+      new Error('Failed to fetch'),
+    );
 
     render(<ApoliceDetalhesPage />, { wrapper: Wrapper });
 

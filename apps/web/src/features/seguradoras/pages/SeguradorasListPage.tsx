@@ -3,7 +3,7 @@
  *
  * Página de listagem oficial de Seguradoras.
  */
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   PageHeader,
@@ -27,6 +27,7 @@ import {
 import type { Column } from '../../../components/ui/DataTable/DataTable';
 import { ROUTES, createPath } from '../../../app/routes/routePaths';
 import { useAuthorization } from '../../../auth/AuthorizationProvider';
+import { useConsulta } from '../../../shared/hooks/useConsulta';
 import { seguradorasApi } from '../api/seguradoras.api';
 import type { SeguradoraListItem } from '../types/seguradora.types';
 
@@ -34,12 +35,9 @@ export const SeguradorasListPage: React.FC = () => {
   const navigate = useNavigate();
   const { possuiPermissao } = useAuthorization();
 
-  const [seguradoras, setSeguradoras] = useState<SeguradoraListItem[]>([]);
-  const [total, setTotal] = useState(0);
-  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
 
-  // Filtros e Paginação
   const [busca, setBusca] = useState('');
   const [ativo, setAtivo] = useState<string>('');
   const [pagina, setPagina] = useState(1);
@@ -58,29 +56,32 @@ export const SeguradorasListPage: React.FC = () => {
     loading: false,
   });
 
-  const carregarSeguradoras = useCallback(async () => {
-    try {
-      setIsLoading(true);
-      setError(null);
-      const res = await seguradorasApi.listar({
-        pagina,
-        tamanhoPagina,
-        busca: busca.trim() || undefined,
-        ativo: ativo === 'true' ? true : ativo === 'false' ? false : undefined,
-      });
-      setSeguradoras(res.itens || []);
-      setTotal(res.totalItens || 0);
-    } catch (err: unknown) {
-      console.error('Erro ao listar seguradoras:', err);
-      setError('Não foi possível carregar a lista de seguradoras.');
-    } finally {
-      setIsLoading(false);
-    }
-  }, [pagina, tamanhoPagina, busca, ativo]);
-
-  useEffect(() => {
-    carregarSeguradoras();
-  }, [carregarSeguradoras]);
+  const load = useCallback(
+    (signal: AbortSignal) =>
+      seguradorasApi.listar(
+        {
+          pagina,
+          tamanhoPagina,
+          busca: busca.trim() || undefined,
+          ativo:
+            ativo === 'true' ? true : ativo === 'false' ? false : undefined,
+        },
+        signal,
+      ),
+    [pagina, tamanhoPagina, busca, ativo],
+  );
+  const {
+    data,
+    isLoading,
+    error: erroConsulta,
+    refetch,
+  } = useConsulta(
+    load,
+    'Não foi possível carregar a lista de seguradoras.',
+    refreshTrigger,
+  );
+  const seguradoras = data?.itens || [];
+  const total = data?.totalItens || 0;
 
   const handleBuscaChange = (novaBusca: string) => {
     setBusca(novaBusca);
@@ -99,12 +100,18 @@ export const SeguradorasListPage: React.FC = () => {
     if (!cnpj) return '-';
     const clean = cnpj.replace(/\D/g, '');
     if (clean.length === 14) {
-      return clean.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, '$1.$2.$3/$4-$5');
+      return clean.replace(
+        /^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/,
+        '$1.$2.$3/$4-$5',
+      );
     }
     return cnpj;
   };
 
-  const abrirConfirmacao = (item: SeguradoraListItem, tipo: 'inativar' | 'reativar') => {
+  const abrirConfirmacao = (
+    item: SeguradoraListItem,
+    tipo: 'inativar' | 'reativar',
+  ) => {
     setDialogConfig({
       aberto: true,
       tipo,
@@ -114,11 +121,17 @@ export const SeguradorasListPage: React.FC = () => {
   };
 
   const fecharConfirmacao = () => {
-    setDialogConfig((prev) => ({ ...prev, aberto: false, item: null, loading: false }));
+    setDialogConfig((prev) => ({
+      ...prev,
+      aberto: false,
+      item: null,
+      loading: false,
+    }));
   };
 
   const handleExecutarAcaoStatus = async () => {
     if (!dialogConfig.item) return;
+    setError(null);
 
     try {
       setDialogConfig((prev) => ({ ...prev, loading: true }));
@@ -128,7 +141,7 @@ export const SeguradorasListPage: React.FC = () => {
         await seguradorasApi.reativar(dialogConfig.item.publicId);
       }
       fecharConfirmacao();
-      await carregarSeguradoras();
+      setRefreshTrigger((previous) => previous + 1);
     } catch (err: unknown) {
       console.error(`Erro ao ${dialogConfig.tipo} seguradora:`, err);
       setError(`Ocorreu um erro ao ${dialogConfig.tipo} a seguradora.`);
@@ -172,7 +185,12 @@ export const SeguradorasListPage: React.FC = () => {
           rowActions.push({
             label: 'Editar',
             icon: <EditIcon size={16} />,
-            onClick: () => navigate(createPath(ROUTES.SEGURADORA_EDITAR, { publicId: row.publicId })),
+            onClick: () =>
+              navigate(
+                createPath(ROUTES.SEGURADORA_EDITAR, {
+                  publicId: row.publicId,
+                }),
+              ),
           });
         }
 
@@ -226,16 +244,16 @@ export const SeguradorasListPage: React.FC = () => {
         }
       />
 
-      {error && (
-        <Alert
-          variant="error"
-          title="Erro de carregamento"
-          onClose={() => setError(null)}
-        >
+      {erroConsulta && (
+        <Alert variant="error" title="Erro de carregamento">
           <div className="flex flex-col gap-2">
-            <span>{error}</span>
+            <span>Não foi possível carregar a lista de seguradoras.</span>
             <div>
-              <Button variant="secondary" size="small" onClick={carregarSeguradoras}>
+              <Button
+                variant="secondary"
+                size="small"
+                onClick={() => void refetch()}
+              >
                 Tentar novamente
               </Button>
             </div>
@@ -243,10 +261,23 @@ export const SeguradorasListPage: React.FC = () => {
         </Alert>
       )}
 
+      {error && (
+        <Alert
+          variant="error"
+          title="Falha na operação"
+          onClose={() => setError(null)}
+        >
+          {error}
+        </Alert>
+      )}
+
       <div className="flex flex-col gap-4">
         <FilterBar>
           <div className="flex-1 flex flex-col gap-1">
-            <label htmlFor="busca-seguradoras" className="text-sm font-medium text-texto-secundario">
+            <label
+              htmlFor="busca-seguradoras"
+              className="text-sm font-medium text-texto-secundario"
+            >
               Buscar seguradora
             </label>
             <SearchField
@@ -257,7 +288,10 @@ export const SeguradorasListPage: React.FC = () => {
             />
           </div>
           <div className="w-full md:w-48 flex flex-col gap-1">
-            <label htmlFor="status-seguradoras" className="text-sm font-medium text-texto-secundario">
+            <label
+              htmlFor="status-seguradoras"
+              className="text-sm font-medium text-texto-secundario"
+            >
               Status
             </label>
             <Select
@@ -291,18 +325,20 @@ export const SeguradorasListPage: React.FC = () => {
           totalItems={total}
         />
 
-        <DataTable
-          columns={columns}
-          data={seguradoras}
-          keyExtractor={(row) => row.publicId}
-          isLoading={isLoading}
-          emptyTitle="Nenhuma seguradora encontrada"
-          emptyDescription={
-            hasFilters
-              ? 'Tente ajustar os filtros ou termos da pesquisa.'
-              : 'Clique em "Nova Seguradora" para começar a cadastrar.'
-          }
-        />
+        {(!erroConsulta || data) && (
+          <DataTable
+            columns={columns}
+            data={seguradoras}
+            keyExtractor={(row) => row.publicId}
+            isLoading={isLoading}
+            emptyTitle="Nenhuma seguradora encontrada"
+            emptyDescription={
+              hasFilters
+                ? 'Tente ajustar os filtros ou termos da pesquisa.'
+                : 'Clique em "Nova Seguradora" para começar a cadastrar.'
+            }
+          />
+        )}
 
         {total > 0 && (
           <Pagination
@@ -318,7 +354,11 @@ export const SeguradorasListPage: React.FC = () => {
         onClose={fecharConfirmacao}
         onConfirm={handleExecutarAcaoStatus}
         loading={dialogConfig.loading}
-        title={dialogConfig.tipo === 'inativar' ? 'Inativar Seguradora' : 'Reativar Seguradora'}
+        title={
+          dialogConfig.tipo === 'inativar'
+            ? 'Inativar Seguradora'
+            : 'Reativar Seguradora'
+        }
         description={
           dialogConfig.tipo === 'inativar' ? (
             <p>
@@ -326,16 +366,20 @@ export const SeguradorasListPage: React.FC = () => {
               <strong>{dialogConfig.item?.nome}</strong>?
               <br />
               <span className="text-sm text-texto-secundario">
-                O cadastro ficará inativo no sistema, mas os vínculos e apólices existentes não serão apagados.
+                O cadastro ficará inativo no sistema, mas os vínculos e apólices
+                existentes não serão apagados.
               </span>
             </p>
           ) : (
             <p>
-              Deseja reativar a seguradora <strong>{dialogConfig.item?.nome}</strong> para novas operações?
+              Deseja reativar a seguradora{' '}
+              <strong>{dialogConfig.item?.nome}</strong> para novas operações?
             </p>
           )
         }
-        confirmText={dialogConfig.tipo === 'inativar' ? 'Sim, inativar' : 'Sim, reativar'}
+        confirmText={
+          dialogConfig.tipo === 'inativar' ? 'Sim, inativar' : 'Sim, reativar'
+        }
         variant={dialogConfig.tipo === 'inativar' ? 'danger' : 'primary'}
       />
     </div>

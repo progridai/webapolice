@@ -7,6 +7,8 @@ public partial class PropostaItem
 {
     public long Id { get; set; }
 
+    public Guid PublicId { get; set; } = Guid.NewGuid();
+
     public long PropostaId { get; set; }
 
     public long? TipoProdutoId { get; set; }
@@ -33,7 +35,7 @@ public partial class PropostaItem
 
     public int? UltimaFaixaEtaria { get; set; }
 
-    public int LegadoId { get; set; }
+    public int? LegadoId { get; set; }
 
     public int? LegadoPropostaTipoAnt { get; set; }
 

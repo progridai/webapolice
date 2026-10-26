@@ -50,7 +50,7 @@
 }
 
 .checkbox-custom:after {
-  content: '';
+  content: "";
   position: absolute;
   display: none;
   left: 6px;

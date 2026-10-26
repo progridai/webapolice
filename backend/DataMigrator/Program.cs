@@ -7,18 +7,18 @@ class Program
 {
     static void Main()
     {
-        string connOldStr = "Host=painel.bravida.com.br;Port=5432;Database=webapolice_antigo;Username=bravito;Password=Bravida@2023!";
-        string connNewStr = "Host=painel.bravida.com.br;Port=5432;Database=webapolice_teste;Username=bravito;Password=Bravida@2023!";
+        string connOldStr = Environment.GetEnvironmentVariable("WEBAPOLICE_SOURCE_CONNECTION")
+            ?? throw new InvalidOperationException("Defina WEBAPOLICE_SOURCE_CONNECTION antes de executar a ferramenta.");
+        if (string.IsNullOrWhiteSpace(connOldStr)) throw new InvalidOperationException("WEBAPOLICE_SOURCE_CONNECTION não pode estar vazia.");
+        string connNewStr = Environment.GetEnvironmentVariable("WEBAPOLICE_TARGET_CONNECTION")
+            ?? throw new InvalidOperationException("Defina WEBAPOLICE_TARGET_CONNECTION antes de executar a ferramenta.");
+        if (string.IsNullOrWhiteSpace(connNewStr)) throw new InvalidOperationException("WEBAPOLICE_TARGET_CONNECTION não pode estar vazia.");
 
         using var connOld = new NpgsqlConnection(connOldStr);
         using var connNew = new NpgsqlConnection(connNewStr);
         connOld.Open();
         connNew.Open();
         
-        using (var cmd = new NpgsqlCommand("SET session_replication_role = replica;", connNew))
-        {
-            cmd.ExecuteNonQuery();
-        }
 
         string[] tablesToFix = new[] { 
             "core.pessoa_contato_institucional", 
@@ -78,9 +78,5 @@ class Program
             }
         }
         
-        using (var cmd = new NpgsqlCommand("SET session_replication_role = origin;", connNew))
-        {
-            cmd.ExecuteNonQuery();
-        }
     }
 }

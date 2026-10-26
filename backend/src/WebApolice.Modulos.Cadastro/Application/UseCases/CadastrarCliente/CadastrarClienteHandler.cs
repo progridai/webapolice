@@ -1,3 +1,6 @@
+using WebApolice.Modulos.Cadastro.Domain.Validators;
+using WebApolice.Modulos.Seguranca.Contracts;
+using WebApolice.Modulos.Cadastro.Domain.Clientes;
 using System;
 using System.Linq;
 using System.Threading;
@@ -5,42 +8,28 @@ using System.Threading.Tasks;
 using WebApolice.Modulos.Cadastro.Application.Ports;
 using WebApolice.Modulos.Cadastro.Domain;
 using WebApolice.Modulos.Cadastro.Domain.Exceptions;
-using WebApolice.Modulos.Cadastro.Infrastructure.Persistence;
-using WebApolice.Modulos.Cadastro.Infrastructure.Persistence.Models;
 
-using WebApolice.Auditoria.Contracts;
-using WebApolice.Auditoria.Domain;
-using System.Text.Json;
-using Microsoft.EntityFrameworkCore;
-using System.Linq;
 
 namespace WebApolice.Modulos.Cadastro.Application.UseCases.CadastrarCliente;
 
 public sealed class CadastrarClienteHandler
 {
     private readonly IClienteRepository _repository;
-    private readonly CadastroDbContext _dbContext;
-    private readonly IRegistradorAuditoria _auditoria;
-    private readonly WebApolice.Modulos.Seguranca.Infrastructure.Persistence.SegurancaDbContext _segurancaDbContext;
+    private readonly IOperacaoCadastroAuditada _operacao;
+    private readonly IDisponibilidadeCatalogo _catalogo;
 
-    public CadastrarClienteHandler(IClienteRepository repository, CadastroDbContext dbContext, IRegistradorAuditoria auditoria, WebApolice.Modulos.Seguranca.Infrastructure.Persistence.SegurancaDbContext segurancaDbContext)
+    public CadastrarClienteHandler(IClienteRepository repository, IOperacaoCadastroAuditada operacao, IDisponibilidadeCatalogo catalogo)
     {
         _repository = repository;
-        _dbContext = dbContext;
-        _auditoria = auditoria;
-        _segurancaDbContext = segurancaDbContext;
+        _operacao = operacao;
+        _catalogo = catalogo;
     }
 
     public async Task<CadastrarClienteResult> Handle(CadastrarClienteCommand command, string usuarioSub, CancellationToken cancellationToken)
     {
         if (!string.IsNullOrWhiteSpace(command.Re))
         {
-            var recursoRe = await _segurancaDbContext.Recursos
-                .Include(r => r.Modulo)
-                .Where(r => r.Codigo == "RE" && r.Modulo.Codigo == "CLIENTES")
-                .FirstOrDefaultAsync(cancellationToken);
-
-            if (recursoRe == null || !recursoRe.Habilitado || !recursoRe.Ativo || !recursoRe.Modulo.Habilitado || !recursoRe.Modulo.Ativo)
+            if (!await _catalogo.RecursoDisponivelAsync("CLIENTES", "RE", cancellationToken))
             {
                 throw new ClienteInvalidoException("O campo RE não está habilitado no sistema.");
             }
@@ -63,9 +52,7 @@ public sealed class CadastrarClienteHandler
         if (command.Falecido && !command.DataObito.HasValue)
             throw new ClienteInvalidoException("Data de óbito é obrigatória para clientes falecidos.");
 
-        await using var transaction = await _dbContext.BeginTransactionAsync(cancellationToken);
-
-        try
+        return await _operacao.ExecutarAsync<CadastrarClienteResult>("Clientes", "cliente", "CLIENTE_CRIADO", async ct =>
         {
             var statusAtivo = await _repository.ObterStatusPorCodigoAsync(ClienteStatusCodigos.Ativo, cancellationToken)
                 ?? throw new ClienteInvalidoException($"Status '{ClienteStatusCodigos.Ativo}' não encontrado no catálogo.");
@@ -158,34 +145,20 @@ public sealed class CadastrarClienteHandler
             }
 
             await _repository.SalvarAlteracoesAsync(cancellationToken);
-            await transaction.CommitAsync(cancellationToken);
 
-            await _auditoria.RegistrarAsync(new RegistroAuditoria
-            {
-                Acao = "CLIENTE_CRIADO",
-                Modulo = "Clientes",
-                Recurso = "cliente",
-                RecursoId = cliente.PublicId.ToString(),
-                Resultado = ResultadoAuditoria.Sucesso,
-                DadosPosteriores = JsonSerializer.SerializeToDocument(new { command.Nome, command.Documento, command.TipoPessoa })
-            }, cancellationToken);
 
             var docMascarado = MascararDocumento(documentoLimpo, command.TipoPessoa);
             var statusStr = cliente.StatusId == statusAtivo.Id ? statusAtivo.Nome : statusInativo.Nome;
 
-            return new CadastrarClienteResult(
+            var resultado = new CadastrarClienteResult(
                 cliente.PublicId,
                 pessoa.Nome,
                 docMascarado,
                 statusStr,
                 cliente.CreatedAt
             );
-        }
-        catch (Exception)
-        {
-            await transaction.RollbackAsync(cancellationToken);
-            throw;
-        }
+            return (resultado, cliente.PublicId.ToString(), null, new { command.Nome, command.Documento, command.TipoPessoa });
+        }, cancellationToken);
     }
 
     private static string LimparDocumento(string? doc)
@@ -194,13 +167,7 @@ public sealed class CadastrarClienteHandler
         return new string(doc.Where(char.IsDigit).ToArray());
     }
 
-    private static bool ValidarDocumento(string limpo, short tipoPessoa)
-    {
-        // Simplificado para o escopo
-        if (tipoPessoa == 1) return limpo.Length == 11;
-        if (tipoPessoa == 2) return limpo.Length == 14;
-        return false;
-    }
+    private static bool ValidarDocumento(string limpo, short tipoPessoa) => DocumentoValidator.IsValid(limpo, tipoPessoa);
 
     private static string MascararDocumento(string limpo, short tipoPessoa)
     {

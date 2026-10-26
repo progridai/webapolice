@@ -30,9 +30,13 @@ Caso encontradas (inclusive aninhadas ou em arrays), o registro é **rejeitado i
 Dados pessoais que necessitem mascaramento ou minimização serão controlados e filtrados manualmente pelo domínio antes de enviar para auditoria; o módulo técnico apenas age como última barreira para credenciais.
 
 ## Transações
-A auditoria e as operações de negócio que exigem atomicidade forte (como o cadastro, alteração e gerenciamento de status de Clientes) são coordenadas em uma única transação física. Ambas utilizam uma `DbConnection` compartilhada (registrada como Scoped no DI), onde um commit/rollback atômico é executado através de um `IClientesTransactionManager`, garantindo que falhas na gravação da auditoria revertam as ações do cliente, e vice-versa, sem requerer MSDTC ou transações distribuídas (que são incompatíveis com o Linux).
+Operações que exigem atomicidade devem usar o coordenador existente `OperacaoAuditada`, por uma porta do módulo de negócio. A implementação de Infrastructure compartilha a conexão e transação física entre o DbContext de negócio e AuditoriaDbContext; só confirma após as duas gravações. Não confirmar negócio antes de registrar auditoria, nem tentar compensar um commit com rollback posterior. Propagar CancellationToken até as gravações e confirmar rollback em nova conexão de teste.
+
+Na consolidação de 23/10/2026, esse fluxo foi aplicado às quatro escritas de Clientes, Cooperados, Estipulantes, habilitação de módulo/recurso e criação/adição de item de Propostas. Outros CRUD de Cadastro ainda precisam uniformização (Seguradoras, Corretoras, Subestipulantes e Módulos); a existência do coordenador não comprova cobertura de todos os escritores.
+
+A suíte ClienteAuditadoPostgresTests cobre sucesso e reversão por falha/cancelamento da auditoria, mas sua execução nesta consolidação falhou ao inicializar Testcontainers por indisponibilidade do Docker Engine. Não há nova comprovação de atomicidade física. Transações locais também não tornam operações externas do Keycloak atômicas: compensações e falhas remotas precisam homologação específica. Ver resultados e limites na revisão 76.
 
 ## Limitações Atuais
 - Não implementamos purge automático ou particionamento de tabelas.
-- O IP confia no request original; deve-se tomar cuidado com proxy reverso e `X-Forwarded-For`.
+- O IP usa o request após forwarded headers restritos aos proxies configurados. A lista de confiança e a borda implantada precisam homologação; nunca confiar em X-Forwarded-For arbitrário.
 - Não existe frontend / painel administrativo construído para exibir os eventos gravados (apenas via acesso de banco de dados).

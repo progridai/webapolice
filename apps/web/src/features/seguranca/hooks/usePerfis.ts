@@ -4,7 +4,11 @@
  */
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { listarPerfis } from '../api/perfisApi';
-import type { PerfilDto, PerfisQuery, PagedResult } from '../types/seguranca.types';
+import type {
+  PerfilDto,
+  PerfisQuery,
+  PagedResult,
+} from '../types/seguranca.types';
 import { HttpApiError } from '../../../services/http';
 
 interface UsePerfisState {
@@ -42,9 +46,15 @@ export function usePerfis(query: PerfisQuery) {
       const normalizedError =
         err instanceof HttpApiError
           ? err
-          : new Error('Não foi possível conectar ao servidor. Verifique sua conexão e tente novamente.');
+          : new Error(
+              'Não foi possível conectar ao servidor. Verifique sua conexão e tente novamente.',
+            );
 
-      setState((prev) => ({ ...prev, isLoading: false, error: normalizedError }));
+      setState((prev) => ({
+        ...prev,
+        isLoading: false,
+        error: normalizedError,
+      }));
     }
   }, []);
 

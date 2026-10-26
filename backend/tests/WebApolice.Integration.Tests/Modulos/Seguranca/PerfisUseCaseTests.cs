@@ -42,8 +42,8 @@ public class PerfisUseCaseTests : IClassFixture<SegurancaIntegrationTestFixture>
     {
         if (_perfisCriados.Any())
         {
-            await _dbContext.Database.ExecuteSqlRawAsync($"DELETE FROM seguranca.perfil_permissao WHERE perfil_id IN (SELECT id FROM seguranca.perfil WHERE public_id = ANY(ARRAY['{string.Join("','", _perfisCriados)}']::uuid[]))");
-            await _dbContext.Database.ExecuteSqlRawAsync($"DELETE FROM seguranca.perfil WHERE public_id = ANY(ARRAY['{string.Join("','", _perfisCriados)}']::uuid[])");
+            await _dbContext.Database.ExecuteSqlAsync($"DELETE FROM seguranca.perfil_permissao WHERE perfil_id IN (SELECT id FROM seguranca.perfil WHERE public_id = ANY({_perfisCriados.ToArray()}))");
+            await _dbContext.Database.ExecuteSqlAsync($"DELETE FROM seguranca.perfil WHERE public_id = ANY({_perfisCriados.ToArray()})");
         }
     }
 

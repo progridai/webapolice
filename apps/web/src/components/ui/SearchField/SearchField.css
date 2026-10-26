@@ -26,7 +26,7 @@
 
 .search-field-clear:hover,
 .search-field-clear:focus {
-  background-color: var(--cor-fundo-hover, rgba(0,0,0,0.05));
+  background-color: var(--cor-fundo-hover, rgba(0, 0, 0, 0.05));
   color: var(--cor-texto-principal);
   outline: none;
 }

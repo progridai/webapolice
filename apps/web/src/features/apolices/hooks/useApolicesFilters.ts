@@ -15,7 +15,8 @@ export function useApolicesFilters() {
     const seguradoraId = searchParams.get('seguradoraId') || '';
     const tipoRamo = searchParams.get('tipoRamo') || '';
 
-    const ativo = ativoStr === 'true' ? true : ativoStr === 'false' ? false : undefined;
+    const ativo =
+      ativoStr === 'true' ? true : ativoStr === 'false' ? false : undefined;
 
     return {
       page: isNaN(page) || page < 1 ? 1 : page,
@@ -29,29 +30,35 @@ export function useApolicesFilters() {
     };
   }, [searchParams]);
 
-  const setFilters = useCallback((newFilters: Partial<ApolicesQuery>) => {
-    setSearchParams((prev) => {
-      const next = new URLSearchParams(prev);
-      
-      Object.entries(newFilters).forEach(([key, value]) => {
-        if (value === '' || value === null || value === undefined) {
-          next.delete(key);
-        } else {
-          next.set(key, String(value));
-        }
-      });
+  const setFilters = useCallback(
+    (newFilters: Partial<ApolicesQuery>) => {
+      setSearchParams(
+        (prev) => {
+          const next = new URLSearchParams(prev);
 
-      const isPageOrSortChange = Object.keys(newFilters).every(
-        (k) => k === 'page' || k === 'sortBy' || k === 'direction'
+          Object.entries(newFilters).forEach(([key, value]) => {
+            if (value === '' || value === null || value === undefined) {
+              next.delete(key);
+            } else {
+              next.set(key, String(value));
+            }
+          });
+
+          const isPageOrSortChange = Object.keys(newFilters).every(
+            (k) => k === 'page' || k === 'sortBy' || k === 'direction',
+          );
+
+          if (!isPageOrSortChange) {
+            next.set('page', '1');
+          }
+
+          return next;
+        },
+        { replace: true },
       );
-      
-      if (!isPageOrSortChange) {
-        next.set('page', '1');
-      }
-
-      return next;
-    }, { replace: true });
-  }, [setSearchParams]);
+    },
+    [setSearchParams],
+  );
 
   const clearFilters = useCallback(() => {
     setSearchParams(new URLSearchParams(), { replace: true });

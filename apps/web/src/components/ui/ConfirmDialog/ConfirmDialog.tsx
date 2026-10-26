@@ -51,12 +51,20 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
       footer={footer}
     >
       <div className="confirm-dialog-content-row">
-        <div className={variant === 'danger' ? 'confirm-dialog-icon-error' : 'confirm-dialog-icon-primary'}>
-          {variant === 'danger' ? <ErrorIcon size={24} /> : <AlertIcon size={24} />}
+        <div
+          className={
+            variant === 'danger'
+              ? 'confirm-dialog-icon-error'
+              : 'confirm-dialog-icon-primary'
+          }
+        >
+          {variant === 'danger' ? (
+            <ErrorIcon size={24} />
+          ) : (
+            <AlertIcon size={24} />
+          )}
         </div>
-        <div className="confirm-dialog-desc">
-          {description}
-        </div>
+        <div className="confirm-dialog-desc">{description}</div>
       </div>
     </Modal>
   );

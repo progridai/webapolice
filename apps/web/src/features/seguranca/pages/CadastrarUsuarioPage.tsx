@@ -1,9 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { UsuarioForm, type CriarUsuarioFormData } from '../components/UsuarioForm';
+import {
+  UsuarioForm,
+  type CriarUsuarioFormData,
+} from '../components/UsuarioForm';
 import { criarUsuario } from '../api/usuariosApi';
 import { listarPerfis } from '../api/perfisApi';
-import { Alert, PageHeader, Breadcrumbs, Spinner } from '../../../components/ui';
+import {
+  Alert,
+  PageHeader,
+  Breadcrumbs,
+  Spinner,
+} from '../../../components/ui';
 import type { PerfilDto } from '../types/seguranca.types';
 
 export const CadastrarUsuarioPage: React.FC = () => {
@@ -45,8 +53,11 @@ export const CadastrarUsuarioPage: React.FC = () => {
       navigate(`/seguranca/usuarios/${response.id}`);
     } catch (err: unknown) {
       console.error('Erro ao cadastrar usuário:', err);
-      const errorResponse = err as { response?: { status?: number; data?: { message?: string } } };
-      setError(errorResponse.response?.data?.message || 'Ocorreu um erro ao cadastrar o usuário. Verifique os dados e tente novamente.');
+      setError(
+        err instanceof Error && err.message
+          ? err.message
+          : 'Ocorreu um erro ao cadastrar o usuário. Verifique os dados e tente novamente.',
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -61,7 +72,11 @@ export const CadastrarUsuarioPage: React.FC = () => {
   }
 
   return (
-    <main className="flex flex-col gap-6 p-6 max-w-4xl mx-auto focus:outline-none" role="main" tabIndex={-1}>
+    <main
+      className="flex flex-col gap-6 p-6 max-w-4xl mx-auto focus:outline-none"
+      role="main"
+      tabIndex={-1}
+    >
       <PageHeader
         title="Novo Usuário"
         description="Crie um novo usuário para acesso à plataforma."
@@ -80,7 +95,9 @@ export const CadastrarUsuarioPage: React.FC = () => {
       <div className="w-full">
         {error && (
           <div className="mb-4">
-            <Alert variant="error" title="Erro no Cadastro">{error}</Alert>
+            <Alert variant="error" title="Erro no Cadastro">
+              {error}
+            </Alert>
           </div>
         )}
         <UsuarioForm

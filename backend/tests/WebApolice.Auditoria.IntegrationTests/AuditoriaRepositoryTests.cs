@@ -9,8 +9,7 @@ namespace WebApolice.Auditoria.IntegrationTests;
 
 public class AuditoriaRepositoryTests : IAsyncLifetime
 {
-    private readonly PostgreSqlContainer _dbContainer = new PostgreSqlBuilder()
-        .WithImage("postgres:16-alpine")
+    private readonly PostgreSqlContainer _dbContainer = new PostgreSqlBuilder("postgres:18.4")
         .WithDatabase("auditoria_db")
         .WithUsername("postgres")
         .WithPassword("postgres")

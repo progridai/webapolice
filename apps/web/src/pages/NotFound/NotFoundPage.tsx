@@ -25,7 +25,9 @@ export const NotFoundPage: React.FC = () => {
       <EmptyState
         title="Página não encontrada"
         description={`A página que você procura (${location.pathname}) não existe ou foi movida. Verifique o endereço ou retorne ao início.`}
-        icon={<InfoIcon size={48} className="error-page-icon" aria-hidden="true" />}
+        icon={
+          <InfoIcon size={48} className="error-page-icon" aria-hidden="true" />
+        }
         action={
           <div className="error-page-actions">
             <Button

@@ -6,12 +6,11 @@ export const subgrupoApoliceSchema = z.object({
     .trim()
     .min(1, 'O nome do Subgrupo é obrigatório.')
     .max(200, 'O nome não pode exceder 200 caracteres.'),
-  convenioCobrancaPublicId: z.union([z.uuid(), z.literal('')]).nullable().optional(),
-  observacao: z
-    .string()
-    .trim()
+  convenioCobrancaPublicId: z
+    .union([z.uuid(), z.literal('')])
     .nullable()
     .optional(),
+  observacao: z.string().trim().nullable().optional(),
 });
 
 export type SubgrupoApoliceFormValues = z.infer<typeof subgrupoApoliceSchema>;

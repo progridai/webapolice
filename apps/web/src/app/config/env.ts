@@ -11,7 +11,7 @@ function getRequired(key: string): string {
   if (!value || typeof value !== 'string' || value.trim() === '') {
     throw new Error(
       `[webapolice] Variável de ambiente obrigatória ausente ou vazia: ${key}\n` +
-        `Certifique-se de que o arquivo .env contém ${key}=<valor>.`
+        `Certifique-se de que o arquivo .env contém ${key}=<valor>.`,
     );
   }
   return value;
@@ -39,7 +39,8 @@ export const ENV = {
   KEYCLOAK_CLIENT_ID: getRequired('VITE_KEYCLOAK_CLIENT_ID'),
 
   /** Habilita o catálogo do Design System (deve ser combinado com role admin) */
-  ENABLE_DESIGN_SYSTEM: getOptional('VITE_ENABLE_DESIGN_SYSTEM', 'false') === 'true',
+  ENABLE_DESIGN_SYSTEM:
+    getOptional('VITE_ENABLE_DESIGN_SYSTEM', 'false') === 'true',
 
   /** Modo de ambiente (development, production, test) */
   MODE: import.meta.env.MODE as 'development' | 'production' | 'test',

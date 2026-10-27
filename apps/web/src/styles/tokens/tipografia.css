@@ -8,12 +8,12 @@
 
   /* Tamanhos de Fonte */
   --fonte-tamanho-xs: 0.75rem; /* 12px */
-  --fonte-tamanho-sm: 0.875rem; /* 14px */
-  --fonte-tamanho-md: 1rem; /* 16px */
-  --fonte-tamanho-lg: 1.125rem; /* 18px */
-  --fonte-tamanho-xl: 1.25rem; /* 20px */
-  --fonte-tamanho-2xl: 1.5rem; /* 24px */
-  --fonte-tamanho-3xl: 1.875rem; /* 30px */
+  --fonte-tamanho-sm: 0.8125rem; /* 13px */
+  --fonte-tamanho-md: 0.875rem; /* 14px */
+  --fonte-tamanho-lg: 1rem; /* 16px */
+  --fonte-tamanho-xl: 1.125rem; /* 18px */
+  --fonte-tamanho-2xl: 1.375rem; /* 22px */
+  --fonte-tamanho-3xl: 1.625rem; /* 26px */
 
   /* Pesos de Fonte */
   --fonte-peso-normal: 400;

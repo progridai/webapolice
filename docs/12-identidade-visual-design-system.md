@@ -65,6 +65,35 @@ A camada de serviço (`IdentidadeVisualService`) assegura o contraste dinamicame
 
 ## 3. Estrutura dos Tokens Semânticos
 
+### Escala compacta de interface (26/10/2026)
+
+A interface administrativa adota uma escala menor e uniforme, tomando como referência tabelas densas, superfícies leves e hierarquia discreta. A família sans-serif existente foi preservada, sem dependência de fontes externas. As utilidades de fonte do Tailwind (`font-sans`, `text-xs` até `text-3xl`) agora consomem os mesmos tokens dos componentes CSS, evitando escalas paralelas.
+
+| Elemento | Medida padrão |
+| :--- | :--- |
+| Texto auxiliar / rótulos de formulário | 12 px |
+| Texto de tabelas, filtros, botões e navegação | 13 px |
+| Texto principal / valores de detalhes | 14 px |
+| Títulos de seção / card | 16 px, peso 600 |
+| Títulos de página | 22 px, peso 600 |
+| Demais tamanhos `xl` / `3xl` | 18 / 26 px |
+| Cabeçalho de tabela / rótulo de detalhe | 11 px, maiúsculas |
+| Botão pequeno / padrão / grande | 28 / 32 / 40 px de altura |
+| Input, Select e AsyncSelect | 32 px de altura |
+| Raios pequeno / médio / grande | 6 / 10 / 12 px |
+
+As medidas em fonte usam `rem`, respeitando o tamanho de texto configurado no navegador; os valores em px acima correspondem à base de 16 px. A escala de espaçamentos de 4 px permanece vigente.
+
+Cards usam padding de 16 px, sem sombra permanente; filtros usam 12 px verticais e 16 px horizontais. As células da tabela usam 8 px verticais e 12 px horizontais, divisores de 1 px e ações de linha alinhadas em 28 px. A altura final de cada linha depende do conteúdo. Os menus de ações continuam podendo ultrapassar a tabela no desktop; em telas pequenas permanece o comportamento responsivo existente.
+
+`DescriptionList` apresenta rótulo e valor diretamente sobre a seção, sem caixas e fundos individuais. O modo compacto mantém gap de 8 px e o confortável, de 16 px. Isso reduz o peso visual sem ocultar informações. O cabeçalho global tem altura mínima de 56 px, a navegação lateral mede 208 px e os itens têm altura mínima de 34 px.
+
+Inputs, selects, textareas e botões secundários usam borda padrão sutil; hover usa borda forte e foco mantém o destaque semântico existente. Placeholders usam texto secundário. A paleta, os temas claro/escuro/sistema, o branding por organização e os mecanismos de autorização permanecem nos contratos existentes.
+
+A listagem de clientes usa a largura disponível, gap de 16 px e layout Tailwind. Seus filtros usam dimensões flexíveis apenas no desktop, evitando que a base flex dos controles produza espaços verticais excessivos no celular. O botão Limpar acompanha a altura dos demais controles.
+
+Validações e limitação de homologação desta revisão estão registradas em [Revisão compacta do design system](86-design-system-compacto.md).
+
 Os estilos e tokens estão organizados de forma modular sob `apps/web/src/styles/`:
 
 - [cores.css](file:///c:/PROJETOS/Rsul%20Automacoes/Projetos/webapolice/apps/web/src/styles/tokens/cores.css): Paleta crua e variáveis funcionais base.

@@ -44,19 +44,22 @@ export const AsyncSelect = forwardRef<
     > = {
       control: (provided, state) => ({
         ...provided,
-        minHeight: '40px',
+        minHeight: '32px',
+        height: '32px',
+        fontFamily: 'var(--fonte-familia-principal)',
+        fontSize: 'var(--fonte-tamanho-sm)',
         backgroundColor: 'var(--cor-fundo-superficie)',
         borderColor: error
           ? 'var(--cor-erro)'
           : state.isFocused
             ? 'var(--cor-foco)'
-            : 'var(--cor-borda-forte)',
+            : 'var(--cor-borda)',
         boxShadow: state.isFocused
           ? error
             ? '0 0 0 1px var(--cor-erro)'
             : '0 0 0 1px var(--cor-foco)'
           : 'none',
-        borderRadius: '0.375rem',
+        borderRadius: 'var(--raio-pequeno)',
         '&:hover': {
           borderColor: error
             ? 'var(--cor-erro)'
@@ -65,12 +68,33 @@ export const AsyncSelect = forwardRef<
               : 'var(--cor-borda-forte)',
         },
       }),
+      valueContainer: (provided) => ({
+        ...provided,
+        padding: '0 var(--espaco-3)',
+      }),
+      input: (provided) => ({
+        ...provided,
+        margin: 0,
+        padding: 0,
+        color: 'var(--cor-texto-principal)',
+      }),
+      dropdownIndicator: (provided) => ({
+        ...provided,
+        padding: 'var(--espaco-1)',
+        color: 'var(--cor-texto-secundario)',
+      }),
+      clearIndicator: (provided) => ({
+        ...provided,
+        padding: 'var(--espaco-1)',
+        color: 'var(--cor-texto-secundario)',
+      }),
       menu: (provided) => ({
         ...provided,
         backgroundColor: 'var(--cor-fundo-elevado)',
         border: '1px solid var(--cor-borda)',
         boxShadow: 'var(--sombra-card)',
         zIndex: 50,
+        fontSize: 'var(--fonte-tamanho-sm)',
       }),
       option: (provided, state) => ({
         ...provided,
@@ -89,10 +113,6 @@ export const AsyncSelect = forwardRef<
         },
       }),
       singleValue: (provided) => ({
-        ...provided,
-        color: 'var(--cor-texto-principal)',
-      }),
-      input: (provided) => ({
         ...provided,
         color: 'var(--cor-texto-principal)',
       }),

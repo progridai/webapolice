@@ -7,7 +7,7 @@
   padding-right: var(--espaco-6, 1.5rem);
   height: 32px;
   border-radius: var(--raio-pequeno);
-  border: var(--borda-largura-padrao) solid var(--cor-borda-forte);
+  border: var(--borda-largura-padrao) solid var(--cor-borda);
   background-color: var(--cor-fundo-superficie);
   color: var(--cor-texto-principal);
   outline: none;
@@ -20,7 +20,7 @@
 }
 
 .form-select:hover:not(:disabled) {
-  border-color: var(--cor-texto-principal);
+  border-color: var(--cor-borda-forte);
 }
 
 .form-select:focus {

@@ -4,11 +4,10 @@
   background-color: var(--cor-fundo-superficie);
   border: var(--borda-largura-padrao) solid var(--cor-borda);
   border-radius: var(--raio-medio);
-  box-shadow: var(--sombra-card);
-  padding: var(--espaco-6);
+  padding: var(--espaco-4);
   display: flex;
   flex-direction: column;
-  gap: var(--espaco-4);
+  gap: var(--espaco-3);
   transition:
     transform 0.15s ease,
     box-shadow 0.15s ease;

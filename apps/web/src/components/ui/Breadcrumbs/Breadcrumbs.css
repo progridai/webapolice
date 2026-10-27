@@ -1,8 +1,7 @@
 .breadcrumbs {
   display: flex;
   align-items: center;
-  font-size: var(--fonte-tamanho-sm);
-  margin-bottom: var(--espaco-4);
+  font-size: var(--fonte-tamanho-xs);
 }
 
 .breadcrumbs-list {

@@ -3,6 +3,18 @@ export default {
   content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
   theme: {
     extend: {
+      fontFamily: {
+        sans: ['var(--fonte-familia-principal)'],
+      },
+      fontSize: {
+        xs: ['var(--fonte-tamanho-xs)', '1.4'],
+        sm: ['var(--fonte-tamanho-sm)', '1.5'],
+        base: ['var(--fonte-tamanho-md)', '1.5'],
+        lg: ['var(--fonte-tamanho-lg)', '1.4'],
+        xl: ['var(--fonte-tamanho-xl)', '1.3'],
+        '2xl': ['var(--fonte-tamanho-2xl)', '1.2'],
+        '3xl': ['var(--fonte-tamanho-3xl)', '1.2'],
+      },
       colors: {
         primary: 'var(--cor-marca-principal)',
         'primary-hover': 'var(--cor-marca-principal-hover)',

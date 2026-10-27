@@ -4,12 +4,12 @@
   display: inline-flex;
   align-items: center;
   gap: var(--espaco-1);
-  padding: var(--espaco-1) var(--espaco-2);
+  padding: 3px var(--espaco-2);
   border-radius: var(--raio-pequeno);
   font-size: var(--fonte-tamanho-xs);
-  font-weight: var(--fonte-peso-seminegrito);
+  font-weight: var(--fonte-peso-medio);
   border: var(--borda-largura-padrao) solid transparent;
-  line-height: 1;
+  line-height: var(--linha-altura-curta);
   text-transform: capitalize;
 }
 
@@ -23,7 +23,7 @@
 /* Variantes */
 .badge-neutral {
   background-color: var(--cor-desabilitado-fundo);
-  color: var(--cor-desabilitado);
+  color: var(--cor-texto-secundario);
   border-color: var(--cor-borda);
 }
 

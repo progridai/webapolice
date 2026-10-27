@@ -2,8 +2,8 @@
 
 :root {
   /* Raios de Arredondamento */
-  --raio-pequeno: 4px;
-  --raio-medio: 8px;
+  --raio-pequeno: 6px;
+  --raio-medio: 10px;
   --raio-grande: 12px;
 
   /* Largura de Borda Padrão */

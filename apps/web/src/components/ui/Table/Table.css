@@ -8,6 +8,7 @@
   background-color: var(--cor-fundo-superficie);
 }
 
+/* Menus de ações das linhas precisam extrapolar a tabela no desktop. */
 @media (min-width: 768px) {
   .table-responsive-wrapper {
     overflow: visible;
@@ -20,22 +21,30 @@
   text-align: left;
   font-size: var(--fonte-tamanho-sm);
   background-color: var(--cor-fundo-superficie);
+  line-height: var(--linha-altura-normal);
 }
 
 .data-table-component th {
   background-color: var(--cor-fundo-aplicacao);
   color: var(--cor-texto-secundario);
   font-weight: var(--fonte-peso-seminegrito);
-  padding: var(--espaco-3) var(--espaco-4);
-  border-bottom: 2px solid var(--cor-borda);
+  padding: var(--espaco-2) var(--espaco-3);
+  font-size: 0.6875rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  border-bottom: var(--borda-largura-padrao) solid var(--cor-borda);
   user-select: none;
 }
 
 .data-table-component td {
-  padding: var(--espaco-3) var(--espaco-4);
+  padding: var(--espaco-2) var(--espaco-3);
   border-bottom: var(--borda-largura-padrao) solid var(--cor-borda);
   color: var(--cor-texto-principal);
   vertical-align: middle;
+}
+
+.data-table-component tbody tr:last-child td {
+  border-bottom: 0;
 }
 
 .data-table-component tbody tr:hover td {

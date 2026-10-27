@@ -24,19 +24,30 @@
   display: flex;
   align-items: flex-start;
   gap: var(--espaco-3);
+  min-width: 0;
+}
+
+.page-header-text {
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 .page-header-icon {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 40px;
-  height: 40px;
+  width: 32px;
+  height: 32px;
   border-radius: var(--raio-medio);
   background-color: var(--cor-fundo-superficie);
   border: var(--borda-largura-padrao) solid var(--cor-borda);
   color: var(--cor-marca-principal);
   flex-shrink: 0;
+}
+
+.page-header-icon svg {
+  width: 18px;
+  height: 18px;
 }
 
 .page-header-title-wrapper {
@@ -50,14 +61,14 @@
 .page-header-title {
   margin: 0;
   font-size: var(--fonte-tamanho-2xl);
-  font-weight: 700;
+  font-weight: var(--fonte-peso-seminegrito);
   color: var(--cor-texto-principal);
   line-height: 1.2;
 }
 
 .page-header-description {
   margin: 0;
-  font-size: var(--fonte-tamanho-md);
+  font-size: var(--fonte-tamanho-sm);
   color: var(--cor-texto-secundario);
 }
 

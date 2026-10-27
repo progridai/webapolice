@@ -1,8 +1,8 @@
 # Guia Oficial para Utilização do Design System e Criação de Telas
 
 **Status:** Em vigor  
-**Versão:** 2.1\
-**Data:** 23 de Outubro de 2026\
+**Versão:** 2.2\
+**Data:** 26 de Outubro de 2026\
 **Finalidade:** Padronizar a criação e adaptação de telas (Listagem, Detalhes e Formulários) no WebApólice, focando em sistemas administrativos de alta densidade (ERPs).
 
 Este guia contém as decisões arquiteturais e regras de ouro sobre como utilizar nosso Design System de forma escalável. Sempre consulte estas diretrizes antes de iniciar ou refatorar uma tela.
@@ -36,9 +36,9 @@ Sistemas administrativos lidam com volume intenso de dados. Telas de detalhes n�
   - Ancore as badges de status na propriedade `titleExtras`. Elas aparecerão perfeitamente alinhadas ao lado do título.
   - Utilize a propriedade `description` para exibir um subtítulo discreto (ex: o identificador interno ou e-mail), se estritamente necessário.
 
-### B. Densidade e Escalabilidade (O Padrão "Info Box" com DescriptionList)
-Para renderizar pares de `Label` e `Valor` (como Nome, CPF, Telefone), utilize o componente genérico `DescriptionList` junto com `DescriptionItem`. Eles foram atualizados para renderizar automaticamente o padrão de "Info Box":
-- **Formato Visual:** Um bloco delimitado por borda discreta, fundo cinza (`bg-fundo-aplicacao`), com o label no topo (fonte menor, maiúscula, `text-[10px]`) e o conteúdo de leitura destacado logo abaixo.
+### B. Densidade e Escalabilidade (DescriptionList)
+Para renderizar pares de `Label` e `Valor` (como Nome, CPF, Telefone), utilize o componente genérico `DescriptionList` junto com `DescriptionItem`:
+- **Formato Visual:** Rótulo de 11px em maiúsculas e valor de 14px diretamente sobre a superfície da seção, sem caixas ou fundos individuais. Não acrescente bordas e cards a cada valor.
 - **Densidade:** Utilize `density="compact"` para telas administrativas para manter o gap (espaçamento) reduzido entre os blocos (apenas `8px` ou `gap-2`).
 - **Inteligência de Layout e Espaço:** NUNCA desperdice espaço vertical. A inteligência na montagem do layout é fundamental:
   - O componente `DescriptionList` agora suporta até **4 colunas** (`columns={4}`) para layouts hiper-compactos (como agrupamentos de Endereços).
@@ -97,6 +97,7 @@ Para que o sistema mantenha o aspecto hiper-profissional de um ERP de alta densi
   Isso garante `gap-6` (24px) de distanciamento entre o PageHeader e os conteúdos principais. Não utilize wrappers `.page-content` ou `.clientes-page` fixos do CSS antigo.
 - **Espaçamento da Grade (FormGrid):** O `FormGrid` foi calibrado para ser compacto: 12px de distância vertical (`var(--espaco-3)`) entre as linhas e 16px (`var(--espaco-4)`) nas colunas. Isso previne rolagem excessiva em telas com dezenas de campos.
 - **Tamanho dos Campos (Input, Select, ReadOnlyField):** Todos possuem **altura estrita de 32px**. O padding horizontal é de 12px (`var(--espaco-3)`) para garantir que o texto não cole nas bordas. Nunca adicione paddings verticais extras para não inflar a altura. A label do `FormField` usa o tamanho proporcional `xs` (12px).
+- **Seletores assíncronos e botões:** `AsyncSelect` também usa 32px, com texto de 13px. Botões padrão usam 32px, pequenos usam 28px e grandes usam 40px. Para filtros, mantenha o tamanho padrão para alinhar ações e campos. A escala de fonte do Tailwind está ligada aos tokens oficiais; `text-base` corresponde a 14px e `text-lg`, a 16px.
 - **Preenchimento das Seções (FormSection):** O padding interno foi reduzido de 20px para `16px` (`var(--espaco-4)`).
 
 ### D. Arrays Dinâmicos (Contatos, Endereços, etc.)
@@ -111,7 +112,15 @@ Em listas dinâmicas geradas no formulário de edição, aplique regras agressiv
 
 ---
 
-## 4. Como a IA deve atuar usando este guia
+## 4. Composição de Listagens Compactas
+
+- Use `PageHeader`, `FilterBar`, `ResultsSummary`, `DataTable`/`Table`, `RowActions` e `Pagination` compartilhados para herdar a escala compacta. Evite sobrescrever alturas e tamanhos de fonte por tela.
+- O wrapper da listagem pode usar `flex flex-col gap-4 w-full`, com 16px entre cabeçalho, filtros e resultados. Seções de detalhes continuam usando `gap-3`.
+- Labels de filtros usam `form-label`; campos e botão de limpeza devem ficar alinhados na base, com 32px de altura.
+- Ao empilhar filtros no celular, aplique `flex-basis`, larguras fixas e crescimentos de coluna apenas a partir do breakpoint desktop. Uma base em px aplicada em `flex-col` aumenta indevidamente a altura do filtro.
+- Cabeçalhos de tabela usam 11px e células usam 13px. Os divisores são sutis, e os menus de ações precisam permanecer visíveis além dos limites da tabela no desktop.
+
+## 5. Como a IA deve atuar usando este guia
 
 Sempre que solicitada a construir, refatorar ou analisar o design de uma página no WebApólice, a IA deve validar o código contra as regras acima:
 1. **Abraçar o Tailwind:** Refatorar imediatamente qualquer arquivo `.css` criado para estruturar a página (ex: `.clientes-page { display: flex }`) usando as utilidades Tailwind (`flex flex-col gap-6`). O Tailwind é o padrão.

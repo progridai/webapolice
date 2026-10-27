@@ -6,7 +6,7 @@
   padding: 0 var(--espaco-3);
   height: 32px;
   border-radius: var(--raio-pequeno);
-  border: var(--borda-largura-padrao) solid var(--cor-borda-forte);
+  border: var(--borda-largura-padrao) solid var(--cor-borda);
   background-color: var(--cor-fundo-superficie);
   color: var(--cor-texto-principal);
   outline: none;
@@ -17,12 +17,12 @@
 }
 
 .form-input::placeholder {
-  color: var(--cor-desabilitado);
-  opacity: 0.8;
+  color: var(--cor-texto-secundario);
+  opacity: 1;
 }
 
 .form-input:hover:not(:disabled) {
-  border-color: var(--cor-texto-principal);
+  border-color: var(--cor-borda-forte);
 }
 
 .form-input:focus {

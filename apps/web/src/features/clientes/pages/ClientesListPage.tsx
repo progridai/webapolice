@@ -18,7 +18,6 @@ import {
   Breadcrumbs,
   UsersIcon,
 } from '../../../components/ui';
-import './ClientesListPage.css';
 
 export const ClientesListPage: React.FC = () => {
   const { filters, setFilters, clearFilters } = useClientesFilters();
@@ -63,7 +62,7 @@ export const ClientesListPage: React.FC = () => {
   const hasData = data && data.itens && data.itens.length > 0;
 
   return (
-    <main className="clientes-page" tabIndex={-1}>
+    <main className="flex flex-col gap-4 w-full" tabIndex={-1}>
       <PageHeader
         title="Clientes"
         description="Gerencie e consulte os clientes da plataforma."
@@ -95,7 +94,7 @@ export const ClientesListPage: React.FC = () => {
       </section>
 
       {error ? (
-        <div className="clientes-error">
+        <div className="flex flex-col items-start gap-3">
           <Alert variant="error" title="Não foi possível carregar os clientes">
             {error.message}
           </Alert>
@@ -104,10 +103,14 @@ export const ClientesListPage: React.FC = () => {
           </Button>
         </div>
       ) : isLoading && !data && isMobile ? (
-        <div className="clientes-skeletons" aria-busy="true" aria-live="polite">
-          <Skeleton className="clientes-skeleton-row" />
-          <Skeleton className="clientes-skeleton-row" />
-          <Skeleton className="clientes-skeleton-row" />
+        <div
+          className="flex flex-col gap-3"
+          aria-busy="true"
+          aria-live="polite"
+        >
+          <Skeleton className="w-full h-11" />
+          <Skeleton className="w-full h-11" />
+          <Skeleton className="w-full h-11" />
         </div>
       ) : !hasData && isMobile ? (
         <EmptyState
@@ -160,7 +163,7 @@ export const ClientesListPage: React.FC = () => {
           )}
 
           {data && data.totalPaginas > 1 && (
-            <div className="clientes-pagination">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
               <Pagination
                 currentPage={data.paginaAtual}
                 totalPages={data.totalPaginas}

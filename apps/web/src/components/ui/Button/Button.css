@@ -12,25 +12,28 @@
   transition: all 0.15s ease;
   user-select: none;
   position: relative;
+  line-height: var(--linha-altura-curta);
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 /* Tamanhos */
 .btn-small {
-  padding: var(--espaco-1) var(--espaco-3);
+  padding: 0 var(--espaco-2);
   font-size: var(--fonte-tamanho-xs);
   height: 28px;
 }
 
 .btn-medium {
-  padding: var(--espaco-2) var(--espaco-4);
+  padding: 0 var(--espaco-3);
   font-size: var(--fonte-tamanho-sm);
-  height: 38px;
+  height: 32px;
 }
 
 .btn-large {
-  padding: var(--espaco-3) var(--espaco-6);
+  padding: 0 var(--espaco-4);
   font-size: var(--fonte-tamanho-md);
-  height: 48px;
+  height: 40px;
 }
 
 /* Variantes */
@@ -50,13 +53,13 @@
 
 .btn-secondary {
   background-color: transparent;
-  border-color: var(--cor-borda-forte);
+  border-color: var(--cor-borda);
   color: var(--cor-texto-principal);
 }
 
 .btn-secondary:hover:not(:disabled) {
   background-color: var(--cor-fundo-aplicacao);
-  border-color: var(--cor-texto-principal);
+  border-color: var(--cor-borda-forte);
 }
 
 .btn-text {

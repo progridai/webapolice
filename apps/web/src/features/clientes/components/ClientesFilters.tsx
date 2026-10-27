@@ -1,7 +1,6 @@
 import React from 'react';
 import { Select, Button, FilterBar, SearchField } from '../../../components/ui';
 import type { ClientesQuery } from '../types/cliente.types';
-import './ClientesFilters.css';
 
 interface ClientesFiltersProps {
   filters: ClientesQuery;
@@ -38,8 +37,8 @@ export const ClientesFilters: React.FC<ClientesFiltersProps> = ({
 
   return (
     <FilterBar>
-      <div className="clientes-filter-search">
-        <label htmlFor="busca-cliente" className="clientes-filter-label">
+      <div className="w-full min-w-0 md:flex-[1_1_280px] md:w-auto">
+        <label htmlFor="busca-cliente" className="form-label block mb-1">
           Buscar cliente
         </label>
         <SearchField
@@ -51,8 +50,8 @@ export const ClientesFilters: React.FC<ClientesFiltersProps> = ({
         />
       </div>
 
-      <div className="clientes-filter-status">
-        <label htmlFor="status-cliente" className="clientes-filter-label">
+      <div className="w-full md:flex-[0_1_180px] md:min-w-[120px] md:w-auto">
+        <label htmlFor="status-cliente" className="form-label block mb-1">
           Status
         </label>
         <Select
@@ -78,13 +77,12 @@ export const ClientesFilters: React.FC<ClientesFiltersProps> = ({
         />
       </div>
 
-      <div className="clientes-filter-actions">
+      <div className="flex items-end shrink-0">
         <Button
           variant="secondary"
           onClick={onClearFilters}
           disabled={!hasActiveFilters || isLoading}
           aria-label="Limpar filtros"
-          className="clientes-clear-button"
         >
           Limpar
         </Button>

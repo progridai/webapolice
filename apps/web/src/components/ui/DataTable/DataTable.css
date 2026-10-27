@@ -19,7 +19,7 @@
 }
 
 .data-table-sort-button:focus {
-  outline: 2px solid var(--cor-foco, #3b82f6);
+  outline: 2px solid var(--cor-foco);
   outline-offset: 2px;
 }
 
@@ -31,7 +31,7 @@
 }
 
 .data-table-skeleton-row {
-  height: 48px;
+  height: 44px;
   width: 100%;
 }
 
@@ -40,5 +40,5 @@
 }
 
 .data-table-expanded-content td {
-  background-color: var(--cor-fundo-secundario) !important;
+  background-color: var(--cor-fundo-aplicacao) !important;
 }

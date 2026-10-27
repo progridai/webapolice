@@ -9,7 +9,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: var(--espaco-4) var(--espaco-5);
+  padding: var(--espaco-3) var(--espaco-4);
   border-bottom: var(--borda-largura-padrao) solid var(--cor-borda);
   background-color: var(--cor-fundo-aplicacao);
   gap: var(--espaco-4);
@@ -52,7 +52,7 @@
 
 @media (max-width: 640px) {
   .form-section-header {
-    padding: var(--espaco-4);
+    padding: var(--espaco-3) var(--espaco-4);
   }
   .form-section-content {
     padding: var(--espaco-4);

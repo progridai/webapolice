@@ -6,6 +6,7 @@ namespace WebApolice.Modulos.Seguro.Domain.Modelos;
 public class ApoliceSubestipulanteModel
 {
     public long Id { get; set; }
+    public Guid PublicId { get; set; }
     public long ApoliceId { get; set; }
     public long SubestipulanteId { get; set; }
     

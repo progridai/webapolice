@@ -27,7 +27,7 @@ public class ApoliceVidaTests : IClassFixture<SeguroIntegrationTestFixture>
         _fixture = fixture;
     }
 
-    private async Task<(Guid apolicePublicId, Guid clientePublicId, Guid apoliceSubgrupoPublicId, Guid apoliceModuloPublicId)> SeedDataAsync()
+    private async Task<(Guid apolicePublicId, Guid clientePublicId, Guid apoliceSubgrupoPublicId, Guid apoliceModuloPublicId, Guid vinculoPublicId)> SeedDataAsync()
     {
         var apolicePublicId = Guid.NewGuid();
         var clientePublicId = Guid.NewGuid();
@@ -84,20 +84,28 @@ public class ApoliceVidaTests : IClassFixture<SeguroIntegrationTestFixture>
 
         await _fixture.DbContext.SaveChangesAsync();
 
-        return (apolicePublicId, clientePublicId, subgrupoPublicId, moduloPublicId);
+        if (!await _fixture.Cadastro.Estipulantes.AnyAsync(e => e.Id == 1))
+        {
+            _fixture.Cadastro.Estipulantes.Add(new() { Id = 1, PublicId = Guid.NewGuid(), Nome = "Estipulante Vidas", Ativo = true });
+            await _fixture.Cadastro.SaveChangesAsync();
+        }
+        var vinculo = new WebApolice.Modulos.Cadastro.Domain.Modelos.ClienteVinculoModel(cliente.Id, pessoa.Id, 1, "MAT-Vida");
+        _fixture.Cadastro.Vinculos.Add(vinculo); await _fixture.Cadastro.SaveChangesAsync();
+        return (apolicePublicId, clientePublicId, subgrupoPublicId, moduloPublicId, vinculo.PublicId);
     }
 
     [Fact]
     public async Task CriarVida_CombinacoesValidas()
     {
         var data = await SeedDataAsync();
-        var handler = new CriarApoliceVidaHandler(new WebApolice.Modulos.Seguro.Infrastructure.Persistence.Repositories.ApoliceVinculosRepository(_fixture.DbContext), WebApolice.Integration.Tests.Setup.SeguroPersistenciaTestes.ConsultasCadastro(_fixture.DbContext));
+        var handler = new CriarApoliceVidaHandler(new WebApolice.Modulos.Seguro.Infrastructure.Persistence.Repositories.ApoliceVinculosRepository(_fixture.DbContext), WebApolice.Integration.Tests.Setup.SeguroPersistenciaTestes.ConsultasCadastro(_fixture.DbContext), _fixture.OperacaoVidas, _fixture.VinculosVida);
 
         // Direto
         var vidaDiretaId = await handler.Handle(new CriarApoliceVidaCommand
         {
             ApolicePublicId = data.apolicePublicId,
             ClientePublicId = data.clientePublicId,
+            ClienteVinculoPublicId = data.vinculoPublicId,
             DataInicioVigencia = new DateOnly(2025, 2, 1),
             UsuarioPublicId = Guid.NewGuid()
         }, CancellationToken.None);
@@ -108,6 +116,7 @@ public class ApoliceVidaTests : IClassFixture<SeguroIntegrationTestFixture>
         {
             ApolicePublicId = data.apolicePublicId,
             ClientePublicId = data.clientePublicId,
+            ClienteVinculoPublicId = data.vinculoPublicId,
             ApoliceSubgrupoPublicId = data.apoliceSubgrupoPublicId,
             UsuarioPublicId = Guid.NewGuid()
         }, CancellationToken.None);
@@ -118,6 +127,7 @@ public class ApoliceVidaTests : IClassFixture<SeguroIntegrationTestFixture>
         {
             ApolicePublicId = data.apolicePublicId,
             ClientePublicId = data.clientePublicId,
+            ClienteVinculoPublicId = data.vinculoPublicId,
             ApoliceModuloPublicId = data.apoliceModuloPublicId,
             UsuarioPublicId = Guid.NewGuid()
         }, CancellationToken.None);
@@ -128,6 +138,7 @@ public class ApoliceVidaTests : IClassFixture<SeguroIntegrationTestFixture>
         {
             ApolicePublicId = data.apolicePublicId,
             ClientePublicId = data.clientePublicId,
+            ClienteVinculoPublicId = data.vinculoPublicId,
             ApoliceSubgrupoPublicId = data.apoliceSubgrupoPublicId,
             ApoliceModuloPublicId = data.apoliceModuloPublicId,
             UsuarioPublicId = Guid.NewGuid()
@@ -135,20 +146,22 @@ public class ApoliceVidaTests : IClassFixture<SeguroIntegrationTestFixture>
         vidaSubModId.Should().NotBeEmpty();
 
         // Queries
-        IApolicesQueries queries = new ApolicesQueries(_fixture.DbContext);
-        
+        IApolicesQueries queries = new ApolicesQueries(_fixture.DbContext, cadastro: SeguroPersistenciaTestes.ConsultasCadastro(_fixture.DbContext));
+
         var list = await queries.ListarVidasPaginadoAsync(data.apolicePublicId, 1, 50, null, null, null, null, null, CancellationToken.None);
         list.TotalCount.Should().BeGreaterThanOrEqualTo(4);
-        
+
         var vDireto = await queries.ObterApoliceVidaPorPublicIdAsync(data.apolicePublicId, vidaDiretaId, CancellationToken.None);
         vDireto.Should().NotBeNull();
-        vDireto!.ApoliceSubgrupoPublicId.Should().BeNull();
+        vDireto!.ClienteVinculoPublicId.Should().Be(data.vinculoPublicId);
+        vDireto.VinculoMatricula.Should().Be("MAT-Vida");
+        vDireto.ApoliceSubgrupoPublicId.Should().BeNull();
         vDireto.ApoliceModuloPublicId.Should().BeNull();
 
         var vSub = await queries.ObterApoliceVidaPorPublicIdAsync(data.apolicePublicId, vidaSubId, CancellationToken.None);
         vSub!.ApoliceSubgrupoPublicId.Should().Be(data.apoliceSubgrupoPublicId);
         vSub.ApoliceModuloPublicId.Should().BeNull();
-        
+
         var vMod = await queries.ObterApoliceVidaPorPublicIdAsync(data.apolicePublicId, vidaModId, CancellationToken.None);
         vMod!.ApoliceSubgrupoPublicId.Should().BeNull();
         vMod.ApoliceModuloPublicId.Should().Be(data.apoliceModuloPublicId);
@@ -162,7 +175,7 @@ public class ApoliceVidaTests : IClassFixture<SeguroIntegrationTestFixture>
     public async Task CriarVida_SubgrupoOuModuloDeOutraApolice_RetornaErro()
     {
         var data = await SeedDataAsync();
-        var handler = new CriarApoliceVidaHandler(new WebApolice.Modulos.Seguro.Infrastructure.Persistence.Repositories.ApoliceVinculosRepository(_fixture.DbContext), WebApolice.Integration.Tests.Setup.SeguroPersistenciaTestes.ConsultasCadastro(_fixture.DbContext));
+        var handler = new CriarApoliceVidaHandler(new WebApolice.Modulos.Seguro.Infrastructure.Persistence.Repositories.ApoliceVinculosRepository(_fixture.DbContext), WebApolice.Integration.Tests.Setup.SeguroPersistenciaTestes.ConsultasCadastro(_fixture.DbContext), _fixture.OperacaoVidas, _fixture.VinculosVida);
 
         var outraApolice = new ApoliceModel
         {
@@ -191,6 +204,7 @@ public class ApoliceVidaTests : IClassFixture<SeguroIntegrationTestFixture>
         {
             ApolicePublicId = data.apolicePublicId,
             ClientePublicId = data.clientePublicId,
+            ClienteVinculoPublicId = data.vinculoPublicId,
             ApoliceSubgrupoPublicId = outroSubgrupo.PublicId,
             UsuarioPublicId = Guid.NewGuid()
         }, CancellationToken.None);
@@ -202,12 +216,13 @@ public class ApoliceVidaTests : IClassFixture<SeguroIntegrationTestFixture>
     public async Task CriarVida_ForaDaVigenciaDaApolice_RetornaErro()
     {
         var data = await SeedDataAsync();
-        var handler = new CriarApoliceVidaHandler(new WebApolice.Modulos.Seguro.Infrastructure.Persistence.Repositories.ApoliceVinculosRepository(_fixture.DbContext), WebApolice.Integration.Tests.Setup.SeguroPersistenciaTestes.ConsultasCadastro(_fixture.DbContext));
+        var handler = new CriarApoliceVidaHandler(new WebApolice.Modulos.Seguro.Infrastructure.Persistence.Repositories.ApoliceVinculosRepository(_fixture.DbContext), WebApolice.Integration.Tests.Setup.SeguroPersistenciaTestes.ConsultasCadastro(_fixture.DbContext), _fixture.OperacaoVidas, _fixture.VinculosVida);
 
         var act = async () => await handler.Handle(new CriarApoliceVidaCommand
         {
             ApolicePublicId = data.apolicePublicId,
             ClientePublicId = data.clientePublicId,
+            ClienteVinculoPublicId = data.vinculoPublicId,
             DataInicioVigencia = new DateOnly(2024, 12, 31), // Apólice inicia em 01/01/2025
             UsuarioPublicId = Guid.NewGuid()
         }, CancellationToken.None);
@@ -219,16 +234,17 @@ public class ApoliceVidaTests : IClassFixture<SeguroIntegrationTestFixture>
     public async Task AlterarEInativarVida_FluxoCompleto()
     {
         var data = await SeedDataAsync();
-        var criarHandler = new CriarApoliceVidaHandler(new WebApolice.Modulos.Seguro.Infrastructure.Persistence.Repositories.ApoliceVinculosRepository(_fixture.DbContext), WebApolice.Integration.Tests.Setup.SeguroPersistenciaTestes.ConsultasCadastro(_fixture.DbContext));
-        
+        var criarHandler = new CriarApoliceVidaHandler(new WebApolice.Modulos.Seguro.Infrastructure.Persistence.Repositories.ApoliceVinculosRepository(_fixture.DbContext), WebApolice.Integration.Tests.Setup.SeguroPersistenciaTestes.ConsultasCadastro(_fixture.DbContext), _fixture.OperacaoVidas, _fixture.VinculosVida);
+
         var vidaId = await criarHandler.Handle(new CriarApoliceVidaCommand
         {
             ApolicePublicId = data.apolicePublicId,
             ClientePublicId = data.clientePublicId,
+            ClienteVinculoPublicId = data.vinculoPublicId,
             UsuarioPublicId = Guid.NewGuid()
         }, CancellationToken.None);
 
-        var alterarHandler = new AlterarApoliceVidaHandler(new WebApolice.Modulos.Seguro.Infrastructure.Persistence.Repositories.ApoliceVinculosRepository(_fixture.DbContext));
+        var alterarHandler = new AlterarApoliceVidaHandler(new WebApolice.Modulos.Seguro.Infrastructure.Persistence.Repositories.ApoliceVinculosRepository(_fixture.DbContext), SeguroPersistenciaTestes.ConsultasCadastro(_fixture.DbContext), _fixture.OperacaoVidas, _fixture.VinculosVida);
         await alterarHandler.Handle(new AlterarApoliceVidaCommand
         {
             ApolicePublicId = data.apolicePublicId,
@@ -240,7 +256,7 @@ public class ApoliceVidaTests : IClassFixture<SeguroIntegrationTestFixture>
             UsuarioPublicId = Guid.NewGuid()
         }, CancellationToken.None);
 
-        IApolicesQueries queries = new ApolicesQueries(_fixture.DbContext);
+        IApolicesQueries queries = new ApolicesQueries(_fixture.DbContext, cadastro: SeguroPersistenciaTestes.ConsultasCadastro(_fixture.DbContext));
         var vidaAtualizada = await queries.ObterApoliceVidaPorPublicIdAsync(data.apolicePublicId, vidaId, CancellationToken.None);
         vidaAtualizada!.DataInicioVigencia.Should().Be(new DateOnly(2025, 3, 1));
         vidaAtualizada.Observacao.Should().Be("Atualizado");

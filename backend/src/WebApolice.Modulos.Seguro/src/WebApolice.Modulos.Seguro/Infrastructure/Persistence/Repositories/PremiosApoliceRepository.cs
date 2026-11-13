@@ -14,7 +14,7 @@ public sealed class PremiosApoliceRepository(SeguroDbContext db, OperacaoAuditad
         {
             CatalogosSeguroHandler.ValidarPremios(dados, false);
             var e = await db.ApoliceCoberturas.Include(e => e.ApolicePlano!).ThenInclude(e => e.ApoliceProduto!).ThenInclude(e => e.Apolice)
-                .FirstOrDefaultAsync(e => e.PublicId == vinculoPublicId && e.ApolicePlano!.ApoliceProduto!.Apolice!.PublicId == apolicePublicId
+                .FirstOrDefaultAsync(e => e.PublicId == vinculoPublicId && e.DeletedAt == null && e.ApolicePlano!.DeletedAt == null && e.ApolicePlano.ApoliceProduto!.DeletedAt == null && e.ApolicePlano!.ApoliceProduto!.Apolice!.PublicId == apolicePublicId
                     && e.ApolicePlano.ApoliceProduto.Apolice.DeletedAt == null, token)
                 ?? throw new ValidacaoException("Cobertura não encontrada nesta Apólice.");
             if (!e.Ativo || !e.ApolicePlano!.Ativo || !e.ApolicePlano.ApoliceProduto!.Ativo || !e.ApolicePlano.ApoliceProduto.Apolice!.Ativo)

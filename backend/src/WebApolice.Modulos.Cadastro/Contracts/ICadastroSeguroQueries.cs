@@ -9,11 +9,28 @@ public sealed record ModuloSeguro(long Id, Guid PublicId, string Nome, string? D
 public sealed record SubestipulanteSeguro(long Id, bool Ativo);
 
 /// <summary>Consultas p?blicas dos dados de Cadastro necess?rios aos v?nculos de Seguro.</summary>
+public sealed record VinculoClienteSeguro
+{
+    public long Id { get; init; }
+    public Guid PublicId { get; init; }
+    public long ClienteId { get; init; }
+    public long PessoaId { get; init; }
+    public long? EstipulanteId { get; init; }
+    public string Matricula { get; init; } = "";
+    public bool Ativo { get; init; }
+    public string? Estipulante { get; init; }
+    public bool EstipulanteAtivo { get; init; }
+}
+
 public interface ICadastroSeguroQueries
 {
+    Task<VinculoClienteSeguro?> ObterVinculoAsync(Guid publicId, long clienteId, CancellationToken ct);
+    Task<IReadOnlyList<VinculoClienteSeguro>> ObterVinculosAsync(IReadOnlyCollection<long> ids, CancellationToken ct);
+    Task<WebApolice.SharedKernel.Application.Models.PagedResult<VinculoClienteSeguro>> ListarVinculosAsync(Guid clienteId, long estipulanteId, int pagina, int tamanho, CancellationToken ct);
     Task<ClienteSeguro?> ObterClienteAsync(Guid publicId, CancellationToken ct);
     Task<ModuloSeguro?> ObterModuloAsync(Guid publicId, CancellationToken ct);
     Task<ModuloSeguro?> ObterModuloPorIdAsync(long id, CancellationToken ct);
+    Task<ModuloSeguro?> ObterModuloParaConfirmacaoAsync(long id, CancellationToken ct);
     Task<IReadOnlyList<ModuloSeguro>> ObterModulosAsync(IReadOnlyCollection<long> ids, CancellationToken ct);
     Task<SubestipulanteSeguro?> ObterSubestipulanteAsync(Guid publicId, CancellationToken ct);
 }

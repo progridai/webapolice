@@ -2,6 +2,8 @@
 
 Regra atual confirmada em 06/10/2026, no horário de São Paulo. A Cobertura é um cadastro compartilhado; o Plano continua exclusivo do vínculo do Módulo na Apólice.
 
+Continuidade de Propostas, conferida em 12/11/2026: a criação explícita pela Vida copia o Plano e as associações ativas do Módulo para campos próprios da proposta, com referências contextuais e valores registrados, sem calcular totais ou gerar cobrança. Alterar depois a configuração do Módulo não reescreve essas condições. O plano global anterior continua separado. Regras, validações e limites no [documento 83](83-fluxo-operacional-propostas.md).
+
 ## Regras atuais
 
 - Cada vínculo em `seguro.apolice_modulo` possui um único Plano, inclusive quando inativo.

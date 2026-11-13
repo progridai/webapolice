@@ -29,6 +29,8 @@ public class AdicionarPropostaItemHandler : IRequestHandler<AdicionarPropostaIte
             
         if (proposta == null)
             throw new ValidacaoException("Proposta não encontrada.");
+        if (proposta.ApoliceModuloId.HasValue)
+            throw new ValidacaoException("Esta proposta usa o Plano do Módulo. Itens do Universo anterior não podem ser incluídos nesta proposta.");
 
         // Se não tem apolice (legado solto), não tem como validar universo permitido
         if (proposta.ApoliceId == null)

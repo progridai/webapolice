@@ -27,6 +27,16 @@ public class PadronizacaoTextoTests
     }
 
     [Theory]
+    [InlineData("MotivoPendenciaVigencia", true)]
+    [InlineData("ConfirmadaEm", false)]
+    [InlineData("CanceladaEm", false)]
+    [InlineData("DescartadaEm", false)]
+    [InlineData("DataCancelamentoVigencia", false)]
+    [InlineData("CancelamentoSolicitadoEm", false)]
+    [InlineData("ParentescoRegistrado", true)]
+    [InlineData("JustificativaAjustePremio", true)]
+    [InlineData("ParentescoOriginal", false)]
+    [InlineData("RevisaoPreenchimento", false)]
     [InlineData("Nome", true)]
     [InlineData("nome_fantasia", true)]
     [InlineData("NomeNormalizado", false)]
@@ -34,7 +44,16 @@ public class PadronizacaoTextoTests
     [InlineData("Uf", false)]
     [InlineData("Codigo", false)]
     [InlineData("Username", false)]
+    [InlineData("NovaMatricula", false)]
     [InlineData("NomeOriginal", false)]
+    [InlineData("SubgrupoNomeRegistrado", true)]
+    [InlineData("modulo_nome_registrado", true)]
+    [InlineData("PlanoNomeRegistrado", true)]
+    [InlineData("CoberturaNomeRegistrado", true)]
+    [InlineData("CoberturaNomeReduzidoRegistrado", true)]
+    [InlineData("CoberturaBasicaRegistrada", false)]
+    [InlineData("PlanoNomeLegado", false)]
+    [InlineData("CoberturaNomeLegado", false)]
     public void DistingueTextoHumanoDeCampoTecnico(string field, bool expected) =>
         Assert.Equal(expected, PadronizacaoTexto.CampoHumano(field));
 
@@ -55,6 +74,22 @@ public class PadronizacaoTextoTests
         db.PadronizarTextos();
         Assert.Equal("Maria Souza", pessoa.Nome);
     }
+    [Fact]
+    public void AlteracaoTecnicaPreservaTextoHistoricoIntocadoMasNormalizaNovaEdicaoHumana()
+    {
+        using var db = new CadastroDbContext(new DbContextOptionsBuilder<CadastroDbContext>()
+            .UseNpgsql("Host=localhost;Database=model_test").UseSnakeCaseNamingConvention().Options);
+        var pessoa = new PessoaModel { Id = 7, Nome = "EVIDÊNCIA HISTÓRICA", Observacao = "OBSERVAÇÃO ORIGINAL", DocumentoPrincipal = "ABC" };
+        db.Attach(pessoa);
+        pessoa.DocumentoPrincipal = "ABC-2";
+        db.PadronizarTextos();
+        Assert.Equal("EVIDÊNCIA HISTÓRICA", pessoa.Nome); Assert.Equal("OBSERVAÇÃO ORIGINAL", pessoa.Observacao);
+        Assert.False(db.Entry(pessoa).Property(p => p.Nome).IsModified);
+        pessoa.Nome = "MARIA d’ÁVILA";
+        db.PadronizarTextos();
+        Assert.Equal("Maria d’Ávila", pessoa.Nome); Assert.Equal("OBSERVAÇÃO ORIGINAL", pessoa.Observacao);
+    }
+
     private sealed class SuppressSave : Microsoft.EntityFrameworkCore.Diagnostics.SaveChangesInterceptor
     {
         public override Microsoft.EntityFrameworkCore.Diagnostics.InterceptionResult<int> SavingChanges(

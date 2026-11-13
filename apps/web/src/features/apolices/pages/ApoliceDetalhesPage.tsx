@@ -205,7 +205,13 @@ export const ApoliceDetalhesPage: React.FC = () => {
           {activeTab === 'subestipulantes' && (
             <SubestipulantesTab publicId={data.publicId} />
           )}
-          {activeTab === 'vidas' && <VidasTab publicId={data.publicId} />}
+          {activeTab === 'vidas' && (
+            <VidasTab
+              publicId={data.publicId}
+              estipulanteNome={data.estipulanteNome}
+              apoliceAtiva={data.ativo}
+            />
+          )}
           {activeTab === 'universo' && (
             <UniversoPermitidoTab publicId={data.publicId} />
           )}

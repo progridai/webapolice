@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { ExcluirVinculoButton } from '../ExcluirVinculoButton';
 import { useApoliceSubgrupos } from '../../hooks/useApoliceSubgrupos';
 import { inativarApoliceSubgrupo } from '../../api/apolices.api';
 import type { ApoliceSubgrupoResult } from '../../types/apolice.types';
@@ -110,6 +111,13 @@ export const SubgruposTab: React.FC<SubgruposTabProps> = ({ publicId }) => {
       align: 'right',
       render: (row) => (
         <div className="flex justify-end gap-2">
+          <ExcluirVinculoButton
+            apolicePublicId={publicId}
+            tipo="subgrupos"
+            vinculoPublicId={row.subgrupoPublicId}
+            identificacao={`Subgrupo ${row.nome}`}
+            onSucesso={() => void refetch()}
+          />
           {podeAlterar && row.ativo && (
             <Button
               variant="secondary"

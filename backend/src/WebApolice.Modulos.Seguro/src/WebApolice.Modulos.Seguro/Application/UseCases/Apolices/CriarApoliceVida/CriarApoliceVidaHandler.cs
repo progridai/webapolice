@@ -24,128 +24,157 @@ public class CriarApoliceVidaHandler
 {
     private readonly IApoliceVinculosRepository _repository;
     private readonly ICadastroSeguroQueries _cadastro;
+    private readonly IOperacaoVidas _operacao;
+    private readonly ICadastroVinculosVida _vinculos;
 
-    public CriarApoliceVidaHandler(IApoliceVinculosRepository dbContext, ICadastroSeguroQueries cadastro)
+    public CriarApoliceVidaHandler(IApoliceVinculosRepository dbContext, ICadastroSeguroQueries cadastro, IOperacaoVidas operacao, ICadastroVinculosVida vinculos)
     {
         _repository = dbContext;
         _cadastro = cadastro;
+        _operacao = operacao;
+        _vinculos = vinculos;
     }
 
     public async Task<Guid> Handle(CriarApoliceVidaCommand request, CancellationToken cancellationToken)
     {
-        // 1. Validar datas
-        if (request.DataFimVigencia.HasValue && request.DataInicioVigencia.HasValue
-            && request.DataFimVigencia < request.DataInicioVigencia)
+        return await _operacao.ExecutarAsync<Guid>("VIDA_CRIADA", async ct =>
         {
-            throw new ValidacaoException("A data de fim de vigência não pode ser anterior à data de início.");
-        }
+            // 1. Validar datas
+            if (request.DataFimVigencia.HasValue && request.DataInicioVigencia.HasValue
+                && request.DataFimVigencia < request.DataInicioVigencia)
+            {
+                throw new ValidacaoException("A data de fim de vigência não pode ser anterior à data de início.");
+            }
 
-        // 2. Localizar Apólice
-        var apolice = await _repository.ObterApoliceAsync(request.ApolicePublicId, false, cancellationToken);
-        if (apolice == null)
-            throw new ValidacaoException("Apólice não encontrada.");
+            // 2. Localizar Apólice
+            var apolice = await _repository.ObterApoliceAsync(request.ApolicePublicId, false, cancellationToken);
+            if (apolice == null)
+                throw new ValidacaoException("Apólice não encontrada.");
 
-        // 3. Resolver Cliente
-        var clienteDto = await _cadastro.ObterClienteAsync(request.ClientePublicId, cancellationToken);
+            // 3. Resolver Cliente
+            var clienteDto = await _cadastro.ObterClienteAsync(request.ClientePublicId, cancellationToken);
 
-        if (clienteDto == null)
-            throw new ValidacaoException("Cliente não encontrado no Cadastro Global.");
+            if (clienteDto == null)
+                throw new ValidacaoException("Cliente não encontrado no Cadastro Global.");
 
-        long? apoliceSubgrupoId = null;
-        long? apoliceModuloId = null;
-        DateOnly? moduloDataInicio = null;
-        DateOnly? moduloDataFim = null;
-        string infoSubgrupo = "Nenhum";
-        string infoModulo = "Nenhum";
+            if (request.NovaMatricula is not null && request.ClienteVinculoPublicId.HasValue)
+                throw new ValidacaoException("Selecione um vínculo existente ou informe uma nova matrícula, nunca ambos.");
+            if (request.CompletarVinculoSemEstipulante && (!request.ClienteVinculoPublicId.HasValue || request.NovaMatricula is not null))
+                throw new ValidacaoException("Selecione a matrícula existente que deseja vincular ao estipulante da apólice.");
+            VinculoClienteSeguro? vinculo = null;
+            if (request.NovaMatricula is null)
+            {
+                vinculo = request.ClienteVinculoPublicId.HasValue
+                    ? await _cadastro.ObterVinculoAsync(request.ClienteVinculoPublicId.Value, clienteDto.Id, ct) : null;
+                if (vinculo is null || (!request.CompletarVinculoSemEstipulante &&
+                    (!vinculo.Ativo || !vinculo.EstipulanteAtivo || vinculo.EstipulanteId != apolice.EstipulanteId)))
+                    throw new ValidacaoException("Selecione um vínculo ativo do cliente no estipulante desta apólice ou cadastre uma nova matrícula.");
+            }
+            long? apoliceSubgrupoId = null;
+            long? apoliceModuloId = null;
+            DateOnly? moduloDataInicio = null;
+            DateOnly? moduloDataFim = null;
+            string infoSubgrupo = "Nenhum";
+            string infoModulo = "Nenhum";
 
-        // 4. Resolver Subgrupo
-        if (request.ApoliceSubgrupoPublicId.HasValue)
-        {
-            var subgrupo = await _repository.ObterSubgrupoAsync(request.ApoliceSubgrupoPublicId.Value, cancellationToken);
+            // 4. Resolver Subgrupo
+            if (request.ApoliceSubgrupoPublicId.HasValue)
+            {
+                var subgrupo = await _repository.ObterSubgrupoAsync(request.ApoliceSubgrupoPublicId.Value, cancellationToken);
 
-            if (subgrupo == null)
-                throw new ValidacaoException("Subgrupo não encontrado.");
-            
-            if (subgrupo.DeletedAt != null)
-                throw new ValidacaoException("Subgrupo não encontrado."); // Soft-deleted
+                if (subgrupo == null)
+                    throw new ValidacaoException("Subgrupo não encontrado.");
 
-            if (subgrupo.ApoliceId != apolice.Id)
-                throw new ValidacaoException("O Subgrupo informado pertence a outra Apólice.");
+                if (subgrupo.DeletedAt != null)
+                    throw new ValidacaoException("Subgrupo não encontrado."); // Soft-deleted
 
-            if (!subgrupo.Ativo)
-                throw new ValidacaoException("O Subgrupo está inativo. Não é possível vincular Vidas a um Subgrupo inativo.");
+                if (subgrupo.ApoliceId != apolice.Id)
+                    throw new ValidacaoException("O Subgrupo informado pertence a outra Apólice.");
 
-            apoliceSubgrupoId = subgrupo.Id;
-            infoSubgrupo = subgrupo.Nome;
-        }
+                if (!subgrupo.Ativo)
+                    throw new ValidacaoException("O Subgrupo está inativo. Não é possível vincular Vidas a um Subgrupo inativo.");
 
-        // 5. Resolver Módulo
-        if (request.ApoliceModuloPublicId.HasValue)
-        {
-            var modulo = await _repository.ObterModuloAsync(request.ApoliceModuloPublicId.Value, true, cancellationToken);
+                apoliceSubgrupoId = subgrupo.Id;
+                infoSubgrupo = subgrupo.Nome;
+            }
 
-            if (modulo == null)
-                throw new ValidacaoException("Módulo da Apólice não encontrado.");
+            // 5. Resolver Módulo
+            if (request.ApoliceModuloPublicId.HasValue)
+            {
+                var modulo = await _repository.ObterModuloAsync(request.ApoliceModuloPublicId.Value, true, cancellationToken);
 
-            if (modulo.DeletedAt != null)
-                throw new ValidacaoException("Módulo da Apólice não encontrado."); // Soft-deleted
+                if (modulo == null)
+                    throw new ValidacaoException("Módulo da Apólice não encontrado.");
 
-            if (modulo.ApoliceId != apolice.Id)
-                throw new ValidacaoException("O Módulo informado pertence a outra Apólice.");
+                if (modulo.DeletedAt != null)
+                    throw new ValidacaoException("Módulo da Apólice não encontrado."); // Soft-deleted
 
-            if (!modulo.Ativo)
-                throw new ValidacaoException("O Módulo da Apólice está inativo. Não é possível vincular Vidas a um Módulo inativo.");
+                if (modulo.ApoliceId != apolice.Id)
+                    throw new ValidacaoException("O Módulo informado pertence a outra Apólice.");
 
-            apoliceModuloId = modulo.Id;
-            moduloDataInicio = modulo.DataInicio;
-            moduloDataFim = modulo.DataFim;
-            
-            // Busca nome do módulo cross-module
-            var nomeModulo = (await _cadastro.ObterModuloPorIdAsync(modulo.ModuloId, cancellationToken))?.Nome;
-            infoModulo = nomeModulo ?? "Desconhecido";
-        }
+                if (!modulo.Ativo)
+                    throw new ValidacaoException("O Módulo da Apólice está inativo. Não é possível vincular Vidas a um Módulo inativo.");
 
-        // 6. Validar vigência da Vida dentro da Apólice e do Módulo
-        ValidarVigenciaDentroDoContextoPai(request.DataInicioVigencia, request.DataFimVigencia, apolice.DataInicioVigencia, apolice.DataFimVigencia, "Apólice");
+                apoliceModuloId = modulo.Id;
+                moduloDataInicio = modulo.DataInicio;
+                moduloDataFim = modulo.DataFim;
 
-        if (apoliceModuloId.HasValue)
-        {
-            ValidarVigenciaDentroDoContextoPai(request.DataInicioVigencia, request.DataFimVigencia, moduloDataInicio, moduloDataFim, "Módulo da Apólice");
-        }
+                // Busca nome do módulo cross-module
+                var nomeModulo = (await _cadastro.ObterModuloPorIdAsync(modulo.ModuloId, cancellationToken))?.Nome;
+                infoModulo = nomeModulo ?? "Desconhecido";
+            }
 
-        // 7. Criar ApoliceVida
-        var vidaPublicId = Guid.NewGuid();
-        var novaVida = new ApoliceVidaModel
-        {
-            PublicId = vidaPublicId,
-            ApoliceId = apolice.Id,
-            ClienteId = clienteDto.Id,
-            ApoliceSubgrupoId = apoliceSubgrupoId,
-            ApoliceModuloId = apoliceModuloId,
-            DataInicioVigencia = request.DataInicioVigencia,
-            DataFimVigencia = request.DataFimVigencia,
-            Status = "ativa",
-            Ativo = true,
-            Observacao = request.Observacao,
-            CreatedAt = DateTimeOffset.UtcNow,
-            UpdatedAt = DateTimeOffset.UtcNow
-        };
-        _repository.AdicionarVida(novaVida);
+            // 6. Validar vigência da Vida dentro da Apólice e do Módulo
+            ValidarVigenciaDentroDoContextoPai(request.DataInicioVigencia, request.DataFimVigencia, apolice.DataInicioVigencia, apolice.DataFimVigencia, "Apólice");
 
-        // 8. Registrar Histórico funcional
-        _repository.AdicionarHistorico(new ApoliceHistoricoModel
-        {
-            ApoliceId = apolice.Id,
-            Acao = "Inclusão Vida",
-            Descricao = $"Cliente '{clienteDto.Nome}' incluído como Vida na Apólice. Subgrupo: {infoSubgrupo}, Módulo: {infoModulo}.",
-            UsuarioPublicId = request.UsuarioPublicId,
-            DataAcao = DateTimeOffset.UtcNow,
-            CreatedAt = DateTimeOffset.UtcNow
-        });
+            if (apoliceModuloId.HasValue)
+            {
+                ValidarVigenciaDentroDoContextoPai(request.DataInicioVigencia, request.DataFimVigencia, moduloDataInicio, moduloDataFim, "Módulo da Apólice");
+            }
 
-        await _repository.SalvarAlteracoesAsync(cancellationToken);
+            if (request.CompletarVinculoSemEstipulante)
+                vinculo = await _vinculos.CompletarAsync(clienteDto.Id, request.ClienteVinculoPublicId!.Value, apolice.EstipulanteId, ct);
+            if (request.NovaMatricula is not null)
+            {
+                vinculo = await _vinculos.CriarAsync(clienteDto.Id, apolice.EstipulanteId, request.NovaMatricula, ct);
+            }
+            if (vinculo is null) throw new ValidacaoException("Informe o vínculo do cliente.");
 
-        return vidaPublicId;
+            // 7. Criar ApoliceVida
+            var vidaPublicId = Guid.NewGuid();
+            var novaVida = new ApoliceVidaModel
+            {
+                PublicId = vidaPublicId,
+                ApoliceId = apolice.Id,
+                ClienteId = clienteDto.Id,
+                ClienteVinculoId = vinculo.Id,
+                ApoliceSubgrupoId = apoliceSubgrupoId,
+                ApoliceModuloId = apoliceModuloId,
+                DataInicioVigencia = request.DataInicioVigencia,
+                DataFimVigencia = request.DataFimVigencia,
+                Status = "ativa",
+                Ativo = true,
+                Observacao = request.Observacao,
+                CreatedAt = DateTimeOffset.UtcNow,
+                UpdatedAt = DateTimeOffset.UtcNow
+            };
+            _repository.AdicionarVida(novaVida);
+
+            // 8. Registrar Histórico funcional
+            _repository.AdicionarHistorico(new ApoliceHistoricoModel
+            {
+                ApoliceId = apolice.Id,
+                Acao = "Inclusão Vida",
+                Descricao = $"Cliente '{clienteDto.Nome}' incluído como Vida na Apólice. Subgrupo: {infoSubgrupo}, Módulo: {infoModulo}.",
+                UsuarioPublicId = request.UsuarioPublicId,
+                DataAcao = DateTimeOffset.UtcNow,
+                CreatedAt = DateTimeOffset.UtcNow
+            });
+
+            await _repository.SalvarAlteracoesAsync(cancellationToken);
+
+            return (vidaPublicId, vidaPublicId.ToString(), null, new { vidaPublicId, VinculoPublicId = vinculo.PublicId });
+        }, cancellationToken);
     }
 
     private static void ValidarVigenciaDentroDoContextoPai(

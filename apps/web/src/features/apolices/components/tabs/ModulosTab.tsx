@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { ExcluirVinculoButton } from '../ExcluirVinculoButton';
 import { useApoliceModulos } from '../../hooks/useApoliceModulos';
 import { inativarApoliceModulo } from '../../api/apolices.api';
 import type { ApoliceModuloResult } from '../../types/apolice.types';
@@ -127,6 +128,13 @@ export const ModulosTab: React.FC<ModulosTabProps> = ({ publicId }) => {
       align: 'right',
       render: (row) => (
         <div className="flex justify-end gap-2">
+          <ExcluirVinculoButton
+            apolicePublicId={publicId}
+            tipo="modulos"
+            vinculoPublicId={row.publicId}
+            identificacao={`Módulo ${row.nome}`}
+            onSucesso={() => void refetch()}
+          />
           <Button
             variant="secondary"
             size="small"

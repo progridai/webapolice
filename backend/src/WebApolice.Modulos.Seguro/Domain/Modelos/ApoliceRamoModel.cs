@@ -5,6 +5,7 @@ namespace WebApolice.Modulos.Seguro.Domain.Modelos;
 public class ApoliceRamoModel
 {
     public long Id { get; set; }
+    public Guid PublicId { get; set; }
     public long ApoliceId { get; set; }
     public long RamoId { get; set; }
     
@@ -16,6 +17,7 @@ public class ApoliceRamoModel
     
     public DateTimeOffset CreatedAt { get; set; }
     public DateTimeOffset UpdatedAt { get; set; }
+    public DateTimeOffset? DeletedAt { get; set; }
 
     // Propriedades de Navegação (EF)
     public ApoliceModel? Apolice { get; set; }

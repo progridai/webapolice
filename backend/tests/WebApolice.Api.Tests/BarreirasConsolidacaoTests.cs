@@ -5,6 +5,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.AspNetCore.TestHost;
+using WebApolice.Modulos.Seguro.Application.UseCases.Propostas;
 
 namespace WebApolice.Api.Tests;
 
@@ -34,7 +35,9 @@ public class BarreirasConsolidacaoTests : IClassFixture<ApiTestFactory>
     [Fact]
     public async Task PropostaAutorizadaSemStatusDefinidoRejeitaAntesDoBanco()
     {
-        using var client = _factory.CreateClient();
+        await using var factory = _factory.WithWebHostBuilder(builder => builder.ConfigureServices(services =>
+            services.PostConfigure<ConfiguracaoPropostas>(config => config.StatusInicialCodigo = string.Empty)));
+        using var client = factory.CreateClient();
         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", ApiTestFactory.GerarTokenDeTeste(sub: "erp-total"));
         var response = await client.PostAsJsonAsync("/api/propostas", new { clienteId = 1 });
         Assert.Equal(HttpStatusCode.UnprocessableEntity, response.StatusCode);

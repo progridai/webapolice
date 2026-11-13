@@ -31,6 +31,8 @@ public class SeguroIntegrationTestFixture : IAsyncLifetime
     public SeguroDbContext DbContext { get; private set; } = default!;
     public Guid ConvenioPublicId { get; } = Guid.NewGuid();
     public IConveniosCobrancaConsulta ConveniosConsulta { get; private set; } = default!;
+    public IOperacaoVidas OperacaoVidas { get; private set; } = default!;
+    public WebApolice.Modulos.Cadastro.Contracts.ICadastroVinculosVida VinculosVida { get; private set; } = default!;
     public ISubgruposCadastro SubgruposCadastro { get; private set; } = default!;
 
     public async Task InitializeAsync()
@@ -55,6 +57,11 @@ public class SeguroIntegrationTestFixture : IAsyncLifetime
         ConveniosConsulta = convenios;
         DbContext = new SeguroDbContext(new DbContextOptionsBuilder<SeguroDbContext>()
             .UseNpgsql(Connection, o => o.MigrationsHistoryTable("__EFMigrationsHistory", "seguro")).UseSnakeCaseNamingConvention().Options);
+        VinculosVida = new WebApolice.Modulos.Cadastro.Infrastructure.Persistence.Repositories.CadastroVinculosVida(Cadastro,
+            new WebApolice.Modulos.Cadastro.Infrastructure.Persistence.Repositories.ClienteVinculosRepository(Cadastro),
+            new RegistradorAuditoria(Auditoria), new Moq.Mock<IContextoAuditoria>().Object,
+            new WebApolice.Modulos.Seguro.Infrastructure.Persistence.Queries.ClienteVinculosUso(DbContext));
+        OperacaoVidas = new WebApolice.Modulos.Seguro.Infrastructure.Persistence.OperacaoVidas(DbContext, operacao, VinculosVida);
         await DbContext.GetService<IMigrator>().MigrateAsync(_migrationAlvo);
         SubgruposCadastro = new SubgruposCadastroRepository(DbContext, convenios, operacao);
     }

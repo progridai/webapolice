@@ -121,6 +121,14 @@ public class GlobalExceptionHandler : IExceptionHandler
                 Detail = "Não foi possível concluir a operação no provedor de identidade.",
                 Instance = context.Request.Path
             },
+            Microsoft.EntityFrameworkCore.DbUpdateException { InnerException: Npgsql.PostgresException { ConstraintName: "ck_hierarquia_vinculo_apolice" or "ck_proposta_contexto" } } => new ProblemDetails
+            {
+                Type = "https://webapolice/errors/regra-de-negocio",
+                Title = "Vínculo indisponível",
+                Status = StatusCodes.Status422UnprocessableEntity,
+                Detail = "Um vínculo desta estrutura foi excluído ou não pertence à apólice. Atualize a tela e selecione um vínculo disponível.",
+                Instance = context.Request.Path
+            },
             WebApolice.SharedKernel.Application.Exceptions.ValidacaoException => new ProblemDetails
             {
                 Type = "https://webapolice/errors/regra-de-negocio",

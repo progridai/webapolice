@@ -21,7 +21,7 @@ public partial class PropostaCobertura
 
     public string? CoberturaNomeLegado { get; set; }
 
-    public int LegadoId { get; set; }
+    public int? LegadoId { get; set; }
 
     public int? LegadoPropostaCoberturaAnt { get; set; }
 

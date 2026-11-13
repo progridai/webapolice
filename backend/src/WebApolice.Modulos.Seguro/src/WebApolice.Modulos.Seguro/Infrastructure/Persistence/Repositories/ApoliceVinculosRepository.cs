@@ -20,8 +20,16 @@ public sealed class ApoliceVinculosRepository(SeguroDbContext db) : IApoliceVinc
     public Task<ApoliceModuloModel?> ObterVinculoModuloAsync(long apoliceId, long moduloId, CancellationToken ct) => db.ApoliceModulos.FirstOrDefaultAsync(m => m.ApoliceId == apoliceId && m.ModuloId == moduloId && m.DeletedAt == null, ct);
     public Task<List<ApoliceModuloModel>> ListarModulosAsync(long apoliceId, CancellationToken ct) => db.ApoliceModulos.AsNoTracking().Where(m => m.ApoliceId == apoliceId && m.DeletedAt == null).ToListAsync(ct);
     public Task<RamoModel?> ObterRamoAsync(Guid publicId, CancellationToken ct) => db.Ramos.FirstOrDefaultAsync(r => r.PublicId == publicId, ct);
-    public Task<ApoliceRamoModel?> ObterVinculoRamoAsync(long apoliceId, long ramoId, CancellationToken ct) => db.ApoliceRamos.FirstOrDefaultAsync(r => r.ApoliceId == apoliceId && r.RamoId == ramoId, ct);
-    public Task<ApoliceSubestipulanteModel?> ObterVinculoSubestipulanteAsync(long apoliceId, long subestipulanteId, CancellationToken ct) => db.ApoliceSubestipulantes.FirstOrDefaultAsync(s => s.ApoliceId == apoliceId && s.SubestipulanteId == subestipulanteId, ct);
+    public Task<ApoliceRamoModel?> ObterVinculoRamoAsync(long apoliceId, long ramoId, CancellationToken ct) => db.ApoliceRamos.FirstOrDefaultAsync(r => r.ApoliceId == apoliceId && r.RamoId == ramoId && r.DeletedAt == null, ct);
+    public Task<ApoliceSubestipulanteModel?> ObterVinculoSubestipulanteAsync(long apoliceId, long subestipulanteId, CancellationToken ct) => db.ApoliceSubestipulantes.FirstOrDefaultAsync(s => s.ApoliceId == apoliceId && s.SubestipulanteId == subestipulanteId && s.DeletedAt == null, ct);
+    public Task<bool> VidaPossuiPropostasAsync(long vidaId, CancellationToken ct) => db.Proposta.AnyAsync(p => p.ApoliceVidaId == vidaId, ct);
+    public Task<ApoliceVidaModel?> ObterVidaParaExclusaoAsync(Guid publicId, long apoliceId, CancellationToken ct)
+    {
+        if (db.Database.CurrentTransaction is null)
+            throw new InvalidOperationException("Exclusão de Vida exige transação.");
+        return db.ApoliceVidas.FromSqlInterpolated($"SELECT * FROM seguro.apolice_vida WHERE public_id = {publicId} AND apolice_id = {apoliceId} AND deleted_at IS NULL FOR UPDATE")
+            .SingleOrDefaultAsync(ct);
+    }
     public void AdicionarVida(ApoliceVidaModel vida) => db.ApoliceVidas.Add(vida);
     public void AdicionarModulo(ApoliceModuloModel modulo) => db.ApoliceModulos.Add(modulo);
     public void AdicionarRamo(ApoliceRamoModel ramo) => db.ApoliceRamos.Add(ramo);
@@ -29,5 +37,10 @@ public sealed class ApoliceVinculosRepository(SeguroDbContext db) : IApoliceVinc
     public void AdicionarHistorico(ApoliceHistoricoModel historico) => db.ApoliceHistoricos.Add(historico);
     public void AtualizarRamo(ApoliceRamoModel ramo) => db.ApoliceRamos.Update(ramo);
     public void AtualizarSubestipulante(ApoliceSubestipulanteModel subestipulante) => db.ApoliceSubestipulantes.Update(subestipulante);
-    public async Task SalvarAlteracoesAsync(CancellationToken ct) => await db.SaveChangesAsync(ct);
+    public async Task SalvarAlteracoesAsync(CancellationToken ct)
+    {
+        try { await db.SaveChangesAsync(ct); }
+        catch (DbUpdateException ex) when (ex.InnerException is Npgsql.PostgresException { ConstraintName: "ck_apolice_vida_vinculo" } pg)
+        { throw new WebApolice.SharedKernel.Application.Exceptions.ValidacaoException(pg.MessageText); }
+    }
 }

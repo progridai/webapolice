@@ -12,11 +12,21 @@ public interface IPropostasRepository
     Task<PropostaStatus?> ObterStatusAsync(string codigo, CancellationToken ct);
     Task<ApoliceModel?> ObterApoliceAsync(Guid publicId, CancellationToken ct);
     Task<ApoliceVidaModel?> ObterVidaAsync(Guid publicId, CancellationToken ct);
+    Task<Propostum?> ObterParaPreenchimentoAsync(Guid publicId, CancellationToken ct);
+    Task<Propostum?> ObterOrigemParaVigenciaAsync(long id, CancellationToken ct);
+    Task<IReadOnlyList<AgendamentoVigenciaProposta>> ListarAgendadasAsync(DateOnly ate, string statusConfirmada, long aposId, CancellationToken ct);
+    Task<IReadOnlyList<AgendamentoVigenciaProposta>> ListarCancelamentosAgendadosAsync(DateOnly ate, string statusConfirmada, long aposId, CancellationToken ct);
     Task<Propostum?> ObterAsync(Guid publicId, CancellationToken ct);
+    Task BloquearApoliceAsync(Guid publicId, CancellationToken ct);
+    Task<IReadOnlyList<Propostum>> ObterPropostasDaVidaAsync(long vidaId, CancellationToken ct);
+    Task<ApoliceModuloPlanoModel?> ObterPlanoModuloAsync(long moduloId, CancellationToken ct);
     Task<ApoliceProdutoModel?> ObterProdutoPermitidoAsync(long? apoliceId, long produtoId, CancellationToken ct);
     Task<ApolicePlanoModel?> ObterPlanoPermitidoAsync(long apoliceProdutoId, long planoId, CancellationToken ct);
     Task<PagedResult<PropostaDto>> ListarAsync(ObterPropostasQuery request, CancellationToken cancellationToken);
+    Task<WebApolice.Modulos.Seguro.Application.UseCases.Propostas.ObterProposta.PropostaDetalheDto?> ObterDetalheAsync(Guid publicId, CancellationToken ct, string? codigoInicial = null);
     void Adicionar(Propostum proposta);
     void AdicionarItem(PropostaItem item);
     Task SalvarAlteracoesAsync(CancellationToken ct);
 }
+
+public sealed record AgendamentoVigenciaProposta(long Posicao, Guid PublicId, int RevisaoPreenchimento);

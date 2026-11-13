@@ -19,7 +19,8 @@ public abstract class TextoPadronizadoDbContext : DbContext
                 entry.Metadata.ClrType.Name.EndsWith("MigrationMap", StringComparison.Ordinal)) continue;
             foreach (var property in entry.Properties)
             {
-                if (property.Metadata.ClrType == typeof(string) && PadronizacaoTexto.CampoHumano(property.Metadata.Name))
+                if ((entry.State == EntityState.Added || property.IsModified) &&
+                    property.Metadata.ClrType == typeof(string) && PadronizacaoTexto.CampoHumano(property.Metadata.Name))
                     property.CurrentValue = PadronizacaoTexto.TitleCase((string?)property.CurrentValue);
             }
         }

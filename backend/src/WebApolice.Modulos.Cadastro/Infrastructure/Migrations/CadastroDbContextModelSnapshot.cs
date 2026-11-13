@@ -319,6 +319,11 @@ namespace WebApolice.Modulos.Cadastro.Infrastructure.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
 
+                    b.Property<string>("CriterioCriacao")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("criterio_criacao");
+
                     b.Property<long?>("EstipulanteId")
                         .HasColumnType("bigint")
                         .HasColumnName("estipulante_id");
@@ -335,16 +340,34 @@ namespace WebApolice.Modulos.Cadastro.Infrastructure.Migrations
                         .HasColumnType("text")
                         .HasColumnName("matricula");
 
+                    b.Property<string>("MatriculaNormalizada")
+                        .HasColumnType("text")
+                        .HasColumnName("matricula_normalizada");
+
                     b.Property<long>("PessoaId")
                         .HasColumnType("bigint")
                         .HasColumnName("pessoa_id");
+
+                    b.Property<Guid>("PublicId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("public_id")
+                        .HasDefaultValueSql("gen_random_uuid()");
 
                     b.Property<long?>("SubgrupoId")
                         .HasColumnType("bigint")
                         .HasColumnName("subgrupo_id");
 
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
                     b.HasKey("Id")
                         .HasName("pk_cliente_vinculo");
+
+                    b.HasIndex("PublicId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_cliente_vinculo_public_id");
 
                     b.ToTable("cliente_vinculo", "cadastro");
                 });
@@ -1289,10 +1312,6 @@ namespace WebApolice.Modulos.Cadastro.Infrastructure.Migrations
                     b.Navigation("Configuracao");
                 });
 
-            modelBuilder.Entity("WebApolice.Modulos.Cadastro.Domain.Clientes.PessoaModel", b =>
-                {
-                    b.Navigation("Estipulantes");
-                });
 #pragma warning restore 612, 618
         }
     }

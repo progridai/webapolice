@@ -9,6 +9,9 @@ namespace WebApolice.Modulos.Seguro.Api.Controllers.Requests;
 /// </summary>
 public class AlterarApoliceVidaRequest
 {
+    public Guid? ClienteVinculoPublicId { get; set; }
+    public string? NovaMatricula { get; set; }
+    public bool CompletarVinculoSemEstipulante { get; set; }
     public Guid? ApoliceSubgrupoPublicId { get; set; }
     public Guid? ApoliceModuloPublicId { get; set; }
     public DateOnly? DataInicioVigencia { get; set; }

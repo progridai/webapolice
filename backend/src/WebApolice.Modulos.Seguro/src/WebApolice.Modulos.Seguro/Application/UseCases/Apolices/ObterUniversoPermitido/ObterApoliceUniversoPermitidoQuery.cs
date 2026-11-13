@@ -14,7 +14,8 @@ public sealed record ApoliceUniversoPermitidoResult(
 public sealed record ApoliceProdutoResult(
     long ProdutoIdInternal,
     bool Ativo,
-    List<ApolicePlanoResult> Planos
+    List<ApolicePlanoResult> Planos,
+    Guid PublicId = default, string? Nome = null
 );
 
 public sealed record ApolicePlanoResult(
@@ -22,7 +23,7 @@ public sealed record ApolicePlanoResult(
     long? TabelaPrecoIdInternal,
     bool Ativo,
     List<ApoliceCoberturaResult> Coberturas,
-    string? Nome = null
+    string? Nome = null, Guid PublicId = default
 );
 
 public sealed record ApoliceCoberturaResult(

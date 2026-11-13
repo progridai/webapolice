@@ -162,6 +162,15 @@ export async function inativarApoliceVida(
   );
 }
 
+export async function excluirApoliceVida(
+  apolicePublicId: string,
+  vidaPublicId: string,
+): Promise<void> {
+  await httpClient.delete(
+    `/api/apolices/${apolicePublicId}/vidas/${vidaPublicId}`,
+  );
+}
+
 export async function listarApoliceSubestipulantes(
   publicId: string,
   signal?: AbortSignal,

@@ -1,3 +1,4 @@
+import { ClienteVinculosSection } from '../components/ClienteVinculosSection';
 import React, { useEffect, useRef } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import {
@@ -369,78 +370,11 @@ export const ClienteDetalhePage: React.FC = () => {
         </div>
 
         <div className="flex flex-col gap-3">
-          <DetailsSection
-            title="Vínculos"
-            isEmpty={cliente.vinculos.length === 0}
-            emptyState="Nenhum vínculo cadastrado."
-            className="!p-4 !gap-2 [&>div:first-child]:mb-0"
-          >
-            <div className="flex flex-col gap-2">
-              {cliente.vinculos.map((vinculo, index) => (
-                <div
-                  key={index}
-                  className="p-3 rounded-md bg-fundo-aplicacao border border-borda"
-                >
-                  <div className="flex items-center justify-between mb-2 border-b border-borda pb-2">
-                    <div>
-                      <span className="text-[10px] font-medium text-texto-secundario uppercase tracking-wider mb-0.5 block">
-                        Matrícula
-                      </span>
-                      <span className="text-base text-texto-principal">
-                        {vinculo.matricula}
-                      </span>
-                    </div>
-                    <Badge variant={vinculo.ativo ? 'success' : 'neutral'}>
-                      {vinculo.ativo ? 'Ativo' : 'Inativo'}
-                    </Badge>
-                  </div>
-                  <div className="grid grid-cols-2 gap-2">
-                    {vinculo.estipulante && (
-                      <div className="flex flex-col">
-                        <span className="text-[10px] font-medium text-texto-secundario uppercase tracking-wider mb-0.5">
-                          Estipulante
-                        </span>
-                        <span className="text-base text-texto-principal">
-                          {vinculo.estipulante}
-                        </span>
-                      </div>
-                    )}
-
-                    {vinculo.grupo && (
-                      <div className="flex flex-col">
-                        <span className="text-[10px] font-medium text-texto-secundario uppercase tracking-wider mb-0.5">
-                          Grupo
-                        </span>
-                        <span className="text-base text-texto-principal">
-                          {vinculo.grupo}
-                        </span>
-                      </div>
-                    )}
-                    {vinculo.subgrupo && (
-                      <div className="flex flex-col">
-                        <span className="text-[10px] font-medium text-texto-secundario uppercase tracking-wider mb-0.5">
-                          Subgrupo
-                        </span>
-                        <span className="text-base text-texto-principal">
-                          {vinculo.subgrupo}
-                        </span>
-                      </div>
-                    )}
-                    {vinculo.lotacao && (
-                      <div className="flex flex-col">
-                        <span className="text-[10px] font-medium text-texto-secundario uppercase tracking-wider mb-0.5">
-                          Lotação
-                        </span>
-                        <span className="text-base text-texto-principal">
-                          {vinculo.lotacao}
-                        </span>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </DetailsSection>
+          <ClienteVinculosSection
+            key={cliente.id}
+            clienteId={cliente.id}
+            podeAlterar={podeAlterar}
+          />
 
           <DetailsSection
             title="Dependentes"

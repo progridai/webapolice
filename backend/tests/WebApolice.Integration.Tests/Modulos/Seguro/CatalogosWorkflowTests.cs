@@ -58,10 +58,12 @@ public sealed class CatalogosWorkflowTests : IAsyncLifetime
             (await _seguro.Database.GetPendingMigrationsAsync()).Contains("20261007012211_CompartilharCoberturaNoPlanoModulo"))
         {
             var apoliceLegada = await CriarApolice(); var moduloLegado = await CriarModulo(apoliceLegada);
-            var planoLegado = new ApoliceModuloPlanoModel { PublicId = Guid.NewGuid(), ApoliceModuloId = moduloLegado.Id, Nome = "Plano da migration", CreatedAt = DateTimeOffset.UtcNow, UpdatedAt = DateTimeOffset.UtcNow };
-            _seguro.Add(planoLegado); await _seguro.SaveChangesAsync();
+            // Fixture histórica: gravar o schema daquela migration, sem colunas do modelo atual.
+            await using var planoCommand = new NpgsqlCommand("INSERT INTO seguro.apolice_modulo_plano(public_id,apolice_modulo_id,nome,ativo,created_at,updated_at) VALUES (@public_id,@modulo_id,'Plano da migration',true,now(),now()) RETURNING id", _connection);
+            planoCommand.Parameters.AddWithValue("public_id", Guid.NewGuid()); planoCommand.Parameters.AddWithValue("modulo_id", moduloLegado.Id);
+            var planoLegadoId = (long)(await planoCommand.ExecuteScalarAsync())!;
             legadoPublicId = Guid.NewGuid();
-            await _seguro.Database.ExecuteSqlInterpolatedAsync($"INSERT INTO seguro.apolice_modulo_cobertura(public_id,apolice_modulo_plano_id,nome,nome_reduzido,basica,reajuste,premio_titular,premio_conjuge,ativo) VALUES ({legadoPublicId.Value},{planoLegado.Id},'Cobertura migrada','CM','Básica',true,31.42,0,false)");
+            await _seguro.Database.ExecuteSqlInterpolatedAsync($"INSERT INTO seguro.apolice_modulo_cobertura(public_id,apolice_modulo_plano_id,nome,nome_reduzido,basica,reajuste,premio_titular,premio_conjuge,ativo) VALUES ({legadoPublicId.Value},{planoLegadoId},'Cobertura migrada','CM','Básica',true,31.42,0,false)");
         }
         await _seguro.Database.MigrateAsync();
         if (legadoPublicId is Guid legado)

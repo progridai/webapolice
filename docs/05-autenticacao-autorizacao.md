@@ -107,3 +107,30 @@ Ao implementar a integração de código, observe atentamente as seguintes diret
 ## Consolidação — 23/10/2026
 
 Authority e Audience são obrigatórias. Audience nunca desliga a validação por estar vazia: a inicialização é recusada. HTTPS e metadata segura são obrigatórios em entrega; exceções restritas a Testing ou Development com Authority em loopback. Não tratar falha da configuração de um client Keycloak como motivo para desligar a validação. O catálogo deve existir e estar ativo/habilitado para usuários comuns e AcessoTotal. Consulte os documentos 76/78 e os testes de configuração/JWT/negações HTTP. A configuração real do IdP continua por homologar.
+
+## Diagnóstico de Audiência — 09/11/2026
+
+Se a tela mostrar “Não foi possível carregar as permissões do usuário”, conferir o status de `/api/seguranca/me` e o log da API. HTTP 401 acompanhado de `SecurityTokenInvalidAudienceException` indica rejeição do token antes da consulta das permissões; não comprova ausência de perfil do usuário. Frontend e health checks podem continuar respondendo HTTP 200 nesse cenário.
+
+No ambiente remoto configurado, a API espera `webapolice-api` e o frontend usa `webapolice-web` no realm `webapolice`. Um administrador do Keycloak deve conferir o mapper efetivo do client web e a emissão de um novo access token. A credencial de serviço usada pelo backend para administrar usuários pode receber HTTP 403 ao consultar clients; não ampliar suas permissões para contornar essa restrição.
+
+No painel administrativo do Keycloak, selecionar `webapolice` → **Clients** → `webapolice-web` → **Client scopes** → escopo dedicado `webapolice-web-dedicated` → **Mappers**. Conferir o mapper existente antes de criar outro. Se estiver ausente, usar **Configure a new mapper** → **Audience**, com:
+
+| Campo | Valor |
+|---|---|
+| Name | `webapolice-api-audience` |
+| Included Client Audience | `webapolice-api` |
+| Add to access token | On |
+| Add to ID token | Off |
+
+Se `webapolice-api` não existir entre os clients disponíveis, interromper e revisar o provisionamento do realm; não selecionar outro client apenas para eliminar o erro. Se o mapper já estiver correto, verificar se ele está efetivamente aplicado ao client web e se o token foi emitido depois da configuração. Após o ajuste, sair e entrar novamente no aplicativo para emitir uma nova sessão. Confirmar HTTP 200 em `/api/seguranca/me` e a consulta autenticada das telas de Cliente/Vidas. Não copiar tokens completos para logs, mensagens ou sites externos.
+
+O arquivo declarativo do realm passa a incluir esse mapper, além da configuração já prevista em `configure-realm.sh`. Alterar o JSON local não atualiza um realm remoto existente. O script completo de provisionamento também altera clients, credenciais e o usuário de desenvolvimento: não executá-lo contra o ambiente remoto para fazer somente este reparo. A configuração do mapper segue a [documentação oficial do Keycloak](https://www.keycloak.org/admin-api/protocol-mappers).
+
+## Confirmação e Vigência de Propostas — 12/11/2026
+
+As operações `POST /api/propostas/{publicId}/confirmacao` e `POST /api/propostas/{publicId}/vigencia/efetivar` reutilizam `propostas.alterar` no módulo APOLICES/recurso PROPOSTAS. Consulta do histórico usa o GET de detalhe com `propostas.visualizar`. Não há permissões novas ou concessão a perfis. O processamento interno de agendamentos tem identidade técnica de auditoria `sistema:vigencias-propostas`, sem criar usuário/role no Keycloak, e revalida as condições da confirmação em cada efetivação. Contratos e validação estão no [documento 85](85-confirmacao-substituicao-propostas.md).
+
+Gestão dos agendamentos: `POST /api/propostas/{publicId}/agendamento/reagendar` e `/agendamento/cancelar` também exigem `propostas.alterar` e disponibilidade do módulo/recurso. Os UUIDs são obtidos da rota, não do corpo. Cada alteração exige revisão/justificativa e é auditada na mesma transação do histórico e da proposta. A criação de outra tentativa continua exigindo `propostas.inserir`. Nenhuma concessão, role ou configuração de autenticação foi alterada. Regras no [documento 86](86-gestao-agendamentos-propostas.md).
+
+Encerramento: as rotas `POST /api/propostas/{publicId}/vigencia/cancelamento`, `/vigencia/cancelamento/efetivar` e `/rascunho/descarte` reutilizam as mesmas barreiras `propostas.alterar`/APOLICES/PROPOSTAS. Pedido/descarte exigem justificativa e revisão; efetivação exige revisão e data alcançada. As gravações e o histórico pertencem à mesma transação física da auditoria. O serviço de vigências reutiliza a identidade técnica existente para cancelar na data aprovada. Nenhuma permissão de perfil ou configuração de autenticação foi alterada. Regras no [documento 87](87-encerramento-vigencia-descarte-propostas.md).

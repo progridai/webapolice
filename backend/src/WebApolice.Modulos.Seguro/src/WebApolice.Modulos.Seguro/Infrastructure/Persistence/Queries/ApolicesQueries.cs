@@ -18,12 +18,14 @@ namespace WebApolice.Modulos.Seguro.Infrastructure.Persistence.Queries;
 public class ApolicesQueries : IApolicesQueries
 {
     private readonly SeguroDbContext _dbContext;
+    private readonly WebApolice.Modulos.Cadastro.Contracts.ICadastroSeguroQueries? _cadastro;
     private readonly WebApolice.Modulos.Financeiro.Contracts.IConveniosCobrancaConsulta? _convenios;
 
-    public ApolicesQueries(SeguroDbContext dbContext, WebApolice.Modulos.Financeiro.Contracts.IConveniosCobrancaConsulta? convenios = null)
+    public ApolicesQueries(SeguroDbContext dbContext, WebApolice.Modulos.Financeiro.Contracts.IConveniosCobrancaConsulta? convenios = null, WebApolice.Modulos.Cadastro.Contracts.ICadastroSeguroQueries? cadastro = null)
     {
         _dbContext = dbContext;
         _convenios = convenios;
+        _cadastro = cadastro;
     }
 
     public async Task<PagedResult<ApoliceListagemItemResult>> ListarPaginadoAsync(
@@ -59,7 +61,7 @@ public class ApolicesQueries : IApolicesQueries
         }
 
         var totalItens = await query.CountAsync(cancellationToken);
-        
+
         var skip = (pagina - 1) * tamanhoPagina;
 
         var apolicesRaw = await query
@@ -77,7 +79,7 @@ public class ApolicesQueries : IApolicesQueries
                 a.DataFimVigencia,
                 a.Status,
                 a.Ativo,
-                QtdRamos = a.Ramos.Count
+                QtdRamos = a.Ramos.Count(r => r.DeletedAt == null)
             })
             .ToListAsync(cancellationToken);
 
@@ -102,17 +104,17 @@ public class ApolicesQueries : IApolicesQueries
             ""
         )).ToList();
 
-        return new PagedResult<ApoliceListagemItemResult> 
+        return new PagedResult<ApoliceListagemItemResult>
         {
-            Items = itens, 
-            Page = pagina, 
-            PageSize = tamanhoPagina, 
+            Items = itens,
+            Page = pagina,
+            PageSize = tamanhoPagina,
             TotalCount = totalItens
         };
     }
 
     public async Task<WebApolice.Modulos.Seguro.Application.UseCases.Apolices.ObterApolice.ApoliceDetalheResult?> ObterDetalhePorPublicIdAsync(
-        Guid publicId, 
+        Guid publicId,
         CancellationToken cancellationToken)
     {
         var apoliceRaw = await _dbContext.Apolices
@@ -131,13 +133,13 @@ public class ApolicesQueries : IApolicesQueries
                 a.Status,
                 a.Ativo,
                 a.Observacao,
-                Ramos = a.Ramos.Where(ar => ar.Ramo != null).Select(ar => new WebApolice.Modulos.Seguro.Application.UseCases.Apolices.ObterApolice.ApoliceRamoResult(
+                Ramos = a.Ramos.Where(ar => ar.Ramo != null && ar.DeletedAt == null).Select(ar => new WebApolice.Modulos.Seguro.Application.UseCases.Apolices.ObterApolice.ApoliceRamoResult(
                     ar.Ramo!.PublicId,
                     ar.Ramo.Codigo,
                     ar.Ramo.Nome,
                     ar.NumeroApolice,
                     ar.IofPercentual,
-                    ar.Ativo
+                    ar.Ativo, ar.PublicId
                 )).ToList(),
                 a.Configuracao
             })
@@ -147,8 +149,8 @@ public class ApolicesQueries : IApolicesQueries
 
         var nomesEstipulantes = await ObterNomesGlobaisAsync("estipulante", new List<long> { apoliceRaw.EstipulanteId }, cancellationToken);
         var nomesSeguradoras = await ObterNomesGlobaisAsync("seguradora", new List<long> { apoliceRaw.SeguradoraId }, cancellationToken);
-        var nomesCorretoras = apoliceRaw.CorretoraId.HasValue 
-            ? await ObterNomesGlobaisAsync("corretora", new List<long> { apoliceRaw.CorretoraId.Value }, cancellationToken) 
+        var nomesCorretoras = apoliceRaw.CorretoraId.HasValue
+            ? await ObterNomesGlobaisAsync("corretora", new List<long> { apoliceRaw.CorretoraId.Value }, cancellationToken)
             : new Dictionary<long, string>();
 
         var apolice = new WebApolice.Modulos.Seguro.Application.UseCases.Apolices.ObterApolice.ApoliceDetalheResult(
@@ -270,6 +272,8 @@ public class ApolicesQueries : IApolicesQueries
                 v.Id,
                 v.PublicId,
                 v.ClienteId,
+                v.ClienteVinculoId,
+                PossuiPropostas = _dbContext.Proposta.Any(p => p.ApoliceVidaId == v.Id),
                 v.ApoliceSubgrupoId,
                 v.ApoliceModuloId,
                 v.DataInicioVigencia,
@@ -284,7 +288,9 @@ public class ApolicesQueries : IApolicesQueries
             return new PagedResult<WebApolice.Modulos.Seguro.Application.UseCases.Apolices.ListarVidas.ApoliceVidaResult>
             {
                 Items = new List<WebApolice.Modulos.Seguro.Application.UseCases.Apolices.ListarVidas.ApoliceVidaResult>(),
-                Page = pagina, PageSize = tamanhoPagina, TotalCount = totalItens
+                Page = pagina,
+                PageSize = tamanhoPagina,
+                TotalCount = totalItens
             };
 
         // Enriquecer via ADO.NET cross-module (clientes, subestipulantes, módulos)
@@ -311,24 +317,27 @@ public class ApolicesQueries : IApolicesQueries
 
         var moduloIds = vidasRaw.Where(v => v.ApoliceModuloId.HasValue)
             .Select(v => v.ApoliceModuloId!.Value).Distinct().ToList();
-        
+
         var apoliceModulos = await _dbContext.ApoliceModulos
             .AsNoTracking()
             .Where(m => moduloIds.Contains(m.Id))
             .ToListAsync(cancellationToken);
-            
+
         var cadastroModuloIds = apoliceModulos.Select(m => m.ModuloId).Distinct().ToList();
         var modulosDict = await ObterModulosGlobaisAsync(cadastroModuloIds, cancellationToken);
         var apoliceModulosDict = apoliceModulos.ToDictionary(m => m.Id);
 
         var clientesDict = clientesGlobais.ToDictionary(c => c.Id);
+        var vinculos = _cadastro is null ? new List<WebApolice.Modulos.Cadastro.Contracts.VinculoClienteSeguro>() :
+            await _cadastro.ObterVinculosAsync(vidasRaw.Where(v => v.ClienteVinculoId.HasValue).Select(v => v.ClienteVinculoId!.Value).Distinct().ToList(), cancellationToken);
+        var vinculosDict = vinculos.ToDictionary(v => v.Id);
 
         var itens = vidasRaw.Select(v =>
         {
             var cliente = clientesDict.GetValueOrDefault(v.ClienteId);
-            
+
             var subgrupo = v.ApoliceSubgrupoId.HasValue ? subgruposDict.GetValueOrDefault(v.ApoliceSubgrupoId.Value) : null;
-            
+
             var apoliceModulo = v.ApoliceModuloId.HasValue ? apoliceModulosDict.GetValueOrDefault(v.ApoliceModuloId.Value) : null;
             var moduloGlobal = apoliceModulo != null ? modulosDict.GetValueOrDefault(apoliceModulo.ModuloId) : null;
 
@@ -347,7 +356,10 @@ public class ApolicesQueries : IApolicesQueries
                 v.DataFimVigencia,
                 v.Status,
                 v.Ativo,
-                v.Observacao
+                v.Observacao,
+                v.ClienteVinculoId.HasValue ? vinculosDict.GetValueOrDefault(v.ClienteVinculoId.Value)?.PublicId : null,
+                v.ClienteVinculoId.HasValue ? vinculosDict.GetValueOrDefault(v.ClienteVinculoId.Value)?.Matricula : null,
+                v.PossuiPropostas
             );
         }).ToList();
 
@@ -380,6 +392,8 @@ public class ApolicesQueries : IApolicesQueries
             {
                 x.PublicId,
                 x.ClienteId,
+                x.ClienteVinculoId,
+                PossuiPropostas = _dbContext.Proposta.Any(p => p.ApoliceVidaId == x.Id),
                 x.ApoliceSubgrupoId,
                 x.ApoliceModuloId,
                 x.DataInicioVigencia,
@@ -394,6 +408,8 @@ public class ApolicesQueries : IApolicesQueries
 
         var clientesGlobais = await ObterClientesGlobaisAsync(new List<long> { v.ClienteId }, cancellationToken);
         var cliente = clientesGlobais.FirstOrDefault();
+        var vinculo = _cadastro is not null && v.ClienteVinculoId.HasValue
+            ? (await _cadastro.ObterVinculosAsync(new[] { v.ClienteVinculoId.Value }, cancellationToken)).SingleOrDefault() : null;
 
         ApoliceSubgrupoModel? subgrupo = null;
         if (v.ApoliceSubgrupoId.HasValue)
@@ -410,7 +426,7 @@ public class ApolicesQueries : IApolicesQueries
             apoliceModulo = await _dbContext.ApoliceModulos
                 .AsNoTracking()
                 .FirstOrDefaultAsync(m => m.Id == v.ApoliceModuloId.Value, cancellationToken);
-                
+
             if (apoliceModulo != null)
             {
                 var modDict = await ObterModulosGlobaisAsync(new List<long> { apoliceModulo.ModuloId }, cancellationToken);
@@ -431,7 +447,7 @@ public class ApolicesQueries : IApolicesQueries
             v.DataFimVigencia,
             v.Status,
             v.Ativo,
-            v.Observacao
+            v.Observacao, vinculo?.PublicId, vinculo?.Matricula, v.PossuiPropostas
         );
     }
 
@@ -508,7 +524,7 @@ public class ApolicesQueries : IApolicesQueries
                 subGlobal?.Codigo,
                 s.DataInicio,
                 s.DataFim,
-                s.Ativo
+                s.Ativo, s.PublicId
             );
         }).ToList();
 
@@ -528,15 +544,15 @@ public class ApolicesQueries : IApolicesQueries
 
         var produtos = await _dbContext.ApoliceProdutos
             .AsNoTracking()
-            .Where(p => p.ApoliceId == apoliceId)
+            .Where(p => p.ApoliceId == apoliceId && p.DeletedAt == null)
             .Select(p => new WebApolice.Modulos.Seguro.Application.UseCases.Apolices.ObterUniversoPermitido.ApoliceProdutoResult(
                 p.ProdutoId,
                 p.Ativo,
-                p.Planos.Select(pl => new WebApolice.Modulos.Seguro.Application.UseCases.Apolices.ObterUniversoPermitido.ApolicePlanoResult(
+                p.Planos.Where(pl => pl.DeletedAt == null).Select(pl => new WebApolice.Modulos.Seguro.Application.UseCases.Apolices.ObterUniversoPermitido.ApolicePlanoResult(
                     pl.PlanoId,
                     pl.TabelaPrecoId,
                     pl.Ativo,
-                    pl.Coberturas.Select(c => new WebApolice.Modulos.Seguro.Application.UseCases.Apolices.ObterUniversoPermitido.ApoliceCoberturaResult(
+                    pl.Coberturas.Where(c => c.DeletedAt == null).Select(c => new WebApolice.Modulos.Seguro.Application.UseCases.Apolices.ObterUniversoPermitido.ApoliceCoberturaResult(
                         c.CoberturaId,
                         c.Ativo,
                         c.ImportanciaSeguradaOverride,
@@ -546,8 +562,8 @@ public class ApolicesQueries : IApolicesQueries
                         c.PremioTitularOverride,
                         c.PremioConjugeOverride
                     )).ToList(),
-                    pl.Plano!.Nome
-                )).ToList()
+                    pl.Plano!.Nome, pl.PublicId
+                )).ToList(), p.PublicId, p.Produto!.Nome
             ))
             .ToListAsync(cancellationToken);
 
@@ -556,17 +572,23 @@ public class ApolicesQueries : IApolicesQueries
             .Where(e => planoIds.Contains(e.PlanoId))
             .Select(e => new { e.PlanoId, e.CoberturaId, e.PremioTitular, e.PremioConjuge }).ToListAsync(cancellationToken);
         var porPar = padroes.ToDictionary(e => (e.PlanoId, e.CoberturaId));
-        produtos = produtos.Select(p => p with { Planos = p.Planos.Select(pl => pl with {
-            Coberturas = pl.Coberturas.Select(c => {
-                var padrao = porPar.GetValueOrDefault((pl.PlanoIdInternal, c.CoberturaIdInternal));
-                return c with {
-                    PremioTitularPadrao = padrao?.PremioTitular,
-                    PremioConjugePadrao = padrao?.PremioConjuge,
-                    PremioTitularEfetivo = c.PremioTitularOverride ?? padrao?.PremioTitular,
-                    PremioConjugeEfetivo = c.PremioConjugeOverride ?? padrao?.PremioConjuge
-                };
+        produtos = produtos.Select(p => p with
+        {
+            Planos = p.Planos.Select(pl => pl with
+            {
+                Coberturas = pl.Coberturas.Select(c =>
+                {
+                    var padrao = porPar.GetValueOrDefault((pl.PlanoIdInternal, c.CoberturaIdInternal));
+                    return c with
+                    {
+                        PremioTitularPadrao = padrao?.PremioTitular,
+                        PremioConjugePadrao = padrao?.PremioConjuge,
+                        PremioTitularEfetivo = c.PremioTitularOverride ?? padrao?.PremioTitular,
+                        PremioConjugeEfetivo = c.PremioConjugeOverride ?? padrao?.PremioConjuge
+                    };
+                }).ToList()
             }).ToList()
-        }).ToList() }).ToList();
+        }).ToList();
         return new WebApolice.Modulos.Seguro.Application.UseCases.Apolices.ObterUniversoPermitido.ApoliceUniversoPermitidoResult(produtos);
     }
 
@@ -584,11 +606,11 @@ public class ApolicesQueries : IApolicesQueries
         if (apoliceId == 0)
         {
             return new PagedResult<WebApolice.Modulos.Seguro.Application.UseCases.Apolices.ListarHistorico.ApoliceHistoricoResult>
-            { 
+            {
                 Items = new List<WebApolice.Modulos.Seguro.Application.UseCases.Apolices.ListarHistorico.ApoliceHistoricoResult>(),
-                Page = pagina, 
-                PageSize = tamanhoPagina, 
-                TotalCount = 0 
+                Page = pagina,
+                PageSize = tamanhoPagina,
+                TotalCount = 0
             };
         }
 
@@ -597,7 +619,7 @@ public class ApolicesQueries : IApolicesQueries
             .Where(h => h.ApoliceId == apoliceId);
 
         var totalItens = await query.CountAsync(cancellationToken);
-        
+
         var skip = (pagina - 1) * tamanhoPagina;
 
         var itens = await query
@@ -615,8 +637,8 @@ public class ApolicesQueries : IApolicesQueries
         return new PagedResult<WebApolice.Modulos.Seguro.Application.UseCases.Apolices.ListarHistorico.ApoliceHistoricoResult>
         {
             Items = itens,
-            Page = pagina, 
-            PageSize = tamanhoPagina, 
+            Page = pagina,
+            PageSize = tamanhoPagina,
             TotalCount = totalItens
         };
     }
@@ -741,24 +763,27 @@ public class ApolicesQueries : IApolicesQueries
     /// Lista todos os Subgrupos de uma Apólice.
     /// Subgrupo é uma divisão contextual — não é cadastro global.
     /// </summary>
-    public async Task<List<ApoliceSubgrupoResult>> ListarSubgruposAsync(Guid apolicePublicId,CancellationToken cancellationToken)
+    public async Task<List<ApoliceSubgrupoResult>> ListarSubgruposAsync(Guid apolicePublicId, CancellationToken cancellationToken)
     {
-        var rows=await _dbContext.ApoliceSubgrupos.AsNoTracking().Where(s=>s.Apolice!.PublicId==apolicePublicId && s.Apolice.DeletedAt==null && s.DeletedAt==null).OrderBy(s=>s.Nome).ToListAsync(cancellationToken);
-        return await MapearSubgruposAsync(rows,cancellationToken);
+        var rows = await _dbContext.ApoliceSubgrupos.AsNoTracking().Where(s => s.Apolice!.PublicId == apolicePublicId && s.Apolice.DeletedAt == null && s.DeletedAt == null).OrderBy(s => s.Nome).ToListAsync(cancellationToken);
+        return await MapearSubgruposAsync(rows, cancellationToken);
     }
-    public async Task<ApoliceSubgrupoResult?> ObterSubgrupoPorPublicIdAsync(Guid apolicePublicId,Guid subgrupoPublicId,CancellationToken cancellationToken)
+    public async Task<ApoliceSubgrupoResult?> ObterSubgrupoPorPublicIdAsync(Guid apolicePublicId, Guid subgrupoPublicId, CancellationToken cancellationToken)
     {
-        var rows=await _dbContext.ApoliceSubgrupos.AsNoTracking().Where(s=>s.PublicId==subgrupoPublicId && s.Apolice!.PublicId==apolicePublicId && s.Apolice.DeletedAt==null && s.DeletedAt==null).ToListAsync(cancellationToken);
-        return (await MapearSubgruposAsync(rows,cancellationToken)).FirstOrDefault();
+        var rows = await _dbContext.ApoliceSubgrupos.AsNoTracking().Where(s => s.PublicId == subgrupoPublicId && s.Apolice!.PublicId == apolicePublicId && s.Apolice.DeletedAt == null && s.DeletedAt == null).ToListAsync(cancellationToken);
+        return (await MapearSubgruposAsync(rows, cancellationToken)).FirstOrDefault();
     }
-    private async Task<List<ApoliceSubgrupoResult>> MapearSubgruposAsync(List<ApoliceSubgrupoModel> rows,CancellationToken ct)
+    private async Task<List<ApoliceSubgrupoResult>> MapearSubgruposAsync(List<ApoliceSubgrupoModel> rows, CancellationToken ct)
     {
-        var ids=rows.Where(e=>e.ConvenioCobrancaId.HasValue).Select(e=>e.ConvenioCobrancaId!.Value).Distinct().ToList();
-        if(ids.Count>0 && _convenios is null) throw new InvalidOperationException("Consulta de Convênios não configurada.");
-        var refs=ids.Count==0?new Dictionary<long,WebApolice.Modulos.Financeiro.Contracts.ConvenioCobrancaReferencia>():
-            (await _convenios!.ObterPorIdsAsync(ids,ct)).ToDictionary(e=>e.Id);
-        return rows.Select(e=>{var c=e.ConvenioCobrancaId.HasValue?refs.GetValueOrDefault(e.ConvenioCobrancaId.Value):null;
-            return new ApoliceSubgrupoResult(e.PublicId,e.Nome,e.Observacao,e.Ativo,c?.PublicId,c?.Nome,c?.Ativo);}).ToList();
+        var ids = rows.Where(e => e.ConvenioCobrancaId.HasValue).Select(e => e.ConvenioCobrancaId!.Value).Distinct().ToList();
+        if (ids.Count > 0 && _convenios is null) throw new InvalidOperationException("Consulta de Convênios não configurada.");
+        var refs = ids.Count == 0 ? new Dictionary<long, WebApolice.Modulos.Financeiro.Contracts.ConvenioCobrancaReferencia>() :
+            (await _convenios!.ObterPorIdsAsync(ids, ct)).ToDictionary(e => e.Id);
+        return rows.Select(e =>
+        {
+            var c = e.ConvenioCobrancaId.HasValue ? refs.GetValueOrDefault(e.ConvenioCobrancaId.Value) : null;
+            return new ApoliceSubgrupoResult(e.PublicId, e.Nome, e.Observacao, e.Ativo, c?.PublicId, c?.Nome, c?.Ativo);
+        }).ToList();
     }
 
     private async Task<Dictionary<long, string>> ObterNomesGlobaisAsync(string tabela, List<long> ids, CancellationToken cancellationToken)
@@ -778,7 +803,7 @@ public class ApolicesQueries : IApolicesQueries
                 FROM cadastro.{tabela} e 
                 INNER JOIN core.pessoa p ON e.pessoa_id = p.id 
                 WHERE e.id IN ({idsCsv})";
-            
+
             using var reader = await cmd.ExecuteReaderAsync(cancellationToken);
             while (await reader.ReadAsync(cancellationToken))
             {

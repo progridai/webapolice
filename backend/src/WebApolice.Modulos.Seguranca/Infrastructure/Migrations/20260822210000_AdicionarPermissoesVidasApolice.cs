@@ -2,9 +2,14 @@
 
 #nullable disable
 
+using Microsoft.EntityFrameworkCore.Infrastructure;
+using WebApolice.Modulos.Seguranca.Infrastructure.Persistence;
+
 namespace WebApolice.Modulos.Seguranca.Infrastructure.Migrations
 {
     /// <inheritdoc />
+    [DbContext(typeof(SegurancaDbContext))]
+    [Migration("20260822210000_AdicionarPermissoesVidasApolice")]
     public partial class AdicionarPermissoesVidasApolice : Migration
     {
         /// <inheritdoc />

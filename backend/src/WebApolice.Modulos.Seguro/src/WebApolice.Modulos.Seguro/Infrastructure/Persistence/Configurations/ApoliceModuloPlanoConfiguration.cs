@@ -18,8 +18,8 @@ public sealed class ApoliceModuloPlanoConfiguration : IEntityTypeConfiguration<A
         b.Property(e => e.CreatedAt).HasDefaultValueSql("now()");
         b.Property(e => e.UpdatedAt).HasDefaultValueSql("now()");
         // Um único Plano por vínculo, inclusive quando inativo.
-        b.HasIndex(e => e.ApoliceModuloId).IsUnique();
-        b.HasOne(e => e.ApoliceModulo).WithOne().HasForeignKey<ApoliceModuloPlanoModel>(e => e.ApoliceModuloId).OnDelete(DeleteBehavior.Restrict);
+        b.HasIndex(e => e.ApoliceModuloId).IsUnique().HasFilter("deleted_at IS NULL");
+        b.HasOne(e => e.ApoliceModulo).WithMany().HasForeignKey(e => e.ApoliceModuloId).OnDelete(DeleteBehavior.Restrict);
         b.HasMany(e => e.Coberturas).WithOne(e => e.Plano).HasForeignKey(e => e.ApoliceModuloPlanoId).OnDelete(DeleteBehavior.Restrict);
     }
 }
@@ -37,7 +37,7 @@ public sealed class ApoliceModuloCoberturaConfiguration : IEntityTypeConfigurati
         b.Property(e => e.PublicId).HasDefaultValueSql("gen_random_uuid()");
         b.HasIndex(e => e.PublicId).IsUnique();
         b.HasOne(e => e.Cobertura).WithMany().HasForeignKey(e => e.CoberturaId).OnDelete(DeleteBehavior.Restrict);
-        b.HasIndex(e => new { e.ApoliceModuloPlanoId, e.CoberturaId }).IsUnique();
+        b.HasIndex(e => new { e.ApoliceModuloPlanoId, e.CoberturaId }).IsUnique().HasFilter("deleted_at IS NULL");
         b.Property(e => e.PremioTitular).HasPrecision(18, 2);
         b.Property(e => e.PremioConjuge).HasPrecision(18, 2);
         b.Property(e => e.CreatedAt).HasDefaultValueSql("now()");

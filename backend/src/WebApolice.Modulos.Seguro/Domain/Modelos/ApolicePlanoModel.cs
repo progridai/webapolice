@@ -6,6 +6,7 @@ namespace WebApolice.Modulos.Seguro.Domain.Modelos;
 public class ApolicePlanoModel
 {
     public long Id { get; set; }
+    public Guid PublicId { get; set; }
     public long ApoliceProdutoId { get; set; }
     
     // FK Global
@@ -18,6 +19,7 @@ public class ApolicePlanoModel
     
     public DateTimeOffset CreatedAt { get; set; }
     public DateTimeOffset UpdatedAt { get; set; }
+    public DateTimeOffset? DeletedAt { get; set; }
 
     // Navegações
     public ApoliceProdutoModel? ApoliceProduto { get; set; }

@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using WebApolice.Modulos.Seguro.Application.Ports;
 using WebApolice.Modulos.Seguro.Application.UseCases.Apolices.CriarApolice;
 using WebApolice.Modulos.Seguro.Application.UseCases.Apolices.ListarApolices;
@@ -23,8 +24,15 @@ public static class SeguroModuleExtensions
             })
             .UseSnakeCaseNamingConvention());
 
+        services.TryAddSingleton<TimeProvider>(TimeProvider.System);
+        services.AddHostedService<WebApolice.Modulos.Seguro.Infrastructure.Persistence.ProcessadorVigenciasPropostas>();
         services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(SeguroModuleExtensions).Assembly));
         services.Configure<WebApolice.Modulos.Seguro.Application.UseCases.Propostas.ConfiguracaoPropostas>(configuration.GetSection("Propostas"));
+        services.AddScoped<WebApolice.Modulos.Cadastro.Contracts.IClienteVinculosUso, WebApolice.Modulos.Seguro.Infrastructure.Persistence.Queries.ClienteVinculosUso>();
+        services.AddScoped<IOperacaoVidas, WebApolice.Modulos.Seguro.Infrastructure.Persistence.OperacaoVidas>();
+        services.AddScoped<IExclusaoVinculosApolice, ExclusaoVinculosApolice>();
+        services.AddScoped<WebApolice.Modulos.Seguro.Application.UseCases.Apolices.ExcluirApoliceVida.ExcluirApoliceVidaHandler>();
+        services.AddScoped<WebApolice.Modulos.Seguro.Application.UseCases.Apolices.Vinculos.ListarVinculosVidaHandler>();
         services.AddScoped<IOperacaoPropostas, WebApolice.Modulos.Seguro.Infrastructure.Persistence.OperacaoPropostas>();
 
         // Repositories & Queries

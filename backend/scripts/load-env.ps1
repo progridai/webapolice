@@ -12,6 +12,7 @@ $RequiredKeys = @(
     "KeycloakAdmin__ClientId",
     "KeycloakAdmin__ClientSecret"
 )
+$OptionalKeys = @('Propostas__StatusDescartadaCodigo', 'Propostas__StatusCanceladaCodigo', 'Propostas__StatusInicialCodigo', 'Propostas__StatusConfirmadaCodigo', 'Propostas__ProcessarAgendamentos')
 
 $PublicDefaults = @{
     "ASPNETCORE_ENVIRONMENT" = "Development"
@@ -131,6 +132,9 @@ if ($Updated) {
         $FileContent += "$Key=$($EnvVars[$Key])"
     }
     $FileContent += "$TestesPermitirBancoCompartilhadoKey=$($EnvVars[$TestesPermitirBancoCompartilhadoKey])"
+    foreach ($Key in $OptionalKeys) {
+        if ($EnvVars.ContainsKey($Key)) { $FileContent += "$Key=$($EnvVars[$Key])" }
+    }
     
     Set-Content -Path $EnvFilePath -Value $FileContent -Encoding UTF8
     Write-Host "Arquivo .env.local gerado/atualizado com sucesso." -ForegroundColor Green
@@ -145,3 +149,6 @@ foreach ($Key in $RequiredKeys) {
     [Environment]::SetEnvironmentVariable($Key, $EnvVars[$Key], [EnvironmentVariableTarget]::Process)
 }
 [Environment]::SetEnvironmentVariable($TestesPermitirBancoCompartilhadoKey, $EnvVars[$TestesPermitirBancoCompartilhadoKey], [EnvironmentVariableTarget]::Process)
+foreach ($Key in $OptionalKeys) {
+    if ($EnvVars.ContainsKey($Key)) { [Environment]::SetEnvironmentVariable($Key, $EnvVars[$Key], [EnvironmentVariableTarget]::Process) }
+}

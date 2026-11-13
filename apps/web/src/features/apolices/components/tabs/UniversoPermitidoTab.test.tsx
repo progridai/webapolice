@@ -3,14 +3,18 @@ import { render, screen } from '@testing-library/react';
 import { UniversoPermitidoTab } from './UniversoPermitidoTab';
 import { useApoliceUniversoPermitido } from '../../hooks/useApoliceUniversoPermitido';
 import { alterarPremiosApolice } from '../../api/apolices.api';
+import { useAuthorization } from '../../../../auth/AuthorizationProvider';
+import { makeAuthorization } from '../../../../../tests/helpers/authorization';
 
 vi.mock('../../hooks/useApoliceUniversoPermitido');
 vi.mock('../../api/apolices.api');
+vi.mock('../../../../auth/AuthorizationProvider');
 const refetch = vi.fn().mockResolvedValue(undefined);
 
 describe('Prêmios no Universo Permitido', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.mocked(useAuthorization).mockReturnValue(makeAuthorization());
     vi.mocked(useApoliceUniversoPermitido).mockReturnValue({
       isLoading: false,
       error: null,

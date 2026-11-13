@@ -21,16 +21,16 @@ public class ApoliceRepository : IApoliceRepository
     public async Task<ApoliceModel?> ObterPorIdAsync(long apoliceId, CancellationToken cancellationToken)
     {
         return await _dbContext.Apolices
-            .Include(a => a.Ramos)
-            .Include(a => a.Subestipulantes)
+            .Include(a => a.Ramos.Where(r => r.DeletedAt == null))
+            .Include(a => a.Subestipulantes.Where(s => s.DeletedAt == null))
             .FirstOrDefaultAsync(a => a.Id == apoliceId && a.DeletedAt == null, cancellationToken);
     }
 
     public async Task<ApoliceModel?> ObterPorPublicIdAsync(Guid publicId, CancellationToken cancellationToken)
     {
         return await _dbContext.Apolices
-            .Include(a => a.Ramos)
-            .Include(a => a.Subestipulantes)
+            .Include(a => a.Ramos.Where(r => r.DeletedAt == null))
+            .Include(a => a.Subestipulantes.Where(s => s.DeletedAt == null))
             .FirstOrDefaultAsync(a => a.PublicId == publicId && a.DeletedAt == null, cancellationToken);
     }
 

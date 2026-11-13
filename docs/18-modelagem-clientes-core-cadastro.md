@@ -2,6 +2,7 @@
 
 > Atualização de 06/10/2026: as referências históricas a Subgrupo global neste documento foram superadas pelo Subgrupo contextual em `seguro.apolice_subgrupo`, pertencente à Apólice. Vidas podem referenciar Subgrupo e/ou Módulo da mesma Apólice; Subestipulantes são independentes. PKs/FKs numéricas são internas e novos contratos utilizam UUID, conforme [ADR-007](adr/ADR-007-identificadores.md). Convênios, Planos e Coberturas seguem as regras de [Cadastros de Seguro](21-cadastros-convenios-planos-coberturas.md).
 
+> Atualização de 10/11/2026: os vínculos exibem as apólices associadas em Vidas, por matrícula, incluindo nome e números dos ramos. A projeção distingue apólices do mesmo estipulante e admite mais de uma apólice por vínculo; não adiciona `apolice_id` ao cadastro da matrícula. Regras de leitura, inativação, autorização e contrato estão no [documento 81](81-vinculos-clientes-participacoes.md#identificação-das-apólices-no-cadastro--10112026).
 
 ## Objetivo do documento
 
@@ -179,14 +180,16 @@ Domínio de estados possíveis em que o cliente se encontra.
 
 ### `cadastro.cliente_vinculo`
 
+Atualização de 09/11/2026: manutenção e seleção contextual na participação da Vida implementadas conforme [regras de vínculos e participações](81-vinculos-clientes-participacoes.md). O `public_id` UUID identifica o vínculo nos novos contratos; IDs numéricos permanecem internos.
+
 Responsável por armazenar toda forma de vínculo, subordinação de grupo ou convênio (ex: emprego público, empresa, sindicato) pertencente ao cliente.
 
 **Principais Campos:**
 * `id`
+* `public_id`
 * `cliente_id`
 * `pessoa_id`
 * `estipulante_id`
-* `subestipulante_id`
 * `grupo_id`
 * `subgrupo_id`
 * `lotacao_id`
@@ -204,10 +207,11 @@ Responsável por armazenar toda forma de vínculo, subordinação de grupo ou co
 **Regras e Uso:**
 * É possível e comum um cliente possuir múltiplos vínculos (múltiplas matrículas e empregos); não assumir cardinalidade 1:1 de vínculos por cliente;
 * O atributo matrícula é sempre referente a determinado vínculo e não à pessoa em si;
-* Os vínculos servem como elo referencial para níveis de hierarquia: estipulante, subestipulante, grupo, subgrupo e lotação;
+* Os vínculos servem como elo referencial para níveis de hierarquia: estipulante, grupo, subgrupo e lotação;
 * Campos contendo banco, agência e conta corrente representam dados de alto teor financeiro e sensibilidade — devem ser devolvidos à interface apenas mediante necessidade e autorização formal;
 * A coluna `criterio_criacao` atende a necessidades técnicas subjacentes do backend/negócio;
-* As interfaces de Detalhe e formulários necessitam separar visualmente vínculos que estão ativos e os inativos (histórico).
+* A listagem paginada do detalhe apresenta ativos e inativos, identificados pela situação. Permite incluir, corrigir antes do uso e inativar/reativar. Após uso, matrícula/estipulante ficam preservados.
+* `subestipulante_id` foi removido do vínculo pela migration de 24/09/2026. Subgrupo/Módulo da participação são referências próprias da Apólice e não são substituídos pelos campos cadastrais do vínculo.
 
 ### `cadastro.cliente_dependente`
 
@@ -362,3 +366,9 @@ Apesar da modelagem inicial clara, durante o desenrolar das sprints algumas deci
 ## Padronização textual obrigatória
 
 Os campos humanos de todos os módulos são persistidos em Title Case. Colunas técnicas, de pesquisa normalizada e de evidências históricas mantêm o formato próprio. Consulte [26-padronizacao-title-case.md](26-padronizacao-title-case.md), incluindo o script transacional para normalizar dados existentes e instalar os triggers que cobrem SQL direto e importadores. Não há alteração de tipo ou tamanho das colunas.
+
+## Criação de Vínculo Durante a Participação na Apólice
+
+Na inclusão/edição da Vida, o usuário pode selecionar um vínculo compatível existente ou informar uma nova matrícula. O backend obtém o estipulante da apólice e cria `cliente_vinculo` junto com a participação, histórico e auditoria na mesma transação. A criação exige também `clientes.alterar`; selecionar um vínculo existente mantém as permissões de Vida. Cancelar o formulário não grava vínculo. O detalhe do Cliente continua permitindo consulta e manutenção. Não há preenchimento automático de vínculos legados incompletos nem nova migration. Regras e verificações no [documento 81](81-vinculos-clientes-participacoes.md).
+
+Correção de 10/11/2026: matrículas ativas sem estipulante e sem uso em Vida/Proposta também aparecem no seletor contextual. A escolha é identificada na tela e só completa o estipulante ao salvar com `completarVinculoSemEstipulante: true`, exigindo `clientes.alterar`. A operação reutiliza o UUID/registro escolhido e preserva a matrícula e os demais campos legados. A associação, Vida e auditoria são atômicas; não há criação duplicada ou preenchimento em lote. Vínculos de outro estipulante e identidades já utilizadas continuam protegidos.

@@ -1,5 +1,13 @@
 /** Política de dados humanos: manter em sincronia com PadronizacaoTexto e docs/26. */
 const humanFields = new Set([
+  'motivopendenciavigencia',
+  'parentescoregistrado',
+  'justificativaajustepremio',
+  'subgruponomeregistrado',
+  'modulonomeregistrado',
+  'planonomeregistrado',
+  'coberturanomeregistrado',
+  'coberturanomereduzidoregistrado',
   'nome',
   'nomefantasia',
   'razaosocial',

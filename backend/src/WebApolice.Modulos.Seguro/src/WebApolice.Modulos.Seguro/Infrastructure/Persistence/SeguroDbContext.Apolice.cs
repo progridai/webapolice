@@ -23,6 +23,10 @@ public partial class SeguroDbContext
 
     partial void OnModelCreatingPartial(ModelBuilder modelBuilder)
     {
+        modelBuilder.ApplyConfiguration(new PropostaOperacionalConfiguration());
+        modelBuilder.ApplyConfiguration(new PropostaItemOperacionalConfiguration());
+        modelBuilder.ApplyConfiguration(new PropostaCoberturaOperacionalConfiguration());
+        modelBuilder.ApplyConfiguration(new PropostaBeneficiarioOperacionalConfiguration());
         modelBuilder.ApplyConfiguration(new RamoConfiguration());
         modelBuilder.ApplyConfiguration(new ApoliceConfiguration());
         modelBuilder.ApplyConfiguration(new ApoliceConfiguracaoConfiguration());
@@ -39,6 +43,14 @@ public partial class SeguroDbContext
         modelBuilder.ApplyConfiguration(new ApoliceModuloCoberturaConfiguration());
         
         // Atualiza a configuração do Propostum
+        modelBuilder.Entity<ApoliceRamoModel>().Property(e => e.PublicId).HasDefaultValueSql("gen_random_uuid()");
+        modelBuilder.Entity<ApoliceRamoModel>().HasIndex(e => e.PublicId).IsUnique();
+        modelBuilder.Entity<ApoliceSubestipulanteModel>().Property(e => e.PublicId).HasDefaultValueSql("gen_random_uuid()");
+        modelBuilder.Entity<ApoliceSubestipulanteModel>().HasIndex(e => e.PublicId).IsUnique();
+        modelBuilder.Entity<ApoliceProdutoModel>().Property(e => e.PublicId).HasDefaultValueSql("gen_random_uuid()");
+        modelBuilder.Entity<ApoliceProdutoModel>().HasIndex(e => e.PublicId).IsUnique();
+        modelBuilder.Entity<ApolicePlanoModel>().Property(e => e.PublicId).HasDefaultValueSql("gen_random_uuid()");
+        modelBuilder.Entity<ApolicePlanoModel>().HasIndex(e => e.PublicId).IsUnique();
         modelBuilder.Entity<Propostum>(entity => 
         {
             entity.Property(e => e.ApoliceId).HasColumnName("apolice_id");

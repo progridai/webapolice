@@ -29,7 +29,7 @@ public static class CadastroModuleExtensions
         services.AddDbContext<CadastroDbContext>((sp, options) =>
         {
             var connection = sp.GetRequiredService<System.Data.Common.DbConnection>();
-            options.UseNpgsql(connection, npgsqlOptions => 
+            options.UseNpgsql(connection, npgsqlOptions =>
             {
                 npgsqlOptions.MigrationsHistoryTable("__EFMigrationsHistory", "cadastro");
             }).UseSnakeCaseNamingConvention();
@@ -46,18 +46,21 @@ public static class CadastroModuleExtensions
         services.AddScoped<ICooperadoRepository, CooperadoRepository>();
         services.AddScoped<ICooperadosQueries, CooperadosQueries>();
         services.AddScoped<ICadastroTransactionManager, CadastroTransactionManager>();
-        
+
         services.AddScoped<IEstipulantesQueries, EstipulantesQueries>();
         services.AddScoped<IEstipulanteRepository, EstipulanteRepository>();
         services.AddScoped<ISeguradorasQueries, SeguradorasQueries>();
         services.AddScoped<ISeguradoraRepository, SeguradoraRepository>();
-        
+
         services.AddScoped<ICorretorasQueries, CorretorasQueries>();
         services.AddScoped<ICorretoraRepository, CorretoraRepository>();
 
         services.AddScoped<ISubestipulantesQueries, SubestipulantesQueries>();
         services.AddScoped<ISubestipulanteRepository, SubestipulanteRepository>();
 
+        services.AddScoped<IClienteVinculosRepository, ClienteVinculosRepository>();
+        services.AddScoped<WebApolice.Modulos.Cadastro.Contracts.ICadastroVinculosVida, CadastroVinculosVida>();
+        services.AddScoped<WebApolice.Modulos.Cadastro.Application.UseCases.Vinculos.ClienteVinculosHandler>();
         // Clientes Handlers
         services.AddScoped<CadastrarClienteHandler>();
         services.AddScoped<AlterarClienteHandler>();
@@ -65,7 +68,7 @@ public static class CadastroModuleExtensions
         services.AddScoped<ListarClientesHandler>();
         services.AddScoped<AtivarClienteHandler>();
         services.AddScoped<InativarClienteHandler>();
-        
+
         // Cooperados Handlers
         services.AddScoped<WebApolice.Modulos.Cadastro.Application.UseCases.CadastrarCooperado.CadastrarCooperadoHandler>();
         services.AddScoped<WebApolice.Modulos.Cadastro.Application.UseCases.AlterarCooperado.AlterarCooperadoHandler>();
@@ -73,7 +76,7 @@ public static class CadastroModuleExtensions
         services.AddScoped<WebApolice.Modulos.Cadastro.Application.UseCases.ListarCooperados.ListarCooperadosHandler>();
         services.AddScoped<WebApolice.Modulos.Cadastro.Application.UseCases.AtivarCooperado.AtivarCooperadoHandler>();
         services.AddScoped<WebApolice.Modulos.Cadastro.Application.UseCases.InativarCooperado.InativarCooperadoHandler>();
-        
+
         // Estipulantes Handlers
         services.AddScoped<CriarEstipulanteHandler>();
         services.AddScoped<AtualizarEstipulanteHandler>();

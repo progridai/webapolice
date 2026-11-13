@@ -14,7 +14,8 @@ public sealed record ApoliceSubestipulanteResult(
     string? Codigo,
     DateOnly? DataInicio,
     DateOnly? DataFim,
-    bool Ativo
+    bool Ativo,
+    Guid VinculoPublicId = default
 );
 
 

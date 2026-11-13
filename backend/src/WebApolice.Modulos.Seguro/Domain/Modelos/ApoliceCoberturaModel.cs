@@ -21,6 +21,7 @@ public class ApoliceCoberturaModel
     
     public DateTimeOffset CreatedAt { get; set; }
     public DateTimeOffset UpdatedAt { get; set; }
+    public DateTimeOffset? DeletedAt { get; set; }
 
     // Navegações
     public ApolicePlanoModel? ApolicePlano { get; set; }

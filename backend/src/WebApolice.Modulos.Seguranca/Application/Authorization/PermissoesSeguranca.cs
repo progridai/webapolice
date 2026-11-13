@@ -76,6 +76,7 @@ public static class PermissoesSeguranca
     
     public static class ApolicesRamos
     {
+        public const string Excluir = "apolices.ramos.excluir";
         public const string Inserir = "apolices.ramos.inserir";
         public const string Alterar = "apolices.ramos.alterar";
         public const string Inativar = "apolices.ramos.inativar";
@@ -83,6 +84,7 @@ public static class PermissoesSeguranca
 
     public static class ApolicesSubestipulantes
     {
+        public const string Excluir = "apolices.subestipulantes.excluir";
         public const string Inserir = "apolices.subestipulantes.inserir";
         public const string Alterar = "apolices.subestipulantes.alterar";
         public const string Inativar = "apolices.subestipulantes.inativar";
@@ -95,6 +97,7 @@ public static class PermissoesSeguranca
     /// </summary>
     public static class ApolicesSubgrupos
     {
+        public const string Excluir = "apolices.subgrupos.excluir";
         public const string Inserir = "apolices.subgrupos.inserir";
         public const string Alterar = "apolices.subgrupos.alterar";
         public const string Inativar = "apolices.subgrupos.inativar";
@@ -102,6 +105,7 @@ public static class PermissoesSeguranca
 
     public static class ApolicesModulos
     {
+        public const string Excluir = "apolices.modulos.excluir";
         public const string Inserir = "apolices.modulos.inserir";
         public const string Alterar = "apolices.modulos.alterar";
         public const string Inativar = "apolices.modulos.inativar";
@@ -109,9 +113,15 @@ public static class PermissoesSeguranca
 
     public static class ApolicesVidas
     {
+        public const string Excluir = "apolices.vidas.excluir";
         public const string Inserir = "apolices.vidas.inserir";
         public const string Alterar = "apolices.vidas.alterar";
         public const string Inativar = "apolices.vidas.inativar";
+    }
+
+    public static class ApolicesUniverso
+    {
+        public const string Excluir = "apolices.universo.excluir";
     }
 
     public static class Ramos

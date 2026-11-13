@@ -12,6 +12,7 @@ public sealed class ApoliceModuloPlanoModel
     public bool Ativo { get; set; } = true;
     public DateTimeOffset CreatedAt { get; set; }
     public DateTimeOffset UpdatedAt { get; set; }
+    public DateTimeOffset? DeletedAt { get; set; }
     public ApoliceModuloModel ApoliceModulo { get; set; } = null!;
     public ICollection<ApoliceModuloCoberturaModel> Coberturas { get; set; } = new List<ApoliceModuloCoberturaModel>();
 }
@@ -28,5 +29,6 @@ public sealed class ApoliceModuloCoberturaModel
     public bool Ativo { get; set; } = true;
     public DateTimeOffset CreatedAt { get; set; }
     public DateTimeOffset UpdatedAt { get; set; }
+    public DateTimeOffset? DeletedAt { get; set; }
     public ApoliceModuloPlanoModel Plano { get; set; } = null!;
 }

@@ -48,6 +48,8 @@ internal sealed class ClienteVinculoConfiguration : IEntityTypeConfiguration<Cli
     {
         builder.ToTable("cliente_vinculo", "cadastro");
         builder.HasKey(v => v.Id);
+        builder.HasIndex(v => v.PublicId).IsUnique();
+        builder.Property(v => v.PublicId).HasDefaultValueSql("gen_random_uuid()");
     }
 }
 

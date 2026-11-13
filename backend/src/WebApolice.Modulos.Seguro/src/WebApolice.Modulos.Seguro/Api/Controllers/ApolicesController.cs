@@ -37,14 +37,14 @@ public class ApolicesController : ControllerBase
         CancellationToken cancellationToken)
     {
         var query = new ListarApolicesQuery(
-            pagina, 
-            tamanhoPagina, 
-            busca, 
-            status, 
-            ativo, 
-            estipulanteId, 
-            seguradoraId, 
-            tipoRamo, 
+            pagina,
+            tamanhoPagina,
+            busca,
+            status,
+            ativo,
+            estipulanteId,
+            seguradoraId,
+            tipoRamo,
             vigenciaDataReferencia);
 
         var result = await handler.Handle(query, cancellationToken);
@@ -54,8 +54,8 @@ public class ApolicesController : ControllerBase
     [HttpPost]
     [AuthorizePermissao(PermissoesSeguranca.Apolices.Inserir)]
     public async Task<IActionResult> Post(
-        [FromBody] CriarApoliceRequest request, 
-        [FromServices] CriarApoliceHandler handler, 
+        [FromBody] CriarApoliceRequest request,
+        [FromServices] CriarApoliceHandler handler,
         CancellationToken cancellationToken)
     {
         var command = new CriarApoliceCommand(
@@ -70,7 +70,7 @@ public class ApolicesController : ControllerBase
         );
 
         var result = await handler.Handle(command, cancellationToken);
-        
+
         return CreatedAtAction("GetById", new { publicId = result.PublicId }, result);
     }
 
@@ -97,7 +97,7 @@ public class ApolicesController : ControllerBase
         await handler.Handle(command, cancellationToken);
         return NoContent();
     }
-    
+
     [HttpGet("{publicId}")]
     [AuthorizePermissao(PermissoesSeguranca.Apolices.Visualizar)]
     public async Task<IActionResult> GetById(
@@ -323,14 +323,22 @@ public class ApolicesController : ControllerBase
         [FromBody] CriarApoliceVidaRequest request,
         [FromServices] WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Application.UseCases.Apolices.CriarApoliceVida.CriarApoliceVidaHandler handler,
         [FromServices] WebApolice.Modulos.Seguranca.Application.Ports.IContextoUsuarioAutenticado userContext,
+        [FromServices] IAuthorizationService authorization,
         CancellationToken cancellationToken)
     {
+        if ((request.NovaMatricula is not null || request.CompletarVinculoSemEstipulante) && !(await authorization.AuthorizeAsync(User, null,
+            PermissoesSeguranca.PrefixoPolicy + PermissoesSeguranca.Clientes.Alterar)).Succeeded)
+            return Forbid();
+
         var command = new WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Application.UseCases.Apolices.CriarApoliceVida.CriarApoliceVidaCommand
         {
             ApolicePublicId = publicId,
             ClientePublicId = request.ClientePublicId,
             ApoliceSubgrupoPublicId = request.ApoliceSubgrupoPublicId,
             ApoliceModuloPublicId = request.ApoliceModuloPublicId,
+            ClienteVinculoPublicId = request.ClienteVinculoPublicId,
+            NovaMatricula = request.NovaMatricula,
+            CompletarVinculoSemEstipulante = request.CompletarVinculoSemEstipulante,
             DataInicioVigencia = request.DataInicioVigencia,
             DataFimVigencia = request.DataFimVigencia,
             Observacao = request.Observacao,
@@ -348,8 +356,13 @@ public class ApolicesController : ControllerBase
         [FromBody] AlterarApoliceVidaRequest request,
         [FromServices] WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Application.UseCases.Apolices.AlterarApoliceVida.AlterarApoliceVidaHandler handler,
         [FromServices] WebApolice.Modulos.Seguranca.Application.Ports.IContextoUsuarioAutenticado userContext,
+        [FromServices] IAuthorizationService authorization,
         CancellationToken cancellationToken)
     {
+        if ((request.NovaMatricula is not null || request.CompletarVinculoSemEstipulante) && !(await authorization.AuthorizeAsync(User, null,
+            PermissoesSeguranca.PrefixoPolicy + PermissoesSeguranca.Clientes.Alterar)).Succeeded)
+            return Forbid();
+
         var command = new WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Application.UseCases.Apolices.AlterarApoliceVida.AlterarApoliceVidaCommand
         {
             ApolicePublicId = publicId,
@@ -359,11 +372,21 @@ public class ApolicesController : ControllerBase
             Observacao = request.Observacao,
             ApoliceSubgrupoPublicId = request.ApoliceSubgrupoPublicId,
             ApoliceModuloPublicId = request.ApoliceModuloPublicId,
+            ClienteVinculoPublicId = request.ClienteVinculoPublicId,
+            NovaMatricula = request.NovaMatricula,
+            CompletarVinculoSemEstipulante = request.CompletarVinculoSemEstipulante,
             UsuarioPublicId = Guid.Parse(userContext.KeycloakSub ?? Guid.Empty.ToString())
         };
         await handler.Handle(command, cancellationToken);
         return NoContent();
     }
+
+    [HttpGet("{publicId:guid}/vidas/vinculos-disponiveis")]
+    [AuthorizePermissao(PermissoesSeguranca.Apolices.Visualizar)]
+    public async Task<IActionResult> VinculosDisponiveis(Guid publicId, [FromQuery] Guid clientePublicId,
+        [FromServices] WebApolice.Modulos.Seguro.Application.UseCases.Apolices.Vinculos.ListarVinculosVidaHandler handler,
+        CancellationToken ct, [FromQuery] int pagina = 1, [FromQuery] int tamanhoPagina = 20) =>
+        Ok(await handler.Handle(publicId, clientePublicId, pagina, tamanhoPagina, ct));
 
     [HttpPatch("{publicId}/vidas/{vidaPublicId:guid}/inativar")]
     [AuthorizePermissao(PermissoesSeguranca.ApolicesVidas.Inativar)]
@@ -381,6 +404,18 @@ public class ApolicesController : ControllerBase
             UsuarioPublicId = Guid.Parse(userContext.KeycloakSub ?? Guid.Empty.ToString())
         };
         await handler.Handle(command, cancellationToken);
+        return NoContent();
+    }
+
+    [HttpDelete("{publicId:guid}/vidas/{vidaPublicId:guid}")]
+    [AuthorizePermissao(PermissoesSeguranca.ApolicesVidas.Excluir)]
+    public async Task<IActionResult> ExcluirVida(Guid publicId, Guid vidaPublicId,
+        [FromServices] WebApolice.Modulos.Seguro.Application.UseCases.Apolices.ExcluirApoliceVida.ExcluirApoliceVidaHandler handler,
+        [FromServices] WebApolice.Modulos.Seguranca.Application.Ports.IContextoUsuarioAutenticado userContext,
+        CancellationToken ct)
+    {
+        await handler.Handle(new(publicId, vidaPublicId,
+            Guid.Parse(userContext.KeycloakSub ?? Guid.Empty.ToString())), ct);
         return NoContent();
     }
 

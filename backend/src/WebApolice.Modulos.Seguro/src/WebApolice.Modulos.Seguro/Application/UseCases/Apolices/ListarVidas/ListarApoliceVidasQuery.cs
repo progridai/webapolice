@@ -26,5 +26,8 @@ public sealed record ApoliceVidaResult(
     DateOnly? DataFimVigencia,
     string Status,
     bool Ativo,
-    string? Observacao
+    string? Observacao,
+    Guid? ClienteVinculoPublicId = null,
+    string? VinculoMatricula = null,
+    bool PossuiPropostas = false
 );

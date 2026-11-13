@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { ExcluirVinculoButton } from '../ExcluirVinculoButton';
 import { useApoliceSubestipulantes } from '../../hooks/useApoliceSubestipulantes';
 import {
   DataTable,
@@ -127,6 +128,13 @@ export const SubestipulantesTab: React.FC<SubestipulantesTabProps> = ({
       align: 'right',
       render: (item) => (
         <div className="flex gap-2 justify-end">
+          <ExcluirVinculoButton
+            apolicePublicId={publicId}
+            tipo="subestipulantes"
+            vinculoPublicId={item.vinculoPublicId}
+            identificacao={`Subestipulante ${item.nome}`}
+            onSucesso={() => void refetch()}
+          />
           {podeAlterar && item.ativo && (
             <Button
               variant="secondary"
@@ -187,7 +195,9 @@ export const SubestipulantesTab: React.FC<SubestipulantesTabProps> = ({
         <DataTable
           data={data || []}
           columns={columns}
-          keyExtractor={(item) => item.subestipulantePublicId}
+          keyExtractor={(item) =>
+            item.vinculoPublicId ?? item.subestipulantePublicId
+          }
           isLoading={isLoading}
           aria-label="Lista de Subestipulantes da Apólice"
         />

@@ -1,4 +1,5 @@
 import React from 'react';
+import { ExcluirVinculoButton } from '../ExcluirVinculoButton';
 import { formatarPremio } from '../../../../shared/utils/formatters';
 import { useApoliceUniversoPermitido } from '../../hooks/useApoliceUniversoPermitido';
 import { Alert, Button, EmptyState } from '../../../../components/ui';
@@ -55,13 +56,20 @@ export const UniversoPermitidoTab: React.FC<UniversoPermitidoTabProps> = ({
       </Alert>
       {data?.produtos.map((produto) => (
         <div
-          key={produto.produtoIdInternal}
-          className="border border-borda rounded-lg overflow-hidden bg-white shadow-sm"
+          key={produto.publicId ?? produto.produtoIdInternal}
+          className="border border-borda rounded-lg overflow-hidden bg-fundo-superficie shadow-sm"
         >
           <div className="bg-fundo-secundario px-4 py-3 border-b border-borda flex justify-between items-center">
             <h3 className="font-semibold text-texto-principal text-lg">
-              Produto {produto.produtoIdInternal}
+              {produto.nome || `Produto ${produto.produtoIdInternal}`}
             </h3>
+            <ExcluirVinculoButton
+              apolicePublicId={publicId}
+              tipo="produtos-anteriores"
+              vinculoPublicId={produto.publicId}
+              identificacao={`Produto ${produto.nome || produto.produtoIdInternal}`}
+              onSucesso={() => void refetch()}
+            />
             <span
               className={`px-2 py-1 text-xs rounded-full font-medium ${produto.ativo ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}
             >
@@ -76,13 +84,20 @@ export const UniversoPermitidoTab: React.FC<UniversoPermitidoTabProps> = ({
             ) : (
               produto.planos.map((plano) => (
                 <div
-                  key={plano.planoIdInternal}
+                  key={plano.publicId ?? plano.planoIdInternal}
                   className="border border-borda rounded-md p-3 bg-fundo-principal"
                 >
                   <div className="flex justify-between items-center mb-2">
                     <h4 className="font-medium text-texto-principal">
                       {plano.nome ?? `Plano ${plano.planoIdInternal}`}
                     </h4>
+                    <ExcluirVinculoButton
+                      apolicePublicId={publicId}
+                      tipo="planos-anteriores"
+                      vinculoPublicId={plano.publicId}
+                      identificacao={`Plano ${plano.nome || plano.planoIdInternal}`}
+                      onSucesso={() => void refetch()}
+                    />
                     <span
                       className={`px-2 py-0.5 text-xs rounded-full ${plano.ativo ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}
                     >
@@ -107,14 +122,24 @@ export const UniversoPermitidoTab: React.FC<UniversoPermitidoTabProps> = ({
                       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
                         {plano.coberturas.map((cobertura) => (
                           <div
-                            key={cobertura.coberturaIdInternal}
-                            className="bg-white border border-borda rounded p-2 text-sm flex flex-col"
+                            key={
+                              cobertura.publicId ??
+                              cobertura.coberturaIdInternal
+                            }
+                            className="bg-fundo-superficie border border-borda rounded p-2 text-sm flex flex-col"
                           >
                             <div className="flex justify-between">
                               <span className="font-medium">
                                 {cobertura.nome ??
                                   `Cobertura ${cobertura.coberturaIdInternal}`}
                               </span>
+                              <ExcluirVinculoButton
+                                apolicePublicId={publicId}
+                                tipo="coberturas-anteriores"
+                                vinculoPublicId={cobertura.publicId}
+                                identificacao={`Cobertura ${cobertura.nome || cobertura.coberturaIdInternal}`}
+                                onSucesso={() => void refetch()}
+                              />
                               <span
                                 className={`text-xs ${cobertura.ativo ? 'text-green-600' : 'text-gray-400'}`}
                               >

@@ -51,6 +51,7 @@ export const ROUTES = {
   APOLICE_NOVA: '/apolices/nova',
   APOLICE_DETALHES: '/apolices/:publicId',
   APOLICE_EDITAR: '/apolices/:publicId/editar',
+  PROPOSTAS: '/propostas',
 
   /** Módulo de Ramos */
   RAMOS: '/ramos',

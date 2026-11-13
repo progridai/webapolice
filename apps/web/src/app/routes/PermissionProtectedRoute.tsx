@@ -6,12 +6,19 @@ interface PermissionProtectedRouteProps {
   children: React.ReactNode;
   moduloCodigo?: string;
   permissaoCodigo?: string;
+  recursoCodigo?: string;
   somenteOperador?: boolean;
 }
 
 export const PermissionProtectedRoute: React.FC<
   PermissionProtectedRouteProps
-> = ({ children, moduloCodigo, permissaoCodigo, somenteOperador }) => {
+> = ({
+  children,
+  moduloCodigo,
+  permissaoCodigo,
+  recursoCodigo,
+  somenteOperador,
+}) => {
   const location = useLocation();
   const {
     isLoading,
@@ -20,6 +27,7 @@ export const PermissionProtectedRoute: React.FC<
     usuarioAtivo,
     ehOperadorSistema,
     possuiModulo,
+    possuiRecurso,
     possuiPermissao,
     possuiAcessoTotal,
   } = useAuthorization();
@@ -37,6 +45,10 @@ export const PermissionProtectedRoute: React.FC<
   }
 
   if (moduloCodigo && !possuiModulo(moduloCodigo)) {
+    return <Navigate to="/forbidden" state={{ from: location }} replace />;
+  }
+
+  if (recursoCodigo && !possuiRecurso(recursoCodigo)) {
     return <Navigate to="/forbidden" state={{ from: location }} replace />;
   }
 

@@ -30,3 +30,7 @@ Permanecem requisitos de liberação: informar o código real do status inicial,
 ## Continuidade — 26/10/2026
 
 A migration estrutural foi aplicada em PostgreSQL 18.4 efêmero. PropostasPostgresTests confirmou gravações nativas sem IDs legados artificiais, resolução real de Cliente/Pessoa/vínculo, UUIDs de item persistidos e rollback por falha de auditoria, com leitura em outra conexão. Os códigos/IDs de status desses testes são artificiais e não autorizam a liberação do fluxo. Ainda faltam o código real do status inicial e as demais homologações/regras de negócio indicadas acima. Nenhuma migration foi aplicada a bases existentes.
+
+## Continuidade — Fluxo a Partir da Vida
+
+Na entrega de 11/11, conferida em 12/11/2026, o responsável definiu `RASCUNHO`, sem vigência ou geração financeira, e nova versão ligada à anterior, que só poderá ser substituída ao confirmar. A interface oferece criação/consulta pela Vida e área geral de Propostas; itens e coberturas nativos registram as condições do Plano contextual do Módulo. As migrations pontuais de identidade dos itens e catálogo de permissões foram verificadas e aplicadas somente em `webapolice_teste`, junto das evoluções específicas, sem atualização geral ou concessões a perfis. Confirmação e demais regras operacionais/financeiras continuam pendentes. O [documento 83](83-fluxo-operacional-propostas.md) descreve os contratos, limites, instalação e validação atuais; o histórico acima permanece preservado.

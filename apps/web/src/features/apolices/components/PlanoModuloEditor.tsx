@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { ExcluirVinculoButton } from './ExcluirVinculoButton';
 import { ROUTES } from '../../../app/routes/routePaths';
 import { useCallback, useEffect, useState } from 'react';
 import {
@@ -134,6 +135,17 @@ export function PlanoModuloEditor({
           <div className="flex items-center justify-between gap-3">
             <p className="font-medium">{plano.nome}</p>
             <StatusBadge status={plano.ativo ? 'ativo' : 'inativo'} />
+            <ExcluirVinculoButton
+              apolicePublicId={apolicePublicId}
+              tipo="planos-modulo"
+              vinculoPublicId={plano.publicId}
+              identificacao={`Plano ${plano.nome}`}
+              onSucesso={() => {
+                setEditarPlano(false);
+                setEditarCobertura(undefined);
+                void carregar();
+              }}
+            />
             {podeAlterar && (
               <Button
                 variant="secondary"
@@ -196,6 +208,16 @@ export function PlanoModuloEditor({
                   {plano.coberturas.map((c) => (
                     <tr key={c.publicId} className="border-b border-borda">
                       <td className="p-2">
+                        <ExcluirVinculoButton
+                          apolicePublicId={apolicePublicId}
+                          tipo="coberturas-modulo"
+                          vinculoPublicId={c.publicId}
+                          identificacao={`Cobertura ${c.nome}`}
+                          onSucesso={() => {
+                            setEditarCobertura(undefined);
+                            void carregar();
+                          }}
+                        />
                         {c.nome}
                         <div className="text-texto-secundario text-xs">
                           {c.nomeReduzido}

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { ExcluirVinculoButton } from '../ExcluirVinculoButton';
 import {
   Card,
   CardHeader,
@@ -124,7 +125,7 @@ export const RamosTab: React.FC<RamosTabProps> = ({
       ) : (
         <div className="flex flex-col gap-4">
           {ramos.map((ramo) => (
-            <Card key={ramo.publicId}>
+            <Card key={ramo.vinculoPublicId ?? ramo.publicId}>
               <CardHeader className="flex justify-between items-center">
                 <h3 className="text-lg font-medium text-texto-principal">
                   {ramo.ramoNome}{' '}
@@ -138,6 +139,13 @@ export const RamosTab: React.FC<RamosTabProps> = ({
                   )}
                 </h3>
                 <div className="flex items-center gap-2">
+                  <ExcluirVinculoButton
+                    apolicePublicId={apolice.publicId}
+                    tipo="ramos"
+                    vinculoPublicId={ramo.vinculoPublicId}
+                    identificacao={`Ramo ${ramo.ramoNome}`}
+                    onSucesso={() => onMutateSucesso?.()}
+                  />
                   {podeAlterar && ramo.ativo && (
                     <Button
                       variant="secondary"

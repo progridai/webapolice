@@ -8,6 +8,7 @@ import {
   Button,
   EmptyState,
   ConfirmDialog,
+  Modal,
 } from '../../../../components/ui';
 import type { Column } from '../../../../components/ui/DataTable/DataTable';
 import type {
@@ -15,29 +16,55 @@ import type {
   ApoliceVidaQuery,
 } from '../../types/apolice.types';
 import { useAuthorization } from '../../../../auth/AuthorizationProvider';
+import { PropostasConsulta } from '../../../propostas/components/PropostasConsulta';
+import { CriarPropostaDialog } from '../../../propostas/components/CriarPropostaDialog';
 import { ApoliceVidaFormModal } from './ApoliceVidaFormModal';
 import {
   inativarApoliceVida,
+  excluirApoliceVida,
   criarApoliceVida,
   atualizarApoliceVida,
 } from '../../api/apolices.api';
 
 interface VidasTabProps {
   publicId: string;
+  estipulanteNome?: string;
+  apoliceAtiva?: boolean;
 }
 
-export const VidasTab: React.FC<VidasTabProps> = ({ publicId }) => {
+export const VidasTab: React.FC<VidasTabProps> = ({
+  publicId,
+  estipulanteNome,
+  apoliceAtiva = true,
+}) => {
   const [query, setQuery] = useState<ApoliceVidaQuery>({
     page: 1,
     pageSize: 10,
   });
   const { data, isLoading, error, retry } = useApoliceVidas(publicId, query);
-  const { possuiPermissao } = useAuthorization();
+  const { possuiPermissao, possuiRecurso, possuiModulo } = useAuthorization();
 
   const podeInserir = possuiPermissao('apolices.vidas.inserir');
   const podeAlterar = possuiPermissao('apolices.vidas.alterar');
   const podeInativar = possuiPermissao('apolices.vidas.inativar');
+  const podeExcluir = possuiPermissao('apolices.vidas.excluir');
+  const propostasDisponiveis =
+    possuiRecurso('PROPOSTAS') && possuiModulo('APOLICES');
+  const podeConsultarPropostas =
+    propostasDisponiveis && possuiPermissao('propostas.visualizar');
+  const podeCriarPropostas =
+    propostasDisponiveis &&
+    apoliceAtiva &&
+    possuiPermissao('propostas.inserir');
+  const [vidaCriacao, setVidaCriacao] = useState<ApoliceVidaListItem | null>(
+    null,
+  );
+  const [propostaCriada, setPropostaCriada] = useState<string | null>(null);
+  const [criandoVersao, setCriandoVersao] = useState(false);
+  const [vidaPropostas, setVidaPropostas] =
+    useState<ApoliceVidaListItem | null>(null);
 
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedVida, setSelectedVida] = useState<
@@ -48,39 +75,67 @@ export const VidasTab: React.FC<VidasTabProps> = ({ publicId }) => {
     isOpen: boolean;
     vidaId?: string;
     isLoading: boolean;
+    acao: 'encerrar' | 'excluir';
+    clienteNome?: string;
+    erro?: string;
   }>({
     isOpen: false,
     isLoading: false,
+    acao: 'encerrar',
   });
 
   const handlePageChange = (newPage: number) =>
     setQuery((prev) => ({ ...prev, page: newPage }));
 
   const handleAdd = () => {
+    setSubmitError(null);
     setSelectedVida(undefined);
     setIsModalOpen(true);
   };
 
   const handleEdit = (vida: ApoliceVidaListItem) => {
+    setSubmitError(null);
     setSelectedVida(vida);
     setIsModalOpen(true);
   };
 
   const handleEncerrarClick = (vidaId: string) => {
-    setConfirmDialog({ isOpen: true, vidaId, isLoading: false });
+    setConfirmDialog({
+      isOpen: true,
+      vidaId,
+      isLoading: false,
+      acao: 'encerrar',
+    });
   };
 
-  const confirmarEncerramento = async () => {
-    if (!confirmDialog.vidaId) return;
-    setConfirmDialog((prev) => ({ ...prev, isLoading: true }));
+  const confirmarAcao = async () => {
+    if (!confirmDialog.vidaId || confirmDialog.isLoading) return;
+    setConfirmDialog((prev) => ({ ...prev, isLoading: true, erro: undefined }));
     try {
-      await inativarApoliceVida(publicId, confirmDialog.vidaId);
-      setConfirmDialog({ isOpen: false, isLoading: false });
-      retry(); // Recarrega a tabela
+      if (confirmDialog.acao === 'excluir') {
+        await excluirApoliceVida(publicId, confirmDialog.vidaId);
+      } else {
+        await inativarApoliceVida(publicId, confirmDialog.vidaId);
+      }
+      setConfirmDialog({ isOpen: false, isLoading: false, acao: 'encerrar' });
+      if (
+        confirmDialog.acao === 'excluir' &&
+        data?.items.length === 1 &&
+        (query.page ?? 1) > 1
+      ) {
+        setQuery((prev) => ({ ...prev, page: (prev.page ?? 1) - 1 }));
+      } else {
+        void retry();
+      }
     } catch (err) {
-      console.error(err);
-      alert('Erro ao encerrar participação.');
-      setConfirmDialog((prev) => ({ ...prev, isLoading: false }));
+      setConfirmDialog((prev) => ({
+        ...prev,
+        isLoading: false,
+        erro:
+          err instanceof Error
+            ? err.message
+            : 'Não foi possível concluir a operação.',
+      }));
     }
   };
 
@@ -88,10 +143,15 @@ export const VidasTab: React.FC<VidasTabProps> = ({ publicId }) => {
     formData: import('../../schemas/apoliceVida.schema').ApoliceVidaFormValues,
   ) => {
     setIsSubmitting(true);
+    setSubmitError(null);
     try {
       if (selectedVida) {
         // Edit mode (enviar apenas o permitido no payload)
         await atualizarApoliceVida(publicId, selectedVida.apoliceVidaPublicId, {
+          clienteVinculoPublicId: formData.clienteVinculoPublicId || null,
+          completarVinculoSemEstipulante:
+            formData.completarVinculoSemEstipulante ?? false,
+          novaMatricula: formData.novaMatricula ?? null,
           dataInicioVigencia: formData.dataInicioVigencia || null,
           dataFimVigencia: formData.dataFimVigencia || null,
           observacao: formData.observacao || null,
@@ -102,6 +162,10 @@ export const VidasTab: React.FC<VidasTabProps> = ({ publicId }) => {
         // Create mode
         await criarApoliceVida(publicId, {
           clientePublicId: formData.clientePublicId,
+          clienteVinculoPublicId: formData.clienteVinculoPublicId || null,
+          completarVinculoSemEstipulante:
+            formData.completarVinculoSemEstipulante ?? false,
+          novaMatricula: formData.novaMatricula ?? null,
           apoliceSubgrupoPublicId: formData.apoliceSubgrupoPublicId || null,
           apoliceModuloPublicId: formData.apoliceModuloPublicId || null,
           dataInicioVigencia: formData.dataInicioVigencia || null,
@@ -112,8 +176,11 @@ export const VidasTab: React.FC<VidasTabProps> = ({ publicId }) => {
       setIsModalOpen(false);
       retry();
     } catch (err) {
-      console.error(err);
-      alert('Erro ao salvar a participação de vida.');
+      setSubmitError(
+        err instanceof Error
+          ? err.message
+          : 'Erro ao salvar a participação de vida.',
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -136,6 +203,11 @@ export const VidasTab: React.FC<VidasTabProps> = ({ publicId }) => {
             )}
           </div>
         ),
+      },
+      {
+        key: 'matricula',
+        label: 'Matrícula',
+        render: (vida) => vida.vinculoMatricula || 'Não informada',
       },
       {
         key: 'subgrupo',
@@ -179,12 +251,45 @@ export const VidasTab: React.FC<VidasTabProps> = ({ publicId }) => {
       },
     ];
 
-    if (podeAlterar || podeInativar) {
+    if (
+      podeAlterar ||
+      podeInativar ||
+      podeExcluir ||
+      podeConsultarPropostas ||
+      podeCriarPropostas
+    ) {
       cols.push({
         key: 'acoes',
         label: '',
         render: (vida) => (
           <div className="flex items-center justify-end gap-2">
+            {podeCriarPropostas && vida.ativo && !vida.possuiPropostas && (
+              <Button
+                variant="text"
+                size="small"
+                disabled={!vida.clienteVinculoPublicId}
+                title={
+                  !vida.clienteVinculoPublicId
+                    ? 'Informe uma matrícula compatível na Vida antes de criar a proposta.'
+                    : undefined
+                }
+                onClick={() => setVidaCriacao(vida)}
+              >
+                Criar proposta
+              </Button>
+            )}
+            {podeConsultarPropostas && (
+              <Button
+                variant="text"
+                size="small"
+                onClick={() => {
+                  setPropostaCriada(null);
+                  setVidaPropostas(vida);
+                }}
+              >
+                Consultar propostas
+              </Button>
+            )}
             {podeAlterar && (
               <Button
                 variant="text"
@@ -204,13 +309,42 @@ export const VidasTab: React.FC<VidasTabProps> = ({ publicId }) => {
                 Encerrar
               </Button>
             )}
+            {podeExcluir && (
+              <Button
+                variant="text"
+                size="small"
+                disabled={vida.possuiPropostas}
+                title={
+                  vida.possuiPropostas
+                    ? 'Esta participação possui propostas. Utilize Encerrar.'
+                    : 'Excluir participação incluída por engano'
+                }
+                onClick={() =>
+                  setConfirmDialog({
+                    isOpen: true,
+                    isLoading: false,
+                    acao: 'excluir',
+                    vidaId: vida.apoliceVidaPublicId,
+                    clienteNome: vida.clienteNome,
+                  })
+                }
+              >
+                Excluir
+              </Button>
+            )}
           </div>
         ),
       });
     }
 
     return cols;
-  }, [podeAlterar, podeInativar]);
+  }, [
+    podeAlterar,
+    podeInativar,
+    podeExcluir,
+    podeConsultarPropostas,
+    podeCriarPropostas,
+  ]);
 
   if (error) {
     return (
@@ -265,25 +399,95 @@ export const VidasTab: React.FC<VidasTabProps> = ({ publicId }) => {
         </>
       )}
 
+      {podeConsultarPropostas && vidaPropostas && (
+        <Modal
+          aberto
+          onClose={() => {
+            if (!criandoVersao) setVidaPropostas(null);
+          }}
+          title={`Propostas de ${vidaPropostas.clienteNome}`}
+          size="large"
+        >
+          <p className="text-sm text-texto-secundario mb-3">
+            Matrícula: {vidaPropostas.vinculoMatricula || 'Não informada'}.{' '}
+            {estipulanteNome ? `Estipulante: ${estipulanteNome}.` : ''}
+          </p>
+          <PropostasConsulta
+            key={`${publicId}/${vidaPropostas.apoliceVidaPublicId}`}
+            apolicePublicId={publicId}
+            apoliceVidaPublicId={vidaPropostas.apoliceVidaPublicId}
+            initialPublicId={propostaCriada ?? undefined}
+            onBusy={setCriandoVersao}
+          />
+        </Modal>
+      )}
+      {podeCriarPropostas && vidaCriacao && (
+        <CriarPropostaDialog
+          key={vidaCriacao.apoliceVidaPublicId}
+          apolicePublicId={publicId}
+          vida={vidaCriacao}
+          estipulanteNome={estipulanteNome}
+          onClose={() => setVidaCriacao(null)}
+          onCriada={(id) => {
+            setPropostaCriada(id);
+            setVidaPropostas(vidaCriacao);
+            setVidaCriacao(null);
+            void retry();
+          }}
+        />
+      )}
+      {propostaCriada && !podeConsultarPropostas && (
+        <Alert variant="success" title="Rascunho criado">
+          A proposta foi criada sem vigência e sem gerar cobrança.
+        </Alert>
+      )}
+
       <ApoliceVidaFormModal
+        estipulanteNome={estipulanteNome}
+        podeCadastrarVinculo={possuiPermissao('clientes.alterar')}
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onSubmit={handleFormSubmit}
         apolicePublicId={publicId}
         initialData={selectedVida}
         isSubmitting={isSubmitting}
+        submitError={submitError}
       />
 
       <ConfirmDialog
         aberto={confirmDialog.isOpen}
-        title="Encerrar Participação"
-        description="Deseja encerrar esta participação na Apólice? O Cadastro Global do Cliente será preservado e a participação continuará disponível no histórico."
-        confirmText="Encerrar"
+        title={
+          confirmDialog.acao === 'excluir'
+            ? 'Excluir Participação'
+            : 'Encerrar Participação'
+        }
+        description={
+          <div className="flex flex-col gap-3">
+            <p>
+              {confirmDialog.acao === 'excluir'
+                ? `Deseja excluir a participação de ${confirmDialog.clienteNome} nesta apólice? Ela será removida da lista de Vidas. O cadastro do cliente, a matrícula e o histórico serão preservados.`
+                : 'Deseja encerrar esta participação na Apólice? O Cadastro Global do Cliente será preservado e a participação continuará disponível no histórico.'}
+            </p>
+            {confirmDialog.erro && (
+              <Alert variant="error" title="Não foi possível concluir">
+                {confirmDialog.erro}
+              </Alert>
+            )}
+          </div>
+        }
+        confirmText={confirmDialog.acao === 'excluir' ? 'Excluir' : 'Encerrar'}
         cancelText="Cancelar"
         variant="danger"
         loading={confirmDialog.isLoading}
-        onConfirm={confirmarEncerramento}
-        onClose={() => setConfirmDialog({ isOpen: false, isLoading: false })}
+        onConfirm={() => void confirmarAcao()}
+        onClose={() => {
+          if (!confirmDialog.isLoading)
+            setConfirmDialog({
+              isOpen: false,
+              isLoading: false,
+              acao: 'encerrar',
+            });
+        }}
       />
     </div>
   );

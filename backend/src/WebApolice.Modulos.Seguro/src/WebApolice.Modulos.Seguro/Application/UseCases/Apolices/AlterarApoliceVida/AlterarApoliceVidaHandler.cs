@@ -1,3 +1,4 @@
+using WebApolice.Modulos.Cadastro.Contracts;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -22,103 +23,145 @@ namespace WebApolice.Modulos.Seguro.src.WebApolice.Modulos.Seguro.Application.Us
 public class AlterarApoliceVidaHandler
 {
     private readonly IApoliceVinculosRepository _repository;
+    private readonly ICadastroSeguroQueries _cadastro;
+    private readonly IOperacaoVidas _operacao;
+    private readonly ICadastroVinculosVida _vinculos;
 
-    public AlterarApoliceVidaHandler(IApoliceVinculosRepository dbContext)
+    public AlterarApoliceVidaHandler(IApoliceVinculosRepository dbContext, ICadastroSeguroQueries cadastro, IOperacaoVidas operacao, ICadastroVinculosVida vinculos)
     {
         _repository = dbContext;
+        _cadastro = cadastro;
+        _operacao = operacao;
+        _vinculos = vinculos;
     }
 
     public async Task Handle(AlterarApoliceVidaCommand request, CancellationToken cancellationToken)
     {
-        // 1. Localizar Apólice
-        var apolice = await _repository.ObterApoliceAsync(request.ApolicePublicId, false, cancellationToken);
-        if (apolice == null)
-            throw new ValidacaoException("Apólice não encontrada.");
-
-        // 2. Localizar Vida
-        var vida = await _repository.ObterVidaAsync(request.ApoliceVidaPublicId, apolice.Id, false, cancellationToken);
-
-        if (vida == null)
-            throw new ValidacaoException("Vida não encontrada nesta Apólice.");
-
-        // 3. Vida encerrada não pode ser editada
-        if (!vida.Ativo)
-            throw new ValidacaoException("Esta participação já está encerrada e não pode ser editada. Crie uma nova participação se necessário.");
-
-        // 4. Validar datas
-        var novoInicio = request.DataInicioVigencia ?? vida.DataInicioVigencia;
-        var novoFim = request.DataFimVigencia;
-
-        // DataFim=null significa "sem data fim" (participação em aberto)
-        if (novoFim.HasValue && novoInicio.HasValue && novoFim < novoInicio)
+        await _operacao.ExecutarAsync<bool>("VIDA_ALTERADA", async ct =>
         {
-            throw new ValidacaoException("A data de fim de vigência não pode ser anterior à data de início.");
-        }
+            // 1. Localizar Apólice
+            var apolice = await _repository.ObterApoliceAsync(request.ApolicePublicId, false, cancellationToken);
+            if (apolice == null)
+                throw new ValidacaoException("Apólice não encontrada.");
 
-        // 5. Avaliar mudança de Subgrupo e Módulo independentemente
-        // Se null for enviado no Command, remove a associação. Se Value for enviado, altera/adiciona.
-        long? novoSubgrupoId = null;
-        long? novoModuloId = null;
-        DateOnly? moduloDataInicio = null;
-        DateOnly? moduloDataFim = null;
+            // 2. Localizar Vida
+            var vida = await _repository.ObterVidaAsync(request.ApoliceVidaPublicId, apolice.Id, false, cancellationToken);
 
-        if (request.ApoliceSubgrupoPublicId.HasValue)
-        {
-            var subgrupo = await _repository.ObterSubgrupoAsync(request.ApoliceSubgrupoPublicId.Value, cancellationToken);
+            if (vida == null)
+                throw new ValidacaoException("Vida não encontrada nesta Apólice.");
 
-            if (subgrupo == null) throw new ValidacaoException("Subgrupo não encontrado.");
-            if (subgrupo.DeletedAt != null) throw new ValidacaoException("Subgrupo não encontrado.");
-            if (subgrupo.ApoliceId != apolice.Id) throw new ValidacaoException("O Subgrupo informado pertence a outra Apólice.");
-            if (!subgrupo.Ativo) throw new ValidacaoException("O Subgrupo está inativo. Não é possível vincular Vidas a um Subgrupo inativo.");
-            
-            novoSubgrupoId = subgrupo.Id;
-        }
+            // 3. Vida encerrada não pode ser editada
+            if (!vida.Ativo)
+                throw new ValidacaoException("Esta participação já está encerrada e não pode ser editada. Crie uma nova participação se necessário.");
 
-        if (request.ApoliceModuloPublicId.HasValue)
-        {
-            var modulo = await _repository.ObterModuloAsync(request.ApoliceModuloPublicId.Value, true, cancellationToken);
+            if (request.NovaMatricula is not null && request.ClienteVinculoPublicId.HasValue)
+                throw new ValidacaoException("Selecione um vínculo existente ou informe uma nova matrícula, nunca ambos.");
+            if (request.CompletarVinculoSemEstipulante && (!request.ClienteVinculoPublicId.HasValue || request.NovaMatricula is not null))
+                throw new ValidacaoException("Selecione a matrícula existente que deseja vincular ao estipulante da apólice.");
+            if ((request.NovaMatricula is not null || request.CompletarVinculoSemEstipulante) && await _repository.VidaPossuiPropostasAsync(vida.Id, ct))
+                throw new ValidacaoException("Esta participação já possui propostas. O vínculo não pode ser alterado.");
 
-            if (modulo == null) throw new ValidacaoException("Módulo da Apólice não encontrado.");
-            if (modulo.DeletedAt != null) throw new ValidacaoException("Módulo da Apólice não encontrado.");
-            if (modulo.ApoliceId != apolice.Id) throw new ValidacaoException("O Módulo informado pertence a outra Apólice.");
-            if (!modulo.Ativo) throw new ValidacaoException("O Módulo da Apólice está inativo. Não é possível vincular Vidas a um Módulo inativo.");
-            
-            novoModuloId = modulo.Id;
-            moduloDataInicio = modulo.DataInicio;
-            moduloDataFim = modulo.DataFim;
-        }
+            var vinculoAnterior = vida.ClienteVinculoId;
+            if (request.ClienteVinculoPublicId.HasValue && !request.CompletarVinculoSemEstipulante)
+            {
+                var vinculo = await _cadastro.ObterVinculoAsync(request.ClienteVinculoPublicId.Value, vida.ClienteId, cancellationToken)
+                    ?? throw new ValidacaoException("Vínculo não encontrado neste cliente.");
+                if (vida.ClienteVinculoId != vinculo.Id)
+                {
+                    if (await _repository.VidaPossuiPropostasAsync(vida.Id, cancellationToken))
+                        throw new ValidacaoException("Esta participação já possui propostas. O vínculo não pode ser alterado.");
+                    if (!vinculo.Ativo || !vinculo.EstipulanteAtivo || vinculo.EstipulanteId != apolice.EstipulanteId)
+                        throw new ValidacaoException("Selecione um vínculo ativo do cliente no estipulante desta apólice.");
+                    vida.ClienteVinculoId = vinculo.Id;
+                }
+            }
+            // 4. Validar datas
+            var novoInicio = request.DataInicioVigencia ?? vida.DataInicioVigencia;
+            var novoFim = request.DataFimVigencia;
 
-        // 6. Validar vigência dentro da Apólice e do Módulo
-        ValidarVigenciaDentroDoContextoPai(novoInicio, novoFim, apolice.DataInicioVigencia, apolice.DataFimVigencia, "Apólice");
+            // DataFim=null significa "sem data fim" (participação em aberto)
+            if (novoFim.HasValue && novoInicio.HasValue && novoFim < novoInicio)
+            {
+                throw new ValidacaoException("A data de fim de vigência não pode ser anterior à data de início.");
+            }
 
-        if (novoModuloId.HasValue)
-        {
-            ValidarVigenciaDentroDoContextoPai(novoInicio, novoFim, moduloDataInicio, moduloDataFim, "Módulo da Apólice");
-        }
+            // 5. Avaliar mudança de Subgrupo e Módulo independentemente
+            // Se null for enviado no Command, remove a associação. Se Value for enviado, altera/adiciona.
+            long? novoSubgrupoId = null;
+            long? novoModuloId = null;
+            DateOnly? moduloDataInicio = null;
+            DateOnly? moduloDataFim = null;
 
-        // 7. Atualizar campos editáveis
-        vida.ApoliceSubgrupoId = novoSubgrupoId;
-        vida.ApoliceModuloId = novoModuloId;
-        vida.DataInicioVigencia = request.DataInicioVigencia ?? vida.DataInicioVigencia;
-        vida.DataFimVigencia = request.DataFimVigencia;
-        vida.Observacao = request.Observacao ?? vida.Observacao;
-        vida.UpdatedAt = DateTimeOffset.UtcNow;
-        
-        // Mantemos os IDs legados intocados caso já existissem (não os zeramos, conforme regra exigida)
-        // vida.ApoliceSubestipulanteId permanece como está.
+            if (request.ApoliceSubgrupoPublicId.HasValue)
+            {
+                var subgrupo = await _repository.ObterSubgrupoAsync(request.ApoliceSubgrupoPublicId.Value, cancellationToken);
 
-        // 8. Registrar Histórico funcional
-        _repository.AdicionarHistorico(new ApoliceHistoricoModel
-        {
-            ApoliceId = apolice.Id,
-            Acao = "Alteração Vida",
-            Descricao = $"Dados da Vida (PublicId: {request.ApoliceVidaPublicId}) alterados na Apólice.",
-            UsuarioPublicId = request.UsuarioPublicId,
-            DataAcao = DateTimeOffset.UtcNow,
-            CreatedAt = DateTimeOffset.UtcNow
-        });
+                if (subgrupo == null) throw new ValidacaoException("Subgrupo não encontrado.");
+                if (subgrupo.DeletedAt != null) throw new ValidacaoException("Subgrupo não encontrado.");
+                if (subgrupo.ApoliceId != apolice.Id) throw new ValidacaoException("O Subgrupo informado pertence a outra Apólice.");
+                if (!subgrupo.Ativo) throw new ValidacaoException("O Subgrupo está inativo. Não é possível vincular Vidas a um Subgrupo inativo.");
 
-        await _repository.SalvarAlteracoesAsync(cancellationToken);
+                novoSubgrupoId = subgrupo.Id;
+            }
+
+            if (request.ApoliceModuloPublicId.HasValue)
+            {
+                var modulo = await _repository.ObterModuloAsync(request.ApoliceModuloPublicId.Value, true, cancellationToken);
+
+                if (modulo == null) throw new ValidacaoException("Módulo da Apólice não encontrado.");
+                if (modulo.DeletedAt != null) throw new ValidacaoException("Módulo da Apólice não encontrado.");
+                if (modulo.ApoliceId != apolice.Id) throw new ValidacaoException("O Módulo informado pertence a outra Apólice.");
+                if (!modulo.Ativo) throw new ValidacaoException("O Módulo da Apólice está inativo. Não é possível vincular Vidas a um Módulo inativo.");
+
+                novoModuloId = modulo.Id;
+                moduloDataInicio = modulo.DataInicio;
+                moduloDataFim = modulo.DataFim;
+            }
+
+            // 6. Validar vigência dentro da Apólice e do Módulo
+            ValidarVigenciaDentroDoContextoPai(novoInicio, novoFim, apolice.DataInicioVigencia, apolice.DataFimVigencia, "Apólice");
+
+            if (novoModuloId.HasValue)
+            {
+                ValidarVigenciaDentroDoContextoPai(novoInicio, novoFim, moduloDataInicio, moduloDataFim, "Módulo da Apólice");
+            }
+
+            if (request.CompletarVinculoSemEstipulante)
+            {
+                var vinculo = await _vinculos.CompletarAsync(vida.ClienteId, request.ClienteVinculoPublicId!.Value, apolice.EstipulanteId, ct);
+                vida.ClienteVinculoId = vinculo.Id;
+            }
+            if (request.NovaMatricula is not null)
+            {
+                var vinculo = await _vinculos.CriarAsync(vida.ClienteId, apolice.EstipulanteId, request.NovaMatricula, ct);
+                vida.ClienteVinculoId = vinculo.Id;
+            }
+
+            // 7. Atualizar campos editáveis
+            vida.ApoliceSubgrupoId = novoSubgrupoId;
+            vida.ApoliceModuloId = novoModuloId;
+            vida.DataInicioVigencia = request.DataInicioVigencia ?? vida.DataInicioVigencia;
+            vida.DataFimVigencia = request.DataFimVigencia;
+            vida.Observacao = request.Observacao ?? vida.Observacao;
+            vida.UpdatedAt = DateTimeOffset.UtcNow;
+
+            // Mantemos os IDs legados intocados caso já existissem (não os zeramos, conforme regra exigida)
+            // vida.ApoliceSubestipulanteId permanece como está.
+
+            // 8. Registrar Histórico funcional
+            _repository.AdicionarHistorico(new ApoliceHistoricoModel
+            {
+                ApoliceId = apolice.Id,
+                Acao = "Alteração Vida",
+                Descricao = $"Dados da Vida (PublicId: {request.ApoliceVidaPublicId}) alterados na Apólice.",
+                UsuarioPublicId = request.UsuarioPublicId,
+                DataAcao = DateTimeOffset.UtcNow,
+                CreatedAt = DateTimeOffset.UtcNow
+            });
+
+            await _repository.SalvarAlteracoesAsync(cancellationToken);
+            return (true, vida.PublicId.ToString(), new { ClienteVinculoId = vinculoAnterior }, new { vida.ClienteVinculoId });
+        }, cancellationToken);
     }
 
     private static void ValidarVigenciaDentroDoContextoPai(

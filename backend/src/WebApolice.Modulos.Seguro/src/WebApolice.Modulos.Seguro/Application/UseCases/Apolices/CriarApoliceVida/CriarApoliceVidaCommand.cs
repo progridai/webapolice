@@ -6,6 +6,9 @@ public sealed class CriarApoliceVidaCommand
 {
     public Guid ApolicePublicId { get; set; }
     public Guid ClientePublicId { get; set; }
+    public Guid? ClienteVinculoPublicId { get; set; }
+    public string? NovaMatricula { get; set; }
+    public bool CompletarVinculoSemEstipulante { get; set; }
     public Guid? ApoliceSubgrupoPublicId { get; set; }
     public Guid? ApoliceModuloPublicId { get; set; }
     public DateOnly? DataInicioVigencia { get; set; }

@@ -22,7 +22,7 @@ public class PropostasConsolidacaoTests
         await using var db = CriarDb();
         var vida = await PrepararVidaAsync(db, 50);
         var clientes = new Mock<IClientesPropostas>();
-        clientes.Setup(c => c.ResolverAsync(10, 50, It.IsAny<CancellationToken>())).ReturnsAsync(new IdentidadeClienteProposta(10, 99, 50));
+        clientes.Setup(c => c.ResolverAsync(10, 50, It.IsAny<CancellationToken>())).ReturnsAsync(new IdentidadeClienteProposta(10, 99, 50, 0));
         var handler = CriarHandler(db, clientes.Object);
         var id = await handler.Handle(new CriarPropostaCommand { ClienteId = 10, ApoliceId = vida.Apolice!.PublicId, ApoliceVidaId = vida.PublicId }, default);
         var proposta = await db.Proposta.SingleAsync(p => p.PublicId == id);
@@ -42,7 +42,7 @@ public class PropostasConsolidacaoTests
         var vida = await PrepararVidaAsync(db, vinculo);
         var handler = CriarHandler(db, Mock.Of<IClientesPropostas>());
         await Assert.ThrowsAsync<ValidacaoException>(() => handler.Handle(new CriarPropostaCommand
-            { ClienteId = 10, ApoliceId = vida.Apolice!.PublicId, ApoliceVidaId = vida.PublicId }, default));
+        { ClienteId = 10, ApoliceId = vida.Apolice!.PublicId, ApoliceVidaId = vida.PublicId }, default));
         Assert.Empty(db.Proposta);
     }
 
@@ -58,7 +58,7 @@ public class PropostasConsolidacaoTests
         await db.SaveChangesAsync();
         db.ApolicePlanos.Add(new ApolicePlanoModel { ApoliceProdutoId = produto.Id, PlanoId = 200 });
         await db.SaveChangesAsync();
-        var handler = new AdicionarPropostaItemHandler(new WebApolice.Modulos.Seguro.Infrastructure.Persistence.Repositories.PropostasRepository(db), new OperacaoSemPersistencia());
+        var handler = new AdicionarPropostaItemHandler(new WebApolice.Modulos.Seguro.Infrastructure.Persistence.Repositories.PropostasRepository(db, Mock.Of<IClientesPropostas>()), new OperacaoSemPersistencia());
         var command = new AdicionarPropostaItemCommand { PropostaId = proposta.PublicId, ProdutoId = 100, PlanoId = 200 };
         var primeiro = await handler.Handle(command, default);
         var segundo = await handler.Handle(command, default);
@@ -77,20 +77,20 @@ public class PropostasConsolidacaoTests
     public async Task PaginacaoInvalidaEhRejeitada(int pagina, int tamanho)
     {
         await using var db = CriarDb();
-        await Assert.ThrowsAsync<ValidacaoException>(() => new ObterPropostasHandler(new WebApolice.Modulos.Seguro.Infrastructure.Persistence.Repositories.PropostasRepository(db)).Handle(
+        await Assert.ThrowsAsync<ValidacaoException>(() => new ObterPropostasHandler(new WebApolice.Modulos.Seguro.Infrastructure.Persistence.Repositories.PropostasRepository(db, Mock.Of<IClientesPropostas>())).Handle(
             new ObterPropostasQuery { Pagina = pagina, TamanhoPagina = tamanho }, default));
     }
 
     private static SeguroDbContext CriarDb() => new(new DbContextOptionsBuilder<SeguroDbContext>()
         .UseInMemoryDatabase(Guid.NewGuid().ToString()).Options);
 
-    private static CriarPropostaHandler CriarHandler(SeguroDbContext db, IClientesPropostas clientes) => new(new WebApolice.Modulos.Seguro.Infrastructure.Persistence.Repositories.PropostasRepository(db), clientes,
-        Options.Create(new ConfiguracaoPropostas { StatusInicialCodigo = "STATUS_DE_TESTE" }), new OperacaoSemPersistencia());
+    private static CriarPropostaHandler CriarHandler(SeguroDbContext db, IClientesPropostas clientes) => new(new WebApolice.Modulos.Seguro.Infrastructure.Persistence.Repositories.PropostasRepository(db, Mock.Of<IClientesPropostas>()), clientes,
+        Options.Create(new ConfiguracaoPropostas { StatusInicialCodigo = "STATUS_DE_TESTE" }), new OperacaoSemPersistencia(), Mock.Of<ICadastroSeguroQueries>());
 
     private static async Task<ApoliceVidaModel> PrepararVidaAsync(SeguroDbContext db, long? vinculo)
     {
-        db.PropostaStatuses.Add(new PropostaStatus { Id = 7, Codigo = "STATUS_DE_TESTE", Nome = "Teste" });
-        var apolice = new ApoliceModel { PublicId = Guid.NewGuid() };
+        db.PropostaStatuses.Add(new PropostaStatus { Id = 7, Codigo = "STATUS_DE_TESTE", Nome = "Teste", VisivelOperacional = true });
+        var apolice = new ApoliceModel { PublicId = Guid.NewGuid(), Ativo = true };
         var vida = new ApoliceVidaModel { PublicId = Guid.NewGuid(), Apolice = apolice, ClienteId = 10, ClienteVinculoId = vinculo, Ativo = true };
         db.ApoliceVidas.Add(vida);
         await db.SaveChangesAsync();

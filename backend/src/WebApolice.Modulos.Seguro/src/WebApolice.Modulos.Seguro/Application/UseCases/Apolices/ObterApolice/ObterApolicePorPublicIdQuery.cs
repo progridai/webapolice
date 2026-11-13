@@ -30,7 +30,8 @@ public sealed record ApoliceRamoResult(
     string RamoNome,
     string? NumeroApolice,
     decimal? IofPercentual,
-    bool Ativo
+    bool Ativo,
+    Guid VinculoPublicId = default
 );
 
 public sealed record ApoliceConfiguracaoResult(

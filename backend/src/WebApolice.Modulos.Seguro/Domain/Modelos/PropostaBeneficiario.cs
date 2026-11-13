@@ -6,6 +6,8 @@ namespace WebApolice.Modulos.Seguro.Domain.Modelos;
 public partial class PropostaBeneficiario
 {
     public long Id { get; set; }
+    public Guid PublicId { get; set; } = Guid.NewGuid();
+    public string? ParentescoRegistrado { get; set; }
 
     public long PropostaId { get; set; }
 
@@ -31,7 +33,10 @@ public partial class PropostaBeneficiario
 
     public string? Observacao { get; set; }
 
-    public int LegadoId { get; set; }
+    public int? LegadoId { get; set; }
+
+    public bool PermitePreenchimento() => LegadoId == null && PessoaId == null &&
+        CpfOriginal == null && CpfLimpo == null && ParentescoOriginal == null && ParentescoNormalizado == null && NomeNormalizado == null;
 
     public DateTime CreatedAt { get; set; }
 

@@ -40,11 +40,20 @@ public class ApoliceHierarquiaTests : IClassFixture<SeguroIntegrationTestFixture
         _fixture.DbContext.ApoliceSubestipulantes.Add(subestipulante);
         await _fixture.DbContext.SaveChangesAsync();
 
+        var pessoa = new WebApolice.Modulos.Cadastro.Domain.Clientes.PessoaModel(1, "Pessoa Hierarquia", null, null, false, null, null, null);
+        _fixture.Cadastro.Pessoas.Add(pessoa); await _fixture.Cadastro.SaveChangesAsync();
+        var cliente = new WebApolice.Modulos.Cadastro.Domain.Cliente(pessoa.Id, 1);
+        _fixture.Cadastro.Clientes.Add(cliente);
+        _fixture.Cadastro.Estipulantes.Add(new() { Id = 2, PublicId = Guid.NewGuid(), Nome = "Estipulante Hierarquia", Ativo = true });
+        await _fixture.Cadastro.SaveChangesAsync();
+        var vinculo = new WebApolice.Modulos.Cadastro.Domain.Modelos.ClienteVinculoModel(cliente.Id, pessoa.Id, 2, "H-100");
+        _fixture.Cadastro.Vinculos.Add(vinculo); await _fixture.Cadastro.SaveChangesAsync();
         var vidaDireta = new ApoliceVidaModel
         {
             PublicId = Guid.NewGuid(),
             ApoliceId = apolice.Id,
-            ClienteId = 100,
+            ClienteId = cliente.Id,
+            ClienteVinculoId = vinculo.Id,
             Ativo = true
         };
         _fixture.DbContext.ApoliceVidas.Add(vidaDireta);

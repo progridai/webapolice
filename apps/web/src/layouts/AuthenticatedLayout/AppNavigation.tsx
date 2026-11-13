@@ -21,6 +21,7 @@ interface NavItem {
   icon: React.ComponentType<{ size?: number; className?: string }>;
   moduloCodigo?: string;
   permissaoCodigo?: string;
+  recursoCodigo?: string;
   somenteOperador?: boolean;
   requiresEnvFlag?: boolean;
 }
@@ -72,6 +73,14 @@ const NAV_ITEMS: NavItem[] = [
     icon: BriefcaseIcon,
     moduloCodigo: 'APOLICES',
     permissaoCodigo: 'ramos.visualizar',
+  },
+  {
+    label: 'Propostas',
+    path: ROUTES.PROPOSTAS,
+    icon: ClipboardListIcon,
+    moduloCodigo: 'APOLICES',
+    permissaoCodigo: 'propostas.visualizar',
+    recursoCodigo: 'PROPOSTAS',
   },
   {
     label: 'Seguradoras',
@@ -155,6 +164,7 @@ export const AppNavigation: React.FC<AppNavigationProps> = ({ onNavigate }) => {
   const {
     ehOperadorSistema,
     possuiModulo,
+    possuiRecurso,
     possuiPermissao,
     possuiAcessoTotal,
   } = useAuthorization();
@@ -163,6 +173,12 @@ export const AppNavigation: React.FC<AppNavigationProps> = ({ onNavigate }) => {
   const visibleItems = NAV_ITEMS.filter((item) => {
     if (item.requiresEnvFlag && !ENV.ENABLE_DESIGN_SYSTEM) return false;
     if (item.somenteOperador && !ehOperadorSistema()) return false;
+    if (
+      item.recursoCodigo &&
+      (!possuiRecurso(item.recursoCodigo) ||
+        (item.moduloCodigo && !possuiModulo(item.moduloCodigo)))
+    )
+      return false;
     if (
       item.moduloCodigo &&
       !possuiAcessoTotal() &&

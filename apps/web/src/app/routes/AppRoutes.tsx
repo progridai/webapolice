@@ -49,6 +49,7 @@ import { CooperadosRoutes } from '../../features/cooperados/routes/cooperados.ro
 import { EstipulantesRoutes } from '../../features/estipulantes/routes/estipulantes.routes';
 import { SegurancaRoutes } from '../../features/seguranca/routes/seguranca.routes';
 import { ApolicesRoutes } from '../../features/apolices/routes/apolices.routes';
+import { PropostasRoutes } from '../../features/propostas/routes/propostas.routes';
 
 import { RamosRoutes } from '../../features/ramos/routes/ramos.routes';
 import { SeguradorasRoutes } from '../../features/seguradoras/routes/seguradoras.routes';
@@ -95,6 +96,7 @@ export const AppRoutes: React.FC = () => {
       {CooperadosRoutes}
       {EstipulantesRoutes}
       {ApolicesRoutes}
+      {PropostasRoutes}
       {SegurancaRoutes}
       {RamosRoutes}
       {/* Cadastro: Seguradoras */}

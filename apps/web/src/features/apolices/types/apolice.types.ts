@@ -35,14 +35,10 @@ export interface SalvarApoliceRequest {
   observacao?: string;
 }
 
-export interface PagedResult<T> {
-  items: T[];
-  totalCount: number;
-  page: number;
-  pageSize: number;
-}
+export type { PagedResult } from '../../../shared/types/pagination';
 
 export interface ApoliceRamoResult {
+  vinculoPublicId?: string;
   publicId: string;
   ramoCodigo: string;
   ramoNome: string;
@@ -81,6 +77,9 @@ export interface ApoliceDetalheResponse {
 }
 
 export interface ApoliceVidaListItem {
+  clienteVinculoPublicId?: string | null;
+  vinculoMatricula?: string | null;
+  possuiPropostas?: boolean;
   apoliceVidaPublicId: string;
   clientePublicId: string;
   clienteNome: string;
@@ -107,6 +106,9 @@ export interface ApoliceVidaQuery {
 }
 
 export interface CriarApoliceVidaRequest {
+  completarVinculoSemEstipulante?: boolean;
+  clienteVinculoPublicId?: string | null;
+  novaMatricula?: string | null;
   clientePublicId: string;
   apoliceSubgrupoPublicId?: string | null;
   apoliceModuloPublicId?: string | null;
@@ -116,6 +118,9 @@ export interface CriarApoliceVidaRequest {
 }
 
 export interface AlterarApoliceVidaRequest {
+  completarVinculoSemEstipulante?: boolean;
+  clienteVinculoPublicId?: string | null;
+  novaMatricula?: string | null;
   dataInicioVigencia?: string | null;
   dataFimVigencia?: string | null;
   observacao?: string | null;
@@ -124,6 +129,7 @@ export interface AlterarApoliceVidaRequest {
 }
 
 export interface ApoliceSubestipulanteResult {
+  vinculoPublicId?: string;
   subestipulantePublicId: string;
   nome: string;
   documento?: string;
@@ -149,6 +155,7 @@ export interface ApoliceCoberturaResult {
 }
 
 export interface ApolicePlanoResult {
+  publicId?: string;
   nome?: string;
   planoIdInternal: number;
   tabelaPrecoIdInternal?: number;
@@ -157,6 +164,8 @@ export interface ApolicePlanoResult {
 }
 
 export interface ApoliceProdutoResult {
+  publicId?: string;
+  nome?: string | null;
   produtoIdInternal: number;
   ativo: boolean;
   planos: ApolicePlanoResult[];

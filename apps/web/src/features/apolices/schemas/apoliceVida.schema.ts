@@ -3,6 +3,15 @@ import { z } from 'zod';
 export const apoliceVidaSchema = z
   .object({
     clientePublicId: z.string().min(1, 'Cliente é obrigatório'),
+    clienteVinculoPublicId: z.string().nullable().optional(),
+    completarVinculoSemEstipulante: z.boolean().optional(),
+    novaMatricula: z
+      .string()
+      .trim()
+      .min(1, 'Informe a matrícula')
+      .max(50, 'Máximo 50 caracteres')
+      .nullable()
+      .optional(),
     apoliceSubgrupoPublicId: z.string().nullable().optional(),
     apoliceModuloPublicId: z.string().nullable().optional(),
     dataInicioVigencia: z.string().nullable().optional(),

@@ -10,5 +10,6 @@ internal static class SeguroPersistenciaTestes
 {
     public static ICadastroSeguroQueries ConsultasCadastro(SeguroDbContext db) => new CadastroSeguroQueries(
         new CadastroDbContext(new DbContextOptionsBuilder<CadastroDbContext>()
-            .UseNpgsql(db.Database.GetDbConnection()).UseSnakeCaseNamingConvention().Options));
+            .UseNpgsql(db.Database.GetDbConnection()).UseSnakeCaseNamingConvention().Options),
+        new WebApolice.Modulos.Seguro.Infrastructure.Persistence.Queries.ClienteVinculosUso(db));
 }

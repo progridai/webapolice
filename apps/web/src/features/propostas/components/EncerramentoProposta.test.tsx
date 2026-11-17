@@ -92,7 +92,7 @@ it.each(['claro', 'escuro', 'sistema'])(
       '2026-11-13',
       'Encerramento da Adesão',
     );
-    expect(busy).toHaveBeenLastCalledWith(false);
+    await waitFor(() => expect(busy).toHaveBeenLastCalledWith(false));
     expect(document.documentElement.getAttribute('data-theme')).toBe(
       tema === 'escuro' ? 'dark' : 'light',
     );

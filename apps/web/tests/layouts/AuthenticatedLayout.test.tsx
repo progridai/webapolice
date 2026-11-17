@@ -3,7 +3,13 @@
  *
  * Testa o layout autenticado: navegação, usuário, logout, mobile e teclado.
  */
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import {
+  render,
+  screen,
+  fireEvent,
+  waitFor,
+  within,
+} from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { MemoryRouter } from 'react-router-dom';
 import { AuthContext } from '../../src/auth/AuthContext';
@@ -150,6 +156,34 @@ describe('AuthenticatedLayout', () => {
     expect(dialog).not.toBeNull();
 
     fireEvent.keyDown(dialog, { key: 'Escape' });
+    expect(screen.queryByRole('dialog')).toBeNull();
+  });
+
+  it('deve compartilhar os grupos no desktop e mobile e fechar ao navegar', () => {
+    vi.mocked(useAuthorization).mockReturnValue(
+      makeAuthorization({ acessoTotal: true }),
+    );
+    renderLayout();
+    const desktop = screen.getByRole('navigation', {
+      name: 'Navegação principal',
+    });
+    const desktopLinks = within(desktop)
+      .getAllByRole('link')
+      .map((link) => link.textContent);
+
+    fireEvent.click(
+      screen.getByRole('button', { name: /abrir menu de navegação/i }),
+    );
+    const mobile = within(screen.getByRole('dialog'));
+    expect(mobile.getAllByRole('list').map((list) => list.ariaLabel)).toEqual(
+      within(desktop)
+        .getAllByRole('list')
+        .map((list) => list.ariaLabel),
+    );
+    expect(mobile.getAllByRole('link').map((link) => link.textContent)).toEqual(
+      desktopLinks,
+    );
+    fireEvent.click(mobile.getByRole('link', { name: 'Apólices' }));
     expect(screen.queryByRole('dialog')).toBeNull();
   });
 });

@@ -27,6 +27,8 @@ public static class SegurancaModuleExtensions
         });
 
         services.AddScoped<IUsuarioRepository, UsuarioRepository>();
+        services.AddScoped<IPreferenciasHomeRepository, PreferenciasHomeRepository>();
+        services.AddScoped<WebApolice.Modulos.Seguranca.Application.UseCases.Me.PreferenciasHomeUseCase>();
         services.AddScoped<ISegurancaAdministracaoRepository, SegurancaAdministracaoRepository>();
         services.AddScoped<IConsultasSeguranca, WebApolice.Modulos.Seguranca.Infrastructure.Persistence.Queries.ConsultasSeguranca>();
         services.AddScoped<IOperacaoSegurancaAuditada, OperacaoSegurancaAuditada>();

@@ -521,6 +521,10 @@ namespace WebApolice.Modulos.Seguranca.Infrastructure.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
+                    b.PrimitiveCollection<string[]>("AtalhosHome")
+                        .HasColumnType("text[]")
+                        .HasColumnName("atalhos_home");
+
                     b.Property<bool>("Ativo")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("boolean")

@@ -12,6 +12,25 @@ namespace WebApolice.Modulos.Seguranca.Api.Controllers;
 [Authorize]
 public class MeController : ControllerBase
 {
+    [HttpGet("atalhos-home")]
+    public async Task<IActionResult> ObterAtalhosHome(
+        [FromServices] PreferenciasHomeUseCase useCase,
+        CancellationToken cancellationToken)
+    {
+        var resultado = await useCase.ObterAsync(cancellationToken);
+        return resultado is null ? Forbid() : Ok(resultado);
+    }
+
+    [HttpPut("atalhos-home")]
+    public async Task<IActionResult> SalvarAtalhosHome(
+        [FromServices] PreferenciasHomeUseCase useCase,
+        [FromBody] Requests.AtalhosHomeRequest request,
+        CancellationToken cancellationToken)
+    {
+        var resultado = await useCase.SalvarAsync(request.AtalhosHome, cancellationToken);
+        return resultado is null ? Forbid() : Ok(resultado);
+    }
+
     [HttpGet]
     public async Task<IActionResult> Obter(
         [FromServices] WebApolice.Modulos.Seguranca.Application.UseCases.Me.ObterUsuarioAutenticadoUseCase useCase,

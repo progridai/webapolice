@@ -20,6 +20,7 @@ internal sealed class UsuarioConfiguration : IEntityTypeConfiguration<Usuario>
         builder.Property(u => u.Nome).HasMaxLength(150);
         builder.Property(u => u.Email).HasMaxLength(150);
         builder.Property(u => u.Ativo).HasDefaultValue(true);
+        builder.Property(u => u.AtalhosHome).HasColumnType("text[]");
         builder.Property(u => u.CreatedAt).HasDefaultValueSql("now()").IsRequired();
         builder.Property(u => u.UpdatedAt).HasDefaultValueSql("now()").IsRequired();
 

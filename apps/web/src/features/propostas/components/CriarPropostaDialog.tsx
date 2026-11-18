@@ -24,8 +24,8 @@ export function CriarPropostaDialog({
   return (
     <ConfirmDialog
       aberto
-      title="Criar proposta em rascunho"
-      confirmText="Criar rascunho"
+      title="Criar pré proposta"
+      confirmText="Criar pré proposta"
       cancelText="Cancelar"
       loading={isSubmitting}
       onClose={() => {
@@ -44,19 +44,22 @@ export function CriarPropostaDialog({
             <DescriptionItem label="Módulo" value={vida.moduloNome} />
           </DescriptionList>
           <p>
-            O rascunho será criado sem vigência e sem gerar cobrança. O Plano e
-            as Coberturas ativos do Módulo serão copiados com suas condições
-            atuais para consulta.
+            A pré proposta será criada sem vigência e sem gerar cobrança. O
+            Plano e as Coberturas ativos do Módulo serão copiados com suas
+            condições atuais para consulta.
           </p>
           {!vida.apoliceModuloPublicId && (
             <Alert variant="warning" title="Vida sem Módulo">
-              O rascunho será criado sem itens ou coberturas. O preenchimento
-              deverá ser concluído em uma etapa posterior.
+              A pré proposta será criada sem itens ou coberturas. O
+              preenchimento deverá ser concluído em uma etapa posterior.
             </Alert>
           )}
           <p>Geração financeira ainda não estão disponíveis nesta etapa.</p>
           {error && (
-            <Alert variant="error" title="Não foi possível criar o rascunho">
+            <Alert
+              variant="error"
+              title="Não foi possível criar a pré proposta"
+            >
               {error}
             </Alert>
           )}

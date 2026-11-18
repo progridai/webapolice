@@ -55,7 +55,7 @@ public sealed class ReagendarPropostaHandler(IPropostasRepository repository, IO
             if (inicio == p.DataInicioVigencia) throw new ValidacaoException("Informe uma data diferente do início já agendado.");
             await VigenciaPropostas.ValidarContextoAsync(p, repository, clientes, cadastro, ct);
             VigenciaPropostas.ValidarDatas(p, inicio.Value, hoje, efetivar: false);
-            await VigenciaPropostas.ValidarOrigemAsync(p, inicio.Value, repository, ct);
+            await VigenciaPropostas.ValidarOrigemAsync(p, inicio.Value, repository, configuracao.Value, ct);
             var antes = VigenciaPropostas.Retrato(p); var agora = relogio.GetUtcNow().UtcDateTime;
             var observacao = $"Início Anterior: {p.DataInicioVigencia:dd/MM/yyyy}. Novo Início: {inicio:dd/MM/yyyy}. Justificativa: {request.Dados.Observacao!.Trim()}";
             p.DataInicioVigencia = inicio; p.MotivoPendenciaVigencia = null; p.PendenciaVigenciaEm = null;

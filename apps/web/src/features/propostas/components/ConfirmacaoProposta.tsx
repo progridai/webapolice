@@ -59,7 +59,9 @@ export function ConfirmacaoProposta({
       );
       onConcluida(
         resultado.ativada
-          ? 'Vigência ativada. A substituição da versão anterior, quando existente, foi concluída.'
+          ? proposta.reinclusao
+            ? 'Reinclusão efetivada. A proposta de origem permanece cancelada.'
+            : 'Vigência ativada. A substituição da versão anterior, quando existente, foi concluída.'
           : null,
       );
     } catch (cause) {
@@ -108,7 +110,9 @@ export function ConfirmacaoProposta({
         <Alert variant="info" title="Início de vigência agendado">
           A proposta está confirmada para início em{' '}
           {formatarDataOuVazio(proposta.dataInicioVigencia)}. A versão anterior,
-          quando existente, só será substituída na ativação da nova vigência.
+          {proposta.reinclusao
+            ? 'de origem, permanece cancelada; a reinclusão só terá vigência na ativação.'
+            : 'quando existente, só será substituída na ativação da nova vigência.'}
         </Alert>
       )}
       {proposta.situacaoVigenciaCodigo === 'ATIVACAO_PENDENTE' && (
@@ -139,8 +143,12 @@ export function ConfirmacaoProposta({
                 setConfirmando(false);
                 onConcluida(
                   resultado.agendada
-                    ? 'Proposta confirmada com início agendado. A versão anterior, quando existente, permanece vigente até a ativação.'
-                    : 'Proposta confirmada e vigente. A substituição da versão anterior, quando existente, foi concluída.',
+                    ? proposta.reinclusao
+                      ? 'Reinclusão confirmada com início agendado. A origem permanece cancelada e o intervalo anterior ao novo início permanece sem cobertura.'
+                      : 'Proposta confirmada com início agendado. A versão anterior, quando existente, permanece vigente até a ativação.'
+                    : proposta.reinclusao
+                      ? 'Reinclusão confirmada e vigente a partir da data informada. A origem permanece cancelada.'
+                      : 'Proposta confirmada e vigente. A substituição da versão anterior, quando existente, foi concluída.',
                 );
               }}
               onRecarregar={() => {
@@ -161,9 +169,15 @@ export function ConfirmacaoProposta({
       {podeAlterar && proposta.podeEfetivarVigencia && (
         <DetailsSection title="Efetivar vigência">
           <p>
-            A data de início chegou. A ativação revalidará as condições da
-            participação e substituirá a versão anterior somente se todas as
-            verificações passarem.
+            {proposta.reinclusao ? (
+              'A ativação revalidará as condições da reinclusão e preservará a origem cancelada.'
+            ) : (
+              <>
+                A data de início chegou. A ativação revalidará as condições da
+                participação e substituirá a versão anterior somente se todas as
+                verificações passarem.
+              </>
+            )}
           </p>
           <div>
             <Button
@@ -240,9 +254,22 @@ export function ConfirmacaoPropostaForm({
         100%. Após confirmar, o preenchimento ficará disponível para consulta.
       </p>
       <p>
-        Para início futuro, a versão anterior continua vigente até a ativação.
-        Para hoje ou data retroativa válida, a substituição será efetivada agora
-        a partir da data informada. Esta confirmação não gera cobrança.
+        {proposta.reinclusao ? (
+          <>
+            A origem permanece cancelada. Informe início igual ou posterior a{' '}
+            {formatarDataOuVazio(proposta.dataFimVigenciaOrigem)}. Hoje ou
+            retroativa válida efetiva a reinclusão agora; futura aguarda
+            ativação. Eventual intervalo permanece sem cobertura. Esta
+            confirmação não gera cobrança.
+          </>
+        ) : (
+          <>
+            Para início futuro, a versão anterior continua vigente até a
+            ativação. Para hoje ou data retroativa válida, a substituição será
+            efetivada agora a partir da data informada. Esta confirmação não
+            gera cobrança.
+          </>
+        )}
       </p>
       <FormField
         label="Data de início da vigência"

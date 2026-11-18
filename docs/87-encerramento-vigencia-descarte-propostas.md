@@ -1,10 +1,17 @@
-# Encerramento de Vigência e Descarte de Rascunho
+# Encerramento de Vigência e Descarte de Pré Proposta
 
 Data: 12/11/2026. Etapa 5. Complementa o documento 86.
 
+Continuidade de 17/11/2026: o [documento 91](91-gestao-pedido-cancelamento-vigencia.md)
+registra alteração/retirada do pedido até sua efetivação, inclusive com data
+alcançada. As limitações desta etapa 5 abaixo descrevem seu recorte original.
+
+O [documento 92](92-reinclusao-propostas.md) registra a continuidade de reinclusão
+com outra versão após cancelamento com vigência, preservando a encerrada.
+
 ## Regras e Modelagem Antes da Evolução
 
-O responsável aprovou cancelamento de propostas vigentes com justificativa e data informada, aceitando hoje, retroativa ou futura. A proposta permanece vigente até a data futura. Bloquear enquanto houver rascunho/sucessora não encerrada, exigindo resolvê-la antes. Vida independente, versões anteriores não são reativadas e não há geração financeira. Foi aprovado também descartar rascunho com justificativa/histórico, preservando os dados e liberando outra tentativa.
+O responsável aprovou cancelamento de propostas vigentes com justificativa e data informada, aceitando hoje, retroativa ou futura. A proposta permanece vigente até a data futura. Bloquear enquanto houver pré proposta/sucessora não encerrada, exigindo resolvê-la antes. Vida independente, versões anteriores não são reativadas e não há geração financeira. Foi aprovado também descartar pré proposta com justificativa/histórico, preservando os dados e liberando outra tentativa.
 
 O fluxo continua restrito às propostas nativas do processo atual. Cancelamento não altera condições, valores, beneficiários, identidade, evidências legadas ou cobranças. A data é o primeiro dia **sem** vigência (fim exclusivo, como na substituição). Deve ser igual/posterior ao início da proposta e pertencer aos períodos conhecidos da Apólice/Vida na solicitação. A operação não exige que esses cadastros continuem ativos ou que Plano/beneficiários continuem elegíveis: encerrar não equivale a confirmar nova cobertura. Retroatividade registra a data de negócio e preserva o instante real da ação, sem recalcular financeiro.
 
@@ -14,13 +21,13 @@ Solicitação para hoje/retroativa cancela imediatamente na transação auditada
 
 A efetivação revalida a proposta ainda vigente, sua unicidade na Vida e ausência de sucessora aberta, sem exigir contexto ativo. Falha de elegibilidade registra pendência no campo humano existente `motivo_pendencia_vigencia`, com instante e revisão; repetição da mesma causa não duplica escrita/auditoria. Falha transacional reverte tudo e permite nova tentativa. Não encerrar outra versão nem reativar predecessoras. Reinclusão após cancelamento de uma versão que já teve vigência permanece para uma etapa própria.
 
-Descarte somente de rascunho nativo ainda sem confirmação/vigência. Não exigir condições completas ou contexto ativo. Exigir revisão, justificativa e catálogo `DESCARTADA`, visível, finalizador e sem movimentação, configurado externamente por `Propostas__StatusDescartadaCodigo`. Guardar `descartada_em`; não fabricar confirmação, datas de vigência ou cancelamento. Permitir nova tentativa com número superior ao maior já registrado, preservando a origem vigente quando existente. Ocultações, exclusões e outros estados não equivalem a descarte.
+Descarte somente de pré proposta nativa ainda sem confirmação/vigência. Não exigir condições completas ou contexto ativo. Exigir revisão, justificativa e catálogo `DESCARTADA`, visível, finalizador e sem movimentação, configurado externamente por `Propostas__StatusDescartadaCodigo`. Guardar `descartada_em`; não fabricar confirmação, datas de vigência ou cancelamento. Permitir nova tentativa com número superior ao maior já registrado, preservando a origem vigente quando existente. Ocultações, exclusões e outros estados não equivalem a descarte.
 
 Justificativas e datas explicativas usam `observacao` e `motivo` do histórico, já humanos e classificados em C#/TypeScript/SQL. Reutilizar os normalizadores e o histórico existente: origem/versão quando há predecessor, autorreferência quando é a primeira tentativa. Datas/códigos são técnicos. Não há palavra ou coluna humana nova.
 
 ## Contratos e Interface
 
-Novas operações com UUID da rota e `propostas.alterar`/gates APOLICES/PROPOSTAS: solicitar cancelamento de vigência (revisão, data e observação), efetivar cancelamento vencido (revisão), descartar rascunho (revisão e observação). O detalhe informa datas/instantes, elegibilidade e situações `CANCELAMENTO_AGENDADO`, `CANCELAMENTO_PENDENTE` e `DESCARTADA`, mantendo `CANCELADA` para encerramento concluído. A data planejada é distinta do fim efetivado.
+Novas operações com UUID da rota e `propostas.alterar`/gates APOLICES/PROPOSTAS: solicitar cancelamento de vigência (revisão, data e observação), efetivar cancelamento vencido (revisão), descartar pré proposta (revisão e observação). O detalhe informa datas/instantes, elegibilidade e situações `CANCELAMENTO_AGENDADO`, `CANCELAMENTO_PENDENTE` e `DESCARTADA`, mantendo `CANCELADA` para encerramento concluído. A data planejada é distinta do fim efetivado.
 
 - `POST /api/propostas/{publicId}/vigencia/cancelamento`: `revisaoEsperada`, `dataCancelamentoVigencia` e `observacao` obrigatórios; retorna `cancelada`, `agendada`, revisão e eventual pendência.
 - `POST /api/propostas/{publicId}/vigencia/cancelamento/efetivar`: revisão obrigatória; não antecipa data. Repetição após efetivação retorna o estado sem duplicar histórico/auditoria, inclusive com revisão antiga.
@@ -31,7 +38,7 @@ Formulários explicam a data exclusiva, ausência de reativação anterior e pre
 
 ## Validação e Instalação
 
-Backend: **645 testes aprovados** — 6 Auditoria Unit, 2 Auditoria Integration, 70 Cadastro, 28 Arquitetura, 148 API e 391 Integration. Build sem erros/avisos e modelo EF sem alterações pendentes. Cobertura de datas informadas hoje/retroativa/futura, períodos/início, justificativa/revisão, proposta legada/oculta/rascunho, contexto inativo, preservação da Vida/condições, bloqueio por sucessora, descarte incompleto, nova tentativa com numeração superior e ausência de reativação da anterior. Processamento testa fuso de São Paulo, atraso/reinício, duas instâncias, repetição sem auditoria extra e pendência/correção. As duas ordens da disputa entre cancelamento e criação de sucessora são serializadas. Falha de auditoria reverte pedido imediato/futuro, efetivação e descarte integralmente.
+Backend: **645 testes aprovados** — 6 Auditoria Unit, 2 Auditoria Integration, 70 Cadastro, 28 Arquitetura, 148 API e 391 Integration. Build sem erros/avisos e modelo EF sem alterações pendentes. Cobertura de datas informadas hoje/retroativa/futura, períodos/início, justificativa/revisão, proposta legada/oculta/pré proposta, contexto inativo, preservação da Vida/condições, bloqueio por sucessora, descarte incompleto, nova tentativa com numeração superior e ausência de reativação da anterior. Processamento testa fuso de São Paulo, atraso/reinício, duas instâncias, repetição sem auditoria extra e pendência/correção. As duas ordens da disputa entre cancelamento e criação de sucessora são serializadas. Falha de auditoria reverte pedido imediato/futuro, efetivação e descarte integralmente.
 
 O primeiro teste de repetição de pendência esperava quatro auditorias, omitindo o evento de solicitação que antecede a pendência. Foi corrigido para conferir uma auditoria nova na primeira pendência e nenhuma na repetição. A suíte completa passou depois da correção. Os testes de migrations comparam os registros anteriores, verificam metadados inicialmente nulos e recusam rollback que apagaria descarte/pedido; comparações antigas foram atualizadas para excluir somente as novas colunas nullable do cálculo anterior.
 

@@ -9,32 +9,32 @@ namespace WebApolice.Modulos.Seguro.Application.UseCases.Propostas.PreencherRasc
 public sealed record BeneficiarioPreenchimento(Guid? PublicId, string? Nome, string? ParentescoRegistrado, decimal? PercentualParticipacao);
 public sealed record CoberturaPreenchimento(Guid PublicId, decimal? PremioTitular, decimal? PremioConjuge, string? JustificativaAjustePremio);
 public sealed record PreencherRascunhoDados(int? RevisaoEsperada, string? Observacao,
-    IReadOnlyList<BeneficiarioPreenchimento>? Beneficiarios, IReadOnlyList<CoberturaPreenchimento>? Coberturas);
+    IReadOnlyList<BeneficiarioPreenchimento>? Beneficiarios, IReadOnlyList<CoberturaPreenchimento>? Coberturas, bool? IncluiConjuge = null);
 public sealed record PreencherRascunhoCommand(Guid PublicId, PreencherRascunhoDados Dados) : IRequest<int>;
 
 public sealed class PreencherRascunhoHandler(IPropostasRepository repository, IOperacaoPropostas operacao,
     IOptions<ConfiguracaoPropostas> configuracao) : IRequestHandler<PreencherRascunhoCommand, int>
 {
     public Task<int> Handle(PreencherRascunhoCommand request, CancellationToken cancellationToken) =>
-        operacao.ExecutarAsync("Preencher Rascunho", async ct =>
+        operacao.ExecutarAsync("Preencher Pré Proposta", async ct =>
         {
             var dados = request.Dados;
             if (request.PublicId == Guid.Empty || dados.RevisaoEsperada is null or < 0 ||
                 dados.Beneficiarios is null || dados.Coberturas is null ||
                 dados.Beneficiarios.Any(b => b is null) || dados.Coberturas.Any(c => c is null))
-                throw new ValidacaoException("Informe a revisão, os beneficiários e as coberturas do rascunho.");
+                throw new ValidacaoException("Informe a revisão, os beneficiários e as coberturas da pré proposta.");
             var proposta = await repository.ObterParaPreenchimentoAsync(request.PublicId, ct)
                 ?? throw new ValidacaoException("Proposta não encontrada.");
             if (!proposta.PermitePreenchimento(configuracao.Value.StatusInicialCodigo))
-                throw new ValidacaoException("Somente propostas nativas em rascunho sem vigência podem ser preenchidas.");
+                throw new ValidacaoException("Somente propostas nativas em pré proposta sem vigência podem ser preenchidas.");
             if (proposta.RevisaoPreenchimento != dados.RevisaoEsperada)
-                throw new ValidacaoException("O rascunho foi alterado em outra tela. Recarregue a proposta antes de salvar.");
+                throw new ValidacaoException("A pré proposta foi alterada em outra tela. Recarregue a proposta antes de salvar.");
 
             var beneficiarios = proposta.PropostaBeneficiarios.Where(b => b.DeletedAt == null).ToList();
             var editaveis = beneficiarios.Where(b => b.PermitePreenchimento()).ToDictionary(b => b.PublicId);
             var ids = dados.Beneficiarios.Where(b => b.PublicId.HasValue).Select(b => b.PublicId!.Value).ToList();
             if (ids.Contains(Guid.Empty) || ids.Distinct().Count() != ids.Count || ids.Any(id => !editaveis.ContainsKey(id)))
-                throw new ValidacaoException("Há beneficiário repetido, protegido ou que não pertence ao rascunho.");
+                throw new ValidacaoException("Há beneficiário repetido, protegido ou que não pertence à pré proposta.");
             foreach (var b in dados.Beneficiarios)
                 ValidacaoBeneficiariosProposta.ValidarIndicacao(b.Nome, b.ParentescoRegistrado, b.PercentualParticipacao);
             var total = dados.Beneficiarios.Sum(b => b.PercentualParticipacao!.Value) +
@@ -44,7 +44,7 @@ public sealed class PreencherRascunhoHandler(IPropostasRepository repository, IO
             var coberturas = proposta.PropostaCoberturas.Where(c => c.LegadoId == null && c.Ativo && c.ApoliceModuloCoberturaId != null).ToDictionary(c => c.PublicId);
             if (dados.Coberturas.Count != coberturas.Count || dados.Coberturas.Select(c => c.PublicId).Distinct().Count() != dados.Coberturas.Count ||
                 dados.Coberturas.Any(c => !coberturas.ContainsKey(c.PublicId)))
-                throw new ValidacaoException("Informe uma vez cada cobertura editável do rascunho.");
+                throw new ValidacaoException("Informe uma vez cada cobertura editável da pré proposta.");
             var antes = Retrato(proposta);
             var agora = DateTime.UtcNow;
             foreach (var c in dados.Coberturas)
@@ -78,6 +78,7 @@ public sealed class PreencherRascunhoHandler(IPropostasRepository repository, IO
                 atual.UpdatedAt = agora;
             }
             proposta.Observacao = string.IsNullOrWhiteSpace(dados.Observacao) ? null : dados.Observacao.Trim();
+            if (dados.IncluiConjuge.HasValue) proposta.IncluiConjuge = dados.IncluiConjuge;
             proposta.RevisaoPreenchimento = checked(proposta.RevisaoPreenchimento + 1);
             proposta.UpdatedAt = agora;
             await repository.SalvarAlteracoesAsync(ct);
@@ -87,7 +88,7 @@ public sealed class PreencherRascunhoHandler(IPropostasRepository repository, IO
     // Minimização: nomes, parentescos e conteúdo livre da observação não são duplicados na auditoria.
     private static object Retrato(Propostum p) => new
     {
-        p.PublicId, p.RevisaoPreenchimento, PossuiObservacao = !string.IsNullOrEmpty(p.Observacao),
+        p.PublicId, p.RevisaoPreenchimento, p.IncluiConjuge, PossuiObservacao = !string.IsNullOrEmpty(p.Observacao),
         Beneficiarios = p.PropostaBeneficiarios.Where(b => b.DeletedAt == null).Select(b => new { b.PublicId, b.PercentualParticipacao }).ToArray(),
         Coberturas = p.PropostaCoberturas.Select(c => new { c.PublicId, c.PremioTitular, c.PremioConjuge,
             c.PremioAjustado, c.JustificativaAjustePremio }).ToArray()

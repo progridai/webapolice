@@ -20,8 +20,8 @@ public sealed class PropostasEncerramentoMigrationTests
             """);
         var antes = await db.Database.SqlQueryRaw<string>("SELECT md5(to_jsonb(p)::text) AS \"Value\" FROM seguro.proposta p WHERE id=900").SingleAsync();
         await db.GetService<IMigrator>().MigrateAsync();
-        var depois = await db.Database.SqlQueryRaw<string>("SELECT md5((to_jsonb(p)-'descartada_em'-'cancelamento_solicitado_em'-'data_cancelamento_vigencia')::text) AS \"Value\" FROM seguro.proposta p WHERE id=900").SingleAsync();
-        Assert.Equal(antes, depois); var p = await db.Proposta.SingleAsync(p => p.Id == 900);
+        var depois = await db.Database.SqlQueryRaw<string>("SELECT md5((to_jsonb(p)-'inclui_conjuge'-'condicoes_proprias'-'descartada_em'-'cancelamento_solicitado_em'-'data_cancelamento_vigencia')::text) AS \"Value\" FROM seguro.proposta p WHERE id=900").SingleAsync();
+        Assert.Equal(antes, depois); var p = await db.Proposta.SingleAsync(p => p.Id == 900); Assert.False(p.CondicoesProprias);
         Assert.Null(p.DescartadaEm); Assert.Null(p.CancelamentoSolicitadoEm); Assert.Null(p.DataCancelamentoVigencia);
         var status = await db.PropostaStatuses.SingleAsync(s => s.Codigo == "DESCARTADA"); Assert.True(status.Finalizador); Assert.True(status.VisivelOperacional); Assert.False(status.PermiteMovimentacao);
         await db.Database.ExecuteSqlRawAsync("UPDATE seguro.proposta SET descartada_em=now() WHERE id=900");

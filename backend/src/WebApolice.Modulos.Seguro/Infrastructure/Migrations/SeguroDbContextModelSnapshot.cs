@@ -2431,6 +2431,16 @@ namespace WebApolice.Modulos.Seguro.Infrastructure.Migrations
                         .HasColumnName("public_id")
                         .HasDefaultValueSql("gen_random_uuid()");
 
+                    b.Property<bool>("CondicoesProprias")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false)
+                        .HasColumnName("condicoes_proprias");
+
+                    b.Property<bool?>("IncluiConjuge")
+                        .HasColumnType("boolean")
+                        .HasColumnName("inclui_conjuge");
+
                     b.Property<int>("RevisaoPreenchimento")
                         .IsConcurrencyToken()
                         .ValueGeneratedOnAdd()

@@ -1,5 +1,8 @@
 import { useCallback, useEffect, useState } from 'react';
 import { ConfirmacaoProposta } from './ConfirmacaoProposta';
+import { SimulacaoMensalProposta } from './SimulacaoMensalProposta';
+import { ReinclusaoProposta } from './ReinclusaoProposta';
+import { RevisaoCondicoesProposta } from './RevisaoCondicoesProposta';
 import { PreenchimentoRascunhoForm } from './PreenchimentoRascunhoForm';
 import { useAuthorization } from '../../../auth/AuthorizationProvider';
 import { useCriarProposta } from '../hooks/useCriarProposta';
@@ -23,7 +26,7 @@ function descricaoVigencia(proposta: PropostaDetalhe) {
   if (proposta.situacaoVigenciaCodigo === 'CANCELAMENTO_PENDENTE')
     return 'Vigente com cancelamento pendente';
   if (proposta.situacaoVigenciaCodigo === 'DESCARTADA')
-    return 'Rascunho descartado';
+    return 'Pré proposta descartada';
   if (proposta.situacaoVigenciaCodigo === 'CANCELADA')
     return proposta.dataFimVigencia
       ? 'Vigência cancelada'
@@ -64,8 +67,11 @@ export function PropostaDetalhes({
   const [editando, setEditando] = useState(false);
   const [salvo, setSalvo] = useState(false);
   const [confirmacaoOcupada, setConfirmacaoOcupada] = useState(false);
+  const [reinclusaoOcupada, setReinclusaoOcupada] = useState(false);
+  const [revisaoOcupada, setRevisaoOcupada] = useState(false);
   const [mensagemVigencia, setMensagemVigencia] = useState<string | null>(null);
-  const operacaoEmAberto = editando || confirmacaoOcupada;
+  const operacaoEmAberto =
+    editando || confirmacaoOcupada || reinclusaoOcupada || revisaoOcupada;
   useEffect(() => {
     if (operacaoEmAberto) onBusy?.(true);
     return () => {
@@ -112,10 +118,36 @@ export function PropostaDetalhes({
                 {mensagemVigencia}
               </Alert>
             )}
+            <ReinclusaoProposta
+              proposta={data}
+              podeInserir={possuiPermissao('propostas.inserir')}
+              disabled={
+                editando ||
+                confirmacaoOcupada ||
+                criacao.isSubmitting ||
+                revisaoOcupada
+              }
+              onBusy={setReinclusaoOcupada}
+              onCriada={onNovaVersao}
+              onRecarregar={() => void refetch()}
+            />
+            {data.reinclusao && (
+              <Alert variant="info" title="Nova versão de reinclusão">
+                A proposta de origem permanece cancelada. O início não pode
+                anteceder {formatarDataOuVazio(data.dataFimVigenciaOrigem)}.
+                Eventual intervalo até o novo início permanece sem cobertura.
+                Confira condições e beneficiários antes de confirmar.
+              </Alert>
+            )}
             <ConfirmacaoProposta
               proposta={data}
               podeAlterar={possuiPermissao('propostas.alterar')}
-              disabled={editando || criacao.isSubmitting}
+              disabled={
+                editando ||
+                criacao.isSubmitting ||
+                reinclusaoOcupada ||
+                revisaoOcupada
+              }
               onBusy={setConfirmacaoOcupada}
               onConcluida={(mensagem) => {
                 setMensagemVigencia(mensagem);
@@ -123,14 +155,48 @@ export function PropostaDetalhes({
                 void refetch();
               }}
             />
+            <RevisaoCondicoesProposta
+              proposta={data}
+              podeAlterar={possuiPermissao('propostas.alterar')}
+              disabled={
+                editando ||
+                confirmacaoOcupada ||
+                reinclusaoOcupada ||
+                criacao.isSubmitting ||
+                confirmandoVersao
+              }
+              onBusy={setRevisaoOcupada}
+              onRecarregar={() => {
+                setMensagemVigencia(null);
+                void refetch();
+              }}
+              onConcluida={() => {
+                setMensagemVigencia(
+                  'Condições revisadas. A Vida e os beneficiários foram preservados.',
+                );
+                void refetch();
+              }}
+            />
+            {data.condicoesProprias && (
+              <Alert variant="info" title="Condições próprias da proposta">
+                Os vínculos da Vida foram preservados. Itens e coberturas
+                inativos representam condições anteriores à revisão.
+              </Alert>
+            )}
+            <SimulacaoMensalProposta
+              proposta={data}
+              disabled={
+                operacaoEmAberto || criacao.isSubmitting || confirmandoVersao
+              }
+            />
             {salvo && (
-              <Alert variant="success" title="Rascunho salvo">
+              <Alert variant="success" title="Pré proposta salva">
                 O preenchimento foi salvo sem ativar a proposta.
               </Alert>
             )}
             {data.podeEditarRascunho &&
               possuiPermissao('propostas.alterar') && (
-                <DetailsSection title="Preenchimento do rascunho">
+                <DetailsSection title="Preenchimento da pré proposta">
                   {editando ? (
                     <PreenchimentoRascunhoForm
                       key={data.publicId}
@@ -149,14 +215,18 @@ export function PropostaDetalhes({
                   ) : (
                     <Button
                       variant="secondary"
-                      disabled={confirmacaoOcupada}
+                      disabled={
+                        confirmacaoOcupada ||
+                        reinclusaoOcupada ||
+                        revisaoOcupada
+                      }
                       onClick={() => {
                         setMensagemVigencia(null);
                         setSalvo(false);
                         setEditando(true);
                       }}
                     >
-                      Editar rascunho
+                      Editar pré proposta
                     </Button>
                   )}
                 </DetailsSection>
@@ -272,16 +342,17 @@ export function PropostaDetalhes({
                     <Button
                       variant="secondary"
                       onClick={() => setConfirmandoVersao(true)}
+                      disabled={operacaoEmAberto || criacao.isSubmitting}
                     >
                       Preparar nova versão
                     </Button>
                   ) : (
                     <div className="flex flex-col gap-3">
                       <p>
-                        Será criada uma nova versão em rascunho com as condições
-                        atuais do Módulo da Vida. A proposta anterior continuará
-                        vigente. Esta etapa não confirma a substituição nem gera
-                        cobrança.
+                        Será criada uma nova versão de pré proposta com as
+                        condições atuais do Módulo da Vida. A proposta anterior
+                        continuará vigente. Esta etapa não confirma a
+                        substituição nem gera cobrança.
                       </p>
                       {criacao.error && (
                         <Alert
@@ -306,7 +377,7 @@ export function PropostaDetalhes({
                               .finally(() => onBusy?.(false));
                           }}
                         >
-                          Criar versão em rascunho
+                          Criar versão de pré proposta
                         </Button>
                         <Button
                           variant="secondary"

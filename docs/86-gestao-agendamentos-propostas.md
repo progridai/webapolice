@@ -2,11 +2,11 @@
 
 Data: 12/11/2026. Etapa 4. Complementa o documento 85.
 
-Continuidade: o [documento 87](87-encerramento-vigencia-descarte-propostas.md) define a etapa 5, aprovada pelo responsável, para cancelamento de vigência com data informada e descarte de rascunho. As limitações abaixo registram o recorte original da etapa 4.
+Continuidade: o [documento 87](87-encerramento-vigencia-descarte-propostas.md) define a etapa 5, aprovada pelo responsável, para cancelamento de vigência com data informada e descarte de pré proposta. As limitações abaixo registram o recorte original da etapa 4.
 
 ## Regras e Modelagem Antes da Evolução
 
-O responsável aprovou reagendar e cancelar propostas confirmadas que ainda não entraram em vigência, com justificativa e histórico. O cancelamento encerra a versão como `CANCELADA`, preserva seus dados e permite preparar outra versão a partir da vigente. Cancelamento de vigentes, retorno ao rascunho e financeiro não fazem parte desta etapa.
+O responsável aprovou reagendar e cancelar propostas confirmadas que ainda não entraram em vigência, com justificativa e histórico. O cancelamento encerra a versão como `CANCELADA`, preserva seus dados e permite preparar outra versão a partir da vigente. Cancelamento de vigentes, retorno à pré proposta e financeiro não fazem parte desta etapa.
 
 As operações abrangem propostas nativas confirmadas, visíveis, não excluídas, sem substituição e ainda não vigentes, inclusive uma ativação atrasada ou pendente. O estado é conferido depois dos mesmos bloqueios de Apólice/Proposta usados pelo processador; se a ativação vencer a concorrência, a operação é recusada. Revisão esperada e justificativa não vazia de até 1.000 caracteres são obrigatórias. Vida e versão anterior não são alteradas.
 
@@ -40,7 +40,7 @@ Configuração externa local, ignorada pelo Git: acrescentado `Propostas__Status
 
 Publicação em `backend/src/WebApolice.Api/bin/ExecucaoAgendamentosPropostas-20261112`, validada temporariamente em 5008 e ativada em **5007, PID 5824**. Hashes de `appsettings.json`/`appsettings.Development.json` iguais aos da publicação anterior. Health live/ready e frontend 5173 responderam 200; as duas novas operações retornaram 401 sem token, com UUIDs fictícios. Instância temporária encerrada; logs/metadados em `scratch/propostas-agendamentos-api-20261112/`. Não há migrations no startup.
 
-Homologação visual autenticada permanece pendente. Cancelamento de propostas já vigentes, retorno da cancelada ao rascunho, reagendamento para hoje/retroativa, revisão explícita do contexto e financeiro continuam fora desta entrega.
+Homologação visual autenticada permanece pendente. Cancelamento de propostas já vigentes, retorno da cancelada à pré proposta, reagendamento para hoje/retroativa, revisão explícita do contexto e financeiro continuam fora desta entrega.
 
 ## Arquivos Centrais
 

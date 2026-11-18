@@ -36,7 +36,36 @@ beforeEach(() => {
   );
 });
 
-describe('Preenchimento do rascunho', () => {
+describe('Preenchimento da pré proposta', () => {
+  it('exige escolha explícita de cônjuge e envia a contratação escolhida', async () => {
+    const salvo = vi.fn();
+    render(
+      <PreenchimentoRascunhoForm
+        proposta={{ ...rascunho, incluiConjuge: null }}
+        onCancelar={vi.fn()}
+        onSalvo={salvo}
+      />,
+    );
+    fireEvent.click(
+      screen.getByRole('button', { name: 'Salvar pré proposta' }),
+    );
+    expect(
+      await screen.findByText('Informe se há contratação de cônjuge.'),
+    ).toBeTruthy();
+    expect(salvarRascunho).not.toHaveBeenCalled();
+    fireEvent.change(
+      screen.getByLabelText('Contratação de cônjuge', { exact: false }),
+      { target: { value: 'SIM' } },
+    );
+    fireEvent.click(
+      screen.getByRole('button', { name: 'Salvar pré proposta' }),
+    );
+    await waitFor(() => expect(salvo).toHaveBeenCalledOnce());
+    expect(salvarRascunho).toHaveBeenCalledWith(
+      rascunho.publicId,
+      expect.objectContaining({ incluiConjuge: true }),
+    );
+  });
   it.each(['claro', 'escuro', 'sistema'])(
     'preenche beneficiário e prêmio no tema %s, mantendo revisão e valores nulos',
     async (tema) => {
@@ -78,10 +107,13 @@ describe('Preenchimento do rascunho', () => {
         screen.getByLabelText('Justificativa do ajuste da cobertura 1'),
         { target: { value: 'AJUSTE DE PROTEÇÃO' } },
       );
-      fireEvent.click(screen.getByRole('button', { name: 'Salvar rascunho' }));
+      fireEvent.click(
+        screen.getByRole('button', { name: 'Salvar pré proposta' }),
+      );
       await waitFor(() => expect(salvo).toHaveBeenCalledOnce());
       expect(salvarRascunho).toHaveBeenCalledWith(rascunho.publicId, {
         revisaoEsperada: 0,
+        incluiConjuge: false,
         observacao: '',
         beneficiarios: [
           {
@@ -127,7 +159,9 @@ describe('Preenchimento do rascunho', () => {
     fireEvent.change(screen.getByLabelText('Prêmio titular da cobertura 1'), {
       target: { value: '22' },
     });
-    fireEvent.click(screen.getByRole('button', { name: 'Salvar rascunho' }));
+    fireEvent.click(
+      screen.getByRole('button', { name: 'Salvar pré proposta' }),
+    );
     expect(
       await screen.findByText('Justifique este ajuste de prêmio.'),
     ).toBeTruthy();
@@ -137,7 +171,7 @@ describe('Preenchimento do rascunho', () => {
   it('permite corrigir erro, preserva edição e bloqueia envio duplicado enquanto pendente', async () => {
     vi.mocked(salvarRascunho).mockRejectedValueOnce(
       new Error(
-        'O rascunho foi alterado em outra tela. Recarregue a proposta antes de salvar.',
+        'A pré proposta foi alterada em outra tela. Recarregue a proposta antes de salvar.',
       ),
     );
     const salvo = vi.fn();
@@ -150,12 +184,14 @@ describe('Preenchimento do rascunho', () => {
         onBusy={busy}
       />,
     );
-    fireEvent.change(screen.getByLabelText('Observação do rascunho'), {
+    fireEvent.change(screen.getByLabelText('Observação da pré proposta'), {
       target: { value: 'MINHA OBSERVAÇÃO' },
     });
-    fireEvent.click(screen.getByRole('button', { name: 'Salvar rascunho' }));
+    fireEvent.click(
+      screen.getByRole('button', { name: 'Salvar pré proposta' }),
+    );
     expect(
-      await screen.findByText(/O rascunho foi alterado em outra tela/),
+      await screen.findByText(/A pré proposta foi alterada em outra tela/),
     ).toBeTruthy();
     expect(screen.getByDisplayValue('MINHA OBSERVAÇÃO')).toBeTruthy();
     expect(salvo).not.toHaveBeenCalled();
@@ -166,10 +202,12 @@ describe('Preenchimento do rascunho', () => {
           concluir = resolve;
         }),
     );
-    fireEvent.click(screen.getByRole('button', { name: 'Salvar rascunho' }));
+    fireEvent.click(
+      screen.getByRole('button', { name: 'Salvar pré proposta' }),
+    );
     await waitFor(() => expect(salvarRascunho).toHaveBeenCalledTimes(2));
     fireEvent.submit(
-      screen.getByRole('form', { name: 'Preenchimento do rascunho' }),
+      screen.getByRole('form', { name: 'Preenchimento da pré proposta' }),
     );
     expect(salvarRascunho).toHaveBeenCalledTimes(2);
     expect(
@@ -237,7 +275,7 @@ describe('Preenchimento do rascunho', () => {
     );
     await screen.findByText('Proposta aBc-123');
     expect(
-      screen.queryByRole('button', { name: 'Editar rascunho' }),
+      screen.queryByRole('button', { name: 'Editar pré proposta' }),
     ).toBeNull();
     unmount();
     vi.mocked(useAuthorization).mockReturnValue(
@@ -260,7 +298,7 @@ describe('Preenchimento do rascunho', () => {
     );
     await screen.findByText('Proposta aBc-123');
     expect(
-      screen.queryByRole('button', { name: 'Editar rascunho' }),
+      screen.queryByRole('button', { name: 'Editar pré proposta' }),
     ).toBeNull();
   });
 
@@ -275,7 +313,7 @@ describe('Preenchimento do rascunho', () => {
       />,
     );
     fireEvent.click(
-      await screen.findByRole('button', { name: 'Editar rascunho' }),
+      await screen.findByRole('button', { name: 'Editar pré proposta' }),
     );
     expect(busy).toHaveBeenLastCalledWith(true);
     expect(
@@ -283,7 +321,7 @@ describe('Preenchimento do rascunho', () => {
         .getByRole('button', { name: 'Voltar às propostas' })
         .hasAttribute('disabled'),
     ).toBe(true);
-    fireEvent.change(screen.getByLabelText('Observação do rascunho'), {
+    fireEvent.change(screen.getByLabelText('Observação da pré proposta'), {
       target: { value: 'AÇÃO DE PROTEÇÃO' },
     });
     vi.mocked(obterProposta).mockResolvedValue({
@@ -291,9 +329,11 @@ describe('Preenchimento do rascunho', () => {
       revisaoPreenchimento: 1,
       observacao: 'Ação de Proteção',
     });
-    fireEvent.click(screen.getByRole('button', { name: 'Salvar rascunho' }));
+    fireEvent.click(
+      screen.getByRole('button', { name: 'Salvar pré proposta' }),
+    );
     expect(await screen.findByText('Ação de Proteção')).toBeTruthy();
-    expect(await screen.findByText('Rascunho salvo')).toBeTruthy();
+    expect(await screen.findByText('Pré proposta salva')).toBeTruthy();
     expect(busy).toHaveBeenLastCalledWith(false);
   });
 
@@ -310,10 +350,12 @@ describe('Preenchimento do rascunho', () => {
         onRecarregar={recarregar}
       />,
     );
-    fireEvent.change(screen.getByLabelText('Observação do rascunho'), {
+    fireEvent.change(screen.getByLabelText('Observação da pré proposta'), {
       target: { value: 'Alteração Local' },
     });
-    fireEvent.click(screen.getByRole('button', { name: 'Salvar rascunho' }));
+    fireEvent.click(
+      screen.getByRole('button', { name: 'Salvar pré proposta' }),
+    );
     fireEvent.click(
       await screen.findByRole('button', { name: 'Recarregar proposta' }),
     );

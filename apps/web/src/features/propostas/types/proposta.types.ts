@@ -19,12 +19,21 @@ export interface Proposta {
 }
 
 export interface PropostaDetalhe extends Proposta {
+  incluiConjuge: boolean | null;
+  podeSimularValorMensal: boolean;
+  podeRevisarCondicoes: boolean;
+  condicoesProprias: boolean;
+  podePrepararReinclusao: boolean;
+  reinclusao: boolean;
+  dataFimVigenciaOrigem: string | null;
   dataCancelamentoVigencia: string | null;
   cancelamentoSolicitadoEm: string | null;
   descartadaEm: string | null;
   podeDescartarRascunho: boolean;
   podeCancelarVigencia: boolean;
   podeEfetivarCancelamento: boolean;
+  podeAlterarCancelamento: boolean;
+  podeRetirarCancelamento: boolean;
   canceladaEm: string | null;
   podeReagendar: boolean;
   podeCancelarAgendamento: boolean;
@@ -105,6 +114,7 @@ export interface PropostaDetalhe extends Proposta {
 }
 
 export interface PreencherRascunhoDados {
+  incluiConjuge?: boolean;
   revisaoEsperada: number;
   observacao: string | null;
   beneficiarios: {

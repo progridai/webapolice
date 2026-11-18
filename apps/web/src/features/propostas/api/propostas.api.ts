@@ -61,6 +61,19 @@ export async function criarPropostaDaVida(
   return response.data.publicId;
 }
 
+export async function prepararReinclusao(
+  publicId: string,
+  revisaoEsperada: number,
+  origemCondicoes: 'ANTERIOR' | 'MODULO',
+): Promise<string> {
+  return (
+    await httpClient.post<{ publicId: string }>(
+      `/api/propostas/${publicId}/reinclusao`,
+      { revisaoEsperada, origemCondicoes },
+    )
+  ).data.publicId;
+}
+
 export async function confirmarProposta(
   publicId: string,
   revisaoEsperada: number,
@@ -132,6 +145,31 @@ export async function efetivarCancelamentoVigencia(
     await httpClient.post<CancelamentoVigenciaResultado>(
       `/api/propostas/${publicId}/vigencia/cancelamento/efetivar`,
       { revisaoEsperada },
+    )
+  ).data;
+}
+export async function alterarCancelamentoVigencia(
+  publicId: string,
+  revisaoEsperada: number,
+  dataCancelamentoVigencia: string,
+  observacao: string,
+): Promise<CancelamentoVigenciaResultado> {
+  return (
+    await httpClient.post<CancelamentoVigenciaResultado>(
+      `/api/propostas/${publicId}/vigencia/cancelamento/alterar`,
+      { revisaoEsperada, dataCancelamentoVigencia, observacao },
+    )
+  ).data;
+}
+export async function retirarCancelamentoVigencia(
+  publicId: string,
+  revisaoEsperada: number,
+  observacao: string,
+): Promise<GestaoAgendamentoResultado> {
+  return (
+    await httpClient.post<GestaoAgendamentoResultado>(
+      `/api/propostas/${publicId}/vigencia/cancelamento/retirar`,
+      { revisaoEsperada, observacao },
     )
   ).data;
 }

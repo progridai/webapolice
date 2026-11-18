@@ -16,6 +16,36 @@ namespace WebApolice.Modulos.Seguro.Infrastructure.Persistence.Repositories;
 
 public sealed class PropostasRepository(SeguroDbContext _dbContext, IClientesPropostas clientes) : IPropostasRepository
 {
+    public async Task<IReadOnlyList<ApoliceRamoModel>> ObterRamosSimulacaoAsync(long apoliceId, CancellationToken ct) =>
+        await _dbContext.ApoliceRamos.AsNoTracking().Include(r => r.Ramo)
+            .Where(r => r.ApoliceId == apoliceId && r.Ativo && r.DeletedAt == null && r.Ramo != null && r.Ramo.Ativo)
+            .OrderBy(r => r.Ramo!.Nome).ThenBy(r => r.PublicId).ToListAsync(ct);
+    public Task<int?> ObterRevisaoAtualAsync(Guid publicId, CancellationToken ct) =>
+        _dbContext.Proposta.AsNoTracking().Where(p => p.PublicId == publicId && p.DeletedAt == null && p.VisivelOperacional && p.Status.VisivelOperacional)
+            .Select(p => (int?)p.RevisaoPreenchimento).SingleOrDefaultAsync(ct);
+    public async Task<Propostum?> ObterParaComparacaoAsync(Guid publicId, CancellationToken ct) =>
+        await _dbContext.Proposta.AsNoTracking().Include(p => p.Status).Include(p => p.Apolice)
+            .Include(p => p.ApoliceVida).Include(p => p.ApoliceModulo).Include(p => p.ApoliceSubgrupo)
+            .Include(p => p.PropostaItems).ThenInclude(i => i.ApoliceModuloPlano)
+            .Include(p => p.PropostaCoberturas).ThenInclude(c => c.Cobertura)
+            .Include(p => p.PropostaCoberturas).ThenInclude(c => c.ApoliceModuloCobertura)
+            .AsSplitQuery().SingleOrDefaultAsync(p => p.PublicId == publicId, ct);
+    public async Task<IReadOnlyList<ApoliceModuloModel>> ObterModulosRevisaoAsync(long apoliceId, CancellationToken ct) =>
+        await _dbContext.ApoliceModulos.AsNoTracking().Where(m => m.ApoliceId == apoliceId && m.Ativo && m.DeletedAt == null).OrderBy(m => m.Id).ToListAsync(ct);
+    public async Task<IReadOnlyList<ApoliceSubgrupoModel>> ObterSubgruposRevisaoAsync(long apoliceId, CancellationToken ct) =>
+        await _dbContext.ApoliceSubgrupos.AsNoTracking().Where(s => s.ApoliceId == apoliceId && s.Ativo && s.DeletedAt == null).OrderBy(s => s.Nome).ThenBy(s => s.Id).ToListAsync(ct);
+    public async Task<ApoliceModuloModel?> ObterModuloRevisaoAsync(Guid publicId, CancellationToken ct)
+    {
+        if (_dbContext.Database.CurrentTransaction != null)
+            await _dbContext.Database.ExecuteSqlInterpolatedAsync($"SELECT id FROM seguro.apolice_modulo WHERE public_id={publicId} FOR SHARE", ct);
+        return await _dbContext.ApoliceModulos.SingleOrDefaultAsync(m => m.PublicId == publicId, ct);
+    }
+    public async Task<ApoliceSubgrupoModel?> ObterSubgrupoRevisaoAsync(Guid publicId, CancellationToken ct)
+    {
+        if (_dbContext.Database.CurrentTransaction != null)
+            await _dbContext.Database.ExecuteSqlInterpolatedAsync($"SELECT id FROM seguro.apolice_subgrupo WHERE public_id={publicId} FOR SHARE", ct);
+        return await _dbContext.ApoliceSubgrupos.SingleOrDefaultAsync(s => s.PublicId == publicId, ct);
+    }
     public async Task<PropostaStatus?> ObterStatusAsync(string codigo, CancellationToken ct)
     {
         if (_dbContext.Database.IsRelational() && _dbContext.Database.CurrentTransaction != null)
@@ -38,6 +68,7 @@ public sealed class PropostasRepository(SeguroDbContext _dbContext, IClientesPro
         {
             await _dbContext.Database.ExecuteSqlInterpolatedAsync($"SELECT id FROM seguro.apolice_modulo_plano WHERE apolice_modulo_id={moduloId} ORDER BY id FOR SHARE", ct);
             await _dbContext.Database.ExecuteSqlInterpolatedAsync($"SELECT c.id FROM seguro.apolice_modulo_cobertura c JOIN seguro.apolice_modulo_plano p ON p.id=c.apolice_modulo_plano_id WHERE p.apolice_modulo_id={moduloId} ORDER BY c.id FOR SHARE OF c", ct);
+            await _dbContext.Database.ExecuteSqlInterpolatedAsync($"SELECT c.id FROM seguro.cobertura c JOIN seguro.apolice_modulo_cobertura mc ON mc.cobertura_id=c.id JOIN seguro.apolice_modulo_plano p ON p.id=mc.apolice_modulo_plano_id WHERE p.apolice_modulo_id={moduloId} ORDER BY c.id FOR SHARE OF c", ct);
         }
         return await _dbContext.ApoliceModuloPlanos.AsNoTracking().Include(p => p.Coberturas).ThenInclude(c => c.Cobertura)
             .SingleOrDefaultAsync(p => p.ApoliceModuloId == moduloId && p.DeletedAt == null, ct);
@@ -59,7 +90,11 @@ public sealed class PropostasRepository(SeguroDbContext _dbContext, IClientesPro
         return await _dbContext.Proposta.Include(p => p.Status).Include(p => p.PropostaBeneficiarios)
             .Include(p => p.Apolice).Include(p => p.ApoliceVida).ThenInclude(v => v!.ApoliceModulo)
             .Include(p => p.ApoliceVida).ThenInclude(v => v!.ApoliceSubgrupo)
-            .Include(p => p.PropostaCoberturas).Include(p => p.PropostaItems).AsSplitQuery().SingleOrDefaultAsync(p => p.PublicId == publicId, ct);
+            .Include(p => p.ApoliceModulo).Include(p => p.ApoliceSubgrupo)
+            .Include(p => p.PropostaCoberturas).ThenInclude(c => c.Cobertura)
+            .Include(p => p.PropostaCoberturas).ThenInclude(c => c.ApoliceModuloCobertura)
+            .Include(p => p.PropostaItems).ThenInclude(i => i.ApoliceModuloPlano)
+            .AsSplitQuery().SingleOrDefaultAsync(p => p.PublicId == publicId, ct);
     }
     public async Task<Propostum?> ObterOrigemParaVigenciaAsync(long id, CancellationToken ct)
     {
@@ -85,7 +120,7 @@ public sealed class PropostasRepository(SeguroDbContext _dbContext, IClientesPro
     {
         try { await _dbContext.SaveChangesAsync(ct); }
         catch (DbUpdateConcurrencyException)
-        { throw new ValidacaoException("O rascunho foi alterado em outra tela. Recarregue a proposta antes de salvar."); }
+        { throw new ValidacaoException("A pré proposta foi alterada em outra tela. Recarregue a proposta antes de salvar."); }
         catch (DbUpdateException ex) when (ex.InnerException is Npgsql.PostgresException { ConstraintName: "ux_proposta_nativa_vigente_vida" })
         { throw new ValidacaoException("Esta Vida já possui outra proposta nativa vigente. Recarregue as propostas antes de continuar."); }
         catch (DbUpdateException ex) when (ex.InnerException is Npgsql.PostgresException { ConstraintName: "ck_proposta_vinculo" or "ck_proposta_contexto" } pg)
@@ -163,6 +198,12 @@ public sealed class PropostasRepository(SeguroDbContext _dbContext, IClientesPro
                 p.Id, p.ClienteId, p.ClienteVinculoId,
                 Dto = new PropostaDetalheDto
                 {
+                    PodePrepararReinclusao = p.LegadoId == null && !p.Vigente && p.CanceladaEm != null && p.ConfirmadaEm != null &&
+                        p.DataFimVigencia != null && p.DataCancelamentoVigencia == p.DataFimVigencia && p.CancelamentoSolicitadoEm != null &&
+                        p.SubstituidaEm == null && p.DescartadaEm == null && p.Apolice != null && p.Apolice.Ativo && p.Apolice.DeletedAt == null,
+                    Reinclusao = p.LegadoId == null && p.PropostaOrigem != null && p.PropostaOrigem.LegadoId == null &&
+                        p.PropostaOrigem.CanceladaEm != null && p.PropostaOrigem.DataFimVigencia != null && p.PropostaOrigem.CancelamentoSolicitadoEm != null,
+                    DataFimVigenciaOrigem = p.PropostaOrigem == null ? null : p.PropostaOrigem.DataFimVigencia,
                     MotivoPendenciaVigencia = p.MotivoPendenciaVigencia, PendenciaVigenciaEm = p.PendenciaVigenciaEm,
                     DataCancelamentoVigencia = p.DataCancelamentoVigencia, CancelamentoSolicitadoEm = p.CancelamentoSolicitadoEm, DescartadaEm = p.DescartadaEm,
                     PodeCancelarVigencia = p.LegadoId == null && p.Vigente && p.ConfirmadaEm != null && p.DataInicioVigencia != null &&
@@ -188,7 +229,9 @@ public sealed class PropostasRepository(SeguroDbContext _dbContext, IClientesPro
                     PodeEditarRascunho = p.DescartadaEm == null && p.CancelamentoSolicitadoEm == null && p.CanceladaEm == null && p.ConfirmadaEm == null && p.SubstituidaEm == null && codigoInicial != null && codigoInicial != "" && p.LegadoId == null &&
                         p.ApoliceId != null && p.ApoliceVidaId != null && !p.Vigente &&
                         p.Status.Codigo == codigoInicial && !p.Status.Finalizador && !p.Status.PermiteMovimentacao,
-                    Observacao = p.Observacao, ModuloNomeRegistrado = p.ModuloNomeRegistrado, SubgrupoNomeRegistrado = p.SubgrupoNomeRegistrado
+                    Observacao = p.Observacao, ModuloNomeRegistrado = p.ModuloNomeRegistrado, SubgrupoNomeRegistrado = p.SubgrupoNomeRegistrado,
+                    CondicoesProprias = p.CondicoesProprias, IncluiConjuge = p.IncluiConjuge,
+                    PodeSimularValorMensal = p.LegadoId == null && p.ApoliceId != null && p.ApoliceVidaId != null
                 }
             }).SingleOrDefaultAsync(ct);
         if (registro is null) return null;

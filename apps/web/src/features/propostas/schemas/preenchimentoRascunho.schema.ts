@@ -31,6 +31,12 @@ const decimal = (casas: number, opcional: boolean) =>
 export function criarPreenchimentoSchema(proposta: PropostaDetalhe) {
   return z
     .object({
+      contratacaoConjuge: z
+        .string()
+        .refine(
+          (v): boolean => v === 'SIM' || v === 'NAO',
+          'Informe se há contratação de cônjuge.',
+        ),
       observacao: z.string(),
       beneficiarios: z.array(
         z.object({
@@ -106,6 +112,12 @@ export function dadosPreenchimento(
 ): PreenchimentoFormData {
   return {
     observacao: proposta.observacao ?? '',
+    contratacaoConjuge:
+      proposta.incluiConjuge === null
+        ? ''
+        : proposta.incluiConjuge
+          ? 'SIM'
+          : 'NAO',
     beneficiarios: proposta.beneficiarios
       .filter((b) => b.podeAlterar)
       .map((b) => ({
@@ -131,6 +143,7 @@ export function payloadPreenchimento(
 ): PreencherRascunhoDados {
   return {
     revisaoEsperada: revisao,
+    incluiConjuge: dados.contratacaoConjuge === 'SIM',
     observacao: dados.observacao,
     beneficiarios: dados.beneficiarios.map((b) => ({
       ...b,

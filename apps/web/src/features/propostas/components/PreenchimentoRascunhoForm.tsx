@@ -8,6 +8,7 @@ import {
   FormField,
   FormSection,
   Input,
+  Select,
   Textarea,
 } from '../../../components/ui';
 import { salvarRascunho } from '../api/propostas.api';
@@ -64,7 +65,7 @@ export function PreenchimentoRascunhoForm({
       setErro(
         cause instanceof Error
           ? cause.message
-          : 'Não foi possível salvar o rascunho.',
+          : 'Não foi possível salvar a pré proposta.',
       );
     } finally {
       onBusy?.(false);
@@ -72,7 +73,7 @@ export function PreenchimentoRascunhoForm({
   }
   return (
     <form
-      aria-label="Preenchimento do rascunho"
+      aria-label="Preenchimento da pré proposta"
       className="flex flex-col gap-4"
       noValidate
       onSubmit={(event) => {
@@ -108,14 +109,29 @@ export function PreenchimentoRascunhoForm({
           )}
         </Alert>
       )}
-      <FormField label="Observação do rascunho">
+      <FormField label="Observação da pré proposta">
         <Textarea
           id="rascunho-observacao"
           {...register('observacao')}
           disabled={isSubmitting}
         />
       </FormField>
-      <FormSection title="Beneficiários do rascunho">
+      <FormField
+        label="Contratação de cônjuge"
+        required
+        error={errors.contratacaoConjuge?.message}
+      >
+        <Select
+          id="pre-proposta-conjuge"
+          placeholder="Selecione"
+          disabled={isSubmitting}
+          {...register('contratacaoConjuge')}
+        >
+          <option value="SIM">Sim</option>
+          <option value="NAO">Não</option>
+        </Select>
+      </FormField>
+      <FormSection title="Beneficiários da pré proposta">
         {proposta.beneficiarios.some((b) => !b.podeAlterar) && (
           <p>
             Os beneficiários da estrutura anterior continuam preservados na
@@ -123,7 +139,7 @@ export function PreenchimentoRascunhoForm({
           </p>
         )}
         {fields.length === 0 && (
-          <p>Nenhum beneficiário indicado no rascunho.</p>
+          <p>Nenhum beneficiário indicado na pré proposta.</p>
         )}
         {errors.beneficiarios?.root?.message && (
           <Alert variant="error" title="Revise a participação">
@@ -293,7 +309,7 @@ export function PreenchimentoRascunhoForm({
           Cancelar edição
         </Button>
         <Button type="submit" loading={isSubmitting}>
-          Salvar rascunho
+          Salvar pré proposta
         </Button>
       </FormActions>
     </form>

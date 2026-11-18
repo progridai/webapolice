@@ -23,7 +23,7 @@ public sealed class PropostasOperacionaisMigrationTests
             """);
         var antes = await db.Database.SqlQueryRaw<string>("SELECT md5((to_jsonb(p))::text) AS \"Value\" FROM seguro.proposta p WHERE id=900").SingleAsync();
         await db.GetService<IMigrator>().MigrateAsync();
-        var depois = await db.Database.SqlQueryRaw<string>("SELECT md5((to_jsonb(p)-'apolice_modulo_id'-'apolice_subgrupo_id'-'modulo_nome_registrado'-'subgrupo_nome_registrado'-'revisao_preenchimento'-'confirmada_em'-'substituida_em'-'data_inicio_vigencia'-'data_fim_vigencia'-'motivo_pendencia_vigencia'-'pendencia_vigencia_em'-'cancelada_em'-'data_cancelamento_vigencia'-'cancelamento_solicitado_em'-'descartada_em')::text) AS \"Value\" FROM seguro.proposta p WHERE id=900").SingleAsync();
+        var depois = await db.Database.SqlQueryRaw<string>("SELECT md5((to_jsonb(p)-'inclui_conjuge'-'condicoes_proprias'-'apolice_modulo_id'-'apolice_subgrupo_id'-'modulo_nome_registrado'-'subgrupo_nome_registrado'-'revisao_preenchimento'-'confirmada_em'-'substituida_em'-'data_inicio_vigencia'-'data_fim_vigencia'-'motivo_pendencia_vigencia'-'pendencia_vigencia_em'-'cancelada_em'-'data_cancelamento_vigencia'-'cancelamento_solicitado_em'-'descartada_em')::text) AS \"Value\" FROM seguro.proposta p WHERE id=900").SingleAsync();
         Assert.Equal(antes, depois);
         var item = await db.PropostaItems.SingleAsync(i => i.Id == 900);
         Assert.Equal(Guid.Parse("85f0feba-2676-4792-a6f0-2a25a5ed9101"), item.PublicId);
@@ -37,6 +37,7 @@ public sealed class PropostasOperacionaisMigrationTests
         Assert.Equal("CPF ORIGINAL", beneficiario.CpfOriginal); Assert.Null(beneficiario.ParentescoRegistrado);
         Assert.False(cobertura.PremioAjustado); Assert.Null(cobertura.PremioTitularInicial);
         var rascunho = await db.PropostaStatuses.SingleAsync(s => s.Codigo == "RASCUNHO");
+        Assert.Equal("Pré Proposta", rascunho.Nome);
         Assert.NotEqual(90, rascunho.Id); Assert.False(rascunho.PermiteMovimentacao); Assert.False(rascunho.Finalizador); Assert.True(rascunho.VisivelOperacional);
         var directory = new DirectoryInfo(AppContext.BaseDirectory);
         while (directory is not null && !File.Exists(Path.Combine(directory.FullName, "backend", "scripts", "padronizar-title-case.sql"))) directory = directory.Parent;

@@ -275,7 +275,7 @@ export const VidasTab: React.FC<VidasTabProps> = ({
                 }
                 onClick={() => setVidaCriacao(vida)}
               >
-                Criar proposta
+                Criar pré proposta
               </Button>
             )}
             {podeConsultarPropostas && (
@@ -437,7 +437,7 @@ export const VidasTab: React.FC<VidasTabProps> = ({
         />
       )}
       {propostaCriada && !podeConsultarPropostas && (
-        <Alert variant="success" title="Rascunho criado">
+        <Alert variant="success" title="Pré proposta criada">
           A proposta foi criada sem vigência e sem gerar cobrança.
         </Alert>
       )}

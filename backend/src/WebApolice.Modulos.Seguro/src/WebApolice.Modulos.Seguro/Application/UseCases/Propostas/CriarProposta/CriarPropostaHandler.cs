@@ -2,6 +2,7 @@ using Microsoft.Extensions.Options;
 using WebApolice.Modulos.Cadastro.Contracts;
 using WebApolice.Modulos.Seguro.Application.Ports;
 using WebApolice.Modulos.Seguro.Application.UseCases.Propostas;
+using WebApolice.Modulos.Seguro.Application.UseCases.Propostas.ReincluirProposta;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -78,7 +79,21 @@ public class CriarPropostaHandler : IRequestHandler<CriarPropostaCommand, Guid>
             if (anteriores.Any(p => p.StatusId == status.Id && p.DeletedAt == null))
                 throw new ValidacaoException("Esta Vida já possui uma proposta em preenchimento. Consulte a proposta existente.");
             Propostum? origem = null;
-            if (request.PropostaOrigemPublicId.HasValue)
+            var reinclusao = request.OrigemCondicoesReinclusao != null;
+            if (reinclusao)
+            {
+                if (request.OrigemCondicoesReinclusao is not ("ANTERIOR" or "MODULO") || request.PropostaOrigemPublicId is not Guid origemId)
+                    throw new ValidacaoException("Escolha explicitamente a origem e as condições da reinclusão.");
+                origem = await _repository.ObterParaPreenchimentoAsync(origemId, ct)
+                    ?? throw new ValidacaoException("Proposta de origem não encontrada.");
+                if (request.RevisaoOrigemEsperada is null or < 0 || origem.RevisaoPreenchimento != request.RevisaoOrigemEsperada)
+                    throw new ValidacaoException("A proposta de origem foi alterada. Recarregue antes de preparar a reinclusão.");
+                if (origem.ApoliceVidaId != apoliceVida.Id || origem.ApoliceId != apolice.Id || origem.ClienteId != identidade.ClienteId ||
+                    origem.ClienteVinculoId != identidade.ClienteVinculoId || origem.PessoaId != identidade.PessoaId ||
+                    !ReinclusaoPropostas.SemImpedimentos(origem, anteriores, _configuracao))
+                    throw new ValidacaoException("Selecione a última proposta nativa cancelada com vigência da mesma Vida, sem vigente ou tentativa posterior em aberto.");
+            }
+            else if (request.PropostaOrigemPublicId.HasValue)
             {
                 origem = anteriores.SingleOrDefault(p => p.PublicId == request.PropostaOrigemPublicId && p.CancelamentoSolicitadoEm == null && p.Vigente && p.DeletedAt == null && p.VisivelOperacional &&
                     p.ApoliceId == apolice.Id && p.ClienteId == apoliceVida.ClienteId && p.ClienteVinculoId == identidade.ClienteVinculoId && !p.Status.Finalizador)
@@ -147,11 +162,14 @@ public class CriarPropostaHandler : IRequestHandler<CriarPropostaCommand, Guid>
                 VisivelOperacional = true,
                 Versao = checked(maiorVersao + 1),
                 PropostaOrigemId = origem?.Id,
+                IncluiConjuge = origem?.IncluiConjuge,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
             };
 
-            if (planoModulo is not null)
+            if (reinclusao && request.OrigemCondicoesReinclusao == "ANTERIOR")
+                ReinclusaoPropostas.CopiarCondicoes(origem!, proposta, planoModulo);
+            else if (planoModulo is not null)
             {
                 var item = new PropostaItem
                 {
@@ -178,17 +196,23 @@ public class CriarPropostaHandler : IRequestHandler<CriarPropostaCommand, Guid>
                 }
             }
             if (origem is not null)
+            {
+                if (reinclusao) ReinclusaoPropostas.CopiarBeneficiarios(origem, proposta);
                 proposta.PropostaHistoricoPropostaNovas.Add(new PropostaHistorico
                 {
                     PropostaAnteriorId = origem.Id, PropostaNova = proposta,
-                    Motivo = "Preparação de Nova Versão", DataAlteracao = proposta.CreatedAt, CreatedAt = proposta.CreatedAt
+                    Motivo = reinclusao ? "Preparação de Reinclusão" : "Preparação de Nova Versão",
+                    Observacao = reinclusao ? request.OrigemCondicoesReinclusao == "ANTERIOR" ? "Condições da Proposta Anterior. Beneficiários Nativos Copiados para Revisão." : "Condições Atuais do Módulo. Beneficiários Nativos Copiados para Revisão." : null,
+                    DataAlteracao = proposta.CreatedAt, CreatedAt = proposta.CreatedAt
                 });
+            }
 
             _repository.Adicionar(proposta);
             await _repository.SalvarAlteracoesAsync(cancellationToken);
 
             return (proposta.PublicId, proposta.PublicId.ToString(), null, new { proposta.PublicId, VidaPublicId = apoliceVida.PublicId,
-                proposta.Versao, PropostaOrigemPublicId = origem?.PublicId, PlanoModuloPublicId = planoModulo?.PublicId });
+                proposta.Versao, PropostaOrigemPublicId = origem?.PublicId, PlanoModuloPublicId = planoModulo?.PublicId,
+                OrigemCondicoesReinclusao = request.OrigemCondicoesReinclusao, BeneficiariosCopiados = proposta.PropostaBeneficiarios.Count });
         }, cancellationToken);
     }
 }

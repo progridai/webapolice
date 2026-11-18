@@ -1,4 +1,7 @@
 using WebApolice.Modulos.Seguro.Application.UseCases.Propostas.EncerrarProposta;
+using WebApolice.Modulos.Seguro.Application.UseCases.Propostas.SimularValorMensal;
+using WebApolice.Modulos.Seguro.Application.UseCases.Propostas.RevisarCondicoes;
+using WebApolice.Modulos.Seguro.Application.UseCases.Propostas.ReincluirProposta;
 using WebApolice.Modulos.Seguro.Application.UseCases.Propostas.GerirAgendamento;
 using WebApolice.Modulos.Seguranca.Contracts.Authorization;
 using WebApolice.Modulos.Seguranca.Application.Authorization;
@@ -24,10 +27,35 @@ public class PropostasController : ControllerBase
 {
     private readonly IMediator _mediator;
 
+    [AuthorizePermissao(PermissoesSeguranca.Propostas.Visualizar)]
+    [HttpGet("{publicId:guid}/simulacao-mensal/opcoes")]
+    public async Task<IActionResult> OpcoesSimulacao(Guid publicId, CancellationToken ct) =>
+        Ok(await _mediator.Send(new OpcoesSimulacaoMensalQuery(publicId), ct));
+
+    [AuthorizePermissao(PermissoesSeguranca.Propostas.Visualizar)]
+    [HttpPost("{publicId:guid}/simulacao-mensal")]
+    public async Task<IActionResult> SimularMensal(Guid publicId, [FromBody] SimulacaoMensalDados dados, CancellationToken ct) =>
+        Ok(await _mediator.Send(new SimularValorMensalQuery(publicId, dados), ct));
+
     public PropostasController(IMediator mediator)
     {
         _mediator = mediator;
     }
+
+    [AuthorizePermissao(PermissoesSeguranca.Propostas.Alterar)]
+    [HttpGet("{publicId:guid}/condicoes/opcoes")]
+    public async Task<IActionResult> OpcoesCondicoes(Guid publicId, CancellationToken ct) =>
+        Ok(await _mediator.Send(new OpcoesCondicoesQuery(publicId), ct));
+
+    [AuthorizePermissao(PermissoesSeguranca.Propostas.Alterar)]
+    [HttpPost("{publicId:guid}/condicoes/comparacao")]
+    public async Task<IActionResult> CompararCondicoes(Guid publicId, [FromBody] SelecaoCondicoes dados, CancellationToken ct) =>
+        Ok(await _mediator.Send(new CompararCondicoesQuery(publicId, dados), ct));
+
+    [AuthorizePermissao(PermissoesSeguranca.Propostas.Alterar)]
+    [HttpPost("{publicId:guid}/condicoes/aplicar")]
+    public async Task<IActionResult> AplicarCondicoes(Guid publicId, [FromBody] AplicarCondicoesDados dados, CancellationToken ct) =>
+        Ok(await _mediator.Send(new AplicarCondicoesCommand(publicId, dados), ct));
 
     [AuthorizePermissao(PermissoesSeguranca.Propostas.Visualizar)]
     [HttpGet]
@@ -103,11 +131,29 @@ public class PropostasController : ControllerBase
         Ok(await _mediator.Send(new EfetivarCancelamentoVigenciaCommand(publicId, dados.RevisaoEsperada), ct));
 
     [AuthorizePermissao(PermissoesSeguranca.Propostas.Alterar)]
+    [HttpPost("{publicId:guid}/vigencia/cancelamento/alterar")]
+    public async Task<IActionResult> AlterarCancelamento(Guid publicId, [FromBody] CancelarVigenciaDados dados, CancellationToken ct) =>
+        Ok(await _mediator.Send(new AlterarCancelamentoVigenciaCommand(publicId, dados), ct));
+
+    [AuthorizePermissao(PermissoesSeguranca.Propostas.Alterar)]
+    [HttpPost("{publicId:guid}/vigencia/cancelamento/retirar")]
+    public async Task<IActionResult> RetirarCancelamento(Guid publicId, [FromBody] RetirarCancelamentoVigenciaDados dados, CancellationToken ct) =>
+        Ok(await _mediator.Send(new RetirarCancelamentoVigenciaCommand(publicId, dados), ct));
+
+    [AuthorizePermissao(PermissoesSeguranca.Propostas.Alterar)]
     [HttpPost("{publicId:guid}/rascunho/descarte")]
     public async Task<IActionResult> DescartarRascunho(Guid publicId, [FromBody] DescartarRascunhoDados dados, CancellationToken ct) =>
         Ok(await _mediator.Send(new DescartarRascunhoCommand(publicId, dados), ct));
 
     public sealed record CriarDaVidaRequest(Guid? PropostaOrigemPublicId);
+
+    [AuthorizePermissao(PermissoesSeguranca.Propostas.Inserir)]
+    [HttpPost("{publicId:guid}/reinclusao")]
+    public async Task<IActionResult> PrepararReinclusao(Guid publicId, [FromBody] PrepararReinclusaoDados dados, CancellationToken ct)
+    {
+        var id = await _mediator.Send(new PrepararReinclusaoCommand(publicId, dados), ct);
+        return Created($"/api/propostas/{id}", new { PublicId = id });
+    }
 
     [AuthorizePermissao(PermissoesSeguranca.Propostas.Inserir)]
     [HttpPost("/api/apolices/{apolicePublicId:guid}/vidas/{vidaPublicId:guid}/propostas")]

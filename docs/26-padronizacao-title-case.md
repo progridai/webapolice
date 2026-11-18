@@ -1,5 +1,7 @@
 # Padronização geral dos dados em Title Case
 
+Revisão explícita de condições (18/11/2026): `CondicoesProprias`, flags de elegibilidade, UUIDs de contexto, revisão, hash `Comparacao` e `TratamentoAjustes` são técnicos. `Observacao`, `Nome` e snapshots/justificativas reutilizam classificações humanas existentes em C#, TypeScript e SQL. Não foi adicionada coluna humana; detalhes no [documento 94](94-revisao-explicita-condicoes-propostas.md).
+
 Regra vigente em 15/10/2026, obrigatória para todos os módulos atuais e futuros.
 
 ## Comportamento
@@ -45,10 +47,31 @@ Continuidade de 11/11/2026: a exclusão hierárquica de vínculos da Apólice ad
 
 Fluxo de Propostas (conferência em 12/11/2026): acrescentados os campos humanos `SubgrupoNomeRegistrado`, `ModuloNomeRegistrado`, `PlanoNomeRegistrado`, `CoberturaNomeRegistrado` e `CoberturaNomeReduzidoRegistrado`, com classificação equivalente em C#, TypeScript e SQL. O atributo `CoberturaBasicaRegistrada`, UUIDs, referências, flags, status e matrículas são técnicos. `PlanoNomeLegado`/`CoberturaNomeLegado` continuam evidências preservadas. Os testes cobrem caixa alta/mista, acentos, null, idempotência e SQL direto. O script integral foi reaplicado em `webapolice_teste` com normalização histórica desligada; a proteção dos cinco campos foi confirmada em nova conexão. Detalhes no [documento 83](83-fluxo-operacional-propostas.md).
 
-Preenchimento de Rascunho (12/11/2026): `ParentescoRegistrado` e `JustificativaAjustePremio` são textos humanos, classificados nas três listas e cobertos pelos testes. UUID de beneficiário, revisão técnica, indicador de ajuste e valores iniciais dos prêmios são técnicos. Campos originais/normalizados, CPF e vínculos legados permanecem preservados. O script integral foi reaplicado em `webapolice_teste` sem normalização histórica; a presença dos dois campos nos triggers foi confirmada. Detalhes no [documento 84](84-preenchimento-rascunho-propostas.md).
+Preenchimento de Pré Proposta (12/11/2026): `ParentescoRegistrado` e `JustificativaAjustePremio` são textos humanos, classificados nas três listas e cobertos pelos testes. UUID de beneficiário, revisão técnica, indicador de ajuste e valores iniciais dos prêmios são técnicos. Campos originais/normalizados, CPF e vínculos legados permanecem preservados. O script integral foi reaplicado em `webapolice_teste` sem normalização histórica; a presença dos dois campos nos triggers foi confirmada. Detalhes no [documento 84](84-preenchimento-rascunho-propostas.md).
 
 Confirmação e Vigência (12/11/2026): `MotivoPendenciaVigencia` é texto humano, classificado em C#, TypeScript e SQL; datas, instantes, indicador de processamento e códigos de situação de vigência são técnicos. A atualização da versão anterior precisa preservar seus textos intocados; por isso o mecanismo compartilhado de UPDATE passou a normalizar apenas os campos humanos alterados, sem mudar a lista de palavras, INSERT ou a proteção de campos técnicos/originais. Testes cobrem edição humana, alteração apenas técnica, SQL direto, acentos, null e idempotência. A instalação deve reaplicar o script integral sem normalização histórica, conforme o [documento 85](85-confirmacao-substituicao-propostas.md).
 
 Gestão dos Agendamentos (12/11/2026): `CanceladaEm`/`cancelada_em` é timestamp técnico nullable. Justificativas usam `Observacao` no contrato e no histórico; o motivo do evento usa `Motivo`, ambos humanos já classificados nas três listas. Não há palavra ou campo humano novo nem alteração da política compartilhada. API, cliente HTTP e persistência usam os normalizadores existentes. Testes verificam a justificativa em Title Case e a preservação do timestamp. A instalação reaplica o script integral com normalização histórica desligada, preservando evidências, conforme o [documento 86](86-gestao-agendamentos-propostas.md).
 
 Encerramento e Descarte (12/11/2026): `DataCancelamentoVigencia`, `CancelamentoSolicitadoEm` e `DescartadaEm` são data/instantes técnicos, preservados pelo cliente HTTP e excluídos da classificação humana. Justificativas/eventos continuam em `Observacao`/`Motivo` do histórico, já classificados em C#, TypeScript e SQL, sem nova coluna humana ou mudança da lista de palavras. Testes cobrem o timestamp/data e os textos normalizados da solicitação/descarte. A instalação reaplica os triggers sem normalizar dados históricos. Regras no [documento 87](87-encerramento-vigencia-descarte-propostas.md).
+
+Gestão do Pedido de Cancelamento (17/11/2026): alteração/retirada reutilizam
+`Observacao`/`Motivo` e os metadados técnicos existentes. Nenhum campo humano,
+coluna ou palavra nova; classificações C#/TypeScript/SQL permanecem sincronizadas
+sem mudanças. Testes HTTP e PostgreSQL verificam justificativas com acentos em
+Title Case e a preservação de UUID, revisão, datas e instante original do pedido.
+Não é necessário reaplicar triggers ou normalizar registros anteriores nesta
+etapa. Regras no [documento 91](91-gestao-pedido-cancelamento-vigencia.md).
+
+Reinclusão (17/11/2026): nenhuma coluna ou campo humano novo. `OrigemCondicoes`
+(`ANTERIOR`/`MODULO`), seu metadado interno `OrigemCondicoesReinclusao`,
+`Reinclusao`, `PodePrepararReinclusao`, revisão e
+`DataFimVigenciaOrigem` são códigos/flags/data técnicos. Nomes, parentescos,
+snapshots e justificativas copiados usam campos existentes classificados nas
+listas C#/TypeScript/SQL e a normalização compartilhada de novos registros.
+A origem cancelada e suas evidências permanecem intocadas. Testes HTTP conferem
+a preservação dos dois códigos e testes PostgreSQL comparam integralmente origem,
+itens, coberturas e beneficiários. Não há migration, nova classificação humana
+ou necessidade de reaplicar triggers nesta etapa. Ver [documento 92](92-reinclusao-propostas.md).
+
+Simulação mensal (18/11/2026): `IncluiConjuge`/`inclui_conjuge` é booleano técnico anulável. `PodeSimularValorMensal`, UUID do vínculo Ramo/Apólice, revisão, alíquota, instante e valores monetários canônicos textuais são técnicos e preservados. Nomes de Ramo/Cobertura reutilizam os campos humanos já classificados em C#, TypeScript e SQL; nenhuma lista de palavras ou campo humano novo. Não há reprocessamento histórico nem necessidade de reinstalar triggers por esta coluna. Regras e testes no [documento 95](95-formacao-valores-financeiros-propostas.md).

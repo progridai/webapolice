@@ -2,6 +2,7 @@ using WebApolice.Modulos.Cadastro.Contracts;
 using WebApolice.Modulos.Seguro.Application.Ports;
 using WebApolice.Modulos.Seguro.Domain.Modelos;
 using WebApolice.SharedKernel.Application.Exceptions;
+using WebApolice.Modulos.Seguro.Application.UseCases.Propostas.ReincluirProposta;
 
 namespace WebApolice.Modulos.Seguro.Application.UseCases.Propostas;
 
@@ -17,7 +18,7 @@ internal static class VigenciaPropostas
         var identidade = await clientes.ResolverParaConfirmacaoAsync(p.ClienteId, p.ClienteVinculoId, ct);
         var plano = p.ApoliceModuloId.HasValue ? await repository.ObterPlanoModuloAsync(p.ApoliceModuloId.Value, ct) : null;
         ValidacaoCondicoesProposta.ValidarCondicoes(p, p.Apolice, p.ApoliceVida, identidade, plano);
-        var modulo = await cadastro.ObterModuloParaConfirmacaoAsync(p.ApoliceVida.ApoliceModulo!.ModuloId, ct);
+        var modulo = await cadastro.ObterModuloParaConfirmacaoAsync((p.CondicoesProprias ? p.ApoliceModulo : p.ApoliceVida.ApoliceModulo)!.ModuloId, ct);
         if (modulo is not { Ativo: true }) throw new ValidacaoException("O cadastro do Módulo está indisponível para confirmar ou ativar a proposta.");
     }
 
@@ -33,15 +34,26 @@ internal static class VigenciaPropostas
             throw new ValidacaoException("A vigência só pode ser ativada após o início e enquanto os períodos da Apólice e da Vida estiverem válidos.");
     }
 
-    internal static async Task<Propostum?> ValidarOrigemAsync(Propostum p, DateOnly inicio, IPropostasRepository repository, CancellationToken ct)
+    internal static async Task<Propostum?> ValidarOrigemAsync(Propostum p, DateOnly inicio, IPropostasRepository repository, ConfiguracaoPropostas config, CancellationToken ct)
     {
-        var vigentes = (await repository.ObterPropostasDaVidaAsync(p.ApoliceVidaId!.Value, ct)).Where(v => v.Vigente && v.DeletedAt == null).ToList();
+        var propostas = await repository.ObterPropostasDaVidaAsync(p.ApoliceVidaId!.Value, ct);
+        var vigentes = propostas.Where(v => v.Vigente && v.DeletedAt == null).ToList();
         if (!p.PropostaOrigemId.HasValue)
         {
             if (vigentes.Count != 0) throw new ValidacaoException("Há outra proposta vigente nesta Vida. Revise a origem da versão antes de continuar.");
             return null;
         }
         var origem = await repository.ObterOrigemParaVigenciaAsync(p.PropostaOrigemId.Value, ct);
+        if (origem is not null && origem.CanceladaComVigencia(config.StatusCanceladaCodigo))
+        {
+            if (origem.ApoliceVidaId != p.ApoliceVidaId || origem.ApoliceId != p.ApoliceId || origem.ClienteId != p.ClienteId ||
+                origem.ClienteVinculoId != p.ClienteVinculoId || origem.PessoaId != p.PessoaId || p.Versao <= origem.Versao ||
+                !ReinclusaoPropostas.SemImpedimentos(origem, propostas, config, p.Id))
+                throw new ValidacaoException("A origem da reinclusão deve permanecer cancelada, sem outra vigente ou tentativa posterior em aberto.");
+            if (inicio < origem.DataFimVigencia)
+                throw new ValidacaoException("A reinclusão não pode começar antes do primeiro dia sem cobertura da proposta cancelada.");
+            return origem;
+        }
         if (vigentes.Count != 1 || origem is null || vigentes[0].Id != origem.Id || !origem.Vigente || origem.DeletedAt != null ||
             !origem.VisivelOperacional || origem.Status.Finalizador || origem.CancelamentoSolicitadoEm != null || origem.CanceladaEm != null || origem.SubstituidaEm != null ||
             origem.ApoliceVidaId != p.ApoliceVidaId || origem.ApoliceId != p.ApoliceId || origem.ClienteId != p.ClienteId ||
@@ -54,7 +66,9 @@ internal static class VigenciaPropostas
 
     internal static async Task EfetivarAsync(Propostum p, Propostum? origem, DateTime agora, IPropostasRepository repository, CancellationToken ct)
     {
-        if (origem is not null)
+        if (origem is not null && origem.CanceladaEm != null && origem.DataFimVigencia != null)
+            Historico(p, origem, "Efetivação de Reinclusão", agora);
+        else if (origem is not null)
         {
             origem.Vigente = false; origem.SubstituidaEm = agora; origem.DataFimVigencia = p.DataInicioVigencia;
             origem.UpdatedAt = agora; origem.RevisaoPreenchimento = checked(origem.RevisaoPreenchimento + 1);

@@ -8,6 +8,9 @@ public class CriarPropostaCommand : IRequest<Guid>
     public Guid ApoliceId { get; set; }
     public Guid ApoliceVidaId { get; set; }
     public Guid? PropostaOrigemPublicId { get; set; }
+    // Somente o caso de uso explícito de reinclusão preenche estes dados internos.
+    internal string? OrigemCondicoesReinclusao { get; set; }
+    internal int? RevisaoOrigemEsperada { get; set; }
     
     // O ClienteId precisa ser enviado para provar que a requisição não está
     // forjando a ApoliceVidaId de um terceiro.

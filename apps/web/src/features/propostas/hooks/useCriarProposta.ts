@@ -22,7 +22,7 @@ export function useCriarProposta() {
       setError(
         cause instanceof Error
           ? cause.message
-          : 'Não foi possível criar o rascunho.',
+          : 'Não foi possível criar a pré proposta.',
       );
     } finally {
       enviando.current = false;

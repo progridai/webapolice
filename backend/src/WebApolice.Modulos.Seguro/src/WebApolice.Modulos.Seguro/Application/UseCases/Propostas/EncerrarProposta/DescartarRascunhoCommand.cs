@@ -13,16 +13,16 @@ public sealed class DescartarRascunhoHandler(IPropostasRepository repository, IO
     IOptions<ConfiguracaoPropostas> configuracao, TimeProvider relogio) : IRequestHandler<DescartarRascunhoCommand, GestaoAgendamentoResultado>
 {
     public Task<GestaoAgendamentoResultado> Handle(DescartarRascunhoCommand request, CancellationToken cancellationToken) =>
-        operacao.ExecutarAsync("Descartar Rascunho de Proposta", async ct =>
+        operacao.ExecutarAsync("Descartar Pré Proposta", async ct =>
         {
             var p = await repository.ObterParaPreenchimentoAsync(request.PublicId, ct) ?? throw new ValidacaoException("Proposta não encontrada.");
             EncerramentoPropostas.ValidarPedido(p, request.Dados.RevisaoEsperada, request.Dados.Observacao);
             if (!p.PermitePreenchimento(configuracao.Value.StatusInicialCodigo))
-                throw new ValidacaoException("Somente um rascunho nativo ainda sem confirmação e sem vigência pode ser descartado.");
+                throw new ValidacaoException("Somente uma pré proposta nativa ainda sem confirmação e sem vigência pode ser descartada.");
             var status = await EncerramentoPropostas.ObterStatusAsync(repository, configuracao.Value, true, ct);
             var antes = VigenciaPropostas.Retrato(p); var agora = relogio.GetUtcNow().UtcDateTime;
             p.StatusId = status.Id; p.Status = status; p.DescartadaEm = agora;
-            GestaoAgendamento.Registrar(p, "Descarte de Rascunho", request.Dados.Observacao!.Trim(), agora);
+            GestaoAgendamento.Registrar(p, "Descarte de Pré Proposta", request.Dados.Observacao!.Trim(), agora);
             await repository.SalvarAlteracoesAsync(ct);
             return (new GestaoAgendamentoResultado(p.RevisaoPreenchimento), p.PublicId.ToString(), antes, VigenciaPropostas.Retrato(p));
         }, cancellationToken);

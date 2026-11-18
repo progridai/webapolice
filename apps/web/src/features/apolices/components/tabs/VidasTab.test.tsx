@@ -139,10 +139,12 @@ describe('VidasTab', () => {
       }),
       expect.any(AbortSignal),
     );
-    expect(screen.queryByRole('button', { name: 'Criar proposta' })).toBeNull();
+    expect(
+      screen.queryByRole('button', { name: 'Criar pré proposta' }),
+    ).toBeNull();
   });
 
-  it('cria rascunho por UUID da Vida sem exigir seleção repetida do Cliente ou matrícula', async () => {
+  it('cria pré proposta por UUID da Vida sem exigir seleção repetida do Cliente ou matrícula', async () => {
     vi.mocked(useAuthorization).mockReturnValue(
       makeAuthorization({
         permissoes: ['propostas.inserir'],
@@ -170,10 +172,14 @@ describe('VidasTab', () => {
     });
     vi.mocked(criarPropostaDaVida).mockResolvedValue('proposta-a');
     render(<VidasTab publicId="apolice-a" estipulanteNome="Empresa A" />);
-    fireEvent.click(screen.getByRole('button', { name: 'Criar proposta' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Criar pré proposta' }));
     expect(screen.getAllByText('aBc-X009').length).toBeGreaterThan(0);
-    fireEvent.click(screen.getByRole('button', { name: 'Criar rascunho' }));
-    expect(await screen.findByText('Rascunho criado')).toBeTruthy();
+    fireEvent.click(
+      within(
+        screen.getByRole('dialog', { name: 'Criar pré proposta' }),
+      ).getByRole('button', { name: 'Criar pré proposta' }),
+    );
+    expect(await screen.findByText('Pré proposta criada')).toBeTruthy();
     expect(criarPropostaDaVida).toHaveBeenCalledWith(
       'apolice-a',
       'vida-1',

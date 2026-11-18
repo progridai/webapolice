@@ -134,3 +134,21 @@ As operações `POST /api/propostas/{publicId}/confirmacao` e `POST /api/propost
 Gestão dos agendamentos: `POST /api/propostas/{publicId}/agendamento/reagendar` e `/agendamento/cancelar` também exigem `propostas.alterar` e disponibilidade do módulo/recurso. Os UUIDs são obtidos da rota, não do corpo. Cada alteração exige revisão/justificativa e é auditada na mesma transação do histórico e da proposta. A criação de outra tentativa continua exigindo `propostas.inserir`. Nenhuma concessão, role ou configuração de autenticação foi alterada. Regras no [documento 86](86-gestao-agendamentos-propostas.md).
 
 Encerramento: as rotas `POST /api/propostas/{publicId}/vigencia/cancelamento`, `/vigencia/cancelamento/efetivar` e `/rascunho/descarte` reutilizam as mesmas barreiras `propostas.alterar`/APOLICES/PROPOSTAS. Pedido/descarte exigem justificativa e revisão; efetivação exige revisão e data alcançada. As gravações e o histórico pertencem à mesma transação física da auditoria. O serviço de vigências reutiliza a identidade técnica existente para cancelar na data aprovada. Nenhuma permissão de perfil ou configuração de autenticação foi alterada. Regras no [documento 87](87-encerramento-vigencia-descarte-propostas.md).
+
+Gestão do pedido (17/11/2026): `POST /api/propostas/{publicId}/vigencia/cancelamento/alterar`
+e `/vigencia/cancelamento/retirar` usam `propostas.alterar` e as mesmas barreiras
+APOLICES/PROPOSTAS. Revisão e justificativa obrigatórias; alteração também exige
+nova data. Gestão até a efetivação, inclusive em pendência vencida, revalidada
+sob os mesmos locks/transação da auditoria. Nenhuma concessão, permissão nova ou
+mudança de JWT/Keycloak. Regras no [documento 91](91-gestao-pedido-cancelamento-vigencia.md).
+
+Reinclusão (17/11/2026): `POST /api/propostas/{publicId}/reinclusao` exige
+`propostas.inserir` e os gates APOLICES/PROPOSTAS existentes. UUID da origem na
+rota, revisão esperada e escolha `ANTERIOR`/`MODULO` são obrigatórios; Cliente,
+Vida e Apólice são resolvidos no servidor e revalidados sob lock. Confirmação,
+reagendamento e efetivação mantêm `propostas.alterar`. Nenhuma permissão,
+concessão ou alteração de autenticação foi adicionada. Ver [documento 92](92-reinclusao-propostas.md).
+
+Revisão de condições (18/11/2026): `GET /api/propostas/{publicId}/condicoes/opcoes` e os POSTs `/condicoes/comparacao` e `/condicoes/aplicar` exigem `propostas.alterar` e os gates APOLICES/PROPOSTAS. O UUID é obtido da rota; a aplicação revalida revisão, comparação, situação e vínculos ativos da mesma Apólice. Condições próprias não dispensam identidade/elegibilidade da Vida. Comparar não grava; aplicação, histórico e auditoria compartilham a transação. Nenhuma nova permissão/concessão ou alteração de autenticação. Ver [documento 94](94-revisao-explicita-condicoes-propostas.md).
+
+Simulação mensal de Propostas (18/11/2026): opções de Ramos e cálculo (`GET /api/propostas/{publicId}/simulacao-mensal/opcoes` e `POST /api/propostas/{publicId}/simulacao-mensal`) exigem `propostas.visualizar` e disponibilidade do catálogo. A consulta usa UUID público do vínculo Ramo/Apólice e revisão esperada; não concede alteração ou ações financeiras. A escolha de cônjuge usa o preenchimento já protegido por `propostas.alterar`. Nenhuma nova permissão ou mudança de perfis/Keycloak. Ver [documento 95](95-formacao-valores-financeiros-propostas.md).

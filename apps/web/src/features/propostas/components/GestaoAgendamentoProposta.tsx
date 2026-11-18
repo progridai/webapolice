@@ -113,7 +113,9 @@ function GestaoAgendamentoForm({
           dados.observacao,
         );
         onConcluida(
-          'Início reagendado. A versão anterior, quando existente, permanece vigente até a ativação.',
+          proposta.reinclusao
+            ? 'Reinclusão reagendada. A origem permanece cancelada e o intervalo permanece sem cobertura.'
+            : 'Início reagendado. A versão anterior, quando existente, permanece vigente até a ativação.',
         );
       } else {
         await cancelarAgendamento(
@@ -158,16 +160,28 @@ function GestaoAgendamentoForm({
       </p>
       {reagendando ? (
         <p>
-          Informe outra data futura. As condições serão revalidadas e a versão
-          anterior continuará vigente até a ativação. O reagendamento não gera
-          cobrança.
+          {proposta.reinclusao ? (
+            'Informe outra data futura. As condições serão revalidadas; a origem permanece cancelada e o intervalo até o novo início permanece sem cobertura.'
+          ) : (
+            <>
+              Informe outra data futura. As condições serão revalidadas e a
+              versão anterior continuará vigente até a ativação. O reagendamento
+              não gera cobrança.
+            </>
+          )}
         </p>
       ) : (
         <Alert variant="warning" title="Encerrar esta versão como Cancelada">
-          Esta proposta não entrará em vigência. Seus dados e histórico serão
-          preservados. A versão anterior, quando existente, continuará vigente.
-          Para novas condições, prepare outra versão a partir da vigente ou uma
-          nova tentativa pela Vida quando não houver vigente.
+          {proposta.reinclusao ? (
+            'Esta reinclusão não entrará em vigência. Seus dados e histórico serão preservados e a origem permanecerá cancelada. Outra tentativa poderá ser preparada pela proposta de origem.'
+          ) : (
+            <>
+              Esta proposta não entrará em vigência. Seus dados e histórico
+              serão preservados. A versão anterior, quando existente, continuará
+              vigente. Para novas condições, prepare outra versão a partir da
+              vigente ou uma nova tentativa pela Vida quando não houver vigente.
+            </>
+          )}
         </Alert>
       )}
       {reagendando && (

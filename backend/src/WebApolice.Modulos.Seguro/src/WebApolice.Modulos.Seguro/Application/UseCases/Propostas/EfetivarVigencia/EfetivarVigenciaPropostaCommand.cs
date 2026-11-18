@@ -37,7 +37,7 @@ public sealed class EfetivarVigenciaPropostaHandler(IPropostasRepository reposit
                 {
                     await VigenciaPropostas.ValidarContextoAsync(p, repository, clientes, cadastro, ct);
                     VigenciaPropostas.ValidarDatas(p, p.DataInicioVigencia.Value, hoje, efetivar: true);
-                    origem = await VigenciaPropostas.ValidarOrigemAsync(p, p.DataInicioVigencia.Value, repository, ct);
+                    origem = await VigenciaPropostas.ValidarOrigemAsync(p, p.DataInicioVigencia.Value, repository, configuracao.Value, ct);
                 }
                 catch (ValidacaoException ex)
                 {

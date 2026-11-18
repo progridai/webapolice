@@ -8,6 +8,8 @@ public sealed class PropostaOperacionalConfiguration : IEntityTypeConfiguration<
 {
     public void Configure(EntityTypeBuilder<Propostum> entity)
     {
+        entity.Property(p => p.CondicoesProprias).HasColumnName("condicoes_proprias").HasDefaultValue(false);
+        entity.Property(p => p.IncluiConjuge).HasColumnName("inclui_conjuge");
         entity.Property(p => p.DataCancelamentoVigencia).HasColumnName("data_cancelamento_vigencia");
         entity.Property(p => p.CancelamentoSolicitadoEm).HasColumnName("cancelamento_solicitado_em").HasColumnType("timestamp with time zone");
         entity.Property(p => p.DescartadaEm).HasColumnName("descartada_em").HasColumnType("timestamp with time zone");

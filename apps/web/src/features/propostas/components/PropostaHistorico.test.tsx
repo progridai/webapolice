@@ -68,7 +68,9 @@ it('consulta cancelamento e justificativa sem oferecer edição ou efetivação'
   expect(await screen.findByText('Cancelada sem vigência')).toBeTruthy();
   expect(screen.getByText('Cancelamento registrado em:')).toBeTruthy();
   expect(screen.getByText('Desistência da Adesão')).toBeTruthy();
-  expect(screen.queryByRole('button', { name: 'Editar rascunho' })).toBeNull();
+  expect(
+    screen.queryByRole('button', { name: 'Editar pré proposta' }),
+  ).toBeNull();
   expect(
     screen.queryByRole('button', { name: 'Efetivar vigência agora' }),
   ).toBeNull();
@@ -178,7 +180,7 @@ it('bloqueia troca de versão durante edição para preservar alterações locai
     />,
   );
   fireEvent.click(
-    await screen.findByRole('button', { name: 'Editar rascunho' }),
+    await screen.findByRole('button', { name: 'Editar pré proposta' }),
   );
   expect(
     screen

@@ -6,6 +6,21 @@ namespace WebApolice.Modulos.Seguro.Application.UseCases.Propostas.EncerrarPropo
 
 internal static class EncerramentoPropostas
 {
+    internal static DateOnly ValidarDataCancelamento(Propostum p, DateOnly? data, DateOnly hoje)
+    {
+        if (data == null || data < p.DataInicioVigencia)
+            throw new ValidacaoException("Informe a data de cancelamento, igual ou posterior ao início da proposta.");
+        try { VigenciaPropostas.ValidarDatas(p, data.Value, hoje, efetivar: false); }
+        catch (ValidacaoException) { throw new ValidacaoException("A data de cancelamento deve estar dentro dos períodos da Apólice e da Vida."); }
+        return data.Value;
+    }
+
+    internal static void ValidarPedidoExistente(Propostum p)
+    {
+        if (p.CancelamentoSolicitadoEm == null || p.DataCancelamentoVigencia == null)
+            throw new ValidacaoException("Esta proposta não possui pedido de cancelamento de vigência para alterar ou retirar.");
+    }
+
     internal static void ValidarPedido(Propostum p, int? revisao, string? observacao)
     {
         if (revisao is null or < 0 || string.IsNullOrWhiteSpace(observacao) || observacao.Length > 1000)
@@ -39,7 +54,7 @@ internal static class EncerramentoPropostas
             throw new ValidacaoException("A proposta deve ser a única vigente da Vida para cancelar a vigência.");
         if (propostas.Any(v => v.PropostaOrigemId == p.Id &&
             !v.TentativaEncerradaSemVigencia(config.StatusCanceladaCodigo, config.StatusDescartadaCodigo)))
-            throw new ValidacaoException("Existe uma versão sucessora não encerrada. Descarte o rascunho ou cancele o agendamento antes de cancelar a vigente.");
+            throw new ValidacaoException("Existe uma versão sucessora não encerrada. Descarte a pré proposta ou cancele o agendamento antes de cancelar a vigente.");
     }
 
     internal static void Concluir(Propostum p, PropostaStatus status, DateTime agora)

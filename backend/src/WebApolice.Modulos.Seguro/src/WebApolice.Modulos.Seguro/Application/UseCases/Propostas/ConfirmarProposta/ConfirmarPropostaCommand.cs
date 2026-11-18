@@ -21,7 +21,8 @@ public sealed class ConfirmarPropostaHandler(IPropostasRepository repository, IO
                 throw new ValidacaoException("Informe a revisão e a data de início da vigência.");
             var p = await repository.ObterParaPreenchimentoAsync(request.PublicId, ct) ?? throw new ValidacaoException("Proposta não encontrada.");
             if (p.ConfirmadaEm.HasValue) throw new ValidacaoException("Esta proposta já foi confirmada. Recarregue a consulta para verificar sua vigência.");
-            if (!p.PermitePreenchimento(configuracao.Value.StatusInicialCodigo)) throw new ValidacaoException("Somente um rascunho nativo pode ser confirmado.");
+            if (!p.PermitePreenchimento(configuracao.Value.StatusInicialCodigo)) throw new ValidacaoException("Somente uma pré proposta nativa pode ser confirmada.");
+            if (p.IncluiConjuge is null) throw new ValidacaoException("Informe explicitamente se a proposta inclui cônjuge antes de confirmar.");
             if (p.RevisaoPreenchimento != request.Dados.RevisaoEsperada) throw new ValidacaoException("A proposta foi alterada em outra tela. Recarregue antes de confirmar.");
             var codigo = configuracao.Value.StatusConfirmadaCodigo;
             if (string.IsNullOrWhiteSpace(codigo) || codigo == configuracao.Value.StatusInicialCodigo)
@@ -35,11 +36,12 @@ public sealed class ConfirmarPropostaHandler(IPropostasRepository repository, IO
             if (agendada && !configuracao.Value.ProcessarAgendamentos)
                 throw new ValidacaoException("A confirmação com início futuro está temporariamente indisponível.");
             VigenciaPropostas.ValidarDatas(p, inicio, hoje, efetivar: !agendada);
-            var origem = await VigenciaPropostas.ValidarOrigemAsync(p, inicio, repository, ct);
+            var origem = await VigenciaPropostas.ValidarOrigemAsync(p, inicio, repository, configuracao.Value, ct);
             var antes = VigenciaPropostas.Retrato(p, origem); var agora = relogio.GetUtcNow().UtcDateTime;
             p.StatusId = status.Id; p.Status = status; p.ConfirmadaEm = agora; p.DataInicioVigencia = inicio;
             p.RevisaoPreenchimento = checked(p.RevisaoPreenchimento + 1); p.UpdatedAt = agora;
-            if (agendada && origem is not null) VigenciaPropostas.Historico(p, origem, "Substituição Agendada", agora);
+            if (agendada && origem is not null) VigenciaPropostas.Historico(p, origem,
+                origem.CanceladaEm != null && origem.DataFimVigencia != null ? "Reinclusão Agendada" : "Substituição Agendada", agora);
             if (!agendada) await VigenciaPropostas.EfetivarAsync(p, origem, agora, repository, ct);
             await repository.SalvarAlteracoesAsync(ct);
             return (new ConfirmarPropostaResultado(p.Vigente, agendada, p.RevisaoPreenchimento), p.PublicId.ToString(), antes, VigenciaPropostas.Retrato(p, origem));

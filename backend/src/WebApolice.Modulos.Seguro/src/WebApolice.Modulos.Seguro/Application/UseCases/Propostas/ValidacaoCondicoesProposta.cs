@@ -17,16 +17,18 @@ internal static class ValidacaoCondicoesProposta
             identidade.ClienteVinculoId != proposta.ClienteVinculoId || identidade.EstipulanteId != apolice.EstipulanteId ||
             proposta.EstipulanteId != apolice.EstipulanteId || proposta.SeguradoraId != apolice.SeguradoraId)
             throw new ValidacaoException("A identidade ou a hierarquia da proposta diverge do contexto atual. Revise a participação antes de confirmar.");
-        if (proposta.ApoliceModuloId == null || proposta.ApoliceModuloId != vida.ApoliceModuloId ||
-            proposta.ApoliceSubgrupoId != vida.ApoliceSubgrupoId ||
-            vida.ApoliceModulo is not { Ativo: true, DeletedAt: null } modulo || modulo.ApoliceId != apolice.Id ||
-            (vida.ApoliceSubgrupoId.HasValue && (vida.ApoliceSubgrupo is not { Ativo: true, DeletedAt: null } subgrupo || subgrupo.ApoliceId != apolice.Id)))
-            throw new ValidacaoException("O Módulo ou Subgrupo registrado está indisponível ou diverge da Vida. As condições do rascunho precisam ser revistas.");
+        var contextoModulo = proposta.CondicoesProprias ? proposta.ApoliceModulo : vida.ApoliceModulo;
+        var contextoSubgrupo = proposta.CondicoesProprias ? proposta.ApoliceSubgrupo : vida.ApoliceSubgrupo;
+        if (proposta.ApoliceModuloId == null || (!proposta.CondicoesProprias &&
+            (proposta.ApoliceModuloId != vida.ApoliceModuloId || proposta.ApoliceSubgrupoId != vida.ApoliceSubgrupoId)) ||
+            contextoModulo is not { Ativo: true, DeletedAt: null } modulo || modulo.Id != proposta.ApoliceModuloId || modulo.ApoliceId != apolice.Id ||
+            (proposta.ApoliceSubgrupoId.HasValue && (contextoSubgrupo is not { Ativo: true, DeletedAt: null } subgrupo || subgrupo.Id != proposta.ApoliceSubgrupoId || subgrupo.ApoliceId != apolice.Id)))
+            throw new ValidacaoException("O Módulo ou Subgrupo registrado está indisponível ou diverge da Vida. As condições da pré proposta precisam ser revistas.");
 
         var itens = proposta.PropostaItems.Where(i => i.Ativo).ToList();
         if (plano is not { Ativo: true, DeletedAt: null } || plano.ApoliceModuloId != modulo.Id ||
             itens.Count != 1 || itens[0].LegadoId != null || itens[0].ApoliceModuloPlanoId != plano.Id)
-            throw new ValidacaoException("A confirmação exige um Plano ativo do Módulo, registrado no rascunho.");
+            throw new ValidacaoException("A confirmação exige um Plano ativo do Módulo, registrado na pré proposta.");
         var coberturas = proposta.PropostaCoberturas.Where(c => c.Ativo).ToList();
         if (coberturas.Count == 0 || coberturas.Any(c => c.LegadoId != null || c.PropostaItemId != itens[0].Id ||
             !plano.Coberturas.Any(atual => atual.Id == c.ApoliceModuloCoberturaId && atual.CoberturaId == c.CoberturaId &&

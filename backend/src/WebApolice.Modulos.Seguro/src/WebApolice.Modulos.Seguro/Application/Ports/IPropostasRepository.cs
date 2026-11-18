@@ -13,6 +13,13 @@ public interface IPropostasRepository
     Task<ApoliceModel?> ObterApoliceAsync(Guid publicId, CancellationToken ct);
     Task<ApoliceVidaModel?> ObterVidaAsync(Guid publicId, CancellationToken ct);
     Task<Propostum?> ObterParaPreenchimentoAsync(Guid publicId, CancellationToken ct);
+    Task<Propostum?> ObterParaComparacaoAsync(Guid publicId, CancellationToken ct);
+    Task<IReadOnlyList<ApoliceRamoModel>> ObterRamosSimulacaoAsync(long apoliceId, CancellationToken ct);
+    Task<int?> ObterRevisaoAtualAsync(Guid publicId, CancellationToken ct);
+    Task<IReadOnlyList<ApoliceModuloModel>> ObterModulosRevisaoAsync(long apoliceId, CancellationToken ct);
+    Task<IReadOnlyList<ApoliceSubgrupoModel>> ObterSubgruposRevisaoAsync(long apoliceId, CancellationToken ct);
+    Task<ApoliceModuloModel?> ObterModuloRevisaoAsync(Guid publicId, CancellationToken ct);
+    Task<ApoliceSubgrupoModel?> ObterSubgrupoRevisaoAsync(Guid publicId, CancellationToken ct);
     Task<Propostum?> ObterOrigemParaVigenciaAsync(long id, CancellationToken ct);
     Task<IReadOnlyList<AgendamentoVigenciaProposta>> ListarAgendadasAsync(DateOnly ate, string statusConfirmada, long aposId, CancellationToken ct);
     Task<IReadOnlyList<AgendamentoVigenciaProposta>> ListarCancelamentosAgendadosAsync(DateOnly ate, string statusConfirmada, long aposId, CancellationToken ct);

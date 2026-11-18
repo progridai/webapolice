@@ -3,13 +3,19 @@ import { justificativaPropostaSchema } from './justificativaProposta.schema';
 
 export const encerramentoPropostaSchema = z
   .object({
-    acao: z.enum(['cancelarVigencia', 'descartar']),
+    acao: z.enum([
+      'cancelarVigencia',
+      'descartar',
+      'alterarCancelamento',
+      'retirarCancelamento',
+    ]),
     dataCancelamentoVigencia: z.string(),
     observacao: justificativaPropostaSchema,
   })
   .superRefine((dados, ctx) => {
     if (
-      dados.acao === 'cancelarVigencia' &&
+      (dados.acao === 'cancelarVigencia' ||
+        dados.acao === 'alterarCancelamento') &&
       !z.iso.date().safeParse(dados.dataCancelamentoVigencia).success
     ) {
       ctx.addIssue({

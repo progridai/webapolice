@@ -2,6 +2,7 @@ using MediatR;
 using Microsoft.Extensions.Options;
 using WebApolice.Modulos.Seguro.Application.Ports;
 using WebApolice.Modulos.Seguro.Application.UseCases.Propostas.ListarPropostas;
+using WebApolice.Modulos.Seguro.Application.UseCases.Propostas.ReincluirProposta;
 
 namespace WebApolice.Modulos.Seguro.Application.UseCases.Propostas.ObterProposta;
 
@@ -13,16 +14,28 @@ public sealed class ObterPropostaHandler(IPropostasRepository repository, IOptio
     {
         var dto = await repository.ObterDetalheAsync(request.PublicId, cancellationToken, configuracao.Value.StatusInicialCodigo);
         if (dto is null) return null;
+        if (dto.PodePrepararReinclusao && dto.ApoliceVidaPublicId is Guid vidaPublicId)
+        {
+            var vida = await repository.ObterVidaAsync(vidaPublicId, cancellationToken);
+            var propostas = vida is null ? [] : await repository.ObterPropostasDaVidaAsync(vida.Id, cancellationToken);
+            var origem = propostas.SingleOrDefault(p => p.PublicId == dto.PublicId);
+            dto.PodePrepararReinclusao = vida is { Ativo: true, DeletedAt: null } && origem is not null &&
+                !string.IsNullOrWhiteSpace(configuracao.Value.StatusInicialCodigo) && ReinclusaoPropostas.SemImpedimentos(origem, propostas, configuracao.Value);
+        }
         dto.PodeConfirmar = dto.PodeEditarRascunho && !string.IsNullOrWhiteSpace(configuracao.Value.StatusConfirmadaCodigo);
         var podeGerir = dto.PodeEfetivarVigencia && dto.IntegradaApolice && dto.CanceladaEm == null &&
             dto.ConfirmadaEm != null && dto.SubstituidaEm == null && !dto.Vigente &&
             !string.IsNullOrWhiteSpace(configuracao.Value.StatusConfirmadaCodigo) && dto.StatusCodigo == configuracao.Value.StatusConfirmadaCodigo;
         dto.PodeReagendar = podeGerir && configuracao.Value.ProcessarAgendamentos;
+        dto.PodeRevisarCondicoes = dto.PodeEditarRascunho || (podeGerir && dto.DataInicioVigencia > VigenciaPropostas.Hoje(relogio));
         dto.PodeCancelarAgendamento = podeGerir && !string.IsNullOrWhiteSpace(configuracao.Value.StatusCanceladaCodigo);
         dto.PodeEfetivarVigencia = dto.PodeEfetivarVigencia && dto.IntegradaApolice && dto.ConfirmadaEm != null && dto.SubstituidaEm == null &&
             !dto.Vigente && dto.StatusCodigo == configuracao.Value.StatusConfirmadaCodigo && dto.DataInicioVigencia <= VigenciaPropostas.Hoje(relogio);
         dto.PodeDescartarRascunho = dto.PodeEditarRascunho && !string.IsNullOrWhiteSpace(configuracao.Value.StatusDescartadaCodigo);
         var vigenteNativa = dto.PodeCancelarVigencia && dto.IntegradaApolice && dto.StatusCodigo == configuracao.Value.StatusConfirmadaCodigo;
+        var pedidoAtivo = vigenteNativa && dto.CancelamentoSolicitadoEm != null && dto.DataCancelamentoVigencia != null;
+        dto.PodeAlterarCancelamento = pedidoAtivo && !string.IsNullOrWhiteSpace(configuracao.Value.StatusCanceladaCodigo);
+        dto.PodeRetirarCancelamento = pedidoAtivo;
         dto.PodeCancelarVigencia = vigenteNativa && dto.CancelamentoSolicitadoEm == null && !string.IsNullOrWhiteSpace(configuracao.Value.StatusCanceladaCodigo);
         dto.PodeEfetivarCancelamento = vigenteNativa && dto.CancelamentoSolicitadoEm != null && dto.DataCancelamentoVigencia <= VigenciaPropostas.Hoje(relogio);
         dto.SituacaoVigenciaCodigo = dto.DescartadaEm != null ? "DESCARTADA" : dto.CanceladaEm != null ? "CANCELADA" : dto.CancelamentoSolicitadoEm != null && dto.Vigente
@@ -35,12 +48,21 @@ public sealed class ObterPropostaHandler(IPropostasRepository repository, IOptio
 
 public sealed class PropostaDetalheDto : PropostaDto
 {
+    public bool PodeRevisarCondicoes { get; set; }
+    public bool CondicoesProprias { get; set; }
+    public bool? IncluiConjuge { get; set; }
+    public bool PodeSimularValorMensal { get; set; }
+    public bool PodePrepararReinclusao { get; set; }
+    public bool Reinclusao { get; set; }
+    public DateOnly? DataFimVigenciaOrigem { get; set; }
     public DateOnly? DataCancelamentoVigencia { get; set; }
     public DateTime? CancelamentoSolicitadoEm { get; set; }
     public DateTime? DescartadaEm { get; set; }
     public bool PodeDescartarRascunho { get; set; }
     public bool PodeCancelarVigencia { get; set; }
     public bool PodeEfetivarCancelamento { get; set; }
+    public bool PodeAlterarCancelamento { get; set; }
+    public bool PodeRetirarCancelamento { get; set; }
     public DateTime? CanceladaEm { get; set; }
     public bool PodeReagendar { get; set; }
     public bool PodeCancelarAgendamento { get; set; }

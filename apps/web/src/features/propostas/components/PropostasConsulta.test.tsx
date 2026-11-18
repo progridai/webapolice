@@ -210,7 +210,7 @@ describe('Consulta e criação de Propostas', () => {
       screen.getByText(/A proposta anterior continuará vigente/),
     ).toBeTruthy();
     fireEvent.click(
-      screen.getByRole('button', { name: 'Criar versão em rascunho' }),
+      screen.getByRole('button', { name: 'Criar versão de pré proposta' }),
     );
     await waitFor(() =>
       expect(criarPropostaDaVida).toHaveBeenCalledWith(
@@ -260,7 +260,7 @@ describe('Consulta e criação de Propostas', () => {
     );
     expect(screen.getByText('aBc-X009')).toBeTruthy();
     expect(screen.getByText('Vida sem Módulo')).toBeTruthy();
-    const botao = screen.getByRole('button', { name: 'Criar rascunho' });
+    const botao = screen.getByRole('button', { name: 'Criar pré proposta' });
     fireEvent.click(botao);
     fireEvent.click(botao);
     fireEvent.keyDown(window, { key: 'Escape' });
@@ -295,12 +295,12 @@ describe('Consulta e criação de Propostas', () => {
         onClose={vi.fn()}
       />,
     );
-    fireEvent.click(screen.getByRole('button', { name: 'Criar rascunho' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Criar pré proposta' }));
     expect(
       await screen.findByText('Status inicial não configurado'),
     ).toBeTruthy();
     expect(onCriada).not.toHaveBeenCalled();
-    fireEvent.click(screen.getByRole('button', { name: 'Criar rascunho' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Criar pré proposta' }));
     await waitFor(() =>
       expect(onCriada).toHaveBeenCalledWith(proposta.publicId),
     );

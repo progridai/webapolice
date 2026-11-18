@@ -22,12 +22,9 @@ public sealed class SolicitarCancelamentoVigenciaHandler(IPropostasRepository re
             if (p.CancelamentoSolicitadoEm != null || p.DataCancelamentoVigencia != null) throw new ValidacaoException("Esta proposta já possui cancelamento solicitado. Consulte a data registrada.");
             await EncerramentoPropostas.ValidarVigenteAsync(p, repository, configuracao.Value, ct);
             var status = await EncerramentoPropostas.ObterStatusAsync(repository, configuracao.Value, false, ct);
-            var data = request.Dados.DataCancelamentoVigencia;
-            if (data == null || data < p.DataInicioVigencia)
-                throw new ValidacaoException("Informe a data de cancelamento, igual ou posterior ao início da proposta.");
-            var hoje = VigenciaPropostas.Hoje(relogio); var agendada = data > hoje;
-            try { VigenciaPropostas.ValidarDatas(p, data.Value, hoje, efetivar: false); }
-            catch (ValidacaoException) { throw new ValidacaoException("A data de cancelamento deve estar dentro dos períodos da Apólice e da Vida."); }
+            var hoje = VigenciaPropostas.Hoje(relogio);
+            var data = EncerramentoPropostas.ValidarDataCancelamento(p, request.Dados.DataCancelamentoVigencia, hoje);
+            var agendada = data > hoje;
             if (agendada && !configuracao.Value.ProcessarAgendamentos)
                 throw new ValidacaoException("O processamento de cancelamentos futuros está desabilitado.");
             var antes = VigenciaPropostas.Retrato(p); var agora = relogio.GetUtcNow().UtcDateTime;

@@ -11,8 +11,10 @@ import {
   Textarea,
 } from '../../../components/ui';
 import {
+  alterarCancelamentoVigencia,
   descartarRascunho,
   efetivarCancelamentoVigencia,
+  retirarCancelamentoVigencia,
   solicitarCancelamentoVigencia,
 } from '../api/propostas.api';
 import {
@@ -21,6 +23,41 @@ import {
 } from '../schemas/encerramentoProposta.schema';
 import type { PropostaDetalhe } from '../types/proposta.types';
 import { formatarDataOuVazio } from '../../../shared/utils/formatters';
+
+type AcaoEncerramento = EncerramentoPropostaFormData['acao'];
+const textosAcao = {
+  cancelarVigencia: {
+    formulario: 'Cancelamento da vigência',
+    titulo: 'Encerrar a vigência registrada',
+    explicacao:
+      'Informe o primeiro dia sem vigência. Hoje ou data retroativa válida encerra agora; data futura agenda e mantém a proposta vigente até o processamento. Resolva primeiro qualquer pré proposta ou substituição agendada. Versões anteriores não serão reativadas. A situação da Vida permanece independente e esta operação não recalcula nem ajusta cobranças.',
+    confirmar: 'Confirmar cancelamento da vigência',
+  },
+  descartar: {
+    formulario: 'Descarte de pré proposta',
+    titulo: 'Encerrar esta tentativa como Descartada',
+    explicacao:
+      'A pré proposta será encerrada sem confirmação ou vigência. Seus dados e histórico serão preservados. A proposta anterior, quando existente, continuará vigente. Outra tentativa poderá ser preparada com nova numeração.',
+    confirmar: 'Confirmar descarte da pré proposta',
+  },
+  alterarCancelamento: {
+    formulario: 'Alteração do pedido de cancelamento',
+    titulo: 'Alterar a data do pedido de cancelamento',
+    explicacao:
+      'Informe outra data como primeiro dia sem vigência. Hoje ou data retroativa válida cancela a vigência imediatamente; data futura mantém a proposta vigente até o processamento. É permitido alterar um pedido pendente, mesmo com a data alcançada, até sua efetivação. O histórico será preservado. A Vida permanece independente e não há ajuste de cobranças ou reativação de versões anteriores.',
+    confirmar: 'Confirmar alteração do pedido',
+  },
+  retirarCancelamento: {
+    formulario: 'Retirada do pedido de cancelamento',
+    titulo: 'Retirar o pedido e manter a vigência',
+    explicacao:
+      'A proposta continuará vigente e o pedido de cancelamento será retirado, preservando o histórico. É permitido retirar um pedido pendente, mesmo com a data alcançada, até sua efetivação. A Vida, as condições e as cobranças serão preservadas.',
+    confirmar: 'Confirmar retirada do pedido',
+  },
+} satisfies Record<
+  AcaoEncerramento,
+  { formulario: string; titulo: string; explicacao: string; confirmar: string }
+>;
 
 export function EncerramentoProposta({
   proposta,
@@ -35,9 +72,7 @@ export function EncerramentoProposta({
   onBusy: (busy: boolean) => void;
   onConcluida: (mensagem: string | null) => void;
 }) {
-  const [acao, setAcao] = useState<'cancelarVigencia' | 'descartar' | null>(
-    null,
-  );
+  const [acao, setAcao] = useState<AcaoEncerramento | null>(null);
   const [efetivando, setEfetivando] = useState(false);
   const [erro, setErro] = useState<string | null>(null);
   const enviando = useRef(false);
@@ -74,10 +109,16 @@ export function EncerramentoProposta({
   return (
     <>
       {proposta.situacaoVigenciaCodigo === 'DESCARTADA' && (
-        <Alert variant="info" title="Rascunho descartado">
-          Os dados e o histórico desta tentativa foram preservados. A versão
-          anterior, quando existente, continua vigente. Outra tentativa pode ser
-          preparada sem reutilizar esta numeração.
+        <Alert variant="info" title="Pré proposta descartada">
+          {proposta.reinclusao ? (
+            'Os dados e o histórico desta tentativa de reinclusão foram preservados. A origem permanece cancelada. Outra tentativa pode ser preparada pela proposta de origem.'
+          ) : (
+            <>
+              Os dados e o histórico desta tentativa foram preservados. A versão
+              anterior, quando existente, continua vigente. Outra tentativa pode
+              ser preparada sem reutilizar esta numeração.
+            </>
+          )}
         </Alert>
       )}
       {proposta.situacaoVigenciaCodigo === 'CANCELAMENTO_AGENDADO' && (
@@ -109,6 +150,8 @@ export function EncerramentoProposta({
       {podeAlterar &&
         (proposta.podeCancelarVigencia ||
           proposta.podeDescartarRascunho ||
+          proposta.podeAlterarCancelamento ||
+          proposta.podeRetirarCancelamento ||
           proposta.podeEfetivarCancelamento) && (
           <DetailsSection title="Encerramento da proposta">
             {acao ? (
@@ -123,6 +166,24 @@ export function EncerramentoProposta({
               />
             ) : (
               <div className="flex flex-wrap gap-2">
+                {proposta.podeAlterarCancelamento && (
+                  <Button
+                    variant="secondary"
+                    disabled={disabled || efetivando}
+                    onClick={() => setAcao('alterarCancelamento')}
+                  >
+                    Alterar pedido de cancelamento
+                  </Button>
+                )}
+                {proposta.podeRetirarCancelamento && (
+                  <Button
+                    variant="secondary"
+                    disabled={disabled || efetivando}
+                    onClick={() => setAcao('retirarCancelamento')}
+                  >
+                    Retirar pedido de cancelamento
+                  </Button>
+                )}
                 {proposta.podeCancelarVigencia && (
                   <Button
                     variant="secondary"
@@ -138,7 +199,7 @@ export function EncerramentoProposta({
                     disabled={disabled || efetivando}
                     onClick={() => setAcao('descartar')}
                   >
-                    Descartar rascunho
+                    Descartar pré proposta
                   </Button>
                 )}
                 {proposta.podeEfetivarCancelamento && (
@@ -165,13 +226,15 @@ function EncerramentoForm({
   onConcluida,
 }: {
   proposta: PropostaDetalhe;
-  acao: 'cancelarVigencia' | 'descartar';
+  acao: AcaoEncerramento;
   onFechar: () => void;
   onConcluida: (mensagem: string | null) => void;
 }) {
   const enviando = useRef(false);
   const [erro, setErro] = useState<string | null>(null);
-  const cancelando = acao === 'cancelarVigencia';
+  const informaData =
+    acao === 'cancelarVigencia' || acao === 'alterarCancelamento';
+  const textos = textosAcao[acao];
   const {
     register,
     handleSubmit,
@@ -183,8 +246,12 @@ function EncerramentoForm({
   async function salvar(dados: EncerramentoPropostaFormData) {
     setErro(null);
     try {
-      if (cancelando) {
-        const resultado = await solicitarCancelamentoVigencia(
+      if (informaData) {
+        const executar =
+          acao === 'alterarCancelamento'
+            ? alterarCancelamentoVigencia
+            : solicitarCancelamentoVigencia;
+        const resultado = await executar(
           proposta.publicId,
           proposta.revisaoPreenchimento,
           dados.dataCancelamentoVigencia,
@@ -192,8 +259,19 @@ function EncerramentoForm({
         );
         onConcluida(
           resultado.agendada
-            ? 'Cancelamento agendado. A proposta permanece vigente até a data informada.'
+            ? acao === 'alterarCancelamento'
+              ? 'Pedido de cancelamento alterado. A proposta permanece vigente até a nova data informada.'
+              : 'Cancelamento agendado. A proposta permanece vigente até a data informada.'
             : 'Vigência cancelada a partir da data informada. As versões anteriores foram preservadas.',
+        );
+      } else if (acao === 'retirarCancelamento') {
+        await retirarCancelamentoVigencia(
+          proposta.publicId,
+          proposta.revisaoPreenchimento,
+          dados.observacao,
+        );
+        onConcluida(
+          'Pedido de cancelamento retirado. A proposta continua vigente e o histórico foi preservado.',
         );
       } else {
         await descartarRascunho(
@@ -202,22 +280,20 @@ function EncerramentoForm({
           dados.observacao,
         );
         onConcluida(
-          'Rascunho descartado. Seus dados e o histórico foram preservados, liberando outra tentativa.',
+          'Pré proposta descartada. Seus dados e o histórico foram preservados, liberando outra tentativa.',
         );
       }
     } catch (cause) {
       setErro(
         cause instanceof Error
           ? cause.message
-          : 'Não foi possível encerrar a proposta.',
+          : 'Não foi possível concluir a operação.',
       );
     }
   }
   return (
     <form
-      aria-label={
-        cancelando ? 'Cancelamento da vigência' : 'Descarte de rascunho'
-      }
+      aria-label={textos.formulario}
       noValidate
       className="flex flex-col gap-3"
       onSubmit={(event) => {
@@ -231,19 +307,18 @@ function EncerramentoForm({
         });
       }}
     >
-      <Alert
-        variant="warning"
-        title={
-          cancelando
-            ? 'Encerrar a vigência registrada'
-            : 'Encerrar esta tentativa como Descartada'
-        }
-      >
-        {cancelando
-          ? 'Informe o primeiro dia sem vigência. Hoje ou data retroativa válida encerra agora; data futura agenda e mantém a proposta vigente até o processamento. Resolva primeiro qualquer rascunho ou substituição agendada. Versões anteriores não serão reativadas. A situação da Vida permanece independente e esta operação não recalcula nem ajusta cobranças.'
-          : 'O rascunho será encerrado sem confirmação ou vigência. Seus dados e histórico serão preservados. A proposta anterior, quando existente, continuará vigente. Outra tentativa poderá ser preparada com nova numeração.'}
+      <Alert variant="warning" title={textos.titulo}>
+        {proposta.reinclusao && acao === 'descartar'
+          ? 'Esta pré proposta de reinclusão será descartada, preservando seus dados e histórico. A origem permanecerá cancelada. Outra tentativa poderá ser preparada pela proposta de origem com nova numeração.'
+          : textos.explicacao}
       </Alert>
-      {cancelando && (
+      {(acao === 'alterarCancelamento' || acao === 'retirarCancelamento') && (
+        <p>
+          Data registrada no pedido:{' '}
+          {formatarDataOuVazio(proposta.dataCancelamentoVigencia)}.
+        </p>
+      )}
+      {informaData && (
         <FormField
           label="Data de cancelamento da vigência"
           required
@@ -270,7 +345,7 @@ function EncerramentoForm({
         />
       </FormField>
       {erro && (
-        <Alert variant="error" title="Não foi possível encerrar a proposta">
+        <Alert variant="error" title="Não foi possível concluir a operação">
           {erro}
           <Button
             type="button"
@@ -292,9 +367,7 @@ function EncerramentoForm({
           Voltar sem alterar
         </Button>
         <Button type="submit" loading={isSubmitting}>
-          {cancelando
-            ? 'Confirmar cancelamento da vigência'
-            : 'Confirmar descarte do rascunho'}
+          {textos.confirmar}
         </Button>
       </FormActions>
     </form>

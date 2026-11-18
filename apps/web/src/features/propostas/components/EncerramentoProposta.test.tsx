@@ -100,7 +100,7 @@ it.each(['claro', 'escuro', 'sistema'])(
 );
 
 it.each(['claro', 'escuro', 'sistema'])(
-  'descarta rascunho somente após justificar no tema %s',
+  'descarta pré proposta somente após justificar no tema %s',
   async (tema) => {
     localStorage.setItem('webapolice-tema', tema);
     const concluida = vi.fn();
@@ -115,7 +115,9 @@ it.each(['claro', 'escuro', 'sistema'])(
         />
       </ThemeProvider>,
     );
-    fireEvent.click(screen.getByRole('button', { name: 'Descartar rascunho' }));
+    fireEvent.click(
+      screen.getByRole('button', { name: 'Descartar pré proposta' }),
+    );
     expect(descartarRascunho).not.toHaveBeenCalled();
     expect(
       screen.queryByLabelText('Data de cancelamento da vigência', {
@@ -123,18 +125,22 @@ it.each(['claro', 'escuro', 'sistema'])(
       }),
     ).toBeNull();
     fireEvent.click(
-      screen.getByRole('button', { name: 'Confirmar descarte do rascunho' }),
+      screen.getByRole('button', {
+        name: 'Confirmar descarte da pré proposta',
+      }),
     );
     expect(await screen.findByText('Informe a justificativa.')).toBeTruthy();
     fireEvent.change(screen.getByLabelText('Justificativa', { exact: false }), {
       target: { value: '  Condições Não Aprovadas  ' },
     });
     fireEvent.click(
-      screen.getByRole('button', { name: 'Confirmar descarte do rascunho' }),
+      screen.getByRole('button', {
+        name: 'Confirmar descarte da pré proposta',
+      }),
     );
     await waitFor(() =>
       expect(concluida).toHaveBeenCalledWith(
-        expect.stringContaining('Rascunho descartado'),
+        expect.stringContaining('Pré proposta descartada'),
       ),
     );
     expect(descartarRascunho).toHaveBeenCalledWith(
@@ -279,7 +285,8 @@ it.each(['cancelar', 'descartar'])(
     );
     fireEvent.click(
       screen.getByRole('button', {
-        name: acao === 'cancelar' ? 'Cancelar vigência' : 'Descartar rascunho',
+        name:
+          acao === 'cancelar' ? 'Cancelar vigência' : 'Descartar pré proposta',
       }),
     );
     if (acao === 'cancelar')
@@ -384,7 +391,7 @@ it('recarrega pendência de cancelamento sem comunicar sucesso e permite nova te
   expect(efetivarCancelamentoVigencia).toHaveBeenCalledTimes(2);
 });
 
-it('impede confirmar um rascunho enquanto o descarte está em aberto', async () => {
+it('impede confirmar uma pré proposta enquanto o descarte está em aberto', async () => {
   render(
     <ConfirmacaoProposta
       proposta={{
@@ -398,7 +405,9 @@ it('impede confirmar um rascunho enquanto o descarte está em aberto', async () 
       onConcluida={vi.fn()}
     />,
   );
-  fireEvent.click(screen.getByRole('button', { name: 'Descartar rascunho' }));
+  fireEvent.click(
+    screen.getByRole('button', { name: 'Descartar pré proposta' }),
+  );
   await waitFor(() =>
     expect(
       screen.getByRole('button', { name: 'Confirmar proposta' }),

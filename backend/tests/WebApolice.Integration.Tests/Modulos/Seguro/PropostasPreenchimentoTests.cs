@@ -28,7 +28,7 @@ public partial class PropostasPostgresTests
     }
 
     private static PreencherRascunhoDados Dados(Guid cobertura, int revisao = 0, decimal premio = 15.12m) => new(revisao, "OBSERVAÇÃO DA FAMÍLIA",
-        [new(null, "MARIA d’ÁVILA", "FILHA DO TITULAR", 25.1234m)], [new(cobertura, premio, 0, "AJUSTE DE PROTEÇÃO")]);
+        [new(null, "MARIA d’ÁVILA", "FILHA DO TITULAR", 25.1234m)], [new(cobertura, premio, 0, "AJUSTE DE PROTEÇÃO")], false);
 
     [Fact]
     public async Task PreencheRascunhoAjustaComJustificativaPreservaBaseENaoAtivaFinanceiro()

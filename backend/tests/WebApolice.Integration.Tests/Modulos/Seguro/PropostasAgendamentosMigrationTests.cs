@@ -20,8 +20,8 @@ public sealed class PropostasAgendamentosMigrationTests
             """);
         var antes = await db.Database.SqlQueryRaw<string>("SELECT md5(to_jsonb(p)::text) AS \"Value\" FROM seguro.proposta p WHERE id=900").SingleAsync();
         await db.GetService<IMigrator>().MigrateAsync();
-        var depois = await db.Database.SqlQueryRaw<string>("SELECT md5((to_jsonb(p)-'cancelada_em'-'data_cancelamento_vigencia'-'cancelamento_solicitado_em'-'descartada_em')::text) AS \"Value\" FROM seguro.proposta p WHERE id=900").SingleAsync();
-        Assert.Equal(antes, depois); var p = await db.Proposta.SingleAsync(p => p.Id == 900); Assert.Null(p.CanceladaEm);
+        var depois = await db.Database.SqlQueryRaw<string>("SELECT md5((to_jsonb(p)-'inclui_conjuge'-'condicoes_proprias'-'cancelada_em'-'data_cancelamento_vigencia'-'cancelamento_solicitado_em'-'descartada_em')::text) AS \"Value\" FROM seguro.proposta p WHERE id=900").SingleAsync();
+        Assert.Equal(antes, depois); var p = await db.Proposta.SingleAsync(p => p.Id == 900); Assert.False(p.CondicoesProprias); Assert.Null(p.CanceladaEm);
         var status = await db.PropostaStatuses.SingleAsync(s => s.Codigo == "CANCELADA"); Assert.True(status.Finalizador); Assert.True(status.VisivelOperacional); Assert.False(status.PermiteMovimentacao);
         await db.Database.ExecuteSqlRawAsync("UPDATE seguro.proposta SET cancelada_em=now() WHERE id=900");
         var erro = await Assert.ThrowsAsync<PostgresException>(() => db.GetService<IMigrator>().MigrateAsync("20261112111200_DefinirConfirmadaProposta"));

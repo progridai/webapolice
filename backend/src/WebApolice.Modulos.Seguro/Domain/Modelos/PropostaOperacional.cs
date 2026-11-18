@@ -2,6 +2,14 @@ namespace WebApolice.Modulos.Seguro.Domain.Modelos;
 
 public partial class Propostum
 {
+    public bool CondicoesProprias { get; set; }
+    public bool? IncluiConjuge { get; set; }
+    public bool CanceladaComVigencia(string? codigo) => !string.IsNullOrWhiteSpace(codigo) &&
+        LegadoId == null && !Vigente && DeletedAt == null && VisivelOperacional &&
+        ConfirmadaEm != null && CanceladaEm != null && DescartadaEm == null && SubstituidaEm == null &&
+        DataInicioVigencia != null && DataFimVigencia != null && DataFimVigencia >= DataInicioVigencia &&
+        CancelamentoSolicitadoEm != null && DataCancelamentoVigencia == DataFimVigencia &&
+        Status.Codigo == codigo && Status.VisivelOperacional && Status.Finalizador && !Status.PermiteMovimentacao;
     public DateOnly? DataCancelamentoVigencia { get; set; }
     public DateTime? CancelamentoSolicitadoEm { get; set; }
     public DateTime? DescartadaEm { get; set; }

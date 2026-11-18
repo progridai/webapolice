@@ -118,3 +118,18 @@ sem alterar regras ou configurações.
 
 A homologação visual e autenticada permanece pendente: o inventário de apps e
 navegadores retornou vazio. Os testes em jsdom não substituem essa etapa.
+
+## Continuidade: Instalação em 17/11/2026
+
+Após o relato de erro ao carregar permissões no login, a conferência confirmou
+que a coluna e a migration ainda não existiam no banco de produção. A migration
+específica foi aplicada em `webapolice` e verificada em nova conexão. Ela também
+foi aplicada no banco de testes usado pela API local, `webapolice_teste`, durante
+o diagnóstico inicial. Nenhum usuário, perfil, concessão ou dado histórico foi
+reescrito. A configuração de autenticação não foi alterada.
+
+O instalador `backend/scripts/aplicar-atalhos-home.ps1` permite diagnóstico
+somente leitura e instalação explícita por ambiente, sem atualização geral de
+migrations. Sintaxe, diagnóstico, instalação e repetição em testes foram
+conferidos. Detalhes e limites de validação estão no
+[registro da correção do login](90-correcao-login-migration-atalhos.md).

@@ -1,3 +1,4 @@
+import type { FinanceiroConfirmacaoDados } from '../types/financeiro.types';
 import { httpClient } from '../../../services/http/httpClient';
 import type { PagedResult } from '../../../shared/types/pagination';
 import type {
@@ -26,6 +27,10 @@ export async function listarPropostas(
     pagina: String(query.pagina),
     tamanhoPagina: String(query.tamanhoPagina),
   });
+  if (query.clientePublicId)
+    params.set('clientePublicId', query.clientePublicId);
+  if (query.clienteVinculoPublicId)
+    params.set('clienteVinculoPublicId', query.clienteVinculoPublicId);
   if (query.termoBusca) params.set('termoBusca', query.termoBusca);
   if (query.apolicePublicId)
     params.set('apolicePublicId', query.apolicePublicId);
@@ -78,11 +83,16 @@ export async function confirmarProposta(
   publicId: string,
   revisaoEsperada: number,
   dataInicioVigencia: string,
+  financeiro?: FinanceiroConfirmacaoDados,
 ): Promise<ConfirmacaoPropostaResultado> {
   return (
     await httpClient.post<ConfirmacaoPropostaResultado>(
       `/api/propostas/${publicId}/confirmacao`,
-      { revisaoEsperada, dataInicioVigencia },
+      {
+        revisaoEsperada,
+        dataInicioVigencia,
+        ...(financeiro ? { financeiro } : {}),
+      },
     )
   ).data;
 }

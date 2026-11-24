@@ -5,6 +5,14 @@ namespace WebApolice.Modulos.Cadastro.Infrastructure.Persistence.Queries;
 
 public sealed class ClientesPropostas(CadastroDbContext db) : IClientesPropostas
 {
+    public Task<IdentidadeClienteProposta?> ResolverParaConsultaAsync(Guid clientePublicId, Guid vinculoPublicId, CancellationToken ct) =>
+        (from cliente in db.Clientes.AsNoTracking()
+         join pessoa in db.Pessoas on cliente.PessoaId equals pessoa.Id
+         join vinculo in db.Vinculos on cliente.Id equals vinculo.ClienteId
+         where cliente.PublicId == clientePublicId && vinculo.PublicId == vinculoPublicId &&
+               cliente.DeletedAt == null && pessoa.DeletedAt == null && vinculo.PessoaId == pessoa.Id
+         select new IdentidadeClienteProposta(cliente.Id, pessoa.Id, vinculo.Id, vinculo.EstipulanteId)).SingleOrDefaultAsync(ct);
+
     public async Task<IdentidadeClienteProposta?> ResolverParaConfirmacaoAsync(long clienteId, long vinculoId, CancellationToken ct)
     {
         if (db.Database.IsRelational())

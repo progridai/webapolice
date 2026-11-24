@@ -51,7 +51,7 @@ public sealed class ProcessadorVigenciasPropostas(IServiceScopeFactory scopes, I
                 var operacao = new OperacaoPropostas(sp.GetRequiredService<SeguroDbContext>(), new OperacaoAuditada(
                     sp.GetRequiredService<AuditoriaDbContext>(), sp.GetRequiredService<IRegistradorAuditoria>(), new ContextoAgendamento()));
                 var handler = new EfetivarVigenciaPropostaHandler(sp.GetRequiredService<IPropostasRepository>(), operacao,
-                    sp.GetRequiredService<IClientesPropostas>(), sp.GetRequiredService<ICadastroSeguroQueries>(), configuracao, relogio);
+                    sp.GetRequiredService<IClientesPropostas>(), sp.GetRequiredService<ICadastroSeguroQueries>(), configuracao, relogio, sp.GetRequiredService<IParcelasPropostasRepository>());
                 try { await handler.Handle(new(registro.PublicId, registro.RevisaoPreenchimento), ct); }
                 catch (OperationCanceledException) when (ct.IsCancellationRequested) { throw; }
                 catch (ValidacaoException) { logger.LogInformation("A proposta {PublicId} mudou durante o processamento da vigência; será reavaliada no próximo ciclo.", registro.PublicId); }

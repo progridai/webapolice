@@ -7,6 +7,7 @@ public sealed record ReferenciasPropostas(IReadOnlyList<ReferenciaClientePropost
 
 public interface IClientesPropostas
 {
+    Task<IdentidadeClienteProposta?> ResolverParaConsultaAsync(Guid clientePublicId, Guid vinculoPublicId, CancellationToken cancellationToken);
     Task<IdentidadeClienteProposta?> ResolverAsync(long clienteId, long vinculoId, CancellationToken cancellationToken);
     Task<IdentidadeClienteProposta?> ResolverParaConfirmacaoAsync(long clienteId, long vinculoId, CancellationToken cancellationToken);
     Task<ReferenciasPropostas> ConsultarReferenciasAsync(IReadOnlyCollection<long> clientes, IReadOnlyCollection<long> vinculos, CancellationToken cancellationToken);

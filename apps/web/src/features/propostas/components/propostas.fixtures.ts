@@ -28,6 +28,8 @@ export const detalhe: PropostaDetalhe = {
   reinclusao: false,
   dataFimVigenciaOrigem: null,
   ...proposta,
+  exigeConferenciaFinanceira: false,
+  podeConferirFinanceiro: false,
   revisaoPreenchimento: 0,
   podeEditarRascunho: true,
   propostaOrigemPublicId: null,

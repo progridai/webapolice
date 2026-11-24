@@ -54,7 +54,10 @@ export function CriarPropostaDialog({
               preenchimento deverá ser concluído em uma etapa posterior.
             </Alert>
           )}
-          <p>Geração financeira ainda não estão disponíveis nesta etapa.</p>
+          <p>
+            A vigência e as parcelas serão tratadas após o preenchimento e a
+            confirmação.
+          </p>
           {error && (
             <Alert
               variant="error"

@@ -1,3 +1,4 @@
+using WebApolice.Modulos.Seguro.Application.UseCases.Propostas.Financeiro;
 using MediatR;
 using Microsoft.Extensions.Options;
 using WebApolice.Modulos.Cadastro.Contracts;
@@ -11,7 +12,7 @@ public sealed record EfetivarVigenciaPropostaCommand(Guid PublicId, int? Revisao
 public sealed record EfetivarVigenciaResultado(bool Ativada, bool JaEfetivada, int RevisaoPreenchimento, string? PendenciaVigencia);
 
 public sealed class EfetivarVigenciaPropostaHandler(IPropostasRepository repository, IOperacaoPropostas operacao,
-    IClientesPropostas clientes, ICadastroSeguroQueries cadastro, IOptions<ConfiguracaoPropostas> configuracao, TimeProvider relogio)
+    IClientesPropostas clientes, ICadastroSeguroQueries cadastro, IOptions<ConfiguracaoPropostas> configuracao, TimeProvider relogio, IParcelasPropostasRepository? financeiro = null)
     : IRequestHandler<EfetivarVigenciaPropostaCommand, EfetivarVigenciaResultado>
 {
     public async Task<EfetivarVigenciaResultado> Handle(EfetivarVigenciaPropostaCommand request, CancellationToken cancellationToken)
@@ -37,6 +38,7 @@ public sealed class EfetivarVigenciaPropostaHandler(IPropostasRepository reposit
                 {
                     await VigenciaPropostas.ValidarContextoAsync(p, repository, clientes, cadastro, ct);
                     VigenciaPropostas.ValidarDatas(p, p.DataInicioVigencia.Value, hoje, efetivar: true);
+                    if (financeiro != null) await ParcelasNativas.ValidarPrimeiraAsync(p, financeiro, ct);
                     origem = await VigenciaPropostas.ValidarOrigemAsync(p, p.DataInicioVigencia.Value, repository, configuracao.Value, ct);
                 }
                 catch (ValidacaoException ex)
@@ -50,7 +52,7 @@ public sealed class EfetivarVigenciaPropostaHandler(IPropostasRepository reposit
                 }
                 antes = VigenciaPropostas.Retrato(p, origem);
                 p.RevisaoPreenchimento = checked(p.RevisaoPreenchimento + 1); p.UpdatedAt = agora;
-                await VigenciaPropostas.EfetivarAsync(p, origem, agora, repository, ct);
+                await VigenciaPropostas.EfetivarAsync(p, origem, agora, repository, ct, financeiro);
                 await repository.SalvarAlteracoesAsync(ct);
                 return (new EfetivarVigenciaResultado(true, false, p.RevisaoPreenchimento, null), p.PublicId.ToString(), antes, VigenciaPropostas.Retrato(p, origem));
             }, cancellationToken);

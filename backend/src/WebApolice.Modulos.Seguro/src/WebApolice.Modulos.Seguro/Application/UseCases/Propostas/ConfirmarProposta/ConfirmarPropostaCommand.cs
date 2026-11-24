@@ -1,3 +1,4 @@
+using WebApolice.Modulos.Seguro.Application.UseCases.Propostas.Financeiro;
 using MediatR;
 using Microsoft.Extensions.Options;
 using WebApolice.Modulos.Cadastro.Contracts;
@@ -6,12 +7,12 @@ using WebApolice.SharedKernel.Application.Exceptions;
 
 namespace WebApolice.Modulos.Seguro.Application.UseCases.Propostas.ConfirmarProposta;
 
-public sealed record ConfirmarPropostaDados(int? RevisaoEsperada, DateOnly? DataInicioVigencia);
+public sealed record ConfirmarPropostaDados(int? RevisaoEsperada, DateOnly? DataInicioVigencia, FinanceiroConfirmacaoDados? Financeiro = null);
 public sealed record ConfirmarPropostaCommand(Guid PublicId, ConfirmarPropostaDados Dados) : IRequest<ConfirmarPropostaResultado>;
 public sealed record ConfirmarPropostaResultado(bool Vigente, bool Agendada, int RevisaoPreenchimento);
 
 public sealed class ConfirmarPropostaHandler(IPropostasRepository repository, IOperacaoPropostas operacao,
-    IClientesPropostas clientes, ICadastroSeguroQueries cadastro, IOptions<ConfiguracaoPropostas> configuracao, TimeProvider relogio)
+    IClientesPropostas clientes, ICadastroSeguroQueries cadastro, IOptions<ConfiguracaoPropostas> configuracao, TimeProvider relogio, IParcelasPropostasRepository? financeiro = null)
     : IRequestHandler<ConfirmarPropostaCommand, ConfirmarPropostaResultado>
 {
     public Task<ConfirmarPropostaResultado> Handle(ConfirmarPropostaCommand request, CancellationToken cancellationToken) =>
@@ -38,11 +39,18 @@ public sealed class ConfirmarPropostaHandler(IPropostasRepository repository, IO
             VigenciaPropostas.ValidarDatas(p, inicio, hoje, efetivar: !agendada);
             var origem = await VigenciaPropostas.ValidarOrigemAsync(p, inicio, repository, configuracao.Value, ct);
             var antes = VigenciaPropostas.Retrato(p, origem); var agora = relogio.GetUtcNow().UtcDateTime;
+            if (configuracao.Value.ExigirConferenciaFinanceira || request.Dados.Financeiro != null)
+            {
+                if (financeiro == null || request.Dados.Financeiro == null)
+                    throw new ValidacaoException("Confira a competência, o vencimento e os valores da primeira parcela antes de confirmar.");
+                await FinanceiroConferencia.SalvarAsync(p, inicio, request.Dados.Financeiro, repository, financeiro, relogio, ct);
+            }
             p.StatusId = status.Id; p.Status = status; p.ConfirmadaEm = agora; p.DataInicioVigencia = inicio;
             p.RevisaoPreenchimento = checked(p.RevisaoPreenchimento + 1); p.UpdatedAt = agora;
             if (agendada && origem is not null) VigenciaPropostas.Historico(p, origem,
                 origem.CanceladaEm != null && origem.DataFimVigencia != null ? "Reinclusão Agendada" : "Substituição Agendada", agora);
-            if (!agendada) await VigenciaPropostas.EfetivarAsync(p, origem, agora, repository, ct);
+            if (request.Dados.Financeiro != null) await repository.SalvarAlteracoesAsync(ct);
+            if (!agendada) await VigenciaPropostas.EfetivarAsync(p, origem, agora, repository, ct, financeiro);
             await repository.SalvarAlteracoesAsync(ct);
             return (new ConfirmarPropostaResultado(p.Vigente, agendada, p.RevisaoPreenchimento), p.PublicId.ToString(), antes, VigenciaPropostas.Retrato(p, origem));
         }, cancellationToken);

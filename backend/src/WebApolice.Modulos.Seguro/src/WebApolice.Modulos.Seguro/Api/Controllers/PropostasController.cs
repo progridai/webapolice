@@ -1,4 +1,6 @@
+using WebApolice.Modulos.Seguro.Application.UseCases.Propostas.Financeiro;
 using WebApolice.Modulos.Seguro.Application.UseCases.Propostas.EncerrarProposta;
+using WebApolice.Modulos.Seguro.Application.UseCases.Propostas.ListarParcelas;
 using WebApolice.Modulos.Seguro.Application.UseCases.Propostas.SimularValorMensal;
 using WebApolice.Modulos.Seguro.Application.UseCases.Propostas.RevisarCondicoes;
 using WebApolice.Modulos.Seguro.Application.UseCases.Propostas.ReincluirProposta;
@@ -26,6 +28,26 @@ namespace WebApolice.Modulos.Seguro.Api.Controllers;
 public class PropostasController : ControllerBase
 {
     private readonly IMediator _mediator;
+
+    [AuthorizePermissao(PermissoesSeguranca.Propostas.Visualizar)]
+    [HttpGet("{publicId:guid}/financeiro")]
+    public async Task<IActionResult> Financeiro(Guid publicId, CancellationToken ct) =>
+        Ok(await _mediator.Send(new ObterFinanceiroQuery(publicId), ct));
+
+    [AuthorizePermissao(PermissoesSeguranca.Propostas.Alterar)]
+    [HttpPost("{publicId:guid}/financeiro/conferencia")]
+    public async Task<IActionResult> ConferirFinanceiro(Guid publicId, [FromBody] ConferenciaFinanceiraDados dados, CancellationToken ct) =>
+        Ok(await _mediator.Send(new ConferirFinanceiroQuery(publicId, dados), ct));
+
+    [AuthorizePermissao(PermissoesSeguranca.Propostas.Alterar)]
+    [HttpPut("{publicId:guid}/financeiro")]
+    public async Task<IActionResult> AtualizarFinanceiro(Guid publicId, [FromBody] AtualizarFinanceiroDados dados, CancellationToken ct) =>
+        Ok(await _mediator.Send(new AtualizarFinanceiroCommand(publicId, dados), ct));
+
+    [AuthorizePermissao(PermissoesSeguranca.Propostas.Visualizar)]
+    [HttpGet("{publicId:guid}/parcelas")]
+    public async Task<IActionResult> Parcelas(Guid publicId, [FromQuery] int pagina = 1, [FromQuery] int tamanhoPagina = 20, CancellationToken ct = default) =>
+        Ok(await _mediator.Send(new ListarParcelasQuery(publicId, pagina, tamanhoPagina), ct));
 
     [AuthorizePermissao(PermissoesSeguranca.Propostas.Visualizar)]
     [HttpGet("{publicId:guid}/simulacao-mensal/opcoes")]

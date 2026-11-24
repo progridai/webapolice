@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { ConfirmacaoProposta } from './ConfirmacaoProposta';
+import { HistoricoParcelasProposta } from './HistoricoParcelasProposta';
 import { SimulacaoMensalProposta } from './SimulacaoMensalProposta';
 import { ReinclusaoProposta } from './ReinclusaoProposta';
 import { RevisaoCondicoesProposta } from './RevisaoCondicoesProposta';
@@ -650,6 +651,12 @@ export function PropostaDetalhes({
                 ))}
               </div>
             </DetailsSection>
+            <HistoricoParcelasProposta
+              publicId={data.publicId}
+              disabled={
+                operacaoEmAberto || criacao.isSubmitting || confirmandoVersao
+              }
+            />
           </>
         )
       )}

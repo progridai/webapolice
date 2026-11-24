@@ -1,3 +1,5 @@
+using WebApolice.Modulos.Seguro.Application.UseCases.Propostas.Financeiro;
+using WebApolice.Modulos.Seguro.Application.UseCases.Propostas.ListarParcelas;
 using WebApolice.Modulos.Seguro.Application.UseCases.Propostas.SimularValorMensal;
 using WebApolice.Modulos.Seguro.Application.UseCases.Propostas.EncerrarProposta;
 using WebApolice.Modulos.Seguro.Application.UseCases.Propostas.ReincluirProposta;
@@ -24,9 +26,19 @@ namespace WebApolice.Api.Tests.Modulos.Apolices;
 public sealed class PropostasFluxoAuthTests(ApiTestFactory factory) : IClassFixture<ApiTestFactory>
 {
     [Theory]
+    [InlineData("financeiro", "propostas.visualizar")]
+    [InlineData("conferir_financeiro", "propostas.alterar")]
+    [InlineData("salvar_financeiro", "propostas.alterar")]
+    [InlineData("lote", "propostas.visualizar")]
+    [InlineData("gerar_lote", "propostas.alterar")]
+    [InlineData("fechar_lote", "propostas.alterar")]
+    [InlineData("baixa", "propostas.alterar")]
+
     [InlineData("opcoes_simulacao", "propostas.visualizar")]
     [InlineData("simular", "propostas.visualizar")]
+    [InlineData("parcelas", "propostas.visualizar")]
     [InlineData("lista", "propostas.visualizar")]
+    [InlineData("lista_vinculo", "propostas.visualizar")]
     [InlineData("detalhe", "propostas.visualizar")]
     [InlineData("criar", "propostas.inserir")]
     [InlineData("reincluir", "propostas.inserir")]
@@ -48,8 +60,16 @@ public sealed class PropostasFluxoAuthTests(ApiTestFactory factory) : IClassFixt
         var seguranca = new SegurancaStub(); var handlers = new Handlers();
         await using var host = factory.WithWebHostBuilder(builder => builder.ConfigureServices(services =>
         {
+            services.AddScoped<IRequestHandler<ObterFinanceiroQuery, FinanceiroEstado>>(_ => handlers);
+            services.AddScoped<IRequestHandler<ConferirFinanceiroQuery, ConferenciaFinanceiraResultado>>(_ => handlers);
+            services.AddScoped<IRequestHandler<AtualizarFinanceiroCommand, int>>(_ => handlers);
+            services.AddScoped<IRequestHandler<ConferirLoteQuery, LoteMensalResultado>>(_ => handlers);
+            services.AddScoped<IRequestHandler<GerarLoteCommand, LoteMensalResultado>>(_ => handlers);
+            services.AddScoped<IRequestHandler<FecharLoteCommand, LoteMensalResultado>>(_ => handlers);
+            services.AddScoped<IRequestHandler<BaixarParcelaCommand, bool>>(_ => handlers);
             services.AddScoped<IRequestHandler<OpcoesSimulacaoMensalQuery, IReadOnlyList<RamoSimulacao>>>(_ => handlers);
             services.AddScoped<IRequestHandler<SimularValorMensalQuery, SimulacaoMensalResultado>>(_ => handlers);
+            services.AddScoped<IRequestHandler<ListarParcelasQuery, PagedResult<ParcelaHistoricoDto>>>(_ => handlers);
             services.AddScoped<IPermissoesEfetivasService>(_ => seguranca);
             services.AddScoped<IDisponibilidadeCatalogo>(_ => seguranca);
             services.AddScoped<IRequestHandler<ObterPropostasQuery, PagedResult<PropostaDto>>>(_ => handlers);
@@ -74,6 +94,14 @@ public sealed class PropostasFluxoAuthTests(ApiTestFactory factory) : IClassFixt
         var apolice = Guid.NewGuid(); var vida = Guid.NewGuid(); var origem = Guid.NewGuid();
         async Task<HttpResponseMessage> Enviar() => operacao switch
         {
+            "financeiro" => await client.GetAsync($"/api/propostas/{handlers.Id}/financeiro"),
+            "conferir_financeiro" => await client.PostAsJsonAsync($"/api/propostas/{handlers.Id}/financeiro/conferencia", new { revisaoEsperada = 8, dataInicioVigencia = "2026-11-18", competenciaInicial = 202611, vencimentoInicial = "2026-11-30", ramoPublicId = apolice }),
+            "salvar_financeiro" => await client.PutAsJsonAsync($"/api/propostas/{handlers.Id}/financeiro", new { revisaoEsperada = 8, financeiro = new { competenciaInicial = 202611, vencimentoInicial = "2026-11-30", ramoPublicId = apolice, conferencia = "ABC" } }),
+            "lote" => await client.GetAsync($"/api/apolices/{apolice}/parcelas?competencia=202611"),
+            "gerar_lote" => await client.PostAsJsonAsync($"/api/apolices/{apolice}/parcelas/lote", new { competencia = 202611, conferencia = "ABC" }),
+            "fechar_lote" => await client.PostAsJsonAsync($"/api/apolices/{apolice}/parcelas/fechamento", new { competencia = 202611, conferencia = "ABC" }),
+            "baixa" => await client.PostAsJsonAsync($"/api/apolices/{apolice}/parcelas/{handlers.Id}/baixa", new { revisaoEsperada = 8, dataPagamento = "2026-11-30" }),
+            "parcelas" => await client.GetAsync($"/api/propostas/{handlers.Id}/parcelas?pagina=2&tamanhoPagina=10"),
             "opcoes_simulacao" => await client.GetAsync($"/api/propostas/{handlers.Id}/simulacao-mensal/opcoes"),
             "simular" => await client.PostAsJsonAsync($"/api/propostas/{handlers.Id}/simulacao-mensal", new { revisaoEsperada = 8, ramoPublicId = apolice }),
             "opcoes_condicoes" => await client.GetAsync($"/api/propostas/{handlers.Id}/condicoes/opcoes"),
@@ -87,6 +115,7 @@ public sealed class PropostasFluxoAuthTests(ApiTestFactory factory) : IClassFixt
             "descartar" => await client.PostAsJsonAsync($"/api/propostas/{handlers.Id}/rascunho/descarte", new { revisaoEsperada = 8, observacao = "ENCERRAMENTO", publicId = Guid.NewGuid() }),
             "reagendar" => await client.PostAsJsonAsync($"/api/propostas/{handlers.Id}/agendamento/reagendar", new { revisaoEsperada = 8, dataInicioVigencia = "2026-12-01", observacao = "AÇÃO DE PROTEÇÃO", publicId = Guid.NewGuid() }),
             "cancelar" => await client.PostAsJsonAsync($"/api/propostas/{handlers.Id}/agendamento/cancelar", new { revisaoEsperada = 8, observacao = "AÇÃO DE PROTEÇÃO", publicId = Guid.NewGuid() }),
+            "lista_vinculo" => await client.GetAsync($"/api/propostas?clientePublicId={apolice}&clienteVinculoPublicId={vida}"),
             "lista" => await client.GetAsync($"/api/propostas?apolicePublicId={apolice}&apoliceVidaPublicId={vida}"),
             "confirmar" => await client.PostAsJsonAsync($"/api/propostas/{handlers.Id}/confirmacao", new { revisaoEsperada = 7, dataInicioVigencia = "2026-11-12", publicId = Guid.NewGuid() }),
             "efetivar" => await client.PostAsJsonAsync($"/api/propostas/{handlers.Id}/vigencia/efetivar", new { revisaoEsperada = 8, publicId = Guid.NewGuid() }),
@@ -109,6 +138,7 @@ public sealed class PropostasFluxoAuthTests(ApiTestFactory factory) : IClassFixt
         if (operacao == "aplicar_condicoes") { Assert.Equal(handlers.Id, handlers.Aplicacao!.PublicId); Assert.Equal("MANTER", handlers.Aplicacao.Dados.TratamentoAjustes); Assert.Equal("AbC123", handlers.Aplicacao.Dados.Comparacao); Assert.Equal("Revisão da Proposta", handlers.Aplicacao.Dados.Observacao); }
         if (operacao == "reincluir") { Assert.Equal(handlers.Id, handlers.Reinclusao!.PublicId); Assert.Equal(8, handlers.Reinclusao.Dados.RevisaoEsperada); Assert.Equal("ANTERIOR", handlers.Reinclusao.Dados.OrigemCondicoes); }
         if (operacao == "criar") Assert.Equal(new CriarPropostaDaVidaCommand(apolice, vida, origem), handlers.Criacao);
+        if (operacao == "lista_vinculo") { Assert.Equal(apolice, handlers.Lista!.ClientePublicId); Assert.Equal(vida, handlers.Lista.ClienteVinculoPublicId); }
         if (operacao == "lista") { Assert.Equal(apolice, handlers.Lista!.ApolicePublicId); Assert.Equal(vida, handlers.Lista.ApoliceVidaPublicId); }
         if (operacao == "preencher") { Assert.Equal(handlers.Id, handlers.Preenchimento!.PublicId); Assert.Equal("Ação de Proteção", handlers.Preenchimento.Dados.Observacao); Assert.True(handlers.Preenchimento.Dados.IncluiConjuge); }
         if (operacao == "confirmar") { Assert.Equal(handlers.Id, handlers.Confirmacao!.PublicId); Assert.Equal(new DateOnly(2026, 11, 12), handlers.Confirmacao.Dados.DataInicioVigencia); Assert.Equal(7, handlers.Confirmacao.Dados.RevisaoEsperada); }
@@ -123,12 +153,21 @@ public sealed class PropostasFluxoAuthTests(ApiTestFactory factory) : IClassFixt
         if (operacao == "detalhe") Assert.Equal(handlers.Id, handlers.Detalhe!.PublicId);
     }
 
-    private sealed class Handlers : IRequestHandler<SolicitarCancelamentoVigenciaCommand, CancelamentoVigenciaResultado>, IRequestHandler<EfetivarCancelamentoVigenciaCommand, CancelamentoVigenciaResultado>, IRequestHandler<DescartarRascunhoCommand, GestaoAgendamentoResultado>, IRequestHandler<ReagendarPropostaCommand, GestaoAgendamentoResultado>, IRequestHandler<CancelarAgendamentoCommand, GestaoAgendamentoResultado>, IRequestHandler<ObterPropostasQuery, PagedResult<PropostaDto>>,
+    private sealed class Handlers : IRequestHandler<ObterFinanceiroQuery, FinanceiroEstado>, IRequestHandler<ConferirFinanceiroQuery, ConferenciaFinanceiraResultado>, IRequestHandler<AtualizarFinanceiroCommand, int>, IRequestHandler<ConferirLoteQuery, LoteMensalResultado>, IRequestHandler<GerarLoteCommand, LoteMensalResultado>, IRequestHandler<FecharLoteCommand, LoteMensalResultado>, IRequestHandler<BaixarParcelaCommand, bool>, IRequestHandler<ListarParcelasQuery, PagedResult<ParcelaHistoricoDto>>, IRequestHandler<SolicitarCancelamentoVigenciaCommand, CancelamentoVigenciaResultado>, IRequestHandler<EfetivarCancelamentoVigenciaCommand, CancelamentoVigenciaResultado>, IRequestHandler<DescartarRascunhoCommand, GestaoAgendamentoResultado>, IRequestHandler<ReagendarPropostaCommand, GestaoAgendamentoResultado>, IRequestHandler<CancelarAgendamentoCommand, GestaoAgendamentoResultado>, IRequestHandler<ObterPropostasQuery, PagedResult<PropostaDto>>,
         IRequestHandler<ObterPropostaQuery, PropostaDetalheDto?>, IRequestHandler<CriarPropostaDaVidaCommand, Guid>, IRequestHandler<PreencherRascunhoCommand, int>, IRequestHandler<ConfirmarPropostaCommand, ConfirmarPropostaResultado>, IRequestHandler<EfetivarVigenciaPropostaCommand, EfetivarVigenciaResultado>,
         IRequestHandler<AlterarCancelamentoVigenciaCommand, CancelamentoVigenciaResultado>, IRequestHandler<RetirarCancelamentoVigenciaCommand, GestaoAgendamentoResultado>, IRequestHandler<PrepararReinclusaoCommand, Guid>,
         IRequestHandler<OpcoesSimulacaoMensalQuery, IReadOnlyList<RamoSimulacao>>, IRequestHandler<SimularValorMensalQuery, SimulacaoMensalResultado>,
         IRequestHandler<OpcoesCondicoesQuery, OpcoesCondicoes>, IRequestHandler<CompararCondicoesQuery, ComparacaoCondicoes>, IRequestHandler<AplicarCondicoesCommand, GestaoAgendamentoResultado>
     {
+        private static LoteMensalResultado Lote(Guid id, int competencia) => new(id, competencia, "ABC", null, null, true, false, [], []);
+        public Task<FinanceiroEstado> Handle(ObterFinanceiroQuery request, CancellationToken ct) { Chamadas++; Assert.Equal(Id, request.PublicId); return Task.FromResult(new FinanceiroEstado(null,null,null,null,null,null,null,null,null,false)); }
+        public Task<ConferenciaFinanceiraResultado> Handle(ConferirFinanceiroQuery request, CancellationToken ct) { Chamadas++; Assert.Equal(Id, request.PublicId); Assert.Equal(8, request.Dados.RevisaoEsperada); return Task.FromResult(new ConferenciaFinanceiraResultado("ABC",202611,new(2026,11,30),202611,new(2026,11,30),new(8,false,new(Guid.NewGuid(),"Ramo","01",0),DateTimeOffset.UtcNow,[],"1.00","0.00","1.00","0.00","1.00"))); }
+        public Task<int> Handle(AtualizarFinanceiroCommand request, CancellationToken ct) { Chamadas++; Assert.Equal(Id, request.PublicId); Assert.Equal("ABC", request.Dados.Financeiro.Conferencia); return Task.FromResult(9); }
+        public Task<LoteMensalResultado> Handle(ConferirLoteQuery request, CancellationToken ct) { Chamadas++; Assert.NotEqual(Guid.Empty, request.ApolicePublicId); Assert.Equal(202611, request.Competencia); return Task.FromResult(Lote(request.ApolicePublicId,request.Competencia)); }
+        public Task<LoteMensalResultado> Handle(GerarLoteCommand request, CancellationToken ct) { Chamadas++; Assert.NotEqual(Guid.Empty, request.ApolicePublicId); Assert.Equal("ABC",request.Dados.Conferencia); return Task.FromResult(Lote(request.ApolicePublicId,request.Dados.Competencia)); }
+        public Task<LoteMensalResultado> Handle(FecharLoteCommand request, CancellationToken ct) { Chamadas++; Assert.NotEqual(Guid.Empty, request.ApolicePublicId); Assert.Equal("ABC",request.Dados.Conferencia); return Task.FromResult(Lote(request.ApolicePublicId,request.Dados.Competencia)); }
+        public Task<bool> Handle(BaixarParcelaCommand request, CancellationToken ct) { Chamadas++; Assert.Equal(Id, request.ParcelaPublicId); Assert.NotEqual(Guid.Empty, request.ApolicePublicId); Assert.Equal(8, request.Dados.RevisaoEsperada); return Task.FromResult(true); }
+        public Task<PagedResult<ParcelaHistoricoDto>> Handle(ListarParcelasQuery request, CancellationToken ct) { Chamadas++; Assert.Equal(Id, request.PublicId); Assert.Equal(2, request.Pagina); Assert.Equal(10, request.TamanhoPagina); return Task.FromResult(new PagedResult<ParcelaHistoricoDto> { Page=2, PageSize=10 }); }
         public Task<IReadOnlyList<RamoSimulacao>> Handle(OpcoesSimulacaoMensalQuery request, CancellationToken ct) { Chamadas++; return Task.FromResult<IReadOnlyList<RamoSimulacao>>([]); }
         public Task<SimulacaoMensalResultado> Handle(SimularValorMensalQuery request, CancellationToken ct) { Chamadas++; Assert.Equal(Id, request.PublicId); Assert.Equal(8, request.Dados.RevisaoEsperada); Assert.NotEqual(Guid.Empty, request.Dados.RamoPublicId); return Task.FromResult(new SimulacaoMensalResultado(8, false, new(Guid.NewGuid(), "Ramo", "01", 0), DateTimeOffset.UtcNow, [], "1.00", "0.00", "1.00", "0.00", "1.00")); }
         public OpcoesCondicoesQuery? Opcoes { get; private set; }

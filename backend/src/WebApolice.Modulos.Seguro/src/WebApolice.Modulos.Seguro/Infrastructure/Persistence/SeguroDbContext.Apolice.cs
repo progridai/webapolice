@@ -23,6 +23,7 @@ public partial class SeguroDbContext
 
     partial void OnModelCreatingPartial(ModelBuilder modelBuilder)
     {
+        ConfigurarFinanceiro(modelBuilder);
         modelBuilder.ApplyConfiguration(new PropostaOperacionalConfiguration());
         modelBuilder.ApplyConfiguration(new PropostaItemOperacionalConfiguration());
         modelBuilder.ApplyConfiguration(new PropostaCoberturaOperacionalConfiguration());

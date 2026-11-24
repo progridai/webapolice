@@ -93,7 +93,7 @@ export function formatarPremio(valor?: number | null) {
 
 /** Preserva centavos de valores canônicos recebidos como decimal textual. */
 export function formatarMoedaDecimal(valor: string): string {
-  if (!/^\d+\.\d{2}$/.test(valor)) return 'Valor inválido';
-  const [inteira, centavos] = valor.split('.');
-  return `R$ ${inteira.replace(/\B(?=(\d{3})+(?!\d))/g, '.')},${centavos}`;
+  if (!/^-?\d+\.\d{2}$/.test(valor)) return 'Valor inválido';
+  const [inteira, centavos] = valor.replace(/^-/, '').split('.');
+  return `${valor.startsWith('-') ? '-' : ''}R$ ${inteira.replace(/\B(?=(\d{3})+(?!\d))/g, '.')},${centavos}`;
 }

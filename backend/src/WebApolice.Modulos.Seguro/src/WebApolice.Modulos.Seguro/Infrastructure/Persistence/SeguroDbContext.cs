@@ -461,7 +461,10 @@ public partial class SeguroDbContext : global::WebApolice.Shared.Infrastructure.
         {
             entity.HasKey(e => e.Id).HasName("proposta_movimento_pkey");
 
-            entity.ToTable("proposta_movimento", "seguro");
+            entity.ToTable("proposta_movimento", "seguro", t => t.HasCheckConstraint("ck_proposta_movimento_identidade",
+                "(legado_id IS NOT NULL OR public_id IS NOT NULL) AND (public_id IS NULL OR public_id <> '00000000-0000-0000-0000-000000000000'::uuid)"));
+            entity.Property(e => e.PublicId).HasColumnName("public_id");
+            entity.HasIndex(e => e.PublicId).IsUnique().HasDatabaseName("ux_proposta_movimento_public_id").HasFilter("public_id IS NOT NULL");
 
             entity.HasIndex(e => e.Classificacao, "ix_proposta_movimento_classificacao");
 

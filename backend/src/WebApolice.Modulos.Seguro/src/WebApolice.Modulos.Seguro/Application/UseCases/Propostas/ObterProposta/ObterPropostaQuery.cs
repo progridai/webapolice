@@ -26,6 +26,8 @@ public sealed class ObterPropostaHandler(IPropostasRepository repository, IOptio
         var podeGerir = dto.PodeEfetivarVigencia && dto.IntegradaApolice && dto.CanceladaEm == null &&
             dto.ConfirmadaEm != null && dto.SubstituidaEm == null && !dto.Vigente &&
             !string.IsNullOrWhiteSpace(configuracao.Value.StatusConfirmadaCodigo) && dto.StatusCodigo == configuracao.Value.StatusConfirmadaCodigo;
+        dto.ExigeConferenciaFinanceira = configuracao.Value.ExigirConferenciaFinanceira;
+        dto.PodeConferirFinanceiro = podeGerir;
         dto.PodeReagendar = podeGerir && configuracao.Value.ProcessarAgendamentos;
         dto.PodeRevisarCondicoes = dto.PodeEditarRascunho || (podeGerir && dto.DataInicioVigencia > VigenciaPropostas.Hoje(relogio));
         dto.PodeCancelarAgendamento = podeGerir && !string.IsNullOrWhiteSpace(configuracao.Value.StatusCanceladaCodigo);
@@ -48,6 +50,8 @@ public sealed class ObterPropostaHandler(IPropostasRepository repository, IOptio
 
 public sealed class PropostaDetalheDto : PropostaDto
 {
+    public bool ExigeConferenciaFinanceira { get; set; }
+    public bool PodeConferirFinanceiro { get; set; }
     public bool PodeRevisarCondicoes { get; set; }
     public bool CondicoesProprias { get; set; }
     public bool? IncluiConjuge { get; set; }

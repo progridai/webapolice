@@ -1,3 +1,5 @@
+import { FinanceiroPropostaForm } from './FinanceiroPropostaForm';
+import { atualizarFinanceiro } from '../api/financeiro.api';
 import { EncerramentoProposta } from './EncerramentoProposta';
 import { GestaoAgendamentoProposta } from './GestaoAgendamentoProposta';
 import { useEffect, useRef, useState } from 'react';
@@ -35,13 +37,15 @@ export function ConfirmacaoProposta({
   onBusy: (busy: boolean) => void;
   onConcluida: (mensagem: string | null) => void;
 }) {
+  const [conferindoFinanceiro, setConferindoFinanceiro] = useState(false);
   const [confirmando, setConfirmando] = useState(false);
   const [encerrando, setEncerrando] = useState(false);
   const [gerindo, setGerindo] = useState(false);
   const [efetivando, setEfetivando] = useState(false);
   const [erro, setErro] = useState<string | null>(null);
   const enviando = useRef(false);
-  const ocupado = confirmando || efetivando || gerindo || encerrando;
+  const ocupado =
+    conferindoFinanceiro || confirmando || efetivando || gerindo || encerrando;
   useEffect(() => {
     onBusy(ocupado);
     return () => onBusy(false);
@@ -92,17 +96,58 @@ export function ConfirmacaoProposta({
             : 'Esta versão foi encerrada sem entrar em vigência. A proposta anterior, quando existente, foi preservada. A justificativa está no histórico.'}
         </Alert>
       )}
+      {podeAlterar && proposta.podeConferirFinanceiro && (
+        <DetailsSection title="Conferência financeira da proposta">
+          {conferindoFinanceiro ? (
+            <FinanceiroPropostaForm
+              proposta={proposta}
+              onCancelar={() => setConferindoFinanceiro(false)}
+              onSalvar={async (financeiro) => {
+                await atualizarFinanceiro(
+                  proposta.publicId,
+                  proposta.revisaoPreenchimento,
+                  financeiro,
+                );
+                setConferindoFinanceiro(false);
+                onConcluida(
+                  'Financeiro conferido. Os valores serão usados na efetivação da vigência.',
+                );
+              }}
+            />
+          ) : (
+            <Button
+              variant="secondary"
+              disabled={disabled || ocupado}
+              onClick={() => setConferindoFinanceiro(true)}
+            >
+              Conferir financeiro novamente
+            </Button>
+          )}
+        </DetailsSection>
+      )}
       <EncerramentoProposta
         proposta={proposta}
         podeAlterar={podeAlterar}
-        disabled={disabled || confirmando || efetivando || gerindo}
+        disabled={
+          disabled ||
+          conferindoFinanceiro ||
+          confirmando ||
+          efetivando ||
+          gerindo
+        }
         onBusy={setEncerrando}
         onConcluida={onConcluida}
       />
       <GestaoAgendamentoProposta
         proposta={proposta}
         podeAlterar={podeAlterar}
-        disabled={disabled || confirmando || efetivando || encerrando}
+        disabled={
+          disabled ||
+          conferindoFinanceiro ||
+          confirmando ||
+          efetivando ||
+          encerrando
+        }
         onBusy={setGerindo}
         onConcluida={onConcluida}
       />
@@ -158,7 +203,13 @@ export function ConfirmacaoProposta({
             />
           ) : (
             <Button
-              disabled={disabled || efetivando || gerindo || encerrando}
+              disabled={
+                disabled ||
+                conferindoFinanceiro ||
+                efetivando ||
+                gerindo ||
+                encerrando
+              }
               onClick={() => setConfirmando(true)}
             >
               Confirmar proposta
@@ -181,7 +232,13 @@ export function ConfirmacaoProposta({
           </p>
           <div>
             <Button
-              disabled={disabled || gerindo || confirmando || encerrando}
+              disabled={
+                disabled ||
+                conferindoFinanceiro ||
+                gerindo ||
+                confirmando ||
+                encerrando
+              }
               loading={efetivando}
               onClick={() => void efetivar()}
             >
@@ -194,7 +251,7 @@ export function ConfirmacaoProposta({
   );
 }
 
-export function ConfirmacaoPropostaForm({
+function ConfirmacaoSemFinanceiroForm({
   proposta,
   onCancelar,
   onConfirmada,
@@ -310,5 +367,28 @@ export function ConfirmacaoPropostaForm({
         </Button>
       </FormActions>
     </form>
+  );
+}
+
+export function ConfirmacaoPropostaForm(
+  props: Parameters<typeof ConfirmacaoSemFinanceiroForm>[0],
+) {
+  if (!props.proposta.exigeConferenciaFinanceira)
+    return <ConfirmacaoSemFinanceiroForm {...props} />;
+  return (
+    <FinanceiroPropostaForm
+      proposta={props.proposta}
+      onCancelar={props.onCancelar}
+      onSalvar={async (financeiro, inicio) => {
+        props.onConfirmada(
+          await confirmarProposta(
+            props.proposta.publicId,
+            props.proposta.revisaoPreenchimento,
+            inicio,
+            financeiro,
+          ),
+        );
+      }}
+    />
   );
 }

@@ -16,10 +16,31 @@ namespace WebApolice.Modulos.Seguro.Infrastructure.Persistence.Repositories;
 
 public sealed class PropostasRepository(SeguroDbContext _dbContext, IClientesPropostas clientes) : IPropostasRepository
 {
-    public async Task<IReadOnlyList<ApoliceRamoModel>> ObterRamosSimulacaoAsync(long apoliceId, CancellationToken ct) =>
-        await _dbContext.ApoliceRamos.AsNoTracking().Include(r => r.Ramo)
+    public async Task<PagedResult<PropostaMovimento>?> ListarParcelasAsync(Guid publicId, int pagina, int tamanhoPagina, CancellationToken ct)
+    {
+        var contexto = await _dbContext.Proposta.AsNoTracking()
+            .Where(p => p.PublicId == publicId && p.DeletedAt == null && p.VisivelOperacional)
+            .Select(p => new { p.Id, p.ApoliceId, p.ApoliceVidaId }).SingleOrDefaultAsync(ct);
+        if (contexto == null) return null;
+        var query = _dbContext.PropostaMovimentos.AsNoTracking().Include(m => m.Proposta)
+            .Where(m => m.Proposta != null && m.Proposta.DeletedAt == null && m.Proposta.VisivelOperacional);
+        query = contexto.ApoliceId != null && contexto.ApoliceVidaId != null
+            ? query.Where(m => m.Proposta!.ApoliceId == contexto.ApoliceId && m.Proposta.ApoliceVidaId == contexto.ApoliceVidaId)
+            : query.Where(m => m.PropostaId == contexto.Id);
+        var total = await query.CountAsync(ct);
+        var itens = await query.OrderBy(m => m.Parcela == null).ThenBy(m => m.Parcela)
+            .ThenBy(m => m.CompetenciaInt).ThenBy(m => m.DataLancamento).ThenBy(m => m.Id)
+            .Skip((pagina - 1) * tamanhoPagina).Take(tamanhoPagina).ToListAsync(ct);
+        return new() { Items = itens, TotalCount = total, Page = pagina, PageSize = tamanhoPagina };
+    }
+    public async Task<IReadOnlyList<ApoliceRamoModel>> ObterRamosSimulacaoAsync(long apoliceId, CancellationToken ct)
+    {
+        if (_dbContext.Database.CurrentTransaction != null)
+            await _dbContext.Database.ExecuteSqlInterpolatedAsync($"SELECT ar.id FROM seguro.apolice_ramo ar JOIN seguro.ramo r ON r.id=ar.ramo_id WHERE ar.apolice_id={apoliceId} ORDER BY ar.id FOR SHARE OF ar,r", ct);
+        return await _dbContext.ApoliceRamos.AsNoTracking().Include(r => r.Ramo)
             .Where(r => r.ApoliceId == apoliceId && r.Ativo && r.DeletedAt == null && r.Ramo != null && r.Ramo.Ativo)
             .OrderBy(r => r.Ramo!.Nome).ThenBy(r => r.PublicId).ToListAsync(ct);
+    }
     public Task<int?> ObterRevisaoAtualAsync(Guid publicId, CancellationToken ct) =>
         _dbContext.Proposta.AsNoTracking().Where(p => p.PublicId == publicId && p.DeletedAt == null && p.VisivelOperacional && p.Status.VisivelOperacional)
             .Select(p => (int?)p.RevisaoPreenchimento).SingleOrDefaultAsync(ct);
@@ -130,6 +151,14 @@ public sealed class PropostasRepository(SeguroDbContext _dbContext, IClientesPro
     {
         var query = _dbContext.Proposta.AsNoTracking().Where(p => p.DeletedAt == null && p.VisivelOperacional);
 
+        if (request.ClientePublicId.HasValue || request.ClienteVinculoPublicId.HasValue)
+        {
+            if (request.ClientePublicId is null || request.ClienteVinculoPublicId is null || request.ClientePublicId == Guid.Empty || request.ClienteVinculoPublicId == Guid.Empty)
+                throw new ValidacaoException("Informe os UUIDs do Cliente e do vínculo para consultar suas propostas.");
+            var identidade = await clientes.ResolverParaConsultaAsync(request.ClientePublicId.Value, request.ClienteVinculoPublicId.Value, cancellationToken)
+                ?? throw new ValidacaoException("Vínculo não encontrado para o Cliente informado.");
+            query = query.Where(p => p.ClienteId == identidade.ClienteId && p.ClienteVinculoId == identidade.ClienteVinculoId);
+        }
         if (request.ApolicePublicId == Guid.Empty || request.ApoliceVidaPublicId == Guid.Empty)
             throw new ValidacaoException("Informe UUIDs válidos para Apólice e Vida.");
         if (request.ApoliceVidaPublicId.HasValue)

@@ -28,7 +28,7 @@ export const ClienteDetalhePage: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const mainRef = useRef<HTMLElement>(null);
-  const { possuiPermissao, possuiAcessoTotal, possuiRecurso } =
+  const { possuiPermissao, possuiAcessoTotal, possuiRecurso, possuiModulo } =
     useAuthorization();
   const podeAlterar =
     possuiAcessoTotal() || possuiPermissao('clientes.alterar');
@@ -374,6 +374,11 @@ export const ClienteDetalhePage: React.FC = () => {
             key={cliente.id}
             clienteId={cliente.id}
             podeAlterar={podeAlterar}
+            podeConsultarPropostas={
+              possuiModulo('APOLICES') &&
+              possuiRecurso('PROPOSTAS') &&
+              possuiPermissao('propostas.visualizar')
+            }
           />
 
           <DetailsSection

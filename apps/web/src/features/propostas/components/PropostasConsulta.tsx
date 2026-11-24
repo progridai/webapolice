@@ -18,11 +18,15 @@ import type { Proposta } from '../types/proposta.types';
 import { PropostaDetalhes } from './PropostaDetalhes';
 
 export function PropostasConsulta({
+  clientePublicId,
+  clienteVinculoPublicId,
   apolicePublicId,
   apoliceVidaPublicId,
   initialPublicId,
   onBusy,
 }: {
+  clientePublicId?: string;
+  clienteVinculoPublicId?: string;
   apolicePublicId?: string;
   apoliceVidaPublicId?: string;
   initialPublicId?: string;
@@ -46,12 +50,21 @@ export function PropostasConsulta({
           pagina,
           tamanhoPagina: 20,
           termoBusca,
+          clientePublicId,
+          clienteVinculoPublicId,
           apolicePublicId,
           apoliceVidaPublicId,
         },
         signal,
       ),
-    [pagina, termoBusca, apolicePublicId, apoliceVidaPublicId],
+    [
+      pagina,
+      termoBusca,
+      apolicePublicId,
+      apoliceVidaPublicId,
+      clientePublicId,
+      clienteVinculoPublicId,
+    ],
   );
   const { data, error, isLoading, refetch } = useConsulta(
     permitido ? load : null,

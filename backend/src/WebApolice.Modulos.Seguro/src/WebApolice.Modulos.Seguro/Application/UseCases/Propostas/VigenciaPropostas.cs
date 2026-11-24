@@ -1,3 +1,4 @@
+using WebApolice.Modulos.Seguro.Application.UseCases.Propostas.Financeiro;
 using WebApolice.Modulos.Cadastro.Contracts;
 using WebApolice.Modulos.Seguro.Application.Ports;
 using WebApolice.Modulos.Seguro.Domain.Modelos;
@@ -9,6 +10,7 @@ namespace WebApolice.Modulos.Seguro.Application.UseCases.Propostas;
 internal static class VigenciaPropostas
 {
     private static readonly TimeZoneInfo Fuso = TimeZoneInfo.FindSystemTimeZoneById("America/Sao_Paulo");
+    internal static DateOnly DataLocal(DateTime utc) => DateOnly.FromDateTime(TimeZoneInfo.ConvertTimeFromUtc(utc, Fuso));
     internal static DateOnly Hoje(TimeProvider relogio) => DateOnly.FromDateTime(TimeZoneInfo.ConvertTime(relogio.GetUtcNow(), Fuso).DateTime);
 
     internal static async Task ValidarContextoAsync(Propostum p, IPropostasRepository repository,
@@ -64,8 +66,9 @@ internal static class VigenciaPropostas
         return origem;
     }
 
-    internal static async Task EfetivarAsync(Propostum p, Propostum? origem, DateTime agora, IPropostasRepository repository, CancellationToken ct)
+    internal static async Task EfetivarAsync(Propostum p, Propostum? origem, DateTime agora, IPropostasRepository repository, CancellationToken ct, IParcelasPropostasRepository? financeiro = null)
     {
+        if (financeiro != null) await ParcelasNativas.PrimeiraAsync(p, financeiro, agora, ct);
         if (origem is not null && origem.CanceladaEm != null && origem.DataFimVigencia != null)
             Historico(p, origem, "Efetivação de Reinclusão", agora);
         else if (origem is not null)
@@ -86,7 +89,10 @@ internal static class VigenciaPropostas
     internal static object Retrato(Propostum p, Propostum? origem = null) => new
     {
         p.PublicId, p.StatusId, p.DescartadaEm, p.CancelamentoSolicitadoEm, p.DataCancelamentoVigencia, p.CanceladaEm, p.RevisaoPreenchimento, p.Vigente, p.ConfirmadaEm, p.SubstituidaEm,
+        p.PremioLiquido, p.IofPercentual, p.IofValor, p.ValorParcela, p.DataPrimeiroVencimento,
         p.DataInicioVigencia, p.DataFimVigencia, p.MotivoPendenciaVigencia, p.PendenciaVigenciaEm,
+        ParcelasNativas = p.PropostaMovimentos.Where(m => m.LegadoId == null && m.Classificacao == "PARCELA_MENSAL")
+            .Select(m => new { m.PublicId, m.Parcela, m.CompetenciaInt, m.DataVencimento, m.PremioLiquido, m.Iof, m.PremioTotal }).ToArray(),
         Origem = origem is null ? null : new { origem.PublicId, origem.Vigente, origem.RevisaoPreenchimento, origem.SubstituidaEm, origem.DataFimVigencia }
     };
 }

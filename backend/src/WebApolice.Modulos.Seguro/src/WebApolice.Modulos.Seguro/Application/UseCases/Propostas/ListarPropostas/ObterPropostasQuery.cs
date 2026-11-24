@@ -9,6 +9,8 @@ public class ObterPropostasQuery : IRequest<PagedResult<PropostaDto>>
     public int Pagina { get; set; } = 1;
     public int TamanhoPagina { get; set; } = 20;
     public string? TermoBusca { get; set; }
+    public Guid? ClientePublicId { get; set; }
+    public Guid? ClienteVinculoPublicId { get; set; }
     public Guid? ApolicePublicId { get; set; }
     public Guid? ApoliceVidaPublicId { get; set; }
 }

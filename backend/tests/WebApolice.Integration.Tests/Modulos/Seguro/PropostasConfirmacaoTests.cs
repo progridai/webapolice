@@ -28,7 +28,7 @@ public partial class PropostasPostgresTests
         public override DateTimeOffset GetUtcNow() => Agora;
     }
     private static IOptions<ConfiguracaoPropostas> ConfigConfirmacao(string codigo, bool processar = true) =>
-        Options.Create(new ConfiguracaoPropostas { StatusInicialCodigo = codigo, StatusCanceladaCodigo = "CANCELADA", StatusDescartadaCodigo = "DESCARTADA", StatusConfirmadaCodigo = "CONFIRMADA", ProcessarAgendamentos = processar });
+        Options.Create(new ConfiguracaoPropostas { ExigirConferenciaFinanceira = false, StatusInicialCodigo = codigo, StatusCanceladaCodigo = "CANCELADA", StatusDescartadaCodigo = "DESCARTADA", StatusConfirmadaCodigo = "CONFIRMADA", ProcessarAgendamentos = processar });
     private ConfirmarPropostaHandler Confirmador(string codigo, TimeProvider relogio, IRegistradorAuditoria? auditor = null) => new(
         new PropostasRepository(fixture.DbContext, new ClientesPropostas(fixture.Cadastro)), Operacao(auditor ?? new RegistradorAuditoria(fixture.Auditoria)),
         new ClientesPropostas(fixture.Cadastro), Setup.SeguroPersistenciaTestes.ConsultasCadastro(fixture.DbContext), ConfigConfirmacao(codigo), relogio);
@@ -180,6 +180,7 @@ public partial class PropostasPostgresTests
         services.AddScoped(sp => new CadastroDbContext(new DbContextOptionsBuilder<CadastroDbContext>().UseNpgsql(sp.GetRequiredService<System.Data.Common.DbConnection>()).UseSnakeCaseNamingConvention().Options));
         services.AddScoped(sp => new AuditoriaDbContext(new DbContextOptionsBuilder<AuditoriaDbContext>().UseNpgsql(sp.GetRequiredService<System.Data.Common.DbConnection>()).UseSnakeCaseNamingConvention().Options));
         services.AddScoped<IClientesPropostas, ClientesPropostas>(); services.AddScoped<IPropostasRepository, PropostasRepository>();
+        services.AddScoped<IParcelasPropostasRepository, ParcelasPropostasRepository>();
         services.AddScoped<IRegistradorAuditoria, RegistradorAuditoria>();
         services.AddScoped<ICadastroSeguroQueries>(sp => Setup.SeguroPersistenciaTestes.ConsultasCadastro(sp.GetRequiredService<SeguroDbContext>()));
         return services.BuildServiceProvider();

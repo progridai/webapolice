@@ -1,3 +1,4 @@
+import { LotesMensaisApolice } from '../../propostas/components/LotesMensaisApolice';
 import React, { useEffect, useRef, useState } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import {
@@ -29,6 +30,7 @@ type TabKey =
   | 'subestipulantes'
   | 'vidas'
   | 'universo'
+  | 'parcelas'
   | 'historico';
 
 const TABS: { key: TabKey; label: string }[] = [
@@ -40,6 +42,7 @@ const TABS: { key: TabKey; label: string }[] = [
   { key: 'subestipulantes', label: 'Subestipulantes' },
   { key: 'vidas', label: 'Vidas' },
   { key: 'universo', label: 'Universo anterior' },
+  { key: 'parcelas', label: 'Parcelas' },
   { key: 'historico', label: 'Histórico' },
 ];
 
@@ -52,6 +55,7 @@ export const ApoliceDetalhesPage: React.FC = () => {
   const location = useLocation();
   const mainRef = useRef<HTMLElement>(null);
 
+  const [financeiroOcupado, setFinanceiroOcupado] = useState(false);
   const [activeTab, setActiveTab] = useState<TabKey>('resumo');
   const { data, isLoading, error, retry } = useApoliceDetalhe(publicId);
   const { possuiPermissao } = useAuthorization();
@@ -72,6 +76,7 @@ export const ApoliceDetalhesPage: React.FC = () => {
   }, [data]);
 
   const handleVoltar = () => {
+    if (financeiroOcupado) return;
     if (location.state?.fromListagem) {
       navigate('/apolices', { state: location.state });
     } else {
@@ -148,6 +153,7 @@ export const ApoliceDetalhesPage: React.FC = () => {
             {podeEditar && (
               <Button
                 variant="secondary"
+                disabled={financeiroOcupado}
                 onClick={() =>
                   navigate(
                     ROUTES.APOLICE_EDITAR.replace(':publicId', publicId!),
@@ -171,9 +177,14 @@ export const ApoliceDetalhesPage: React.FC = () => {
             className="-mb-px flex space-x-6 overflow-x-auto"
             aria-label="Tabs"
           >
-            {TABS.map((tab) => (
+            {TABS.filter(
+              (tab) =>
+                tab.key !== 'parcelas' ||
+                possuiPermissao('propostas.visualizar'),
+            ).map((tab) => (
               <button
                 key={tab.key}
+                disabled={financeiroOcupado}
                 onClick={() => setActiveTab(tab.key)}
                 className={`
                   whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm transition-colors
@@ -193,6 +204,15 @@ export const ApoliceDetalhesPage: React.FC = () => {
 
         {/* Tab Content */}
         <div className="pt-2">
+          {activeTab === 'parcelas' &&
+            possuiPermissao('propostas.visualizar') && (
+              <LotesMensaisApolice
+                key={data.publicId}
+                publicId={data.publicId}
+                podeAlterar={possuiPermissao('propostas.alterar')}
+                onBusy={setFinanceiroOcupado}
+              />
+            )}
           {activeTab === 'resumo' && <ResumoTab apolice={data} />}
           {activeTab === 'ramos' && (
             <RamosTab apolice={data} onMutateSucesso={retry} />

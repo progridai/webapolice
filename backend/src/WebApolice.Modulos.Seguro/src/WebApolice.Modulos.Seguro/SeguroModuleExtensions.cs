@@ -40,6 +40,7 @@ public static class SeguroModuleExtensions
         services.AddScoped<IApoliceVinculosRepository, ApoliceVinculosRepository>();
         services.AddScoped<IRamosRepository, RamosRepository>();
         services.AddScoped<IPropostasRepository, PropostasRepository>();
+        services.AddScoped<IParcelasPropostasRepository, ParcelasPropostasRepository>();
         services.AddScoped<IApolicesQueries, ApolicesQueries>();
 
         // Handlers - Apólice

@@ -1,3 +1,4 @@
+import { PropostasConsulta } from '../../propostas/components/PropostasConsulta';
 import { useMemo, useState } from 'react';
 import {
   Alert,
@@ -22,10 +23,15 @@ import {
 export function ClienteVinculosSection({
   clienteId,
   podeAlterar,
+  podeConsultarPropostas = false,
 }: {
   clienteId: string;
   podeAlterar: boolean;
+  podeConsultarPropostas?: boolean;
 }) {
+  const [vinculoPropostas, setVinculoPropostas] =
+    useState<ClienteVinculo | null>(null);
+  const [propostasOcupadas, setPropostasOcupadas] = useState(false);
   const [situacaoEmAlteracao, setSituacaoEmAlteracao] = useState<string | null>(
     null,
   );
@@ -134,6 +140,16 @@ export function ClienteVinculosSection({
             {v.grupo && <p className="text-sm">Grupo: {v.grupo}</p>}
             {v.subgrupo && <p className="text-sm">Subgrupo: {v.subgrupo}</p>}
             {v.lotacao && <p className="text-sm">Lotação: {v.lotacao}</p>}
+            {podeConsultarPropostas && (
+              <Button
+                variant="text"
+                size="small"
+                disabled={!!situacaoEmAlteracao || !!edicao}
+                onClick={() => setVinculoPropostas(v)}
+              >
+                Abrir propostas do vínculo {v.matricula || 'sem matrícula'}
+              </Button>
+            )}
             {podeAlterar && (
               <Button
                 variant="text"
@@ -163,6 +179,23 @@ export function ClienteVinculosSection({
           onPageChange={setPagina}
           disabled={isLoading}
         />
+      )}
+      {vinculoPropostas && podeConsultarPropostas && (
+        <Modal
+          aberto
+          size="large"
+          title={`Propostas do vínculo ${vinculoPropostas.matricula || 'sem matrícula'}`}
+          onClose={() => {
+            if (!propostasOcupadas) setVinculoPropostas(null);
+          }}
+        >
+          <PropostasConsulta
+            key={`${clienteId}:${vinculoPropostas.publicId}`}
+            clientePublicId={clienteId}
+            clienteVinculoPublicId={vinculoPropostas.publicId}
+            onBusy={setPropostasOcupadas}
+          />
+        </Modal>
       )}
       {edicao && (
         <VinculoEditor

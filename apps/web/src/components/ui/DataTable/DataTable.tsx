@@ -134,6 +134,9 @@ export function DataTable<T>({
                             ? 'var(--cor-fundo-aplicacao)'
                             : 'transparent',
                         }}
+                        aria-label={
+                          isExpanded ? 'Recolher detalhes' : 'Exibir detalhes'
+                        }
                         aria-expanded={isExpanded}
                       >
                         <ChevronRightIcon

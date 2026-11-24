@@ -19,6 +19,8 @@ export interface Proposta {
 }
 
 export interface PropostaDetalhe extends Proposta {
+  exigeConferenciaFinanceira: boolean;
+  podeConferirFinanceiro: boolean;
   incluiConjuge: boolean | null;
   podeSimularValorMensal: boolean;
   podeRevisarCondicoes: boolean;
@@ -132,6 +134,8 @@ export interface PreencherRascunhoDados {
 }
 
 export interface PropostasQuery {
+  clientePublicId?: string;
+  clienteVinculoPublicId?: string;
   pagina: number;
   tamanhoPagina: number;
   termoBusca?: string;

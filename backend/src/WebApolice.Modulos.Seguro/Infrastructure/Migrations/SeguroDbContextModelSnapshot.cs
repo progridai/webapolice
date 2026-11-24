@@ -1204,6 +1204,56 @@ namespace WebApolice.Modulos.Seguro.Infrastructure.Migrations
                     b.ToTable("movimento_tipo", "seguro");
                 });
 
+            modelBuilder.Entity("WebApolice.Modulos.Seguro.Domain.Modelos.ParcelaCompetencia", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<long>("ApoliceId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("apolice_id");
+
+                    b.Property<int>("Competencia")
+                        .HasColumnType("integer")
+                        .HasColumnName("competencia");
+
+                    b.Property<DateTime?>("FechadaEm")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("fechada_em");
+
+                    b.Property<DateTime?>("GeradaEm")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("gerada_em");
+
+                    b.Property<Guid>("PublicId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("public_id");
+
+                    b.Property<int>("Revisao")
+                        .HasColumnType("integer")
+                        .HasColumnName("revisao");
+
+                    b.HasKey("Id")
+                        .HasName("pk_parcela_competencia");
+
+                    b.HasIndex("PublicId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_parcela_competencia_public_id");
+
+                    b.HasIndex("ApoliceId", "Competencia")
+                        .IsUnique()
+                        .HasDatabaseName("ix_parcela_competencia_apolice_id_competencia");
+
+                    b.ToTable("parcela_competencia", "seguro", t =>
+                        {
+                            t.HasCheckConstraint("ck_parcela_competencia_mes", "competencia % 100 BETWEEN 1 AND 12 AND competencia BETWEEN 101 AND 999912 AND revisao >= 0 AND (fechada_em IS NULL OR gerada_em IS NOT NULL)");
+                        });
+                });
+
             modelBuilder.Entity("WebApolice.Modulos.Seguro.Domain.Modelos.Plano", b =>
                 {
                     b.Property<long>("Id")
@@ -1694,6 +1744,97 @@ namespace WebApolice.Modulos.Seguro.Infrastructure.Migrations
                     b.ToTable("proposta_cobertura", "seguro");
                 });
 
+            modelBuilder.Entity("WebApolice.Modulos.Seguro.Domain.Modelos.PropostaFinanceiro", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<long>("ApoliceRamoId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("apolice_ramo_id");
+
+                    b.Property<int>("CompetenciaInicial")
+                        .HasColumnType("integer")
+                        .HasColumnName("competencia_inicial");
+
+                    b.Property<int>("CompetenciaReferencia")
+                        .HasColumnType("integer")
+                        .HasColumnName("competencia_referencia");
+
+                    b.Property<string>("CondicoesHash")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("condicoes_hash");
+
+                    b.Property<DateTime>("ConferidaEm")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("conferida_em");
+
+                    b.Property<DateOnly>("InicioConferido")
+                        .HasColumnType("date")
+                        .HasColumnName("inicio_conferido");
+
+                    b.Property<decimal>("IofPercentual")
+                        .HasPrecision(18, 4)
+                        .HasColumnType("numeric(18,4)")
+                        .HasColumnName("iof_percentual");
+
+                    b.Property<decimal>("IofValor")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("numeric(18,2)")
+                        .HasColumnName("iof_valor");
+
+                    b.Property<decimal>("PremioLiquido")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("numeric(18,2)")
+                        .HasColumnName("premio_liquido");
+
+                    b.Property<long>("PropostaId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("proposta_id");
+
+                    b.Property<Guid>("PublicId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("public_id");
+
+                    b.Property<decimal>("TotalMensal")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("numeric(18,2)")
+                        .HasColumnName("total_mensal");
+
+                    b.Property<DateOnly>("VencimentoInicial")
+                        .HasColumnType("date")
+                        .HasColumnName("vencimento_inicial");
+
+                    b.Property<DateOnly>("VencimentoReferencia")
+                        .HasColumnType("date")
+                        .HasColumnName("vencimento_referencia");
+
+                    b.HasKey("Id")
+                        .HasName("pk_proposta_financeiro");
+
+                    b.HasIndex("ApoliceRamoId")
+                        .HasDatabaseName("ix_proposta_financeiro_apolice_ramo_id");
+
+                    b.HasIndex("PropostaId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_proposta_financeiro_proposta_id");
+
+                    b.HasIndex("PublicId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_proposta_financeiro_public_id");
+
+                    b.ToTable("proposta_financeiro", "seguro", t =>
+                        {
+                            t.HasCheckConstraint("ck_proposta_financeiro_valores", "premio_liquido >= 0 AND iof_percentual BETWEEN 0 AND 100 AND iof_valor >= 0 AND total_mensal = premio_liquido + iof_valor AND competencia_inicial % 100 BETWEEN 1 AND 12 AND competencia_inicial BETWEEN 101 AND 999912 AND competencia_referencia % 100 BETWEEN 1 AND 12 AND competencia_referencia BETWEEN 101 AND 999912");
+                        });
+                });
+
             modelBuilder.Entity("WebApolice.Modulos.Seguro.Domain.Modelos.PropostaHistorico", b =>
                 {
                     b.Property<long>("Id")
@@ -1908,6 +2049,10 @@ namespace WebApolice.Modulos.Seguro.Infrastructure.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("ano");
 
+                    b.Property<long?>("ApoliceVidaId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("apolice_vida_id");
+
                     b.Property<string>("Classificacao")
                         .IsRequired()
                         .ValueGeneratedOnAdd()
@@ -2005,7 +2150,7 @@ namespace WebApolice.Modulos.Seguro.Infrastructure.Migrations
                         .HasColumnType("numeric(18,2)")
                         .HasColumnName("iof");
 
-                    b.Property<int>("LegadoId")
+                    b.Property<int?>("LegadoId")
                         .HasColumnType("integer")
                         .HasColumnName("legado_id");
 
@@ -2028,6 +2173,10 @@ namespace WebApolice.Modulos.Seguro.Infrastructure.Migrations
                     b.Property<int?>("Parcela")
                         .HasColumnType("integer")
                         .HasColumnName("parcela");
+
+                    b.Property<long?>("ParcelaCompetenciaId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("parcela_competencia_id");
 
                     b.Property<long?>("PessoaId")
                         .HasColumnType("bigint")
@@ -2068,9 +2217,21 @@ namespace WebApolice.Modulos.Seguro.Infrastructure.Migrations
                         .HasColumnType("numeric(18,2)")
                         .HasColumnName("premio_total_original");
 
+                    b.Property<long?>("PropostaFinanceiroId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("proposta_financeiro_id");
+
                     b.Property<long?>("PropostaId")
                         .HasColumnType("bigint")
                         .HasColumnName("proposta_id");
+
+                    b.Property<Guid?>("PublicId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("public_id");
+
+                    b.Property<int>("RevisaoBaixa")
+                        .HasColumnType("integer")
+                        .HasColumnName("revisao_baixa");
 
                     b.Property<int?>("Sequencia")
                         .HasColumnType("integer")
@@ -2108,6 +2269,27 @@ namespace WebApolice.Modulos.Seguro.Infrastructure.Migrations
                     b.HasKey("Id")
                         .HasName("proposta_movimento_pkey");
 
+                    b.HasIndex("ParcelaCompetenciaId")
+                        .HasDatabaseName("ix_proposta_movimento_parcela_competencia_id");
+
+                    b.HasIndex("PropostaFinanceiroId")
+                        .HasDatabaseName("ix_proposta_movimento_proposta_financeiro_id");
+
+                    b.HasIndex("PublicId")
+                        .IsUnique()
+                        .HasDatabaseName("ux_proposta_movimento_public_id")
+                        .HasFilter("public_id IS NOT NULL");
+
+                    b.HasIndex("ApoliceVidaId", "CompetenciaInt")
+                        .IsUnique()
+                        .HasDatabaseName("ux_parcela_vida_competencia")
+                        .HasFilter("legado_id IS NULL AND classificacao = 'PARCELA_MENSAL'");
+
+                    b.HasIndex("ApoliceVidaId", "Parcela")
+                        .IsUnique()
+                        .HasDatabaseName("ux_parcela_vida_numero")
+                        .HasFilter("legado_id IS NULL AND classificacao = 'PARCELA_MENSAL'");
+
                     b.HasIndex(new[] { "Classificacao" }, "ix_proposta_movimento_classificacao")
                         .HasDatabaseName("ix_proposta_movimento_classificacao");
 
@@ -2140,7 +2322,12 @@ namespace WebApolice.Modulos.Seguro.Infrastructure.Migrations
                         .IsUnique()
                         .HasDatabaseName("ix_proposta_movimento_legado_id");
 
-                    b.ToTable("proposta_movimento", "seguro");
+                    b.ToTable("proposta_movimento", "seguro", t =>
+                        {
+                            t.HasCheckConstraint("ck_parcela_mensal_nativa", "legado_id IS NOT NULL OR classificacao <> 'PARCELA_MENSAL' OR (public_id IS NOT NULL AND proposta_id IS NOT NULL AND apolice_vida_id IS NOT NULL AND proposta_financeiro_id IS NOT NULL AND parcela_competencia_id IS NOT NULL AND parcela IS NOT NULL AND parcela > 0 AND competencia_int IS NOT NULL AND competencia_int BETWEEN 101 AND 999912 AND competencia_int % 100 BETWEEN 1 AND 12 AND data_vencimento IS NOT NULL AND premio_liquido >= 0 AND iof >= 0 AND premio_total = premio_liquido + iof AND premio_total IS NOT NULL AND premio_liquido IS NOT NULL AND iof IS NOT NULL AND (valor_pago IS NULL OR valor_pago = 0 OR valor_pago = premio_total) AND revisao_baixa >= 0)");
+
+                            t.HasCheckConstraint("ck_proposta_movimento_identidade", "(legado_id IS NOT NULL OR public_id IS NOT NULL) AND (public_id IS NULL OR public_id <> '00000000-0000-0000-0000-000000000000'::uuid)");
+                        });
                 });
 
             modelBuilder.Entity("WebApolice.Modulos.Seguro.Domain.Modelos.PropostaStatus", b =>
@@ -2255,6 +2442,12 @@ namespace WebApolice.Modulos.Seguro.Infrastructure.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("competencia_inclusao_int");
 
+                    b.Property<bool>("CondicoesProprias")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false)
+                        .HasColumnName("condicoes_proprias");
+
                     b.Property<DateTime?>("ConfirmadaEm")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("confirmada_em");
@@ -2332,6 +2525,10 @@ namespace WebApolice.Modulos.Seguro.Infrastructure.Migrations
                     b.Property<long>("EstipulanteId")
                         .HasColumnType("bigint")
                         .HasColumnName("estipulante_id");
+
+                    b.Property<bool?>("IncluiConjuge")
+                        .HasColumnType("boolean")
+                        .HasColumnName("inclui_conjuge");
 
                     b.Property<decimal?>("IofPercentual")
                         .HasPrecision(18, 4)
@@ -2430,16 +2627,6 @@ namespace WebApolice.Modulos.Seguro.Infrastructure.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("public_id")
                         .HasDefaultValueSql("gen_random_uuid()");
-
-                    b.Property<bool>("CondicoesProprias")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("boolean")
-                        .HasDefaultValue(false)
-                        .HasColumnName("condicoes_proprias");
-
-                    b.Property<bool?>("IncluiConjuge")
-                        .HasColumnType("boolean")
-                        .HasColumnName("inclui_conjuge");
 
                     b.Property<int>("RevisaoPreenchimento")
                         .IsConcurrencyToken()
@@ -2946,6 +3133,18 @@ namespace WebApolice.Modulos.Seguro.Infrastructure.Migrations
                     b.Navigation("ApoliceSubgrupo");
                 });
 
+            modelBuilder.Entity("WebApolice.Modulos.Seguro.Domain.Modelos.ParcelaCompetencia", b =>
+                {
+                    b.HasOne("WebApolice.Modulos.Seguro.Domain.Modelos.ApoliceModel", "Apolice")
+                        .WithMany()
+                        .HasForeignKey("ApoliceId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_parcela_competencia_apolices_apolice_id");
+
+                    b.Navigation("Apolice");
+                });
+
             modelBuilder.Entity("WebApolice.Modulos.Seguro.Domain.Modelos.PlanoCoberturaModel", b =>
                 {
                     b.HasOne("WebApolice.Modulos.Seguro.Domain.Modelos.Cobertura", "Cobertura")
@@ -3028,6 +3227,27 @@ namespace WebApolice.Modulos.Seguro.Infrastructure.Migrations
                     b.Navigation("PropostaItem");
                 });
 
+            modelBuilder.Entity("WebApolice.Modulos.Seguro.Domain.Modelos.PropostaFinanceiro", b =>
+                {
+                    b.HasOne("WebApolice.Modulos.Seguro.Domain.Modelos.ApoliceRamoModel", "ApoliceRamo")
+                        .WithMany()
+                        .HasForeignKey("ApoliceRamoId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_proposta_financeiro_apolice_ramos_apolice_ramo_id");
+
+                    b.HasOne("WebApolice.Modulos.Seguro.Domain.Modelos.Propostum", "Proposta")
+                        .WithOne()
+                        .HasForeignKey("WebApolice.Modulos.Seguro.Domain.Modelos.PropostaFinanceiro", "PropostaId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_proposta_financeiro_proposta_proposta_id");
+
+                    b.Navigation("ApoliceRamo");
+
+                    b.Navigation("Proposta");
+                });
+
             modelBuilder.Entity("WebApolice.Modulos.Seguro.Domain.Modelos.PropostaHistorico", b =>
                 {
                     b.HasOne("WebApolice.Modulos.Seguro.Domain.Modelos.Propostum", "PropostaAnterior")
@@ -3096,19 +3316,43 @@ namespace WebApolice.Modulos.Seguro.Infrastructure.Migrations
 
             modelBuilder.Entity("WebApolice.Modulos.Seguro.Domain.Modelos.PropostaMovimento", b =>
                 {
+                    b.HasOne("WebApolice.Modulos.Seguro.Domain.Modelos.ApoliceVidaModel", "ApoliceVida")
+                        .WithMany()
+                        .HasForeignKey("ApoliceVidaId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("fk_proposta_movimento_apolice_vidas_apolice_vida_id");
+
                     b.HasOne("WebApolice.Modulos.Seguro.Domain.Modelos.MovimentoTipo", "MovimentoTipo")
                         .WithMany("PropostaMovimentos")
                         .HasForeignKey("MovimentoTipoId")
                         .HasConstraintName("proposta_movimento_movimento_tipo_id_fkey");
+
+                    b.HasOne("WebApolice.Modulos.Seguro.Domain.Modelos.ParcelaCompetencia", "ParcelaCompetencia")
+                        .WithMany()
+                        .HasForeignKey("ParcelaCompetenciaId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("fk_proposta_movimento_parcelas_competencias_parcela_competenci");
+
+                    b.HasOne("WebApolice.Modulos.Seguro.Domain.Modelos.PropostaFinanceiro", "PropostaFinanceiro")
+                        .WithMany()
+                        .HasForeignKey("PropostaFinanceiroId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("fk_proposta_movimento_propostas_financeiro_proposta_financeiro");
 
                     b.HasOne("WebApolice.Modulos.Seguro.Domain.Modelos.Propostum", "Proposta")
                         .WithMany("PropostaMovimentos")
                         .HasForeignKey("PropostaId")
                         .HasConstraintName("proposta_movimento_proposta_id_fkey");
 
+                    b.Navigation("ApoliceVida");
+
                     b.Navigation("MovimentoTipo");
 
+                    b.Navigation("ParcelaCompetencia");
+
                     b.Navigation("Proposta");
+
+                    b.Navigation("PropostaFinanceiro");
                 });
 
             modelBuilder.Entity("WebApolice.Modulos.Seguro.Domain.Modelos.Propostum", b =>

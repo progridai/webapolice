@@ -6,6 +6,7 @@ namespace WebApolice.Modulos.Seguro.Domain.Modelos;
 public partial class PropostaMovimento
 {
     public long Id { get; set; }
+    public Guid? PublicId { get; set; }
 
     public long? PropostaId { get; set; }
 
@@ -87,7 +88,7 @@ public partial class PropostaMovimento
 
     public string? Observacao { get; set; }
 
-    public int LegadoId { get; set; }
+    public int? LegadoId { get; set; }
 
     public int? LegadoMovAnt { get; set; }
 

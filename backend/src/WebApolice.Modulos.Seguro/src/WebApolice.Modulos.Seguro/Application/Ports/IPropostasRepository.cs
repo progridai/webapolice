@@ -9,6 +9,7 @@ namespace WebApolice.Modulos.Seguro.Application.Ports;
 
 public interface IPropostasRepository
 {
+    Task<PagedResult<PropostaMovimento>?> ListarParcelasAsync(Guid publicId, int pagina, int tamanhoPagina, CancellationToken ct);
     Task<PropostaStatus?> ObterStatusAsync(string codigo, CancellationToken ct);
     Task<ApoliceModel?> ObterApoliceAsync(Guid publicId, CancellationToken ct);
     Task<ApoliceVidaModel?> ObterVidaAsync(Guid publicId, CancellationToken ct);

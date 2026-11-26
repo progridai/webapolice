@@ -1,5 +1,7 @@
 # Padronização geral dos dados em Title Case
 
+Estipulantes (24/11/2026): `SeguradoraNome` é texto humano de resposta, classificado nas listas de C#, TypeScript e SQL. A consulta reutiliza `core.pessoa.nome`, já padronizado; não foi criada coluna humana nem há necessidade de reaplicar triggers ou reprocessar dados. `seguradoraPublicId` e o `grupoId` legado são técnicos e preservados. Grupo foi retirado das telas por decisão do responsável, sem apagar vínculos históricos. Ver [documento 103](103-vinculo-seguradora-estipulantes.md).
+
 Revisão explícita de condições (18/11/2026): `CondicoesProprias`, flags de elegibilidade, UUIDs de contexto, revisão, hash `Comparacao` e `TratamentoAjustes` são técnicos. `Observacao`, `Nome` e snapshots/justificativas reutilizam classificações humanas existentes em C#, TypeScript e SQL. Não foi adicionada coluna humana; detalhes no [documento 94](94-revisao-explicita-condicoes-propostas.md).
 
 Regra vigente em 15/10/2026, obrigatória para todos os módulos atuais e futuros.

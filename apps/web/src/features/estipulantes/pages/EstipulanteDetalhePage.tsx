@@ -17,14 +17,9 @@ import { useEstipulanteDetalhe } from '../hooks/useEstipulanteDetalhe';
 import {
   formatarValorContato,
   formatarCep,
+  formatarDataOuVazio,
 } from '../../../shared/utils/formatters';
 import { useAuthorization } from '../../../auth/AuthorizationProvider';
-
-// Data formatter helper inline for configuration
-const formatDate = (dateStr?: string) => {
-  if (!dateStr) return 'Não informado';
-  return new Date(dateStr).toLocaleDateString('pt-BR');
-};
 
 export const EstipulanteDetalhePage: React.FC = () => {
   const { publicId } = useParams<{ publicId: string }>();
@@ -235,12 +230,13 @@ export const EstipulanteDetalhePage: React.FC = () => {
                 value={estipulante.codigo || '-'}
               />
               <DescriptionItem
-                label="Grupo"
-                value={estipulante.grupoPublicId || 'Não vinculado'}
-              />
-              <DescriptionItem
                 label="Seguradora"
-                value={estipulante.seguradoraPublicId || 'Não vinculada'}
+                value={
+                  estipulante.seguradoraNome ||
+                  (estipulante.seguradoraPublicId
+                    ? 'Nome indisponível'
+                    : 'Não vinculada')
+                }
               />
               <DescriptionItem
                 label="Observação"
@@ -259,11 +255,11 @@ export const EstipulanteDetalhePage: React.FC = () => {
               <DescriptionList columns={2} density="compact">
                 <DescriptionItem
                   label="Início da Vigência"
-                  value={formatDate(configuracao.dataInicioVigencia)}
+                  value={formatarDataOuVazio(configuracao.dataInicioVigencia)}
                 />
                 <DescriptionItem
                   label="Fim da Vigência"
-                  value={formatDate(configuracao.dataFimVigencia)}
+                  value={formatarDataOuVazio(configuracao.dataFimVigencia)}
                 />
               </DescriptionList>
             )}

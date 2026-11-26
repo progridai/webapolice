@@ -56,6 +56,7 @@ export const ROUTES = {
   /** Módulo de Ramos */
   RAMOS: '/ramos',
   RAMOS_NOVO: '/ramos/novo',
+  RAMOS_DETALHES: '/ramos/:publicId',
   RAMOS_EDITAR: '/ramos/:publicId/editar',
 
   /** Módulo de Seguradoras */

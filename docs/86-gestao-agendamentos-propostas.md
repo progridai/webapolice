@@ -1,5 +1,7 @@
 # Gestão dos Agendamentos de Propostas
 
+> Referência atual — 25/11/2026: As ausências de funcionalidades descritas abaixo são relativas à etapa original. A sequência de entregas posteriores, incluindo confirmação, agendamento, cancelamento e reinclusão, está no [índice funcional 106](106-indice-funcional-atual.md). O escopo financeiro atual está consolidado no [104](104-alcance-atual-rotinas-financeiras.md). As evidências originais permanecem vinculadas à etapa em que foram obtidas; a homologação visual continua pendente.
+
 Data: 12/11/2026. Etapa 4. Complementa o documento 85.
 
 Continuidade: o [documento 87](87-encerramento-vigencia-descarte-propostas.md) define a etapa 5, aprovada pelo responsável, para cancelamento de vigência com data informada e descarte de pré proposta. As limitações abaixo registram o recorte original da etapa 4.

@@ -5,6 +5,7 @@ import { AuthenticatedLayout } from '../../../layouts/AuthenticatedLayout';
 
 import { RamosListPage } from '../pages/RamosListPage';
 import { RamoFormPage } from '../pages/RamoFormPage';
+import { RamoDetalhePage } from '../pages/RamoDetalhePage';
 
 export const RamosRoutes = (
   <Route
@@ -16,6 +17,14 @@ export const RamosRoutes = (
   >
     <Route path={ROUTES.RAMOS} element={<RamosListPage />} />
     <Route path={ROUTES.RAMOS_NOVO} element={<RamoFormPage />} />
+    <Route
+      path={ROUTES.RAMOS_DETALHES}
+      element={
+        <PermissionProtectedRoute moduloCodigo="APOLICES">
+          <RamoDetalhePage />
+        </PermissionProtectedRoute>
+      }
+    />
     <Route path={ROUTES.RAMOS_EDITAR} element={<RamoFormPage />} />
   </Route>
 );

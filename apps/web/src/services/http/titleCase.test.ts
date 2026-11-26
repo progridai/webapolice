@@ -3,6 +3,7 @@ import { normalizeHumanData, toTitleCase } from './titleCase';
 
 describe('Title Case obrigatório', () => {
   it.each([
+    'seguradoraNome',
     'motivoPendenciaVigencia',
     'parentescoRegistrado',
     'justificativaAjustePremio',

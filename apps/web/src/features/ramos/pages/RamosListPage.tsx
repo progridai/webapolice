@@ -154,8 +154,10 @@ export const RamosListPage: React.FC = () => {
             primaryAction={{
               label: 'Visualizar',
               icon: <EyeIcon size={16} />,
-              // Temporário enquanto não há tela de visualização
-              onClick: () => alert('Visualizar ramo não implementado.'),
+              onClick: () =>
+                navigate(
+                  createPath(ROUTES.RAMOS_DETALHES, { publicId: row.publicId }),
+                ),
             }}
             actions={rowActions}
             ariaLabel={`Ações para o ramo ${row.nome}`}

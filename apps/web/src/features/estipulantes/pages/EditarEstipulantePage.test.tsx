@@ -4,6 +4,11 @@ import { BrowserRouter } from 'react-router-dom';
 import { vi, describe, it, expect, beforeEach } from 'vitest';
 import { EditarEstipulantePage } from './EditarEstipulantePage';
 import * as api from '../api/estipulantes.api';
+import { makeAuthorization } from '../../../../tests/helpers/authorization';
+
+vi.mock('../../../auth/AuthorizationProvider', () => ({
+  useAuthorization: () => makeAuthorization(),
+}));
 
 vi.mock('../api/estipulantes.api', () => ({
   obterEstipulante: vi.fn(),
@@ -31,7 +36,7 @@ describe('EditarEstipulantePage', () => {
     nomeFantasia: 'Teste',
     cnpj: '61198164000160',
     codigo: '123',
-    grupoPublicId: '',
+    grupoId: 19,
     seguradoraPublicId: '',
     observacao: '',
     ativo: true,
@@ -128,6 +133,10 @@ describe('EditarEstipulantePage', () => {
         expect.any(Object),
       );
     });
+    expect(api.alterarEstipulante).toHaveBeenCalledWith(
+      'estip-123',
+      expect.objectContaining({ grupoId: 19 }),
+    );
   });
 
   it('deve tratar conflito HTTP 409 (Pessoa Compartilhada)', async () => {

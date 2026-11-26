@@ -9,7 +9,7 @@ public static partial class PadronizacaoTexto
     private static readonly CultureInfo Cultura = CultureInfo.GetCultureInfo("pt-BR");
     private static readonly HashSet<string> Campos = new(StringComparer.OrdinalIgnoreCase)
     {
-        "MotivoPendenciaVigencia", "ParentescoRegistrado", "JustificativaAjustePremio",
+        "SeguradoraNome", "MotivoPendenciaVigencia", "ParentescoRegistrado", "JustificativaAjustePremio",
         "SubgrupoNomeRegistrado", "ModuloNomeRegistrado", "PlanoNomeRegistrado", "CoberturaNomeRegistrado", "CoberturaNomeReduzidoRegistrado",
         "Nome", "NomeFantasia", "RazaoSocial", "NomeConjuge", "NomeEmpresa", "NomeReduzido", "NomeFormatado", "Descricao", "Observacao", "Titulo", "Logradouro", "Complemento", "Bairro", "Departamento", "Contato", "Empresa", "Equipe", "Funcao", "Setor", "Motivo", "Causa", "Instituidor", "Instituto", "EstNome", "EstCidade", "EstEndereco", "EstComplemento", "EstBairro"
     };

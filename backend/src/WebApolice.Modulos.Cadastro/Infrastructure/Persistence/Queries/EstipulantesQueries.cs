@@ -85,14 +85,17 @@ public class EstipulantesQueries : IEstipulantesQueries
 
         if (estipulante.SeguradoraId.HasValue)
         {
-            var seguradoraId = await _dbContext.Seguradoras
+            var seguradora = await _dbContext.Seguradoras
                 .AsNoTracking()
                 .Where(s => s.Id == estipulante.SeguradoraId.Value)
-                .Select(s => s.PublicId)
+                .Select(s => new { s.PublicId, Nome = s.Pessoa.Nome })
                 .FirstOrDefaultAsync(cancellationToken);
             
-            if (seguradoraId != Guid.Empty)
-                result.SeguradoraPublicId = seguradoraId;
+            if (seguradora != null)
+            {
+                result.SeguradoraPublicId = seguradora.PublicId;
+                result.SeguradoraNome = seguradora.Nome;
+            }
         }
 
         if (estipulante.PessoaId.HasValue)

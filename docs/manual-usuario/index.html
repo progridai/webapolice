@@ -1,0 +1,1050 @@
+<!doctype html>
+<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Manual do usuário do WebApolice: cadastros, Apólices, Vidas, Propostas, parcelas e acessos.">
+<title>Manual do Usuário · WebApolice</title><style>
+:root { color-scheme: light; --brand:#D4AF37; --ink:#242424; --muted:#595959; --line:#dedbd2; --paper:#fff; --canvas:#f7f6f2; --soft:#fbf6e5; --focus:#705800; }
+* { box-sizing:border-box; }
+html { scroll-padding-top:6rem; }
+body { margin:0; color:var(--ink); background:var(--canvas); font:17px/1.7 system-ui,-apple-system,"Segoe UI",sans-serif; }
+a { color:var(--focus); text-underline-offset:.2em; }
+a:hover { text-decoration-thickness:2px; }
+:focus-visible { outline:3px solid var(--focus); outline-offset:4px; }
+button,input { font:inherit; }
+button { border:1px solid var(--line); border-radius:8px; background:var(--paper); color:var(--ink); padding:.5rem .85rem; cursor:pointer; }
+button:hover { border-color:var(--focus); }
+.skip { position:fixed; top:-6rem; left:1rem; z-index:10; padding:.7rem; background:var(--paper); }
+.skip:focus { top:.5rem; }
+.topbar { position:sticky; top:0; z-index:4; display:flex; align-items:center; justify-content:space-between; gap:1rem; padding:.7rem 1.5rem; background:var(--paper); border-bottom:3px solid var(--brand); }
+.brand { font-weight:750; color:var(--ink); text-decoration:none; line-height:1.35; }
+.brand small { display:block; font-size:.75rem; color:var(--muted); font-weight:400; }
+.tools { display:flex; gap:.5rem; align-items:center; }
+.menu-button { display:none; }
+.layout { display:grid; grid-template-columns:280px minmax(0,1fr); max-width:1540px; margin:auto; }
+.sidebar { position:sticky; top:5.4rem; height:calc(100vh - 6rem); overflow:auto; padding:1.5rem 1rem; }
+.sidebar ol { list-style:none; padding:0; margin:0; }
+.sidebar a { display:block; padding:.65rem .8rem; margin:.2rem 0; border-radius:6px; color:var(--ink); text-decoration:none; line-height:1.45; border-left:3px solid transparent; }
+.sidebar a:hover,.sidebar a[aria-current] { background:var(--soft); border-left-color:var(--brand); }
+.sidebar p { font-size:.8rem; color:var(--muted); padding:.6rem .8rem; }
+main { min-width:0; padding:2rem 2.6rem 5rem; }
+.search-panel { padding:1.4rem; margin-bottom:2rem; border:1px solid var(--line); border-radius:12px; background:var(--paper); }
+.search-panel label { display:block; font-weight:700; }
+.search-row { display:flex; gap:.6rem; margin-top:.5rem; }
+.search-row input { flex:1; min-width:0; padding:.7rem; border:1px solid var(--muted); border-radius:6px; background:var(--paper); color:var(--ink); }
+.help { color:var(--muted); font-size:.9rem; margin:.5rem 0 0; }
+#search-results { padding-left:1.5rem; }
+#search-results li { margin:.8rem 0; }
+#search-results small { display:block; color:var(--muted); }
+.chapter { background:var(--paper); border:1px solid var(--line); border-radius:12px; padding:2rem 2.6rem; margin-bottom:2.5rem; }
+.eyebrow { color:var(--muted); font-size:.8rem; text-transform:uppercase; letter-spacing:.1em; margin:0; }
+h1,h2 { line-height:1.3; text-wrap:balance; }
+h1 { font-size:clamp(1.8rem,3vw,2.7rem); margin:.6rem 0 1.5rem; }
+h2 { font-size:1.4rem; margin:2.4rem 0 1rem; padding-top:1.1rem; border-top:1px solid var(--line); }
+p { margin:.9rem 0; }
+li { padding-left:.2rem; margin:.55rem 0; }
+.page-toc { background:var(--canvas); border-radius:8px; padding:1rem 1.3rem; font-size:.93rem; }
+.page-toc ul { columns:2; padding-left:1.1rem; margin:.5rem 0 0; }
+.page-toc li { break-inside:avoid; margin:.35rem 0; }
+.table-wrap { overflow-x:auto; margin:1rem 0; }
+table { border-collapse:collapse; width:100%; font-size:.92rem; line-height:1.6; }
+th,td { text-align:left; vertical-align:top; border:1px solid var(--line); padding:.75rem; }
+th { background:var(--canvas); font-weight:700; }
+tr:nth-child(even) td { background:#fcfcfa; }
+.callout { background:var(--soft); border-left:4px solid var(--brand); padding:1rem 1.2rem; border-radius:0 6px 6px 0; }
+code { background:var(--canvas); border:1px solid var(--line); border-radius:4px; padding:.1rem .25rem; overflow-wrap:anywhere; font-size:.9em; }
+figure { margin:1.5rem 0; }
+figure img { display:block; max-width:100%; height:auto; border:1px solid var(--line); border-radius:8px; }
+figcaption { margin-top:.5rem; color:var(--muted); font-size:.85rem; }
+.chapter-pager { display:flex; flex-wrap:wrap; justify-content:space-between; gap:1rem; border-top:1px solid var(--line); padding-top:1.4rem; margin-top:2.5rem; font-size:.9rem; }
+.footer { text-align:center; font-size:.85rem; color:var(--muted); }
+[hidden] { display:none !important; }
+@media(max-width:1000px) { .layout { grid-template-columns:235px minmax(0,1fr); } main { padding:1.5rem; } .chapter { padding:1.6rem; } .page-toc ul { columns:1; } }
+@media(max-width:760px) { .layout { display:block; } .topbar { padding:.6rem .8rem; } .menu-button { display:inline-block; } .print-button { font-size:.8rem; } .sidebar { display:none; position:static; height:auto; max-height:65vh; padding:.8rem; border-bottom:1px solid var(--line); } .sidebar.open { display:block; } main { padding:1rem .65rem; } .chapter { padding:1.2rem; } .search-panel { padding:1rem; } h1 { font-size:1.8rem; } .brand small { max-width:140px; } }
+@media print { @page { margin:18mm; } body { font-size:10.5pt; background:white; color:black; } .topbar,.sidebar,.search-panel,.skip,.chapter-pager,.footer,.chapter>p:first-of-type { display:none; } .layout { display:block; } main { padding:0; } .chapter { border:0; padding:0; margin:0; break-before:page; } .chapter:first-of-type { break-before:auto; } h1 { font-size:23pt; } h2 { font-size:15pt; break-after:avoid; } tr,.callout { break-inside:avoid; } .table-wrap { overflow:visible; } a { color:black; } .page-toc { background:none; border:1px solid #bbb; } }
+</style></head><body>
+<a class="skip" href="#conteudo">Ir para o conteúdo</a>
+<header class="topbar"><a class="brand" href="#inicio">WebApolice<small>Manual do usuário · versão 0.1</small></a>
+<div class="tools"><button id="menu-toggle" class="menu-button" aria-controls="chapters" aria-expanded="false">Capítulos</button>
+<button id="print" class="print-button">Imprimir / salvar PDF</button></div></header>
+<div class="layout"><nav class="sidebar" id="chapters" aria-label="Capítulos do manual"><ol><li><a href="#inicio">Comece aqui</a></li><li><a href="#c01">01 · Primeiros passos</a></li><li><a href="#c02">02 · Conceitos e glossário</a></li><li><a href="#c03">03 · Cadastros</a></li><li><a href="#c04">04 · Apólices e participações</a></li><li><a href="#c05">05 · Propostas</a></li><li><a href="#c06">06 · Parcelas e financeiro</a></li><li><a href="#c07">07 · Segurança</a></li><li><a href="#c08">08 · Dúvidas e problemas</a></li><li><a href="#c09">09 · Exemplo completo</a></li></ol>
+<p>Edição de 25/11/2026<br>Versão para revisão.<br>Conferência visual em andamento.</p></nav>
+<main id="conteudo" tabindex="-1"><section class="search-panel" aria-label="Busca no manual">
+<label for="search">O que você precisa fazer?</label><div class="search-row"><input id="search" type="search" placeholder="Ex.: criar proposta, matrícula, baixa integral" autocomplete="off" aria-describedby="search-help search-status"><button id="clear-search">Limpar</button></div>
+<p id="search-help" class="help">Busca em todos os capítulos, inclusive sem acentos. Funciona offline.</p>
+<p id="search-status" class="help" role="status" aria-live="polite"></p><ol id="search-results" hidden></ol>
+<noscript><p>A busca e os botões precisam de JavaScript. Os capítulos e links continuam disponíveis abaixo. Use a busca e a impressão do navegador como alternativa.</p></noscript></section>
+<article class="chapter" aria-labelledby="inicio">
+<header class="chapter-header"><p class="eyebrow">Comece aqui</p><h1 id="inicio">Manual do Usuário — WebApolice</h1></header><nav class="page-toc" aria-label="Neste capítulo"><strong>Neste capítulo</strong><ul><li><a href="#inicio-escolha-por-onde-comecar">Escolha por Onde Começar</a></li><li><a href="#inicio-como-usar-este-manual">Como Usar Este Manual</a></li><li><a href="#inicio-alcance-desta-edicao">Alcance Desta Edição</a></li><li><a href="#inicio-responsabilidade-pela-revisao">Responsabilidade pela Revisão</a></li></ul></nav>
+<p>Versão 0.1 — 25/11/2026. Primeira edição para revisão.</p>
+<p>O WebApolice organiza cadastros, Apólices, participações de Clientes, Propostas e o acompanhamento de parcelas. Este manual explica como essas informações se relacionam e como executar as rotinas disponíveis.</p>
+<p><strong>Para consultar com menu e busca, abra <a href="#inicio">o manual no navegador</a>.</strong> Os capítulos abaixo também podem ser lidos diretamente no repositório.</p>
+<section class="manual-section" data-search="true"><h2 id="inicio-escolha-por-onde-comecar">Escolha por Onde Começar</h2>
+<div class="table-wrap" role="region" aria-label="Tabela de referência" tabindex="0"><table><thead><tr>
+<th scope="col">Você precisa…</th>
+<th scope="col">Consulte</th>
+</tr></thead><tbody>
+<tr><td>Aprender a entrar, navegar e localizar registros</td><td><a href="#c01">Primeiros passos</a></td></tr>
+<tr><td>Entender Cliente, matrícula, Vida, Módulo e Proposta</td><td><a href="#c02">Conceitos e glossário</a></td></tr>
+<tr><td>Cadastrar Clientes, parceiros ou configurações</td><td><a href="#c03">Cadastros</a></td></tr>
+<tr><td>Organizar uma Apólice e incluir suas Vidas</td><td><a href="#c04">Apólices e participações</a></td></tr>
+<tr><td>Criar, preencher, confirmar ou encerrar uma Proposta</td><td><a href="#c05">Propostas</a></td></tr>
+<tr><td>Gerar o mês, registrar pagamento e fechar a competência</td><td><a href="#c06">Parcelas e financeiro</a></td></tr>
+<tr><td>Administrar acessos ou consultar Auditoria</td><td><a href="#c07">Segurança e administração</a></td></tr>
+<tr><td>Resolver um bloqueio ou tirar uma dúvida</td><td><a href="#c08">Dúvidas e solução de problemas</a></td></tr>
+<tr><td>Acompanhar um exemplo do cadastro ao pagamento</td><td><a href="#c09">Exemplo completo</a></td></tr>
+</tbody></table></div>
+</section>
+<section class="manual-section" data-search="true"><h2 id="inicio-como-usar-este-manual">Como Usar Este Manual</h2>
+<p>Os caminhos como <strong>Operação → Clientes</strong> representam opções do menu. Os nomes em negrito identificam campos, ações ou informações importantes. Os passos numerados indicam a sequência de uma tarefa; a explicação do resultado permite conferir se ela terminou como esperado.</p>
+<p>Leia primeiro os conceitos se estiver começando a operar seguros no sistema. Se já conhece a rotina, use a tabela acima ou a busca da versão de navegador. Links ao longo dos capítulos levam às tarefas relacionadas.</p>
+<p>As opções que você vê dependem do seu acesso. Poder consultar um registro não significa poder alterá-lo ou executar todas as suas ações. Mensagens de impedimento precisam ser resolvidas no contexto indicado; não repita uma gravação para tentar ignorá-las.</p>
+</section>
+<section class="manual-section" data-search="true"><h2 id="inicio-alcance-desta-edicao">Alcance Desta Edição</h2>
+<p>Esta edição foi elaborada a partir da implementação e da documentação funcional do projeto. <strong>A conferência visual com login foi iniciada e ainda está em andamento.</strong> As primeiras capturas reais e instruções conferidas estão no capítulo de Cadastros. As demais rotinas continuam em revisão antes da aprovação final. Esta versão não contém capturas de tela simuladas.</p>
+<p>O financeiro atual possui baixa integral e geração manual dos lotes mensais. Pagamento parcial, estorno de baixa, emissão de boletos e integração bancária não fazem parte das rotinas descritas. Consulte <a href="#c06-limites-da-versao-atual">os limites financeiros</a>.</p>
+<p>O endereço do sistema e os canais de atendimento são definidos pela sua organização. Use o endereço informado pelo responsável, sem substituir pelo endereço local de desenvolvimento.</p>
+</section>
+<section class="manual-section" data-search="true"><h2 id="inicio-responsabilidade-pela-revisao">Responsabilidade pela Revisão</h2>
+<p>Quem opera cada área deve conferir as instruções com seu perfil de acesso e comunicar diferenças entre o manual e a tela. Ao relatar uma diferença, informe capítulo, tarefa, mensagem exibida e resultado esperado. Não inclua senhas ou dados pessoais desnecessários.</p>
+<p>O controle editorial, as referências técnicas e a geração da versão de navegador ficam no <a href="MANUTENCAO.md">guia de manutenção</a>.</p>
+</section>
+<nav class="chapter-pager" aria-label="Continuar leitura"><a href="#c01">Próximo: 01 · Primeiros passos</a></nav></article>
+<article class="chapter" aria-labelledby="c01">
+<header class="chapter-header"><p class="eyebrow">01 · Primeiros passos</p><h1 id="c01">Primeiros Passos</h1></header><nav class="page-toc" aria-label="Neste capítulo"><strong>Neste capítulo</strong><ul><li><a href="#c01-acessar-o-webapolice">Acessar o WebApolice</a></li><li><a href="#c01-encontrar-uma-area">Encontrar uma Área</a></li><li><a href="#c01-personalizar-meus-atalhos">Personalizar Meus Atalhos</a></li><li><a href="#c01-localizar-e-consultar-um-registro">Localizar e Consultar um Registro</a></li><li><a href="#c01-preencher-e-salvar-com-seguranca">Preencher e Salvar com Segurança</a></li><li><a href="#c01-entender-as-mensagens-da-tela">Entender as Mensagens da Tela</a></li><li><a href="#c01-usar-em-diferentes-telas">Usar em Diferentes Telas</a></li></ul></nav>
+<p><a href="#inicio">Início do manual</a> · <a href="#c02">Próximo: conceitos</a></p>
+<section class="manual-section" data-search="true"><h2 id="c01-acessar-o-webapolice">Acessar o WebApolice</h2>
+<p>Tenha o endereço do sistema e uma conta disponibilizada pelo responsável da sua organização.</p>
+<ol>
+<li>Abra o endereço do WebApolice no navegador.</li>
+<li>Na autenticação apresentada, informe suas credenciais.</li>
+<li>Conclua as etapas de autenticação solicitadas para a sua conta.</li>
+<li>Ao entrar, confira a página <strong>Início</strong> e as opções disponíveis no menu.</li>
+</ol>
+<p>Se o acesso for recusado, confira o usuário e procure o administrador. Não crie outro cadastro para contornar uma conta bloqueada. A administração de usuários é tratada no <a href="#c07">capítulo de Segurança</a>.</p>
+</section>
+<section class="manual-section" data-search="true"><h2 id="c01-encontrar-uma-area">Encontrar uma Área</h2>
+<div class="table-wrap" role="region" aria-label="Tabela de referência" tabindex="0"><table><thead><tr>
+<th scope="col">Grupo do menu</th>
+<th scope="col">Para que serve</th>
+</tr></thead><tbody>
+<tr><td>Início</td><td>Acessar seus atalhos pessoais</td></tr>
+<tr><td>Operação</td><td>Trabalhar com Clientes, Apólices e Propostas</td></tr>
+<tr><td>Parceiros e Estrutura</td><td>Manter Seguradoras, Corretoras, Estipulantes, Subestipulantes e Cooperados</td></tr>
+<tr><td>Configurações do Seguro</td><td>Manter Ramos, Coberturas, Módulos Globais e Convênios de Cobrança</td></tr>
+<tr><td>Segurança</td><td>Administrar Usuários e Perfis e consultar o Catálogo de Permissões e a Auditoria</td></tr>
+<tr><td>Sistema</td><td>Administração de Módulos do Sistema e acesso ao Design System quando disponibilizado</td></tr>
+</tbody></table></div>
+<p>Use o menu para mudar de área e as abas para mudar de assunto dentro de um registro. Por exemplo, <strong>Operação → Apólices → abrir uma Apólice → Vidas</strong> leva às participações daquela Apólice, sem trocar de cadastro.</p>
+<p>Uma opção ausente pode estar relacionada ao seu perfil ou à disponibilidade da funcionalidade. Confira com o responsável pelo acesso antes de concluir que o recurso não existe.</p>
+</section>
+<section class="manual-section" data-search="true"><h2 id="c01-personalizar-meus-atalhos">Personalizar Meus Atalhos</h2>
+<ol>
+<li>Abra <strong>Início</strong>.</li>
+<li>Escolha <strong>Personalizar atalhos</strong>.</li>
+<li>Marque as telas que deseja acessar com mais frequência.</li>
+<li>Escolha <strong>Salvar atalhos</strong>.</li>
+</ol>
+<p>Os cartões seguem a ordem do menu. Você pode salvar a seleção sem nenhuma tela. Cancelar, fechar a janela ou pressionar Escape antes de salvar descarta as alterações dessa seleção.</p>
+<p class="callout"><strong>Resultado esperado:</strong> seus atalhos ficam associados à sua conta e podem ser usados em outros navegadores e computadores. Um atalho não concede permissão; uma tela sem acesso deixa de ser oferecida.</p>
+</section>
+<section class="manual-section" data-search="true"><h2 id="c01-localizar-e-consultar-um-registro">Localizar e Consultar um Registro</h2>
+<ol>
+<li>Abra a área desejada.</li>
+<li>Use a busca e os filtros disponíveis na tela. O critério de busca varia por cadastro; leia a indicação do campo.</li>
+<li>Confira a identificação do resultado antes de abrir ou editar.</li>
+<li>Consulte outras páginas da lista quando necessário.</li>
+<li>Use a ação de consulta ou detalhes disponível para o registro.</li>
+</ol>
+<p>Em Propostas, a busca é pelo número. Na seleção de Vidas para uma nova pré proposta, a busca aceita nome ou documento; a matrícula aparece para identificação. Não presuma que todo campo de busca procura por todas as colunas exibidas.</p>
+<p>Uma lista vazia pode significar ausência de registros para os filtros atuais. Revise os filtros e a página da consulta antes de cadastrar novamente.</p>
+</section>
+<section class="manual-section" data-search="true"><h2 id="c01-preencher-e-salvar-com-seguranca">Preencher e Salvar com Segurança</h2>
+<ol>
+<li>Confira se está no registro correto e se escolheu criar ou editar.</li>
+<li>Preencha os campos obrigatórios sinalizados.</li>
+<li>Revise seleções relacionadas, datas, documentos e valores.</li>
+<li>Execute a ação de salvar e aguarde a conclusão.</li>
+<li>Verifique a mensagem de resultado e, quando necessário, reabra o registro para conferir.</li>
+</ol>
+<p>Mensagens junto aos campos apontam dados que precisam de correção. Em seletores, escolha uma opção da lista: digitar parte do nome pode apenas iniciar uma busca e não concluir a seleção.</p>
+<p>O sistema padroniza nomes e outros textos de negócio, como <strong>JOÃO DA SILVA → João da Silva</strong>. Documentos, códigos, e-mails e senhas mantêm suas regras próprias. Essa padronização não substitui a conferência da grafia e dos dados.</p>
+<p>Durante uma gravação, aguarde. Alguns comandos, saídas e fechamentos ficam bloqueados para impedir operações duplicadas. Se houver falha ou demora, consulte <a href="#c08-uma-operacao-falhou-ou-demorou">como conferir uma operação</a>.</p>
+</section>
+<section class="manual-section" data-search="true"><h2 id="c01-entender-as-mensagens-da-tela">Entender as Mensagens da Tela</h2>
+<div class="table-wrap" role="region" aria-label="Tabela de referência" tabindex="0"><table><thead><tr>
+<th scope="col">Mensagem ou situação</th>
+<th scope="col">Como agir</th>
+</tr></thead><tbody>
+<tr><td>Carregando</td><td>Aguarde a resposta antes de escolher outro comando dependente dos dados</td></tr>
+<tr><td>Nenhum registro</td><td>Revise os filtros; crie um registro somente se ele realmente não existir</td></tr>
+<tr><td>Campo inválido</td><td>Corrija o campo indicado e confira os demais dados antes de salvar</td></tr>
+<tr><td>Tentar novamente</td><td>Repita a consulta depois de conferir a conexão</td></tr>
+<tr><td>Sem permissão ou acesso negado</td><td>Solicite ao responsável a avaliação do acesso necessário</td></tr>
+<tr><td>Dados alterados ou conferência desatualizada</td><td>Recarregue, confira as mudanças e refaça a comparação ou conferência</td></tr>
+<tr><td>Operação concluída</td><td>Confira o resultado no registro ou histórico correspondente</td></tr>
+</tbody></table></div>
+</section>
+<section class="manual-section" data-search="true"><h2 id="c01-usar-em-diferentes-telas">Usar em Diferentes Telas</h2>
+<p>O sistema possui temas claro, escuro e sistema. Use a preferência de aparência disponível no aplicativo para adequar a leitura. O modo sistema acompanha a preferência do dispositivo.</p>
+<p>Em telas menores, abra o menu de navegação e observe a rolagem das listas e dos formulários. Você também pode usar Tab para percorrer controles, Shift + Tab para voltar e Enter para acionar o controle selecionado. Confira o foco antes de confirmar uma operação.</p>
+<p>Para estudar o manual no navegador, use o menu lateral e a busca. Em telas pequenas, o botão <strong>Capítulos</strong> abre a navegação. A opção <strong>Imprimir / salvar PDF</strong> usa a impressão do próprio navegador; nenhuma informação do sistema é enviada por essa ação.</p>
+</section>
+<nav class="chapter-pager" aria-label="Continuar leitura"><a href="#inicio">← Anterior: Comece aqui</a><a href="#c02">Próximo: 02 · Conceitos e glossário</a></nav></article>
+<article class="chapter" aria-labelledby="c02">
+<header class="chapter-header"><p class="eyebrow">02 · Conceitos e glossário</p><h1 id="c02">Conceitos e Glossário</h1></header><nav class="page-toc" aria-label="Neste capítulo"><strong>Neste capítulo</strong><ul><li><a href="#c02-como-as-informacoes-se-relacionam">Como as Informações se Relacionam</a></li><li><a href="#c02-pessoas-vinculos-e-participacoes">Pessoas, Vínculos e Participações</a></li><li><a href="#c02-configuracoes-do-seguro">Configurações do Seguro</a></li><li><a href="#c02-propostas-e-datas">Propostas e Datas</a></li><li><a href="#c02-financeiro">Financeiro</a></li><li><a href="#c02-nomes-parecidos-que-exigem-atencao">Nomes Parecidos que Exigem Atenção</a></li></ul></nav>
+<p><a href="#inicio">Início do manual</a> · <a href="#c01">Anterior: primeiros passos</a> · <a href="#c03">Próximo: cadastros</a></p>
+<section class="manual-section" data-search="true"><h2 id="c02-como-as-informacoes-se-relacionam">Como as Informações se Relacionam</h2>
+<p>O caminho mais comum de uma operação é:</p>
+<p><strong>Cliente → vínculo com Estipulante e matrícula → Vida na Apólice → Pré Proposta → confirmação e vigência → parcelas.</strong></p>
+<p>Cada etapa tem uma finalidade. Cadastrar o Cliente não cria matrícula; cadastrar matrícula não inclui automaticamente o Cliente na Apólice; incluir uma Vida não confirma uma Proposta; criar a pré proposta não concede cobertura nem gera parcela.</p>
+</section>
+<section class="manual-section" data-search="true"><h2 id="c02-pessoas-vinculos-e-participacoes">Pessoas, Vínculos e Participações</h2>
+<div class="table-wrap" role="region" aria-label="Tabela de referência" tabindex="0"><table><thead><tr>
+<th scope="col">Termo</th>
+<th scope="col">Significado no sistema</th>
+<th scope="col">Exemplo didático</th>
+</tr></thead><tbody>
+<tr><td>Cliente</td><td>Cadastro da pessoa física ou jurídica, com seus dados, contatos e endereços</td><td>Ana Souza</td></tr>
+<tr><td>Estipulante</td><td>Organização à qual uma matrícula do Cliente está vinculada e que participa da estrutura do seguro</td><td>Empresa Exemplo</td></tr>
+<tr><td>Vínculo do Cliente</td><td>Relação entre Cliente, Estipulante e matrícula</td><td>Ana, Empresa Exemplo, matrícula 123</td></tr>
+<tr><td>Matrícula</td><td>Identificação do vínculo no Estipulante</td><td>123</td></tr>
+<tr><td>Apólice</td><td>Contexto que reúne a estrutura do seguro, suas configurações e participações</td><td>Apólice da Empresa Exemplo</td></tr>
+<tr><td>Vida</td><td>Participação do Cliente e de sua matrícula em uma Apólice</td><td>Participação de Ana naquela Apólice</td></tr>
+<tr><td>Subgrupo</td><td>Organização contextual dentro da Apólice</td><td>Grupo definido para uma unidade</td></tr>
+<tr><td>Subestipulante</td><td>Cadastro de parceiro/estrutura que pode ser vinculado à Apólice</td><td>Unidade participante cadastrada</td></tr>
+<tr><td>Cooperado</td><td>Cadastro próprio disponível em Parceiros e Estrutura</td><td>Registro utilizado pela organização</td></tr>
+</tbody></table></div>
+<p>O mesmo Estipulante pode participar de mais de uma Apólice. Por isso, o nome do Estipulante sozinho não identifica onde uma matrícula está segurada. Confira a Apólice e a Vida.</p>
+</section>
+<section class="manual-section" data-search="true"><h2 id="c02-configuracoes-do-seguro">Configurações do Seguro</h2>
+<div class="table-wrap" role="region" aria-label="Tabela de referência" tabindex="0"><table><thead><tr>
+<th scope="col">Termo</th>
+<th scope="col">O que representa</th>
+<th scope="col">O que não confundir</th>
+</tr></thead><tbody>
+<tr><td>Ramo</td><td>Classificação do seguro; participa das regras aplicáveis à Proposta e ao IOF</td><td>Número da Apólice é uma identificação própria, não o nome do Ramo</td></tr>
+<tr><td>Cobertura</td><td>Cadastro compartilhado de uma cobertura e seus atributos</td><td>Prêmio do vínculo pertence ao Plano em que a Cobertura foi associada</td></tr>
+<tr><td>Módulo Global</td><td>Cadastro reutilizável de Módulo</td><td>Não configura sozinho as condições de cada Apólice</td></tr>
+<tr><td>Módulo da Apólice</td><td>Vínculo contextual do Módulo naquela Apólice</td><td>Pode ter configuração diferente de outro vínculo do mesmo Módulo</td></tr>
+<tr><td>Plano do Módulo</td><td>Plano exclusivo do vínculo do Módulo na Apólice</td><td>Não é o Plano global histórico nem o Universo anterior</td></tr>
+<tr><td>Prêmio</td><td>Valor informado para a contratação da cobertura, com valores de titular e cônjuge conforme o caso</td><td>Não é capital segurado nem pagamento já recebido</td></tr>
+<tr><td>Convênio de Cobrança</td><td>Cadastro de informações do convênio e configurações de cobrança</td><td>Preencher dados bancários não executa integração ou liquidação bancária</td></tr>
+</tbody></table></div>
+<p><strong>Exemplo:</strong> a mesma Cobertura pode existir em dois Planos. Alterar seu nome no cadastro compartilhado muda a identificação apresentada nos vínculos. Alterar o prêmio no Plano A não muda o prêmio no Plano B.</p>
+</section>
+<section class="manual-section" data-search="true"><h2 id="c02-propostas-e-datas">Propostas e Datas</h2>
+<div class="table-wrap" role="region" aria-label="Tabela de referência" tabindex="0"><table><thead><tr>
+<th scope="col">Termo</th>
+<th scope="col">Como interpretar</th>
+</tr></thead><tbody>
+<tr><td>Pré Proposta</td><td>Preparação ainda sem vigência; permite preencher e revisar as condições</td></tr>
+<tr><td>Proposta nativa</td><td>Criada pelo fluxo atual do WebApolice</td></tr>
+<tr><td>Registro legado</td><td>Informação oriunda do sistema anterior, mantida conforme as regras de preservação histórica</td></tr>
+<tr><td>Nova versão</td><td>Nova tentativa ligada à anterior, com histórico preservado</td></tr>
+<tr><td>Confirmação</td><td>Validação e registro das condições e da data de início</td></tr>
+<tr><td>Agendada</td><td>Confirmada para início futuro; ainda depende da efetivação na data e das validações</td></tr>
+<tr><td>Vigente</td><td>Versão com vigência operacional registrada; confira também seus períodos e eventuais impedimentos</td></tr>
+<tr><td>Substituída</td><td>Versão cuja vigência foi encerrada pela efetivação de uma sucessora</td></tr>
+<tr><td>Cancelamento agendado</td><td>Pedido para encerrar a vigência em data futura</td></tr>
+<tr><td>Cancelada</td><td>Encerramento concluído; consulte se chegou a ter vigência ou se foi cancelada antes do início</td></tr>
+<tr><td>Descartada</td><td>Pré proposta encerrada sem confirmação nem vigência</td></tr>
+<tr><td>Reinclusão</td><td>Preparação de nova versão após cancelamento de uma proposta que teve vigência</td></tr>
+</tbody></table></div>
+<p><strong>Situação, vigência e datas devem ser lidas juntas.</strong> Uma Proposta confirmada pode estar agendada, vigente ou já substituída. A palavra “confirmada”, sozinha, não prova cobertura atual.</p>
+<p>As operações de início e cancelamento consideram o calendário de São Paulo. A data do cancelamento de vigência é o <strong>primeiro dia sem cobertura</strong>. Exemplo: cancelamento em 20/08 significa ausência de cobertura a partir de 20/08; o sistema registra separadamente quando a ação foi executada.</p>
+</section>
+<section class="manual-section" data-search="true"><h2 id="c02-financeiro">Financeiro</h2>
+<div class="table-wrap" role="region" aria-label="Tabela de referência" tabindex="0"><table><thead><tr>
+<th scope="col">Termo</th>
+<th scope="col">Significado</th>
+</tr></thead><tbody>
+<tr><td>Competência</td><td>Mês a que a mensalidade pertence</td></tr>
+<tr><td>Vencimento</td><td>Data prevista para pagamento da parcela</td></tr>
+<tr><td>Parcela</td><td>Registro individual do valor devido</td></tr>
+<tr><td>Lote mensal</td><td>Conjunto de mensalidades elegíveis de uma Apólice para uma competência</td></tr>
+<tr><td>Conferência</td><td>Apresentação dos dados para revisão antes da operação</td></tr>
+<tr><td>Baixa integral</td><td>Registro de pagamento de todo o saldo da parcela</td></tr>
+<tr><td>Saldo anterior</td><td>Débito ainda aberto de competências anteriores</td></tr>
+<tr><td>Total acumulado</td><td>Mensalidade aberta da competência somada ao saldo anterior</td></tr>
+<tr><td>Fechamento</td><td>Encerramento da conferência do mês para liberar a sequência mensal; pode manter parcelas abertas</td></tr>
+<tr><td>IOF</td><td>Imposto considerado na formação do valor conforme o Ramo e a conferência</td></tr>
+</tbody></table></div>
+<p><strong>Fechado não significa pago.</strong> Uma competência fechada pode conter parcelas em aberto e receber baixas posteriores.</p>
+</section>
+<section class="manual-section" data-search="true"><h2 id="c02-nomes-parecidos-que-exigem-atencao">Nomes Parecidos que Exigem Atenção</h2>
+<ul>
+<li><strong>Grupo e Subgrupo:</strong> Grupo foi retirado do cadastro de Estipulantes. Subgrupo da Apólice continua sendo uma configuração própria da estrutura da Apólice.</li>
+<li><strong>Encerrar e excluir Vida:</strong> encerrar mantém a participação como encerrada; excluir corrige uma participação indevida dentro das restrições do sistema.</li>
+<li><strong>Cancelar e descartar:</strong> cancelar trata o agendamento ou a vigência conforme a situação; descartar encerra uma pré proposta sem confirmação.</li>
+<li><strong>Retirar pedido e reincluir:</strong> retirar atua antes de efetivar o cancelamento; reincluir prepara nova versão após cancelamento com vigência.</li>
+<li><strong>Histórico e Auditoria:</strong> o histórico explica a evolução funcional; a Auditoria permite rastrear operações registradas conforme o acesso administrativo.</li>
+</ul>
+</section>
+<nav class="chapter-pager" aria-label="Continuar leitura"><a href="#c01">← Anterior: 01 · Primeiros passos</a><a href="#c03">Próximo: 03 · Cadastros</a></nav></article>
+<article class="chapter" aria-labelledby="c03">
+<header class="chapter-header"><p class="eyebrow">03 · Cadastros</p><h1 id="c03">Cadastros</h1></header><nav class="page-toc" aria-label="Neste capítulo"><strong>Neste capítulo</strong><ul><li><a href="#c03-antes-de-cadastrar">Antes de Cadastrar</a></li><li><a href="#c03-cadastrar-um-cliente">Cadastrar um Cliente</a></li><li><a href="#c03-criar-ou-editar-um-vinculo-do-cliente">Criar ou Editar um Vínculo do Cliente</a></li><li><a href="#c03-consultar-propostas-pela-matricula">Consultar Propostas pela Matrícula</a></li><li><a href="#c03-seguradoras-e-corretoras">Seguradoras e Corretoras</a></li><li><a href="#c03-estipulantes">Estipulantes</a></li><li><a href="#c03-subestipulantes-e-cooperados">Subestipulantes e Cooperados</a></li><li><a href="#c03-ramos">Ramos</a></li><li><a href="#c03-coberturas">Coberturas</a></li><li><a href="#c03-modulos-globais">Módulos Globais</a></li><li><a href="#c03-convenios-de-cobranca">Convênios de Cobrança</a></li><li><a href="#c03-conferencia-apos-salvar">Conferência Após Salvar</a></li></ul></nav>
+<p><a href="#inicio">Início do manual</a> · <a href="#c02">Anterior: conceitos</a> · <a href="#c04">Próximo: Apólices</a></p>
+<section class="manual-section" data-search="true"><h2 id="c03-antes-de-cadastrar">Antes de Cadastrar</h2>
+<p>Pesquise o registro existente para evitar duplicidade. Confirme documento, nome e situação. Um registro inativo pode continuar necessário ao histórico; cadastrar outro com o mesmo significado não substitui a avaliação sobre editar ou reativar o existente.</p>
+<p>Prepare os dados do cadastro e faça as seleções relacionadas. Campos obrigatórios e regras variam entre telas; siga os avisos apresentados. Nos formulários com várias seções, revise também os campos abaixo da área visível antes de salvar.</p>
+</section>
+<section class="manual-section" data-search="true"><h2 id="c03-cadastrar-um-cliente">Cadastrar um Cliente</h2>
+<p><strong>Onde:</strong> Operação → Clientes.</p>
+<ol>
+<li>Escolha a ação para cadastrar um novo Cliente.</li>
+<li>Informe <strong>Tipo de Pessoa</strong>, <strong>Documento (CPF/CNPJ)</strong> e <strong>Nome Completo / Razão Social</strong>.</li>
+<li>Preencha os demais dados aplicáveis, como data de nascimento, sexo e RE quando exibido.</li>
+<li>Em <strong>Contatos</strong>, informe o tipo e o contato; identifique o principal quando necessário.</li>
+<li>Em <strong>Endereços</strong>, preencha os dados e selecione UF e cidade conforme as opções.</li>
+<li>Revise <strong>Informações Adicionais</strong> e observações. Marque falecimento/extinção apenas quando corresponder à situação real e confira a data aplicável.</li>
+<li>Salve e confira o cadastro.</li>
+</ol>
+<p class="callout"><strong>Resultado esperado:</strong> Cliente disponível para consulta. A matrícula e a participação em seguro são etapas posteriores.</p>
+<p>Para editar, localize o Cliente e use a ação de edição autorizada. Confira o documento e o nome antes de alterar informações pessoais; não use a edição para transformar uma pessoa em outra.</p>
+</section>
+<section class="manual-section" data-search="true"><h2 id="c03-criar-ou-editar-um-vinculo-do-cliente">Criar ou Editar um Vínculo do Cliente</h2>
+<p><strong>Onde:</strong> Operação → Clientes → detalhes do Cliente → Vínculos.</p>
+<ol>
+<li>Confira o Cliente aberto.</li>
+<li>Escolha adicionar um vínculo.</li>
+<li>Selecione o <strong>Estipulante</strong> cadastrado. Percorra as páginas de opções se necessário.</li>
+<li>Informe a <strong>matrícula</strong> e a situação oferecida no formulário.</li>
+<li>Salve e confira o vínculo na lista.</li>
+</ol>
+<p>Para alterar, abra a edição do vínculo existente. O sistema protege a identidade de vínculos já utilizados. Se houver bloqueio por histórico, não crie uma alteração artificial para contorná-lo; confira o uso em Apólices e Propostas com o responsável.</p>
+<p class="callout"><strong>Resultado esperado:</strong> matrícula disponível no contexto cadastral. A identificação das Apólices aparece quando houver participação efetivamente associada em Vidas. Sem associação, siga <a href="#c04-incluir-uma-vida">a inclusão de Vida</a>.</p>
+</section>
+<section class="manual-section" data-search="true"><h2 id="c03-consultar-propostas-pela-matricula">Consultar Propostas pela Matrícula</h2>
+<ol>
+<li>Nos detalhes do Cliente, encontre o vínculo correto.</li>
+<li>Use <strong>Propostas</strong> na linha correspondente.</li>
+<li>Confira Cliente, Estipulante e matrícula no contexto da janela.</li>
+<li>Localize a proposta pela listagem ou pelo número.</li>
+<li>Escolha explicitamente a versão desejada.</li>
+</ol>
+<p>Um vínculo pode ter propostas de mais de uma Apólice e várias versões. A consulta não escolhe automaticamente uma proposta para você. As ações disponíveis no detalhe dependem das suas permissões e da situação daquela versão.</p>
+</section>
+<section class="manual-section" data-search="true"><h2 id="c03-seguradoras-e-corretoras">Seguradoras e Corretoras</h2>
+<p><strong>Onde:</strong> Parceiros e Estrutura → Seguradoras ou Corretoras.</p>
+<ol>
+<li>Consulte se a organização já está cadastrada.</li>
+<li>Abra o cadastro novo ou a edição do registro correto.</li>
+<li>Preencha <strong>Nome / Razão Social</strong>, <strong>CNPJ</strong> quando aplicável e <strong>Código Interno</strong>.</li>
+<li>Em Seguradoras, confira <strong>Código SUSEP</strong>; em Corretoras, confira <strong>Código Protheus</strong>. Preencha a observação quando necessária.</li>
+<li>Salve e revise o resultado.</li>
+</ol>
+<p>Escolher uma Seguradora em outro formulário exige que ela esteja disponível na consulta correspondente. Se não aparecer, confira o cadastro, a situação e seu acesso à consulta.</p>
+</section>
+<section class="manual-section" data-search="true"><h2 id="c03-estipulantes">Estipulantes</h2>
+<p><strong>Onde:</strong> Parceiros e Estrutura → Estipulantes.</p>
+<ol>
+<li>Pesquise por um registro existente e escolha cadastrar ou editar.</li>
+<li>Revise <strong>Razão Social</strong>, <strong>Nome Fantasia</strong>, <strong>CNPJ</strong>, código e observações conforme aplicáveis.</li>
+<li>No campo <strong>Seguradora</strong>, pesquise e selecione uma organização cadastrada quando houver vínculo a informar.</li>
+<li>Preencha endereço, contatos e contatos institucionais necessários.</li>
+<li>Em <strong>Configuração Operacional</strong>, informe <strong>Início de Vigência</strong>, que é obrigatório. Preencha <strong>Fim de Vigência</strong> quando aplicável.</li>
+<li>Salve e abra os detalhes para conferir.</li>
+</ol>
+<p><strong>Seguradora é opcional.</strong> Para trocar, escolha outra opção e salve. Para desvincular, use <strong>Remover seguradora</strong> e salve. O vínculo pode ser mantido sem alteração quando você não tem acesso à pesquisa de Seguradoras.</p>
+<p>O campo <strong>Grupo</strong> não faz parte do cadastro atual. Não é necessário preencher um substituto; eventuais vínculos antigos são preservados pelo sistema.</p>
+<figure><img loading="lazy" src="imagens/estipulante-cadastro.png" alt="Cadastro de Estipulante com dados fictícios: identificação, Seguradora e vigência."><figcaption>Cadastro de Estipulante com dados fictícios: identificação, Seguradora e vigência.</figcaption></figure>
+<figure><img loading="lazy" src="imagens/estipulante-detalhes.png" alt="Detalhes do Estipulante fictício com o nome da Seguradora e as datas de vigência conferidas."><figcaption>Detalhes do Estipulante fictício com o nome da Seguradora e as datas de vigência conferidas.</figcaption></figure>
+</section>
+<section class="manual-section" data-search="true"><h2 id="c03-subestipulantes-e-cooperados">Subestipulantes e Cooperados</h2>
+<p><strong>Onde:</strong> Parceiros e Estrutura → área correspondente.</p>
+<ol>
+<li>Consulte o registro para evitar duplicidade.</li>
+<li>Abra a ação de cadastro ou edição.</li>
+<li>Informe os dados de identificação e as relações exigidas pelo formulário.</li>
+<li>Confira a situação e salve.</li>
+</ol>
+<p>O cadastro de um Subestipulante não equivale ao seu vínculo com uma Apólice. Faça a associação no contexto da Apólice quando a rotina exigir. Da mesma forma, não presuma que cadastrar um Cooperado cria automaticamente Cliente, Vida ou Proposta.</p>
+<div class="table-wrap" role="region" aria-label="Tabela de referência" tabindex="0"><table><thead><tr>
+<th scope="col">Cadastro</th>
+<th scope="col">O que conferir no formulário</th>
+</tr></thead><tbody>
+<tr><td>Subestipulante</td><td>Nome / Razão Social, CNPJ quando aplicável, Código Interno e Observações Internas</td></tr>
+<tr><td>Cooperado — identificação</td><td>Tipo, Código, Nome, CPF, Data de Nascimento e Coordenador responsável quando aplicável</td></tr>
+<tr><td>Cooperado — documentação</td><td>RG, Órgão Emissor, Data de Emissão e registros profissionais/fiscais apresentados</td></tr>
+<tr><td>Cooperado — contato e endereço</td><td>Telefone, E-mail, CEP, logradouro, número, complemento, bairro, UF e cidade</td></tr>
+<tr><td>Cooperado — operação</td><td>Número de Dependentes, Data de Inscrição e indicação de Cooperado Credenciado</td></tr>
+<tr><td>Cooperado — banco</td><td>Banco, Agência e Conta Corrente, além das observações pertinentes</td></tr>
+</tbody></table></div>
+<p>O número de dependentes do Cooperado é uma informação cadastral. Não deve ser interpretado como inclusão automática de beneficiários ou dependentes em uma Proposta.</p>
+</section>
+<section class="manual-section" data-search="true"><h2 id="c03-ramos">Ramos</h2>
+<p><strong>Onde:</strong> Configurações do Seguro → Ramos.</p>
+<p>Para cadastrar, abra a inclusão, informe <strong>Código</strong> e <strong>Nome</strong>, preencha a <strong>Descrição</strong> quando necessária e salve. Para consultar um existente:</p>
+<ol>
+<li>Consulte o Ramo desejado.</li>
+<li>Use <strong>Visualizar</strong> para abrir seus detalhes.</li>
+<li>Confira nome, situação, código quando apresentado, descrição e datas.</li>
+<li>Se precisar corrigir e possuir acesso, use a edição disponível.</li>
+</ol>
+<p>O Ramo participa da configuração do seguro e da conferência financeira. Mudanças cadastrais não recalculam automaticamente valores financeiros já confirmados.</p>
+<figure><img loading="lazy" src="imagens/ramo-detalhes.png" alt="Detalhes de um Ramo: identificação, situação e ações para voltar ou editar."><figcaption>Detalhes de um Ramo: identificação, situação e ações para voltar ou editar.</figcaption></figure>
+</section>
+<section class="manual-section" data-search="true"><h2 id="c03-coberturas">Coberturas</h2>
+<p><strong>Onde:</strong> Configurações do Seguro → Coberturas.</p>
+<ol>
+<li>Cadastre ou localize a Cobertura.</li>
+<li>Revise nome, nome reduzido, classificação básica e reajuste, conforme exibidos.</li>
+<li>Salve o cadastro compartilhado.</li>
+<li>Para informar os prêmios de uma Apólice, abra o <a href="#c04-configurar-plano-e-coberturas">Plano do Módulo daquela Apólice</a>.</li>
+</ol>
+<p>Alterar os atributos da Cobertura afeta a identificação compartilhada nos vínculos. Os prêmios de titular e cônjuge pertencem à associação com o Plano e são mantidos separadamente.</p>
+</section>
+<section class="manual-section" data-search="true"><h2 id="c03-modulos-globais">Módulos Globais</h2>
+<p><strong>Onde:</strong> Configurações do Seguro → Módulos Globais.</p>
+<p>Consulte, cadastre ou edite o Módulo conforme sua autorização. Confira <strong>Nome do Módulo</strong>, <strong>Descrição</strong> e <strong>Status</strong> quando apresentado. Depois, faça o vínculo no contexto da Apólice e configure seu Plano e suas Coberturas. O cadastro global é uma referência reutilizável; sozinho não conclui a preparação da Apólice.</p>
+</section>
+<section class="manual-section" data-search="true"><h2 id="c03-convenios-de-cobranca">Convênios de Cobrança</h2>
+<p><strong>Onde:</strong> Configurações do Seguro → Convênios de Cobrança.</p>
+<p>O formulário reúne dados gerais e bancários, configurações de arquivos de remessa/retorno e dados do estabelecimento. Preencha somente informações validadas pelo responsável por esse cadastro e confira códigos, agência, conta e caminhos quando aplicáveis.</p>
+<p class="callout"><strong>Limite:</strong> a existência desses campos não significa que a rotina atual emite boletos, transmite arquivos ou realiza liquidação bancária. As operações financeiras disponíveis estão no <a href="#c06">capítulo Financeiro</a>.</p>
+</section>
+<section class="manual-section" data-search="true"><h2 id="c03-conferencia-apos-salvar">Conferência Após Salvar</h2>
+<ul>
+<li>Confirme que o nome e o documento identificam a pessoa ou organização correta.</li>
+<li>Reabra o registro e confira contatos, endereço e relações importantes.</li>
+<li>Verifique se a situação permite o uso desejado na etapa seguinte.</li>
+<li>Ao usar uma lista de seleção já aberta em outra tela, recarregue suas opções quando necessário.</li>
+</ul>
+</section>
+<nav class="chapter-pager" aria-label="Continuar leitura"><a href="#c02">← Anterior: 02 · Conceitos e glossário</a><a href="#c04">Próximo: 04 · Apólices e participações</a></nav></article>
+<article class="chapter" aria-labelledby="c04">
+<header class="chapter-header"><p class="eyebrow">04 · Apólices e participações</p><h1 id="c04">Apólices e Participações</h1></header><nav class="page-toc" aria-label="Neste capítulo"><strong>Neste capítulo</strong><ul><li><a href="#c04-abrir-e-conferir-uma-apolice">Abrir e Conferir uma Apólice</a></li><li><a href="#c04-cadastrar-ou-editar-os-dados-gerais">Cadastrar ou Editar os Dados Gerais</a></li><li><a href="#c04-preparar-a-estrutura">Preparar a Estrutura</a></li><li><a href="#c04-configurar-plano-e-coberturas">Configurar Plano e Coberturas</a></li><li><a href="#c04-alterar-uma-cobertura-do-plano">Alterar uma Cobertura do Plano</a></li><li><a href="#c04-incluir-uma-vida">Incluir uma Vida</a></li><li><a href="#c04-abrir-as-propostas-de-uma-vida">Abrir as Propostas de uma Vida</a></li><li><a href="#c04-encerrar-ou-excluir-uma-participacao">Encerrar ou Excluir uma Participação</a></li><li><a href="#c04-exclusoes-na-estrutura-da-apolice">Exclusões na Estrutura da Apólice</a></li><li><a href="#c04-consultar-o-universo-anterior-e-o-historico">Consultar o Universo Anterior e o Histórico</a></li></ul></nav>
+<p><a href="#inicio">Início do manual</a> · <a href="#c03">Anterior: cadastros</a> · <a href="#c05">Próximo: Propostas</a></p>
+<section class="manual-section" data-search="true"><h2 id="c04-abrir-e-conferir-uma-apolice">Abrir e Conferir uma Apólice</h2>
+<p><strong>Onde:</strong> Operação → Apólices.</p>
+<ol>
+<li>Localize a Apólice na consulta.</li>
+<li>Abra o registro e confira nome, identificação, situação e períodos.</li>
+<li>Escolha a aba correspondente à tarefa.</li>
+</ol>
+<div class="table-wrap" role="region" aria-label="Tabela de referência" tabindex="0"><table><thead><tr>
+<th scope="col">Aba</th>
+<th scope="col">Finalidade</th>
+</tr></thead><tbody>
+<tr><td>Resumo</td><td>Conferir a identificação geral</td></tr>
+<tr><td>Ramos</td><td>Consultar e manter os vínculos de Ramos e suas identificações na Apólice</td></tr>
+<tr><td>Configurações</td><td>Conferir as configurações próprias da Apólice</td></tr>
+<tr><td>Subgrupos</td><td>Organizar os Subgrupos do contexto</td></tr>
+<tr><td>Módulos</td><td>Vincular Módulos e configurar Plano e Coberturas</td></tr>
+<tr><td>Subestipulantes</td><td>Manter as associações correspondentes</td></tr>
+<tr><td>Vidas</td><td>Consultar e manter as participações e acessar suas Propostas</td></tr>
+<tr><td>Universo anterior</td><td>Consultar a estrutura histórica correspondente</td></tr>
+<tr><td>Parcelas</td><td>Conferir competências, gerar lotes, registrar baixas e fechar o mês</td></tr>
+<tr><td>Histórico</td><td>Consultar os eventos funcionais registrados</td></tr>
+</tbody></table></div>
+<p>Antes de alterar uma configuração, confirme que está na Apólice correta. Cadastros parecidos podem existir em contextos diferentes.</p>
+</section>
+<section class="manual-section" data-search="true"><h2 id="c04-cadastrar-ou-editar-os-dados-gerais">Cadastrar ou Editar os Dados Gerais</h2>
+<p><strong>Antes de começar:</strong> confira os cadastros de Estipulante e Seguradora e, quando aplicável, de Corretora.</p>
+<ol>
+<li>Em <strong>Operação → Apólices</strong>, abra a ação de cadastro ou a edição da Apólice desejada.</li>
+<li>Informe <strong>Nome (Denominação)</strong>.</li>
+<li>Selecione <strong>Estipulante</strong> e <strong>Seguradora</strong>.</li>
+<li>Selecione <strong>Corretora (Opcional)</strong> quando fizer parte da operação.</li>
+<li>Confira <strong>Início da Vigência</strong>, <strong>Fim da Vigência</strong> e <strong>Data de Aniversário</strong> conforme os campos e regras apresentados.</li>
+<li>Preencha a observação quando necessária e salve.</li>
+<li>Abra os detalhes e revise a identificação antes de manter os vínculos nas abas.</li>
+</ol>
+<p class="callout"><strong>Resultado esperado:</strong> dados gerais da Apólice gravados. O número associado a um Ramo e a estrutura de Módulos, Plano, Coberturas e Vidas são conferidos em suas respectivas etapas.</p>
+</section>
+<section class="manual-section" data-search="true"><h2 id="c04-preparar-a-estrutura">Preparar a Estrutura</h2>
+<p>Para uma nova estrutura, revise os cadastros que serão utilizados: parceiros, Ramos, Coberturas e Módulos Globais. Na Apólice, confira os dados gerais e mantenha os vínculos aplicáveis pelas abas correspondentes.</p>
+<p>Uma sequência útil é conferir <strong>Ramos e Configurações</strong>, organizar <strong>Subgrupos e Subestipulantes</strong>, configurar <strong>Módulos, Plano e Coberturas</strong> e, depois, incluir <strong>Vidas</strong>. A necessidade de cada vínculo depende da configuração da operação; não cadastre associações sem correspondência real apenas para preencher a estrutura.</p>
+<p>Para alterar um vínculo, use a edição da própria linha ou registro. A situação do cadastro global e a situação do vínculo são controles diferentes; confira ambos quando uma seleção estiver indisponível.</p>
+</section>
+<section class="manual-section" data-search="true"><h2 id="c04-configurar-plano-e-coberturas">Configurar Plano e Coberturas</h2>
+<p><strong>Antes de começar:</strong> a Cobertura deve existir no cadastro compartilhado; a Apólice e o Módulo precisam permitir a alteração.</p>
+<ol>
+<li>Na Apólice, abra <strong>Módulos</strong>.</li>
+<li>Abra <strong>Plano e Coberturas</strong> do vínculo desejado ou edite o vínculo do Módulo.</li>
+<li>Cadastre seu Plano, se ainda não existir. Cada vínculo do Módulo possui um único Plano.</li>
+<li>Escolha <strong>Vincular Cobertura</strong>.</li>
+<li>Selecione uma Cobertura existente.</li>
+<li>Informe <strong>prêmio do titular</strong> e <strong>prêmio do cônjuge</strong>.</li>
+<li>Confira a situação e escolha <strong>Salvar vínculo da Cobertura</strong>.</li>
+<li>Repita para as demais Coberturas e revise a lista final.</li>
+</ol>
+<p>Os dois prêmios são obrigatórios, não negativos e aceitam até duas casas decimais. Zero representa ausência de cobrança naquele campo. O sistema não herda automaticamente os valores de Planos globais ou do Universo anterior.</p>
+<p>Ao cadastrar um novo vínculo de Módulo, <strong>Salvar vínculo e continuar</strong> permite seguir para Plano e Coberturas. Essas etapas são salvas separadamente: interromper depois de salvar o vínculo não desfaz o que já foi gravado.</p>
+<p class="callout"><strong>Resultado esperado:</strong> Plano com as Coberturas e os prêmios corretos para aquele vínculo de Módulo naquela Apólice.</p>
+</section>
+<section class="manual-section" data-search="true"><h2 id="c04-alterar-uma-cobertura-do-plano">Alterar uma Cobertura do Plano</h2>
+<ol>
+<li>Localize a associação no Plano.</li>
+<li>Use <strong>Editar vínculo</strong>.</li>
+<li>Altere prêmios ou situação conforme necessário.</li>
+<li>Salve e confira o resultado.</li>
+</ol>
+<p>A identidade da Cobertura não é trocada dentro da mesma associação. Para usar outra, mantenha o histórico da anterior e faça a nova associação permitida.</p>
+<p>Uma Cobertura já associada, mesmo inativa, não aparece como uma associação nova disponível. Edite ou reative o vínculo existente. Para reativá-lo, o cadastro da Cobertura também precisa estar ativo. Se a Cobertura acabou de ser cadastrada, use <strong>Atualizar Coberturas</strong> no seletor.</p>
+<p>Alterar a configuração do Módulo não reescreve silenciosamente as condições das Propostas já criadas. Para uma Proposta elegível, utilize <a href="#c05-revisar-condicoes">Revisar condições</a>.</p>
+</section>
+<section class="manual-section" data-search="true"><h2 id="c04-incluir-uma-vida">Incluir uma Vida</h2>
+<p><strong>Antes de começar:</strong> tenha o Cliente cadastrado, seu vínculo com Estipulante e matrícula, e a estrutura de seguro aplicável preparada.</p>
+<ol>
+<li>Abra a Apólice correta e entre em <strong>Vidas</strong>.</li>
+<li>Escolha a ação de inclusão de participação.</li>
+<li>Selecione o Cliente e o vínculo/matrícula correto conforme o formulário.</li>
+<li>Confira Subgrupo, Módulo, situação e períodos aplicáveis.</li>
+<li>Revise os dados e salve.</li>
+<li>Reabra a participação e confira sua identificação.</li>
+</ol>
+<p class="callout"><strong>Resultado esperado:</strong> participação disponível na Apólice. O relacionamento com a matrícula poderá aparecer também nos detalhes do Cliente. Ainda será necessário criar e confirmar uma Proposta para seguir o fluxo de contratação.</p>
+<p>Uma Vida pode ter impedimentos que bloqueiam a criação ou confirmação de Proposta. Leia o motivo apresentado e confira o contexto em vez de criar outra participação para contornar a regra.</p>
+</section>
+<section class="manual-section" data-search="true"><h2 id="c04-abrir-as-propostas-de-uma-vida">Abrir as Propostas de uma Vida</h2>
+<ol>
+<li>Em <strong>Vidas</strong>, localize a participação correta.</li>
+<li>Abra a consulta de Propostas disponível para ela.</li>
+<li>Confira Cliente, matrícula e Apólice.</li>
+<li>Escolha a versão desejada ou inicie a criação permitida.</li>
+</ol>
+<p>Uma Vida encerrada pode continuar permitindo a consulta de seu histórico de Propostas. Consultar não significa poder criar ou confirmar outra versão nesse contexto.</p>
+</section>
+<section class="manual-section" data-search="true"><h2 id="c04-encerrar-ou-excluir-uma-participacao">Encerrar ou Excluir uma Participação</h2>
+<div class="table-wrap" role="region" aria-label="Tabela de referência" tabindex="0"><table><thead><tr>
+<th scope="col">Necessidade</th>
+<th scope="col">Ação e efeito</th>
+</tr></thead><tbody>
+<tr><td>Registrar o encerramento da participação</td><td><strong>Encerrar</strong> mantém a Vida visível como encerrada</td></tr>
+<tr><td>Corrigir uma participação incluída indevidamente</td><td><strong>Excluir</strong>, quando permitido, retira a participação das consultas operacionais e preserva histórico e Auditoria</td></tr>
+</tbody></table></div>
+<p>A exclusão exige confirmação e <strong>não é permitida se a Vida tiver qualquer Proposta</strong>, inclusive inativa ou excluída. Cliente e matrícula não são apagados por essa operação. A permissão de excluir é diferente da de encerrar ou alterar.</p>
+<p>Antes de confirmar, confira a Apólice, o Cliente e a matrícula. Se houver Proposta ou outro uso protegido, mantenha o histórico e avalie a operação adequada com o responsável.</p>
+</section>
+<section class="manual-section" data-search="true"><h2 id="c04-exclusoes-na-estrutura-da-apolice">Exclusões na Estrutura da Apólice</h2>
+<p>Ramos, Subgrupos, Subestipulantes, Módulos e seus vínculos possuem proteções de uso e histórico. Leia o conteúdo da confirmação e os impedimentos apresentados. Não exclua registros relacionados para tentar liberar uma exclusão bloqueada sem avaliar a consequência funcional.</p>
+<p>Encerrar participação, cancelar Proposta e inativar configuração são ações diferentes. Confira a finalidade da alteração antes de escolher.</p>
+</section>
+<section class="manual-section" data-search="true"><h2 id="c04-consultar-o-universo-anterior-e-o-historico">Consultar o Universo Anterior e o Histórico</h2>
+<p>Use <strong>Universo anterior</strong> para compreender os dados históricos apresentados. A preparação de novas Propostas segue o contexto atual de Vida, Módulo, Plano e Coberturas; não reutilize identificações antigas como se fossem a estrutura atual.</p>
+<p>Use <strong>Histórico</strong> para conferir eventos funcionais. Para acompanhar parcelas e pagamentos entre versões, consulte também <a href="#c06-consultar-o-historico-financeiro">o histórico financeiro</a>.</p>
+</section>
+<nav class="chapter-pager" aria-label="Continuar leitura"><a href="#c03">← Anterior: 03 · Cadastros</a><a href="#c05">Próximo: 05 · Propostas</a></nav></article>
+<article class="chapter" aria-labelledby="c05">
+<header class="chapter-header"><p class="eyebrow">05 · Propostas</p><h1 id="c05">Propostas</h1></header><nav class="page-toc" aria-label="Neste capítulo"><strong>Neste capítulo</strong><ul><li><a href="#c05-escolher-a-rotina-correta">Escolher a Rotina Correta</a></li><li><a href="#c05-consultar-uma-proposta">Consultar uma Proposta</a></li><li><a href="#c05-criar-a-primeira-pre-proposta">Criar a Primeira Pré Proposta</a></li><li><a href="#c05-preencher-a-pre-proposta">Preencher a Pré Proposta</a></li><li><a href="#c05-revisar-condicoes">Revisar Condições</a></li><li><a href="#c05-conferir-e-confirmar">Conferir e Confirmar</a></li><li><a href="#c05-preparar-uma-nova-versao">Preparar uma Nova Versão</a></li><li><a href="#c05-gerir-o-agendamento-de-inicio">Gerir o Agendamento de Início</a></li><li><a href="#c05-cancelar-a-vigencia">Cancelar a Vigência</a></li><li><a href="#c05-alterar-ou-retirar-pedido-de-cancelamento">Alterar ou Retirar Pedido de Cancelamento</a></li><li><a href="#c05-reincluir-apos-cancelamento">Reincluir Após Cancelamento</a></li><li><a href="#c05-descartar-uma-pre-proposta">Descartar uma Pré Proposta</a></li><li><a href="#c05-conferencia-final-de-qualquer-transicao">Conferência Final de Qualquer Transição</a></li></ul></nav>
+<p><a href="#inicio">Início do manual</a> · <a href="#c04">Anterior: Apólices</a> · <a href="#c06">Próximo: financeiro</a></p>
+<section class="manual-section" data-search="true"><h2 id="c05-escolher-a-rotina-correta">Escolher a Rotina Correta</h2>
+<div class="table-wrap" role="region" aria-label="Tabela de referência" tabindex="0"><table><thead><tr>
+<th scope="col">O que você precisa fazer</th>
+<th scope="col">Caminho neste capítulo</th>
+</tr></thead><tbody>
+<tr><td>Iniciar a primeira contratação de uma Vida</td><td><a href="#c05-criar-a-primeira-pre-proposta">Criar pré proposta</a></td></tr>
+<tr><td>Completar beneficiários e informações</td><td><a href="#c05-preencher-a-pre-proposta">Preencher</a></td></tr>
+<tr><td>Comparar as condições com outra configuração disponível</td><td><a href="#c05-revisar-condicoes">Revisar condições</a></td></tr>
+<tr><td>Validar valores e iniciar ou agendar a vigência</td><td><a href="#c05-conferir-e-confirmar">Conferir e confirmar</a></td></tr>
+<tr><td>Alterar uma contratação que já está vigente</td><td><a href="#c05-preparar-uma-nova-versao">Nova versão</a></td></tr>
+<tr><td>Mudar ou cancelar um início futuro</td><td><a href="#c05-gerir-o-agendamento-de-inicio">Gerir agendamento</a></td></tr>
+<tr><td>Encerrar a vigência</td><td><a href="#c05-cancelar-a-vigencia">Cancelar vigência</a></td></tr>
+<tr><td>Alterar ou retirar um pedido ainda não efetivado</td><td><a href="#c05-alterar-ou-retirar-pedido-de-cancelamento">Gerir pedido de cancelamento</a></td></tr>
+<tr><td>Retomar após cancelamento que teve vigência</td><td><a href="#c05-reincluir-apos-cancelamento">Reincluir</a></td></tr>
+<tr><td>Encerrar uma preparação ainda não confirmada</td><td><a href="#c05-descartar-uma-pre-proposta">Descartar</a></td></tr>
+</tbody></table></div>
+<p>As ações aparecem conforme situação, origem, elegibilidade e permissões. Algumas rotinas se aplicam somente a Propostas nativas. Um registro histórico pode permitir consulta sem oferecer os mesmos comandos.</p>
+</section>
+<section class="manual-section" data-search="true"><h2 id="c05-consultar-uma-proposta">Consultar uma Proposta</h2>
+<p>Você pode começar por <strong>Operação → Propostas</strong>, pelas Propostas de uma <strong>Vida</strong> ou pela ação <strong>Propostas</strong> de um vínculo nos detalhes do Cliente.</p>
+<ol>
+<li>Localize o número desejado ou percorra a listagem no contexto escolhido.</li>
+<li>Abra a Proposta.</li>
+<li>Confira Cliente, matrícula, Apólice, número e versão.</li>
+<li>Leia situação, indicador de vigência, datas e eventuais pendências.</li>
+<li>Consulte condições, beneficiários, histórico e parcelas antes de executar alterações.</li>
+</ol>
+<p>Ao abrir pela matrícula ou pela Vida, a consulta permanece naquele contexto. Confira a versão escolhida; não presuma que o primeiro resultado seja a única Proposta ou a versão vigente.</p>
+</section>
+<section class="manual-section" data-search="true"><h2 id="c05-criar-a-primeira-pre-proposta">Criar a Primeira Pré Proposta</h2>
+<p><strong>Antes de começar:</strong> a Vida deve estar elegível, com vínculo de Cliente e condições disponíveis. A primeira criação não é o caminho para uma Vida que já possui histórico de Propostas.</p>
+<ol>
+<li>Abra <strong>Operação → Propostas</strong>.</li>
+<li>Escolha <strong>Nova pré proposta</strong>.</li>
+<li>Pesquise e selecione uma Apólice ativa.</li>
+<li>Pesquise a Vida por nome ou documento e confira a matrícula.</li>
+<li>Leia Cliente, Subgrupo, Módulo e os impedimentos apresentados.</li>
+<li>Escolha uma Vida elegível.</li>
+<li>Confira o contexto no diálogo e confirme a criação.</li>
+</ol>
+<p class="callout"><strong>Resultado esperado:</strong> abertura da pré proposta criada para preenchimento. Ela começa sem vigência e sem parcela. Cancelar a seleção antes de confirmar retorna à consulta sem criar o registro.</p>
+<p>Também é possível iniciar pelo contexto da Vida na Apólice. Se houver histórico anterior, use a operação oferecida no detalhe da Proposta, como nova versão ou reinclusão, conforme a situação.</p>
+</section>
+<section class="manual-section" data-search="true"><h2 id="c05-preencher-a-pre-proposta">Preencher a Pré Proposta</h2>
+<ol>
+<li>Abra a pré proposta correta.</li>
+<li>Confira o contexto e as condições copiadas do Módulo.</li>
+<li>Preencha ou revise os beneficiários e seus percentuais.</li>
+<li>Confira os prêmios de Coberturas e a contratação de cônjuge quando aplicável.</li>
+<li>Ao realizar ajustes de prêmio permitidos, informe a justificativa exigida.</li>
+<li>Preencha a observação quando necessária.</li>
+<li>Salve o preenchimento e confira o resultado.</li>
+</ol>
+<p><strong>Antes de confirmar:</strong> os beneficiários devem estar completos e somar <strong>100%</strong>. Exemplo: dois beneficiários com 60% e 40% somam 100%; dois com 60% e 50% precisam de correção.</p>
+<p>Dados de beneficiários e valores pertencem àquela Proposta. Corrigir um cadastro relacionado não significa que todas as condições registradas serão substituídas automaticamente.</p>
+</section>
+<section class="manual-section" data-search="true"><h2 id="c05-revisar-condicoes">Revisar Condições</h2>
+<p>Use esta rotina quando precisar comparar as condições registradas com outra configuração de Subgrupo/Módulo disponível na mesma Apólice. Ela é permitida na pré proposta e em confirmadas com início ainda futuro, antes da efetivação, quando a tela indicar elegibilidade.</p>
+<ol>
+<li>No detalhe, escolha <strong>Revisar condições</strong>.</li>
+<li>Selecione o Subgrupo e o Módulo de destino permitidos.</li>
+<li>Escolha <strong>Comparar condições</strong>.</li>
+<li>Examine mudanças de contexto, Plano, Coberturas incluídas, removidas e mantidas, atributos e prêmios.</li>
+<li>Escolha explicitamente o tratamento dos ajustes: manter ajustes das correspondências permitidas ou usar os prêmios atuais do Módulo.</li>
+<li>Confira o resultado proposto e informe a justificativa.</li>
+<li>Use <strong>Aplicar condições comparadas</strong>.</li>
+</ol>
+<p class="callout"><strong>Resultado esperado:</strong> condições da Proposta atualizadas com registro de histórico. A Vida e as versões anteriores permanecem preservadas. Os beneficiários são mantidos para nova conferência.</p>
+<p>Manter ajustes vale para correspondências reconhecidas pelo sistema. Coberturas novas recebem seus valores atuais; nomes semelhantes não garantem correspondência. Abrir a revisão, comparar ou voltar não aplica a mudança.</p>
+<p>Se os dados mudarem depois da comparação, faça uma nova comparação. Após mudanças que afetem valores ou início, refaça também a conferência financeira.</p>
+</section>
+<section class="manual-section" data-search="true"><h2 id="c05-conferir-e-confirmar">Conferir e Confirmar</h2>
+<p><strong>Antes de começar:</strong> confira a identificação, o Plano do Módulo, ao menos uma Cobertura ativa, beneficiários completos e total de 100%, além das justificativas dos ajustes.</p>
+<ol>
+<li>Abra a operação de confirmação/conferência disponível no detalhe.</li>
+<li>Informe e confira <strong>Data de início da vigência</strong>, <strong>Competência inicial</strong>, <strong>Primeiro vencimento</strong> e <strong>Ramo para o IOF</strong>.</li>
+<li>Escolha <strong>Conferir primeira parcela</strong>.</li>
+<li>Revise prêmios, participação de cônjuge quando contratada, IOF e valor mensal.</li>
+<li>Confira os efeitos da confirmação sobre a vigência e eventual versão anterior.</li>
+<li>Escolha <strong>Confirmar proposta e valores</strong> somente quando os dados apresentados estiverem corretos.</li>
+<li>Leia o resultado e confira situação, datas e histórico.</li>
+</ol>
+<div class="table-wrap" role="region" aria-label="Tabela de referência" tabindex="0"><table><thead><tr>
+<th scope="col">Data de início</th>
+<th scope="col">Resultado esperado quando todas as regras são atendidas</th>
+</tr></thead><tbody>
+<tr><td>Hoje ou retroativa válida</td><td>Efetivação na confirmação e substituição da anterior quando aplicável</td></tr>
+<tr><td>Futura</td><td>Confirmação e agendamento; a anterior permanece vigente até a efetivação da nova</td></tr>
+</tbody></table></div>
+<p>A data precisa respeitar os períodos e as regras do contexto. Data retroativa não significa permissão irrestrita para qualquer dia passado. Um agendamento futuro depende de processamento habilitado no ambiente.</p>
+<p>A primeira parcela mensal integral é gerada na <strong>ativação</strong> quando existe plano financeiro nativo. Criar, salvar ou apenas agendar uma pré proposta não equivale a receber pagamento. Consulte <a href="#c06-entender-a-primeira-parcela">a primeira parcela</a>.</p>
+</section>
+<section class="manual-section" data-search="true"><h2 id="c05-preparar-uma-nova-versao">Preparar uma Nova Versão</h2>
+<p>Use a criação de nova versão oferecida no detalhe para uma Proposta elegível, em vez de tentar criar outra primeira Proposta pela lista geral.</p>
+<ol>
+<li>Abra a versão de origem e confira a vigência.</li>
+<li>Escolha a ação de nova versão disponível.</li>
+<li>Revise o contexto apresentado e confirme a preparação.</li>
+<li>Preencha, revise condições, confira valores e confirme a nova versão pelo fluxo normal.</li>
+</ol>
+<p class="callout"><strong>Resultado esperado:</strong> nova preparação ligada à origem e histórico preservado. Preparar a nova versão não encerra a anterior. A troca ocorre na efetivação válida da sucessora, imediatamente ou na data agendada.</p>
+<p>Se a substituição falhar na validação, a anterior não deve ser considerada substituída apenas porque a tentativa foi criada. Confira o resultado e o histórico.</p>
+</section>
+<section class="manual-section" data-search="true"><h2 id="c05-gerir-o-agendamento-de-inicio">Gerir o Agendamento de Início</h2>
+<p>Abra a Proposta confirmada para início futuro. Em <strong>Gerenciar agendamento</strong>, quando elegível, use <strong>Reagendar início</strong> ou <strong>Cancelar agendamento</strong>, com os dados e justificativas exigidos.</p>
+<p>Para reagendar, informe a nova data, confira as validações e refaça a conferência financeira quando solicitada. Não trate o reagendamento como edição livre das condições.</p>
+<p>Para cancelar antes do início, confira que está encerrando o agendamento correto. Essa operação não representa cancelamento de uma cobertura já vigente e não reativa versões anteriores.</p>
+<p>Quando a data for alcançada, o processamento revalida a elegibilidade. Se houver pendência, leia o motivo, corrija a causa e utilize a nova tentativa oferecida quando cabível. A efetivação manual disponível não antecipa o início.</p>
+</section>
+<section class="manual-section" data-search="true"><h2 id="c05-cancelar-a-vigencia">Cancelar a Vigência</h2>
+<p><strong>Antes de começar:</strong> confirme que deseja encerrar a versão vigente. Se pretende alterar condições com continuidade, avalie a rotina de nova versão.</p>
+<ol>
+<li>Abra a Proposta vigente correta.</li>
+<li>Escolha a ação de cancelamento de vigência.</li>
+<li>Informe a data e a justificativa exigidas.</li>
+<li>Confira que a data representa o <strong>primeiro dia sem vigência</strong>.</li>
+<li>Confirme e leia se o cancelamento foi efetivado ou agendado.</li>
+</ol>
+<p>Para hoje ou data retroativa válida, o encerramento ocorre na operação. Para data futura, fica um pedido e a Proposta permanece vigente até o processamento. Podem existir impedimentos, como sucessora não encerrada; siga a mensagem apresentada.</p>
+<p>O cancelamento preserva parcelas, pagamentos, condições e histórico. Não gera automaticamente devolução, crédito ou ajuste proporcional. Não considere uma solicitação futura como encerramento já concluído.</p>
+</section>
+<section class="manual-section" data-search="true"><h2 id="c05-alterar-ou-retirar-pedido-de-cancelamento">Alterar ou Retirar Pedido de Cancelamento</h2>
+<p>Enquanto o cancelamento ainda não foi efetivado, uma Proposta elegível permite gerir o pedido, inclusive quando a data já chegou e há pendência de processamento.</p>
+<ul>
+<li><strong>Alterar o pedido:</strong> informe uma nova data válida, diferente da anterior, e uma justificativa. Data de hoje ou retroativa válida pode efetivar o cancelamento na própria operação; futura mantém o pedido.</li>
+<li><strong>Retirar o pedido:</strong> confirme a retirada e informe a justificativa. O pedido ativo é removido e o histórico da solicitação é preservado; a Proposta permanece vigente.</li>
+</ul>
+<p class="callout"><strong>Limite:</strong> essas ações não desfazem cancelamento já efetivado. Se o processamento concluir antes da sua gravação, recarregue o registro e confira a situação atual.</p>
+</section>
+<section class="manual-section" data-search="true"><h2 id="c05-reincluir-apos-cancelamento">Reincluir Após Cancelamento</h2>
+<p>Use a reinclusão para uma Proposta nativa cancelada que chegou a ter vigência e que esteja elegível. Ela cria uma nova versão; não reabre a encerrada.</p>
+<ol>
+<li>Abra a Proposta cancelada indicada como origem elegível.</li>
+<li>Escolha a ação de reinclusão.</li>
+<li>Selecione explicitamente as condições: configuração atual do Módulo ou condições registradas na encerrada.</li>
+<li>Confira os valores e a escolha apresentada.</li>
+<li>Conclua a preparação da nova pré proposta.</li>
+<li>Revise beneficiários copiados, percentuais, condições e dados atuais.</li>
+<li>Confira e confirme pelo fluxo normal, com data válida.</li>
+</ol>
+<p>Ao escolher condições anteriores, os ajustes preservados continuam sujeitos às validações atuais. Ao escolher o Módulo, não presuma que os ajustes antigos serão transportados.</p>
+<p>O novo início não pode anteceder o fim de vigência da encerrada. Um intervalo entre o cancelamento e o novo início continua sem cobertura. Preparar a reinclusão não concede vigência nem gera parcela por si só.</p>
+</section>
+<section class="manual-section" data-search="true"><h2 id="c05-descartar-uma-pre-proposta">Descartar uma Pré Proposta</h2>
+<ol>
+<li>Abra a preparação ainda sem confirmação nem vigência.</li>
+<li>Escolha a ação de descarte quando disponível.</li>
+<li>Informe a justificativa e confira a identificação.</li>
+<li>Confirme e consulte a situação e o histórico.</li>
+</ol>
+<p class="callout"><strong>Resultado esperado:</strong> tentativa encerrada como descartada e preservada no histórico. Uma origem vigente, quando existente, não é encerrada pelo descarte da preparação.</p>
+</section>
+<section class="manual-section" data-search="true"><h2 id="c05-conferencia-final-de-qualquer-transicao">Conferência Final de Qualquer Transição</h2>
+<p>Após confirmar, agendar, cancelar, substituir ou reincluir, confira a versão, as datas, o indicador de vigência e o evento no histórico. Em mudanças com impacto financeiro, confira também as parcelas. Se o retorno for de falha ou contexto alterado, recarregue antes de decidir a próxima ação.</p>
+</section>
+<nav class="chapter-pager" aria-label="Continuar leitura"><a href="#c04">← Anterior: 04 · Apólices e participações</a><a href="#c06">Próximo: 06 · Parcelas e financeiro</a></nav></article>
+<article class="chapter" aria-labelledby="c06">
+<header class="chapter-header"><p class="eyebrow">06 · Parcelas e financeiro</p><h1 id="c06">Parcelas e Financeiro</h1></header><nav class="page-toc" aria-label="Neste capítulo"><strong>Neste capítulo</strong><ul><li><a href="#c06-visao-geral-da-rotina">Visão Geral da Rotina</a></li><li><a href="#c06-conferir-os-valores-da-proposta">Conferir os Valores da Proposta</a></li><li><a href="#c06-entender-a-primeira-parcela">Entender a Primeira Parcela</a></li><li><a href="#c06-conferir-uma-competencia">Conferir uma Competência</a></li><li><a href="#c06-gerar-o-lote-mensal">Gerar o Lote Mensal</a></li><li><a href="#c06-registrar-uma-baixa-integral">Registrar uma Baixa Integral</a></li><li><a href="#c06-fechar-a-competencia">Fechar a Competência</a></li><li><a href="#c06-entender-atrasados-sem-duplicar-cobranca">Entender Atrasados sem Duplicar Cobrança</a></li><li><a href="#c06-entender-vencimentos-e-novas-versoes">Entender Vencimentos e Novas Versões</a></li><li><a href="#c06-consultar-o-historico-financeiro">Consultar o Histórico Financeiro</a></li><li><a href="#c06-limites-da-versao-atual">Limites da Versão Atual</a></li></ul></nav>
+<p><a href="#inicio">Início do manual</a> · <a href="#c05">Anterior: Propostas</a> · <a href="#c07">Próximo: Segurança</a></p>
+<section class="manual-section" data-search="true"><h2 id="c06-visao-geral-da-rotina">Visão Geral da Rotina</h2>
+<p>A sequência mensal é <strong>conferir → gerar as mensalidades elegíveis → registrar os pagamentos recebidos → fechar a competência</strong>. Pagamentos de parcelas abertas também podem ser registrados depois do fechamento.</p>
+<p>A primeira parcela tem origem na ativação da Proposta com plano financeiro nativo. As mensalidades seguintes são geradas manualmente por Apólice e competência. A mudança do mês no calendário não gera nem fecha lotes sozinha.</p>
+</section>
+<section class="manual-section" data-search="true"><h2 id="c06-conferir-os-valores-da-proposta">Conferir os Valores da Proposta</h2>
+<p><strong>Onde:</strong> detalhe da Proposta → confirmação ou conferência financeira disponível.</p>
+<ol>
+<li>Confira <strong>Data de início da vigência</strong>.</li>
+<li>Informe <strong>Competência inicial</strong> e <strong>Primeiro vencimento</strong>.</li>
+<li>Selecione <strong>Ramo para o IOF</strong>.</li>
+<li>Escolha <strong>Conferir primeira parcela</strong>.</li>
+<li>Revise a composição apresentada: prêmios, cônjuge quando contratado, IOF e total mensal.</li>
+<li>Na confirmação inicial, use <strong>Confirmar proposta e valores</strong> somente após a revisão completa.</li>
+<li>Para a conferência permitida de uma confirmada ainda não ativada, confira o resultado e use <strong>Salvar financeiro conferido</strong>, quando oferecido.</li>
+</ol>
+<p>Os valores e a alíquota conferidos ficam registrados. Uma mudança posterior no cadastro do IOF não recalcula automaticamente o plano já confirmado. Mudanças de início ou condições antes da ativação podem exigir nova conferência.</p>
+</section>
+<section class="manual-section" data-search="true"><h2 id="c06-entender-a-primeira-parcela">Entender a Primeira Parcela</h2>
+<p>A primeira parcela é mensal e integral; não é proporcional à quantidade de dias de cobertura. Ela é gerada uma única vez na ativação quando há plano financeiro nativo, inclusive na efetivação de início agendado.</p>
+<p><strong>Exemplo didático:</strong> uma mensalidade conferida de R$ 100,00 gera uma parcela mensal integral de R$ 100,00, mesmo que a data válida de início não seja o primeiro dia do mês. Não faça um rateio manual esperando que o sistema o reconheça como regra de cobrança.</p>
+<p>A geração mensal considera a parcela inicial para evitar repetir a mesma mensalidade. Em alterações de versão, consulte o histórico antes de concluir que deveria existir outra parcela na mesma competência.</p>
+</section>
+<section class="manual-section" data-search="true"><h2 id="c06-conferir-uma-competencia">Conferir uma Competência</h2>
+<p><strong>Onde:</strong> Operação → Apólices → abrir a Apólice → Parcelas → <strong>Parcelas e lote mensal</strong>.</p>
+<ol>
+<li>Confira a Apólice.</li>
+<li>Informe <strong>Competência do lote</strong>.</li>
+<li>Escolha <strong>Conferir competência</strong>.</li>
+<li>Leia a situação: conferência anterior à geração, lote gerado ou competência fechada.</li>
+<li>Revise todas as páginas de Vidas e as pendências apresentadas.</li>
+<li>Examine os valores e os detalhes das parcelas antes de gerar, baixar ou fechar.</li>
+</ol>
+<div class="table-wrap" role="region" aria-label="Tabela de referência" tabindex="0"><table><thead><tr>
+<th scope="col">Informação</th>
+<th scope="col">Como interpretar</th>
+</tr></thead><tbody>
+<tr><td>Mensalidade da competência</td><td>Valor do mês analisado para a Vida, conforme sua elegibilidade</td></tr>
+<tr><td>Saldo anterior</td><td>Parcelas antigas ainda abertas</td></tr>
+<tr><td>Total acumulado</td><td>Mensalidade aberta do mês mais o saldo anterior</td></tr>
+<tr><td>Impedimento ou motivo</td><td>Explicação de por que uma ação ou inclusão não está permitida</td></tr>
+</tbody></table></div>
+<p>Se houver pendência, corrija a causa e confira novamente. Não mude a competência apenas para contornar um bloqueio da sequência mensal.</p>
+</section>
+<section class="manual-section" data-search="true"><h2 id="c06-gerar-o-lote-mensal">Gerar o Lote Mensal</h2>
+<ol>
+<li>Faça a conferência da competência.</li>
+<li>Confira a elegibilidade das Vidas, os valores e a situação do mês anterior.</li>
+<li>Quando a geração estiver liberada, escolha <strong>Confirmar geração do lote</strong>.</li>
+<li>Aguarde a conclusão.</li>
+<li>Confira as parcelas resultantes e a mensagem de sucesso.</li>
+</ol>
+<p class="callout"><strong>Resultado esperado:</strong> criação somente das novas mensalidades elegíveis. Dívidas anteriores permanecem em suas parcelas originais; não são somadas ao valor da nova parcela.</p>
+<p>Para liberar a competência seguinte, a anterior precisa estar gerada e fechada. Isso não exige que todas as parcelas tenham sido pagas.</p>
+</section>
+<section class="manual-section" data-search="true"><h2 id="c06-registrar-uma-baixa-integral">Registrar uma Baixa Integral</h2>
+<p><strong>Antes de começar:</strong> tenha a confirmação do recebimento integral e a data do pagamento. Confira Apólice, Vida, competência e parcela.</p>
+<ol>
+<li>Na conferência do lote, abra os detalhes da Vida.</li>
+<li>Localize a parcela pelo número, competência, vencimento, total e saldo aberto.</li>
+<li>Informe a <strong>data do pagamento</strong> daquela parcela.</li>
+<li>Confira novamente a identificação e a data.</li>
+<li>Escolha <strong>Confirmar baixa integral da parcela</strong> correspondente.</li>
+<li>Aguarde e verifique a data registrada e a atualização dos saldos.</li>
+</ol>
+<p class="callout"><strong>Resultado esperado:</strong> pagamento integral registrado e saldo da parcela atualizado. A operação não transfere dinheiro e não executa liquidação bancária; registra no WebApolice um pagamento recebido e conferido.</p>
+<p>Uma parcela antiga ainda aberta pode ser baixada depois que sua competência foi fechada. Não é necessário reabrir o mês. Confira se está baixando a parcela antiga correta, e não a mensalidade atual.</p>
+<p class="callout"><strong>Atenção:</strong> não há pagamento parcial nem estorno de baixa nesta versão. Se o valor recebido for parcial, não registre como integral. Se uma baixa foi lançada indevidamente, comunique o responsável com a identificação da parcela para avaliação; não repita o lançamento nem altere o banco de dados.</p>
+</section>
+<section class="manual-section" data-search="true"><h2 id="c06-fechar-a-competencia">Fechar a Competência</h2>
+<ol>
+<li>Consulte novamente a competência e confira se o lote foi gerado.</li>
+<li>Revise as parcelas e os pagamentos registrados.</li>
+<li>Identifique quais parcelas permanecerão abertas.</li>
+<li>Quando o fechamento estiver liberado, escolha <strong>Confirmar fechamento, preservando abertas</strong>.</li>
+<li>Confira a situação de competência fechada.</li>
+</ol>
+<p class="callout"><strong>Resultado esperado:</strong> mês fechado para a sequência de geração. Os valores não pagos continuam devidos e podem receber baixa posteriormente.</p>
+<p>Fechar a competência não comprova que todos pagaram. Ao informar a situação a outra pessoa, diferencie <strong>mês fechado</strong> de <strong>parcelas quitadas</strong>.</p>
+</section>
+<section class="manual-section" data-search="true"><h2 id="c06-entender-atrasados-sem-duplicar-cobranca">Entender Atrasados sem Duplicar Cobrança</h2>
+<p><strong>Exemplo didático:</strong> janeiro possui R$ 100,00 em aberto. Fevereiro tem nova mensalidade de R$ 100,00. A conferência pode mostrar R$ 100,00 de saldo anterior e R$ 200,00 de total acumulado.</p>
+<p>Existem duas parcelas de R$ 100,00; não foi criada uma parcela de fevereiro de R$ 200,00. Se janeiro for pago depois, registre a baixa de janeiro. O saldo anterior será atualizado sem duplicar o pagamento na mensalidade de fevereiro.</p>
+</section>
+<section class="manual-section" data-search="true"><h2 id="c06-entender-vencimentos-e-novas-versoes">Entender Vencimentos e Novas Versões</h2>
+<p>O calendário preserva o dia de vencimento e o deslocamento de meses originalmente definidos. Se o dia não existe no mês, usa o último dia daquele mês e retoma o dia original nos seguintes. Exemplo: dia 31 usa o último dia de fevereiro e volta ao dia 31 em março.</p>
+<p>Uma nova versão preserva a parcela já gerada e aplica as novas condições à próxima competência elegível ainda não gerada. Cancelamento preserva parcelas e pagamentos anteriores; a geração seguinte considera o período de cobertura. Essas transições não geram automaticamente crédito, devolução ou acerto de diferenças.</p>
+</section>
+<section class="manual-section" data-search="true"><h2 id="c06-consultar-o-historico-financeiro">Consultar o Histórico Financeiro</h2>
+<p>Consulte as parcelas na Apólice e o histórico de parcelas disponível na Proposta. Confira competência, vencimento, valor, pagamento e identificação da versão quando apresentados.</p>
+<p>O histórico acompanha os movimentos da família Apólice/Vida visível, inclusive entre versões, conforme as regras de consulta. Movimentos legados são preservados; não presuma que um registro antigo tenha o mesmo plano financeiro das Propostas nativas.</p>
+</section>
+<section class="manual-section" data-search="true"><h2 id="c06-limites-da-versao-atual">Limites da Versão Atual</h2>
+<div class="table-wrap" role="region" aria-label="Tabela de referência" tabindex="0"><table><thead><tr>
+<th scope="col">Disponível</th>
+<th scope="col">Fora do escopo atual</th>
+</tr></thead><tbody>
+<tr><td>Conferência dos valores e IOF</td><td>Recálculo automático de todo o histórico por alteração cadastral</td></tr>
+<tr><td>Primeira parcela na ativação com plano nativo</td><td>Proporcionalidade diária da mensalidade</td></tr>
+<tr><td>Geração manual de lotes mensais</td><td>Geração e fechamento automáticos pelo calendário</td></tr>
+<tr><td>Baixa integral por parcela</td><td>Pagamento parcial e fracionamento da baixa</td></tr>
+<tr><td>Registro de pagamento com data</td><td>Estorno de baixa</td></tr>
+<tr><td>Fechamento com parcelas abertas</td><td>Crédito ou devolução automática por cancelamento/substituição</td></tr>
+<tr><td>Consulta de parcelas e histórico</td><td>Emissão de títulos/boletos, remessa/retorno e liquidação bancária</td></tr>
+</tbody></table></div>
+<p>O responsável optou por manter esse alcance nesta versão. Campos de convênio e dados bancários não ampliam essas funcionalidades.</p>
+</section>
+<nav class="chapter-pager" aria-label="Continuar leitura"><a href="#c05">← Anterior: 05 · Propostas</a><a href="#c07">Próximo: 07 · Segurança</a></nav></article>
+<article class="chapter" aria-labelledby="c07">
+<header class="chapter-header"><p class="eyebrow">07 · Segurança</p><h1 id="c07">Segurança e Administração</h1></header><nav class="page-toc" aria-label="Neste capítulo"><strong>Neste capítulo</strong><ul><li><a href="#c07-como-o-acesso-funciona">Como o Acesso Funciona</a></li><li><a href="#c07-cadastrar-um-usuario">Cadastrar um Usuário</a></li><li><a href="#c07-manter-perfis-de-acesso">Manter Perfis de Acesso</a></li><li><a href="#c07-consultar-o-catalogo-de-permissoes">Consultar o Catálogo de Permissões</a></li><li><a href="#c07-consultar-auditoria">Consultar Auditoria</a></li><li><a href="#c07-modulos-do-sistema">Módulos do Sistema</a></li><li><a href="#c07-design-system">Design System</a></li><li><a href="#c07-quando-encaminhar-ao-administrador">Quando Encaminhar ao Administrador</a></li></ul></nav>
+<p><a href="#inicio">Início do manual</a> · <a href="#c06">Anterior: financeiro</a> · <a href="#c08">Próximo: dúvidas</a></p>
+<section class="manual-section" data-search="true"><h2 id="c07-como-o-acesso-funciona">Como o Acesso Funciona</h2>
+<p>O login identifica a conta. Os Perfis e suas permissões definem as operações de negócio disponíveis. A disponibilidade de módulos e recursos também interfere no acesso.</p>
+<p><strong>Exemplo:</strong> alguém pode consultar Propostas sem poder alterá-las. Ter acesso a Clientes não concede automaticamente criação de Propostas. Um atalho pessoal também não acrescenta permissão.</p>
+<p>Este capítulo se destina a usuários autorizados a administrar ou consultar essas áreas. Quando uma tela não estiver disponível, solicite ao responsável a avaliação do acesso necessário para a sua função.</p>
+</section>
+<section class="manual-section" data-search="true"><h2 id="c07-cadastrar-um-usuario">Cadastrar um Usuário</h2>
+<p><strong>Onde:</strong> Segurança → Usuários.</p>
+<ol>
+<li>Confira se a conta já existe.</li>
+<li>Abra a ação de cadastro.</li>
+<li>Informe <strong>Username</strong>, <strong>Nome Completo</strong> e <strong>E-mail</strong>.</li>
+<li>Preencha <strong>Senha Temporária</strong> e <strong>Confirmar Senha</strong>.</li>
+<li>Confira o <strong>Status</strong> da conta.</li>
+<li>Em <strong>Perfis de Acesso</strong>, selecione os Perfis adequados à função.</li>
+<li>Escolha <strong>Cadastrar Usuário</strong> e confira o resultado.</li>
+</ol>
+<p class="callout"><strong>Resultado esperado:</strong> usuário registrado conforme o retorno da operação. O nome de acesso deve ser conferido antes do cadastro: o campo Username não fica editável depois da criação.</p>
+<p>Ao editar, revise os dados permitidos, a situação e os Perfis, e escolha <strong>Salvar Alterações</strong>. A senha temporária pertence à criação; não presuma que editar o usuário oferece o mesmo fluxo de redefinição de senha.</p>
+</section>
+<section class="manual-section" data-search="true"><h2 id="c07-manter-perfis-de-acesso">Manter Perfis de Acesso</h2>
+<p><strong>Onde:</strong> Segurança → Perfis.</p>
+<ol>
+<li>Localize o Perfil ou abra um novo cadastro.</li>
+<li>Confira código, nome, descrição e situação.</li>
+<li>Revise as permissões apresentadas e selecione as necessárias para a função.</li>
+<li>Salve.</li>
+<li>Confira os usuários associados conforme as consultas disponíveis e valide as operações necessárias com o perfil apropriado.</li>
+</ol>
+<p>Antes de alterar um Perfil existente, considere que a mudança pode afetar várias contas. Use permissões compatíveis com a responsabilidade operacional; não conceda acesso total apenas para eliminar uma mensagem de bloqueio.</p>
+</section>
+<section class="manual-section" data-search="true"><h2 id="c07-consultar-o-catalogo-de-permissoes">Consultar o Catálogo de Permissões</h2>
+<p><strong>Onde:</strong> Segurança → Catálogo de Permissões.</p>
+<p>Use a consulta para identificar os módulos, recursos e ações disponíveis no catálogo. O catálogo é uma referência de acesso; esta tela não deve ser tratada como edição livre de novas permissões.</p>
+<p>Se uma ação está ausente, verifique tanto a permissão do Perfil quanto a disponibilidade do módulo e recurso correspondentes. Os controles de disponibilidade também se aplicam ao Acesso Total quando a regra do catálogo assim exige.</p>
+</section>
+<section class="manual-section" data-search="true"><h2 id="c07-consultar-auditoria">Consultar Auditoria</h2>
+<p><strong>Onde:</strong> Segurança → Auditoria.</p>
+<ol>
+<li>Abra a listagem.</li>
+<li>Informe os filtros necessários: <strong>Ação</strong>, <strong>Entidade</strong>, <strong>Data Inicial</strong> e <strong>Data Final</strong>.</li>
+<li>Escolha <strong>Filtrar</strong>.</li>
+<li>Localize o evento e abra seus detalhes.</li>
+<li>Confira autor, momento, operação e dados apresentados para aquele evento.</li>
+<li>Use <strong>Limpar</strong> para remover os filtros e iniciar outra consulta.</li>
+</ol>
+<p>Os códigos de ação e entidade devem corresponder ao que você procura. Uma lista vazia pode estar relacionada ao filtro escolhido. Use informações do evento ou orientação do responsável em vez de presumir um código.</p>
+<p>Auditoria é evidência de operações. Ela não é uma ferramenta para editar ou desfazer registros. Para entender a sequência do negócio, consulte também o histórico funcional da Apólice ou Proposta.</p>
+</section>
+<section class="manual-section" data-search="true"><h2 id="c07-modulos-do-sistema">Módulos do Sistema</h2>
+<p><strong>Onde:</strong> Sistema → Módulos do Sistema, quando disponível ao operador autorizado.</p>
+<p>A tela permite consultar e controlar a habilitação de módulos e recursos. Uma alteração pode interferir no acesso de vários usuários. Confira exatamente o módulo ou recurso antes de mudar sua disponibilidade e observe o resultado da operação.</p>
+<p><strong>Módulos do Sistema não são Módulos Globais do seguro.</strong> O primeiro trata da disponibilidade de funcionalidades; o segundo é um cadastro utilizado na configuração das Apólices.</p>
+</section>
+<section class="manual-section" data-search="true"><h2 id="c07-design-system">Design System</h2>
+<p>O acesso em <strong>Sistema → Design System</strong> depende da autorização de operador e da configuração do ambiente. Ele apresenta referências dos componentes visuais e não é uma etapa para contratar seguro, gerar parcelas ou cadastrar Clientes.</p>
+</section>
+<section class="manual-section" data-search="true"><h2 id="c07-quando-encaminhar-ao-administrador">Quando Encaminhar ao Administrador</h2>
+<p>Informe a tela e a operação necessárias, a mensagem recebida e o contexto mínimo para identificação. A ausência de um botão pode ser esperada para o seu Perfil; encaminhe a necessidade funcional, sem solicitar uma permissão técnica por tentativa.</p>
+<p>Credenciais e senhas temporárias devem seguir o canal autorizado da organização. Não as inclua em registros de problema, imagens do manual ou evidências de Auditoria anexadas a chamados.</p>
+</section>
+<nav class="chapter-pager" aria-label="Continuar leitura"><a href="#c06">← Anterior: 06 · Parcelas e financeiro</a><a href="#c08">Próximo: 08 · Dúvidas e problemas</a></nav></article>
+<article class="chapter" aria-labelledby="c08">
+<header class="chapter-header"><p class="eyebrow">08 · Dúvidas e problemas</p><h1 id="c08">Dúvidas e Solução de Problemas</h1></header><nav class="page-toc" aria-label="Neste capítulo"><strong>Neste capítulo</strong><ul><li><a href="#c08-uma-tela-ou-um-botao-nao-aparece">Uma Tela ou um Botão Não Aparece</a></li><li><a href="#c08-um-cadastro-nao-aparece-no-seletor">Um Cadastro Não Aparece no Seletor</a></li><li><a href="#c08-cadastrei-o-cliente-mas-nao-consigo-criar-a-proposta">Cadastrei o Cliente, mas Não Consigo Criar a Proposta</a></li><li><a href="#c08-a-proposta-nao-confirma">A Proposta Não Confirma</a></li><li><a href="#c08-a-proposta-esta-confirmada-mas-nao-esta-vigente">A Proposta Está Confirmada, mas Não Está Vigente</a></li><li><a href="#c08-mudei-o-modulo-mas-a-proposta-continua-com-os-valores-anteriores">Mudei o Módulo, mas a Proposta Continua com os Valores Anteriores</a></li><li><a href="#c08-quero-desfazer-um-cancelamento">Quero Desfazer um Cancelamento</a></li><li><a href="#c08-nao-consigo-excluir-uma-vida">Não Consigo Excluir uma Vida</a></li><li><a href="#c08-o-mes-esta-fechado-mas-ainda-aparece-divida">O Mês Está Fechado, mas Ainda Aparece Dívida</a></li><li><a href="#c08-o-total-acumulado-parece-maior-que-a-mensalidade">O Total Acumulado Parece Maior que a Mensalidade</a></li><li><a href="#c08-recebi-apenas-parte-do-valor-ou-lancei-uma-baixa-errada">Recebi Apenas Parte do Valor ou Lancei uma Baixa Errada</a></li><li><a href="#c08-uma-operacao-falhou-ou-demorou">Uma Operação Falhou ou Demorou</a></li><li><a href="#c08-como-relatar-um-problema">Como Relatar um Problema</a></li></ul></nav>
+<p><a href="#inicio">Início do manual</a> · <a href="#c07">Anterior: Segurança</a> · <a href="#c09">Próximo: exemplo completo</a></p>
+<section class="manual-section" data-search="true"><h2 id="c08-uma-tela-ou-um-botao-nao-aparece">Uma Tela ou um Botão Não Aparece</h2>
+<p>Confira se está na área, no registro e na versão corretos. A disponibilidade pode depender do Perfil, de permissões específicas, da situação do registro e da habilitação do módulo/recurso.</p>
+<p>Se a ação for necessária ao seu trabalho, informe ao responsável o que precisa realizar e em qual contexto. Criar um atalho, trocar o endereço manualmente ou acessar outro registro não concede o acesso necessário.</p>
+</section>
+<section class="manual-section" data-search="true"><h2 id="c08-um-cadastro-nao-aparece-no-seletor">Um Cadastro Não Aparece no Seletor</h2>
+<ol>
+<li>Confira se o cadastro existe e se a consulta exige situação ativa.</li>
+<li>Verifique se você está selecionando no contexto correto, como a mesma Apólice.</li>
+<li>Revise o texto de busca e percorra as páginas.</li>
+<li>Atualize as opções quando a tela oferecer essa ação.</li>
+<li>Confira se o registro já está associado, mesmo inativo.</li>
+</ol>
+<p>No Plano do Módulo, uma Cobertura já vinculada não é oferecida como vínculo novo. Edite ou reative a associação existente conforme permitido.</p>
+</section>
+<section class="manual-section" data-search="true"><h2 id="c08-cadastrei-o-cliente-mas-nao-consigo-criar-a-proposta">Cadastrei o Cliente, mas Não Consigo Criar a Proposta</h2>
+<p>Confira as etapas separadamente: Cliente cadastrado, vínculo com Estipulante/matrícula, Vida na Apólice e condições de Módulo/Plano/Coberturas. Cadastrar o Cliente não conclui essas relações.</p>
+<p>Na seleção de Vida, leia os impedimentos. Vida inativa, sem vínculo ou com histórico anterior não pode iniciar outra primeira proposta pelo mesmo fluxo. Para histórico existente, consulte nova versão ou reinclusão no detalhe da Proposta elegível.</p>
+</section>
+<section class="manual-section" data-search="true"><h2 id="c08-a-proposta-nao-confirma">A Proposta Não Confirma</h2>
+<p>Confira beneficiários completos e total de 100%, Plano e Coberturas exigidos, justificativas dos ajustes, datas válidas e conferência financeira atualizada. Leia também as mensagens de contexto e situação.</p>
+<p>Se houve alteração de condições ou de início, refaça a conferência necessária. Se outra pessoa alterou o registro, recarregue antes de tentar novamente. Não crie uma Proposta duplicada para contornar a validação.</p>
+</section>
+<section class="manual-section" data-search="true"><h2 id="c08-a-proposta-esta-confirmada-mas-nao-esta-vigente">A Proposta Está Confirmada, mas Não Está Vigente</h2>
+<p>Leia a data de início e o indicador de agendamento. Início futuro permanece agendado até a data e a revalidação. Se a data já chegou, consulte a pendência e a ação de efetivação disponível.</p>
+<p>Se o motivo indicar processamento desabilitado ou outra condição do ambiente, encaminhe ao responsável. Alterar o relógio do computador ou repetir confirmações não substitui o processamento.</p>
+</section>
+<section class="manual-section" data-search="true"><h2 id="c08-mudei-o-modulo-mas-a-proposta-continua-com-os-valores-anteriores">Mudei o Módulo, mas a Proposta Continua com os Valores Anteriores</h2>
+<p>As condições da Proposta são registradas para preservar o histórico. Alterar a configuração do Módulo não as reescreve automaticamente. Quando elegível, utilize <a href="#c05-revisar-condicoes">Revisar condições</a>, compare e aplique conscientemente a mudança.</p>
+<p>Se a Proposta já está vigente, confira a necessidade de uma nova versão. Não trate alterações cadastrais como substituição automática da contratação existente.</p>
+</section>
+<section class="manual-section" data-search="true"><h2 id="c08-quero-desfazer-um-cancelamento">Quero Desfazer um Cancelamento</h2>
+<p>Confira se há apenas um pedido ou se o cancelamento já foi efetivado. Um pedido ainda não efetivado pode permitir retirada. Cancelamento concluído não é desfeito por essa ação.</p>
+<p>Quando a cancelada teve vigência e está elegível, a <a href="#c05-reincluir-apos-cancelamento">reinclusão</a> prepara uma nova versão, preservando a encerrada. Um eventual intervalo sem cobertura continua existindo.</p>
+</section>
+<section class="manual-section" data-search="true"><h2 id="c08-nao-consigo-excluir-uma-vida">Não Consigo Excluir uma Vida</h2>
+<p>A existência de qualquer Proposta, inclusive inativa ou excluída, impede a exclusão da participação. Também é necessário acesso específico para excluir.</p>
+<p>Se deseja registrar o fim da participação, avalie a ação <strong>Encerrar</strong>. Ela tem finalidade diferente. Não descarte ou cancele Propostas apenas para tentar liberar uma exclusão histórica.</p>
+</section>
+<section class="manual-section" data-search="true"><h2 id="c08-o-mes-esta-fechado-mas-ainda-aparece-divida">O Mês Está Fechado, mas Ainda Aparece Dívida</h2>
+<p>Isso é esperado quando há parcelas não pagas. O fechamento libera a sequência mensal, mas não quita débitos. Localize a parcela aberta e registre a baixa integral quando o recebimento for confirmado.</p>
+</section>
+<section class="manual-section" data-search="true"><h2 id="c08-o-total-acumulado-parece-maior-que-a-mensalidade">O Total Acumulado Parece Maior que a Mensalidade</h2>
+<p>Confira o saldo anterior. O total acumulado reúne a mensalidade aberta e débitos de meses anteriores. A nova parcela não deve ser interpretada como uma duplicação desses débitos. Consulte o <a href="#c06-entender-atrasados-sem-duplicar-cobranca">exemplo de atrasados</a>.</p>
+</section>
+<section class="manual-section" data-search="true"><h2 id="c08-recebi-apenas-parte-do-valor-ou-lancei-uma-baixa-errada">Recebi Apenas Parte do Valor ou Lancei uma Baixa Errada</h2>
+<p>A rotina atual aceita somente baixa integral e não oferece estorno de baixa. Não registre um pagamento parcial como integral. Para baixa incorreta, encaminhe o caso ao responsável com Apólice, competência e identificação da parcela. Não edite diretamente o banco nem lance outro pagamento para compensar.</p>
+</section>
+<section class="manual-section" data-search="true"><h2 id="c08-uma-operacao-falhou-ou-demorou">Uma Operação Falhou ou Demorou</h2>
+<ol>
+<li>Aguarde o encerramento da tentativa em andamento.</li>
+<li>Leia a mensagem apresentada e confira a conexão.</li>
+<li>Antes de reenviar uma gravação com resultado incerto, consulte o registro e o histórico para verificar se ela foi concluída.</li>
+<li>Se houver conflito ou dados alterados, recarregue e refaça a revisão/conferência necessária.</li>
+<li>Se a falha persistir, registre o contexto e encaminhe ao responsável.</li>
+</ol>
+<p>Consultar novamente é diferente de repetir uma geração, confirmação ou baixa. Confira o estado atual antes de decidir por um novo envio.</p>
+</section>
+<section class="manual-section" data-search="true"><h2 id="c08-como-relatar-um-problema">Como Relatar um Problema</h2>
+<p>Informe:</p>
+<ul>
+<li>Área e caminho da tela.</li>
+<li>Identificação mínima do registro e da versão, quando houver.</li>
+<li>Passos realizados e resultado esperado.</li>
+<li>Mensagem exibida, data e horário aproximados.</li>
+<li>Se a operação aparece ou não no registro/histórico após a consulta.</li>
+</ul>
+<p>Use dados fictícios para reproduções quando possível. Ao enviar imagem, preserve o contexto necessário e oculte dados pessoais que não ajudem a resolver o problema. Não envie senha, token ou credencial.</p>
+</section>
+<nav class="chapter-pager" aria-label="Continuar leitura"><a href="#c07">← Anterior: 07 · Segurança</a><a href="#c09">Próximo: 09 · Exemplo completo</a></nav></article>
+<article class="chapter" aria-labelledby="c09">
+<header class="chapter-header"><p class="eyebrow">09 · Exemplo completo</p><h1 id="c09">Exemplo Completo: do Cadastro ao Pagamento</h1></header><nav class="page-toc" aria-label="Neste capítulo"><strong>Neste capítulo</strong><ul><li><a href="#c09-cenario-didatico">Cenário Didático</a></li><li><a href="#c09-etapa-1-conferir-os-cadastros">Etapa 1 — Conferir os Cadastros</a></li><li><a href="#c09-etapa-2-registrar-a-matricula">Etapa 2 — Registrar a Matrícula</a></li><li><a href="#c09-etapa-3-conferir-a-estrutura-da-apolice">Etapa 3 — Conferir a Estrutura da Apólice</a></li><li><a href="#c09-etapa-4-incluir-a-vida">Etapa 4 — Incluir a Vida</a></li><li><a href="#c09-etapa-5-criar-e-preencher-a-pre-proposta">Etapa 5 — Criar e Preencher a Pré Proposta</a></li><li><a href="#c09-etapa-6-conferir-valores-e-confirmar">Etapa 6 — Conferir Valores e Confirmar</a></li><li><a href="#c09-etapa-7-registrar-o-pagamento-recebido">Etapa 7 — Registrar o Pagamento Recebido</a></li><li><a href="#c09-etapa-8-fechar-e-seguir-para-o-proximo-mes">Etapa 8 — Fechar e Seguir para o Próximo Mês</a></li><li><a href="#c09-se-as-condicoes-mudarem-depois">Se as Condições Mudarem Depois</a></li></ul></nav>
+<p><a href="#inicio">Início do manual</a> · <a href="#c08">Anterior: dúvidas</a></p>
+<section class="manual-section" data-search="true"><h2 id="c09-cenario-didatico">Cenário Didático</h2>
+<p>Ana Souza será incluída no seguro da Empresa Exemplo, com matrícula 123. A Apólice, os cadastros e as condições usados aqui são fictícios. O objetivo é explicar a sequência; não reproduza lançamentos fictícios em registros reais.</p>
+<p>Cada etapa possui um ponto de conferência. Se ele não for atendido, resolva a causa antes de seguir.</p>
+</section>
+<section class="manual-section" data-search="true"><h2 id="c09-etapa-1-conferir-os-cadastros">Etapa 1 — Conferir os Cadastros</h2>
+<p>Pesquise Ana em <strong>Operação → Clientes</strong>. Se não existir, faça seu cadastro com dados válidos. Confira a Empresa Exemplo em <strong>Parceiros e Estrutura → Estipulantes</strong>.</p>
+<p class="callout"><strong>Ponto de conferência:</strong> pessoa e organização corretas, sem cadastro duplicado.</p>
+<p><a href="#c03-cadastrar-um-cliente">Ver cadastro de Clientes e vínculos</a>.</p>
+</section>
+<section class="manual-section" data-search="true"><h2 id="c09-etapa-2-registrar-a-matricula">Etapa 2 — Registrar a Matrícula</h2>
+<p>Nos detalhes de Ana, em <strong>Vínculos</strong>, adicione ou confira o Estipulante Empresa Exemplo e a matrícula 123.</p>
+<p class="callout"><strong>Ponto de conferência:</strong> o vínculo identifica Ana, o Estipulante e a matrícula corretos. Nenhuma participação em Apólice foi presumida só por esse cadastro.</p>
+</section>
+<section class="manual-section" data-search="true"><h2 id="c09-etapa-3-conferir-a-estrutura-da-apolice">Etapa 3 — Conferir a Estrutura da Apólice</h2>
+<p>Abra a Apólice destinada à Empresa Exemplo. Confira períodos e situação, Subgrupo quando aplicável e o Módulo desejado. No Plano do Módulo, revise as Coberturas e seus prêmios.</p>
+<p class="callout"><strong>Ponto de conferência:</strong> condições completas e disponíveis para o uso pretendido.</p>
+<p><a href="#c04-configurar-plano-e-coberturas">Ver Plano e Coberturas</a>.</p>
+</section>
+<section class="manual-section" data-search="true"><h2 id="c09-etapa-4-incluir-a-vida">Etapa 4 — Incluir a Vida</h2>
+<p>Na aba <strong>Vidas</strong>, inclua a participação de Ana usando o vínculo/matrícula 123 e confira Módulo, Subgrupo e demais dados aplicáveis.</p>
+<p class="callout"><strong>Ponto de conferência:</strong> Ana está na Apólice correta. A Vida está pronta para a avaliação de criação de Proposta; isso ainda não significa cobertura vigente.</p>
+</section>
+<section class="manual-section" data-search="true"><h2 id="c09-etapa-5-criar-e-preencher-a-pre-proposta">Etapa 5 — Criar e Preencher a Pré Proposta</h2>
+<p>Em <strong>Operação → Propostas → Nova pré proposta</strong>, selecione a Apólice e a Vida de Ana. Confira e crie. Preencha beneficiários e demais informações. Neste exemplo, dois beneficiários com 60% e 40% completam os 100% exigidos.</p>
+<p class="callout"><strong>Ponto de conferência:</strong> Cliente, matrícula, Apólice, condições, beneficiários e eventuais ajustes corretos.</p>
+<p><a href="#c05-preencher-a-pre-proposta">Ver preenchimento e revisão</a>.</p>
+</section>
+<section class="manual-section" data-search="true"><h2 id="c09-etapa-6-conferir-valores-e-confirmar">Etapa 6 — Conferir Valores e Confirmar</h2>
+<p>Informe início válido, competência inicial, primeiro vencimento e Ramo para IOF. Execute <strong>Conferir primeira parcela</strong>, revise a composição e confirme os valores e a Proposta.</p>
+<p>Se o início for futuro, acompanhe o agendamento. Se for hoje ou retroativo válido, confira o retorno da efetivação. Neste exemplo, suponha uma mensalidade final conferida de R$ 100,00.</p>
+<p class="callout"><strong>Ponto de conferência:</strong> resultado e datas corretos. Quando ocorrer a ativação com plano financeiro nativo, haverá a primeira parcela integral; nenhum pagamento foi presumido.</p>
+</section>
+<section class="manual-section" data-search="true"><h2 id="c09-etapa-7-registrar-o-pagamento-recebido">Etapa 7 — Registrar o Pagamento Recebido</h2>
+<p>Quando o recebimento integral da primeira parcela estiver confirmado, abra <strong>Apólice → Parcelas</strong>, confira a competência, localize a Vida e a parcela, informe a data e confirme a baixa integral.</p>
+<p class="callout"><strong>Ponto de conferência:</strong> pagamento na parcela certa, data correta e saldo atualizado.</p>
+<p><a href="#c06-registrar-uma-baixa-integral">Ver baixa integral</a>.</p>
+</section>
+<section class="manual-section" data-search="true"><h2 id="c09-etapa-8-fechar-e-seguir-para-o-proximo-mes">Etapa 8 — Fechar e Seguir para o Próximo Mês</h2>
+<p>Depois da revisão da competência da Apólice, confirme seu fechamento. No mês seguinte, confira e gere manualmente o lote elegível.</p>
+<p>Se uma parcela anterior continuar aberta, ela permanece como dívida. O mês pode estar fechado e a parcela ainda ser paga depois. Acompanhe separadamente mensalidade, saldo anterior e total acumulado.</p>
+<p class="callout"><strong>Ponto de conferência:</strong> sequência mensal liberada sem apagar ou duplicar débitos.</p>
+</section>
+<section class="manual-section" data-search="true"><h2 id="c09-se-as-condicoes-mudarem-depois">Se as Condições Mudarem Depois</h2>
+<p>Antes da confirmação/ativação, confira se cabe revisar as condições da preparação. Para uma contratação vigente, avalie nova versão. Para encerrar, use cancelamento de vigência; para retomar após cancelamento com vigência, avalie reinclusão.</p>
+<p>Cada transição mantém sua própria história. Consulte <a href="#c05">o capítulo de Propostas</a> antes de escolher a ação.</p>
+</section>
+<nav class="chapter-pager" aria-label="Continuar leitura"><a href="#c08">← Anterior: 08 · Dúvidas e problemas</a></nav></article><footer class="footer">WebApolice · Manual do usuário · 25/11/2026 · Primeira edição para revisão</footer></main></div><script>
+(() => {
+  const menu = document.querySelector('#chapters');
+  const toggle = document.querySelector('#menu-toggle');
+  toggle.addEventListener('click', () => {
+    const open = menu.classList.toggle('open');
+    toggle.setAttribute('aria-expanded', String(open));
+  });
+  document.querySelector('#print').addEventListener('click', () => window.print());
+  const normalize = value => value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+  const search = document.querySelector('#search');
+  const results = document.querySelector('#search-results');
+  const status = document.querySelector('#search-status');
+  const entries = [...document.querySelectorAll('[data-search]')].map(section => ({
+    heading: section.querySelector('h2'),
+    chapter: section.closest('article').querySelector('h1').textContent,
+    text: section.textContent.replace(/\s+/g, ' ').trim(),
+    normalized: normalize(section.textContent.replace(/\s+/g, ' '))
+  }));
+  function updateSearch() {
+    results.replaceChildren();
+    const words = normalize(search.value.trim()).split(/\s+/).filter(Boolean);
+    if (!words.length) { status.textContent = ''; results.hidden = true; return; }
+    const matches = entries.filter(entry => words.every(word => entry.normalized.includes(word)));
+    results.hidden = false;
+    status.textContent = matches.length
+      ? `${matches.length} seções encontradas. ${matches.length > 20 ? 'Exibindo as primeiras 20; refine a busca.' : 'Escolha um resultado para ir ao assunto.'}`
+      : 'Nenhum resultado. Tente outras palavras, como matrícula, beneficiários ou baixa.';
+    matches.slice(0, 20).forEach(entry => {
+      const li = document.createElement('li');
+      const link = document.createElement('a');
+      link.href = '#' + entry.heading.id;
+      link.textContent = entry.chapter + ' → ' + entry.heading.textContent;
+      const snippet = document.createElement('small');
+      const matchPosition = normalize(entry.text).indexOf(words[0]);
+      const start = Math.max(0, matchPosition - 65);
+      snippet.textContent = (start ? '…' : '') + entry.text.slice(start, start + 210) + '…';
+      li.append(link, snippet);
+      results.append(li);
+    });
+  }
+  search.addEventListener('input', updateSearch);
+  document.querySelector('#clear-search').addEventListener('click', () => {
+    search.value = ''; updateSearch(); search.focus();
+  });
+  function updateNavigation() {
+    const hash = location.hash.slice(1) || 'inicio';
+    const chapter = hash.split('-')[0];
+    document.querySelectorAll('#chapters a').forEach(link => {
+      if (link.hash === '#' + chapter) link.setAttribute('aria-current', 'location');
+      else link.removeAttribute('aria-current');
+    });
+  }
+  document.addEventListener('click', event => {
+    const link = event.target.closest('a[href^="#"]');
+    if (!link) return;
+    const target = document.getElementById(link.hash.slice(1));
+    if (target && /^H[12]$/.test(target.tagName)) {
+      target.setAttribute('tabindex', '-1');
+      target.focus({preventScroll: true});
+    }
+    if (menu.contains(link)) {
+      menu.classList.remove('open'); toggle.setAttribute('aria-expanded', 'false');
+    }
+  });
+  window.addEventListener('hashchange', updateNavigation);
+  updateNavigation();
+})();
+</script></body></html>

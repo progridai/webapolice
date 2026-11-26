@@ -7,7 +7,11 @@ import {
   listarApoliceVidas,
 } from '../../src/features/apolices/api/apolices.api';
 import { listarCooperados } from '../../src/features/cooperados/api/cooperadosApi';
-import { listarEstipulantes } from '../../src/features/estipulantes/api/estipulantes.api';
+import {
+  listarEstipulantes,
+  obterEstipulante,
+  obterConfiguracao,
+} from '../../src/features/estipulantes/api/estipulantes.api';
 import { modulosApi } from '../../src/features/modulos/api/modulos.api';
 import { ramosApi } from '../../src/features/ramos/api/ramos.api';
 import { corretorasApi } from '../../src/features/corretoras/api/corretoras.api';
@@ -46,7 +50,15 @@ function request() {
 }
 
 describe('Contratos HTTP de Usuários e Apólices', () => {
-  it.each(['cooperados', 'modulos', 'ramos', 'corretoras'] as const)(
+  it.each([
+    'cooperados',
+    'modulos',
+    'ramos',
+    'ramoDetalhe',
+    'estipulanteDetalhe',
+    'estipulanteConfiguracao',
+    'corretoras',
+  ] as const)(
     'propaga cancelamento de %s enquanto a rede está pendente',
     async (feature) => {
       const controller = new AbortController();
@@ -70,6 +82,11 @@ describe('Contratos HTTP de Usuários e Apólices', () => {
           ),
         ramos: () =>
           ramosApi.listar({ pagina: 1, tamanhoPagina: 20 }, controller.signal),
+        ramoDetalhe: () => ramosApi.obter('ramo-1', controller.signal),
+        estipulanteDetalhe: () =>
+          obterEstipulante('estip-1', controller.signal),
+        estipulanteConfiguracao: () =>
+          obterConfiguracao('estip-1', controller.signal),
         corretoras: () => corretorasApi.listar({}, controller.signal),
       };
       const pending = load[feature]();

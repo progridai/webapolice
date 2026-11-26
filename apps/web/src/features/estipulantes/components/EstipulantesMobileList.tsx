@@ -100,14 +100,6 @@ export const EstipulantesMobileList: React.FC<EstipulantesMobileListProps> = ({
                   {formatCnpj(est.cnpj)}
                   {est.codigo && ` • ${est.codigo}`}
                 </p>
-                {est.grupo && (
-                  <p
-                    className="text-sm mt-1"
-                    style={{ color: 'var(--color-text-tertiary)' }}
-                  >
-                    Grupo: {est.grupo}
-                  </p>
-                )}
               </div>
               <StatusBadge status={est.ativo ? 'ativo' : 'inativo'} />
             </CardHeader>

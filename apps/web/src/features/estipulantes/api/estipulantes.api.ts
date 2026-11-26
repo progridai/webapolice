@@ -33,9 +33,11 @@ export async function cadastrarEstipulante(
  */
 export async function obterEstipulante(
   publicId: string,
+  signal?: AbortSignal,
 ): Promise<EstipulanteDetalheResponse> {
   const response = await httpClient.get<EstipulanteDetalheResponse>(
     `/api/estipulantes/${publicId}`,
+    { signal },
   );
   return response.data;
 }
@@ -45,9 +47,11 @@ export async function obterEstipulante(
  */
 export async function obterConfiguracao(
   publicId: string,
+  signal?: AbortSignal,
 ): Promise<EstipulanteConfiguracaoResponse> {
   const response = await httpClient.get<EstipulanteConfiguracaoResponse>(
     `/api/estipulantes/${publicId}/configuracao`,
+    { signal },
   );
   return response.data;
 }

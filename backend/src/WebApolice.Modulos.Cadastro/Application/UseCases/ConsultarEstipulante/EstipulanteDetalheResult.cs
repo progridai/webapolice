@@ -17,6 +17,7 @@ public class EstipulanteDetalheResult
     
     public long? GrupoId { get; set; }
     public Guid? SeguradoraPublicId { get; set; }
+    public string? SeguradoraNome { get; set; }
     public string? Observacao { get; set; }
     public EnderecoDetalheResult? Endereco { get; set; }
     public IReadOnlyList<ContatoDetalheResult>? Contatos { get; set; }

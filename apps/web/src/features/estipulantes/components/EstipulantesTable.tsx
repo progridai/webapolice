@@ -115,12 +115,6 @@ export const EstipulantesTable: React.FC<EstipulantesTableProps> = ({
         ),
     },
     {
-      key: 'grupo',
-      label: 'Grupo',
-      render: (est) =>
-        est.grupo ? <span>{est.grupo}</span> : <span>&mdash;</span>,
-    },
-    {
       key: 'status',
       label: 'Status',
       sortable: true,

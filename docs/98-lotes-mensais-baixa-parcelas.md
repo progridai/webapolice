@@ -1,5 +1,7 @@
 # Lotes Mensais e Baixa de Parcelas Nativas
 
+Estado atual conferido em 24/11/2026: o ciclo foi aplicado ao ambiente local de testes, conforme [documento 99](99-aplicacao-financeiro-execucao-local.md) e a atualização de implantação ao final deste arquivo. As referências a migrations somente preparadas registram a etapa original. O [documento 104](104-alcance-atual-rotinas-financeiras.md) reúne o alcance atual, os limites e as evidências da revisão antes do manual.
+
 Data: 18/11/2026. Regras aprovadas; ciclo financeiro implementado e validado localmente. Complementa o documento 97. Não há emissão de títulos, envio de cobrança ou execução bancária.
 
 ## Regras e Escopo

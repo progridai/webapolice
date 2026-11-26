@@ -75,7 +75,7 @@ it.each(['claro', 'escuro', 'sistema'])(
       'Ajuste de Calendário',
     );
     expect(cancelarAgendamento).not.toHaveBeenCalled();
-    expect(busy).toHaveBeenLastCalledWith(false);
+    await waitFor(() => expect(busy).toHaveBeenLastCalledWith(false));
     expect(document.documentElement.getAttribute('data-theme')).toBe(
       tema === 'escuro' ? 'dark' : 'light',
     );

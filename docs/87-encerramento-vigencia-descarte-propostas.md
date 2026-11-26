@@ -1,5 +1,7 @@
 # Encerramento de Vigência e Descarte de Pré Proposta
 
+> Referência atual — 25/11/2026: As ausências de funcionalidades descritas abaixo são relativas à etapa original. A sequência de entregas posteriores, incluindo confirmação, agendamento, cancelamento e reinclusão, está no [índice funcional 106](106-indice-funcional-atual.md). O escopo financeiro atual está consolidado no [104](104-alcance-atual-rotinas-financeiras.md). As evidências originais permanecem vinculadas à etapa em que foram obtidas; a homologação visual continua pendente.
+
 Data: 12/11/2026. Etapa 5. Complementa o documento 86.
 
 Continuidade de 17/11/2026: o [documento 91](91-gestao-pedido-cancelamento-vigencia.md)

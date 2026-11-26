@@ -1,5 +1,7 @@
 # Confirmação e Substituição de Propostas
 
+> Referência atual — 25/11/2026: As ausências de funcionalidades descritas abaixo são relativas à etapa original. A sequência de entregas posteriores, incluindo confirmação, agendamento, cancelamento e reinclusão, está no [índice funcional 106](106-indice-funcional-atual.md). O escopo financeiro atual está consolidado no [104](104-alcance-atual-rotinas-financeiras.md). As evidências originais permanecem vinculadas à etapa em que foram obtidas; a homologação visual continua pendente.
+
 Data: 12/11/2026. Etapa 3. Complementa os documentos 83 e 84.
 
 Continuidade: o [documento 86](86-gestao-agendamentos-propostas.md) define a etapa 4 de reagendamento/cancelamento antes da vigência, aprovada pelo responsável. As referências abaixo a essas operações como futuras registram o recorte original da etapa 3.

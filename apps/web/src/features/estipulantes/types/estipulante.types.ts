@@ -73,7 +73,6 @@ export interface CriarEstipulanteRequest {
   nomeFantasia?: string;
   cnpj: string;
   codigo?: string;
-  grupoPublicId?: string;
   seguradoraPublicId?: string;
   observacao?: string;
   endereco?: EstipulanteEnderecoRequest;
@@ -86,7 +85,7 @@ export interface AtualizarEstipulanteRequest {
   razaoSocial: string;
   nomeFantasia?: string;
   codigo?: string;
-  grupoPublicId?: string;
+  grupoId?: number | null;
   seguradoraPublicId?: string;
   observacao?: string;
   endereco?: EstipulanteEnderecoRequest;
@@ -105,8 +104,9 @@ export interface EstipulanteDetalheResponse {
   nomeFantasia?: string;
   cnpj: string;
   codigo?: string;
-  grupoPublicId?: string;
+  grupoId?: number | null;
   seguradoraPublicId?: string;
+  seguradoraNome?: string;
   observacao?: string;
   ativo: boolean;
   endereco?: {

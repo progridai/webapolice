@@ -1,5 +1,7 @@
 # Visão do Produto (00-visao-do-produto.md)
 
+> Referência atual — 25/11/2026: Este documento descreve a visão estratégica, incluindo evoluções planejadas. Consulte o [índice funcional 106](106-indice-funcional-atual.md) para distinguir os objetivos do funcionamento implementado.
+
 Este documento define os objetivos estratégicos, o público-alvo, os problemas a serem solucionados e as características essenciais do novo ERP **WebApolice**.
 
 ---

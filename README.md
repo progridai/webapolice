@@ -1,6 +1,10 @@
 # WebApolice - ERP Web
 
-Revisão técnica original de 23/10/2026, atualizada na [preparação da integração de 26/10/2026](docs/79-preparacao-integracao-main.md): consulte a [análise de arquitetura, segurança, qualidade e documentação](docs/76-revisao-arquitetura-seguranca-qualidade.md). Ela registra os achados pendentes e o alcance das validações atuais; afirmações históricas de conclusão abaixo não substituem essa avaliação.
+**Manual do usuário:** [abrir com navegação e busca](docs/manual-usuario/index.html) ou [consultar os capítulos](docs/manual-usuario/README.md). Primeira edição para revisão; conferência visual autenticada pendente.
+
+Para consultar as rotinas implementadas, suas referências e limitações, comece pelo [índice funcional atual — 25/11/2026](docs/106-indice-funcional-atual.md). O [escopo financeiro aprovado](docs/104-alcance-atual-rotinas-financeiras.md) está documentado; a [homologação visual autenticada](docs/105-roteiro-homologacao-antes-manual.md) permanece pendente, adiada pelo responsável.
+
+A [revisão técnica de 23/10/2026](docs/76-revisao-arquitetura-seguranca-qualidade.md) e a [preparação da integração de 26/10/2026](docs/79-preparacao-integracao-main.md) são registros históricos. Consulte as entregas posteriores no índice atual antes de tratar pendências antigas como ainda abertas.
 
 ## Descrição Resumida
 O **WebApolice** é a nova versão web e responsiva do sistema de ERP, concebida para substituir progressivamente o sistema ERP legado em VB.NET com banco SQL Server. Ele servirá como o motor centralizado de dados e processos, operando de forma 100% web.
@@ -46,14 +50,19 @@ webapolice/
 │   └── web/                   # Frontend React 19 + TypeScript + Vite 8
 ├── backend/                   # Solução backend .NET 10 LTS
 │   ├── src/
-│   │   ├── WebApolice.Api/    # Web API ASP.NET Core (Minimal APIs)
+│   │   ├── WebApolice.Api/    # Web API ASP.NET Core (Controllers)
 │   │   ├── WebApolice.SharedKernel/ # Biblioteca de tipos comuns transversais
 │   │   ├── WebApolice.Shared.Infrastructure/ # Infraestrutura compartilhada transversa (e segurança)
-│   │   └── WebApolice.Modulos.Clientes/ # Módulo de negócio Clientes (Backend)
+│   │   ├── WebApolice.Modulos.Cadastro/ # Clientes e cadastros
+│   │   ├── WebApolice.Modulos.Seguro/ # Apólices, Vidas e Propostas
+│   │   └── WebApolice.Modulos.Seguranca/ # Controle de acesso
 │   └── tests/
 │       ├── WebApolice.Api.Tests/ # Testes de integração da API e autorização Keycloak
 │       ├── WebApolice.Architecture.Tests/ # Testes arquiteturais por reflexão (NetArchTest)
-│       └── WebApolice.Modulos.Clientes.Tests/ # Testes de domínio e caso de uso do módulo Clientes
+│       ├── WebApolice.Modulos.Cadastro.Tests/ # Domínio e casos de uso de Cadastro
+│       ├── WebApolice.Integration.Tests/ # Integração dos módulos
+│       ├── WebApolice.Auditoria.UnitTests/ # Unidade de Auditoria
+│       └── WebApolice.Auditoria.IntegrationTests/ # Integração de Auditoria
 ├── docs/                      # Documentação técnica e estratégica
 │   └── adr/                   # Registros de Decisão de Arquitetura (ADRs)
 └── prompts/                   # Templates de prompts padronizados para IA
@@ -169,7 +178,9 @@ Para iniciar a API corretamente, o projeto exige a configuração das variáveis
 
 ---
 
-## Estado Atual — Consolidação de 23/10/2026
+## Registro Histórico — Consolidação de 23/10/2026
+
+Este quadro preserva o diagnóstico daquela data. Para o alcance funcional posterior e a preparação do manual, consulte o [índice 106](docs/106-indice-funcional-atual.md).
 
 A [revisão 76](docs/76-revisao-arquitetura-seguranca-qualidade.md) é o índice de achados, correções, testes e pendências. A stack e o monólito modular foram preservados; implementação e verificações locais não equivalem a homologação com o legado.
 
@@ -183,26 +194,26 @@ A [revisão 76](docs/76-revisao-arquitetura-seguranca-qualidade.md) é o índice
 > **Identidade Visual e Design System Reutilizável (Concluído)**:
 > A identidade visual oficial, os design tokens com suporte a temas claro/escuro/sistema e o catálogo completo de componentes UI reutilizáveis estão implementados; validações locais e limitações de homologação estão na revisão 76. Os componentes (`Button`, `FormField`, `Input`, `Textarea`, `Select`, `Checkbox`, `Alert`, `Spinner`, `Skeleton`, `Card`, `Badge`, `EmptyState`, `Modal`, `ConfirmDialog`, `Table`, `Pagination`) estão disponíveis via barril `src/components/ui`. O script `npm run lint:design-system` verifica continuamente a conformidade de tokens (zero cores hex/rgb fixadas nos componentes). O catálogo visual está disponível em `/#design-system`.
 > 
-> - [docs/12-identidade-visual-design-system.md](file:///c:/PROJETOS/Rsul%20Automacoes/Projetos/webapolice/docs/12-identidade-visual-design-system.md) — Guia de marca e tokens
-> - [docs/13-componentes-design-system.md](file:///c:/PROJETOS/Rsul%20Automacoes/Projetos/webapolice/docs/13-componentes-design-system.md) — Catálogo de componentes e regras de uso
+> - [docs/12-identidade-visual-design-system.md](docs/12-identidade-visual-design-system.md) — Guia de marca e tokens
+> - [docs/13-componentes-design-system.md](docs/13-componentes-design-system.md) — Catálogo de componentes e regras de uso
 
 > [!NOTE]
 > **Modelagem de Banco de Dados e Domínio**:
 > O projeto utiliza PostgreSQL como banco de dados oficial, com separação de responsabilidades por schemas e rastreabilidade legada.
 > 
-> - [docs/17-modelagem-banco-dados-webapolice.md](file:///c:/PROJETOS/Rsul%20Automacoes/Projetos/webapolice/docs/17-modelagem-banco-dados-webapolice.md) — Modelagem geral do banco de dados
-> - [docs/18-modelagem-clientes-core-cadastro.md](file:///c:/PROJETOS/Rsul%20Automacoes/Projetos/webapolice/docs/18-modelagem-clientes-core-cadastro.md) — Modelagem de Clientes (Core e Cadastro)
+> - [docs/17-modelagem-banco-dados-webapolice.md](docs/17-modelagem-banco-dados-webapolice.md) — Modelagem geral do banco de dados
+> - [docs/18-modelagem-clientes-core-cadastro.md](docs/18-modelagem-clientes-core-cadastro.md) — Modelagem de Clientes (Core e Cadastro)
 
 ---
 
 ## Referência aos ADRs (Architectural Decision Records)
 As escolhas estruturais do projeto estão justificadas e documentadas em:
-* [ADR-001: Estrutura do Repositório](file:///c:/PROJETOS/Rsul%20Automacoes/Projetos/webapolice/docs/adr/ADR-001-estrutura-do-repositorio.md) (Uso de monorepo compartilhado)
-* [ADR-002: Frontend React e Vite](file:///c:/PROJETOS/Rsul%20Automacoes/Projetos/webapolice/docs/adr/ADR-002-frontend-react-vite.md) (Uso de SPA com empacotador veloz e postergação do Design System)
-* [ADR-003: Backend ASP.NET Core](file:///c:/PROJETOS/Rsul%20Automacoes/Projetos/webapolice/docs/adr/ADR-003-backend-aspnet-core.md) (ASP.NET Core como centralizador de regras e integrações)
-* [ADR-004: Monólito Modular](file:///c:/PROJETOS/Rsul%20Automacoes/Projetos/webapolice/docs/adr/ADR-004-monolito-modular.md) (Divisão lógica de fronteiras e controle de acoplamento)
-* [ADR-005: Infraestrutura Local com Docker Compose](file:///c:/PROJETOS/Rsul%20Automacoes/Projetos/webapolice/docs/adr/ADR-005-infraestrutura-local-docker.md) (Uso de Docker Compose para PostgreSQL e Keycloak local)
-* [ADR-006: Keycloak como Provedor Central de Identidade](file:///c:/PROJETOS/Rsul%20Automacoes/Projetos/webapolice/docs/adr/ADR-006-keycloak-identidade-central.md) (Uso do Keycloak local, fluxo PKCE, clients OIDC e provisionamento automatizado)
+* [ADR-001: Estrutura do Repositório](docs/adr/ADR-001-estrutura-do-repositorio.md) (Uso de monorepo compartilhado)
+* [ADR-002: Frontend React e Vite](docs/adr/ADR-002-frontend-react-vite.md) (Uso de SPA com empacotador veloz e postergação do Design System)
+* [ADR-003: Backend ASP.NET Core](docs/adr/ADR-003-backend-aspnet-core.md) (ASP.NET Core como centralizador de regras e integrações)
+* [ADR-004: Monólito Modular](docs/adr/ADR-004-monolito-modular.md) (Divisão lógica de fronteiras e controle de acoplamento)
+* [ADR-005: Infraestrutura Local com Docker Compose](docs/adr/ADR-005-infraestrutura-local-docker.md) (Uso de Docker Compose para PostgreSQL e Keycloak local)
+* [ADR-006: Keycloak como Provedor Central de Identidade](docs/adr/ADR-006-keycloak-identidade-central.md) (Uso do Keycloak local, fluxo PKCE, clients OIDC e provisionamento automatizado)
 
 ## Regra obrigatória de dados: Title Case
 

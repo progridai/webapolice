@@ -42,7 +42,7 @@ BEGIN
           AND c.table_name NOT ILIKE '%migration%'
           AND c.data_type IN ('text', 'character varying', 'character')
           AND c.is_generated = 'NEVER'
-          AND c.column_name = ANY(ARRAY['motivo_pendencia_vigencia', 'parentesco_registrado', 'justificativa_ajuste_premio','subgrupo_nome_registrado','modulo_nome_registrado','plano_nome_registrado','cobertura_nome_registrado','cobertura_nome_reduzido_registrado','nome','nome_fantasia','razao_social','nome_conjuge','nome_empresa','nome_reduzido','nome_formatado','descricao','observacao','titulo','logradouro','complemento','bairro','departamento','contato','empresa','equipe','funcao','setor','motivo','causa','instituidor','instituto','est_nome','est_cidade','est_endereco','est_complemento','est_bairro'])
+          AND c.column_name = ANY(ARRAY['seguradora_nome','motivo_pendencia_vigencia', 'parentesco_registrado', 'justificativa_ajuste_premio','subgrupo_nome_registrado','modulo_nome_registrado','plano_nome_registrado','cobertura_nome_registrado','cobertura_nome_reduzido_registrado','nome','nome_fantasia','razao_social','nome_conjuge','nome_empresa','nome_reduzido','nome_formatado','descricao','observacao','titulo','logradouro','complemento','bairro','departamento','contato','empresa','equipe','funcao','setor','motivo','causa','instituidor','instituto','est_nome','est_cidade','est_endereco','est_complemento','est_bairro'])
         GROUP BY c.table_schema, c.table_name
         ORDER BY c.table_schema, c.table_name
     LOOP

@@ -1,5 +1,7 @@
 # Fluxo Operacional de Propostas a Partir da Vida
 
+> Referência atual — 25/11/2026: As ausências de funcionalidades descritas abaixo são relativas à etapa original. A sequência de entregas posteriores, incluindo confirmação, agendamento, cancelamento e reinclusão, está no [índice funcional 106](106-indice-funcional-atual.md). O escopo financeiro atual está consolidado no [104](104-alcance-atual-rotinas-financeiras.md). As evidências originais permanecem vinculadas à etapa em que foram obtidas; a homologação visual continua pendente.
+
 Nomenclatura atualizada em 17/11/2026: a situação inicial chama-se **Pré Proposta**, conforme o [documento 93](93-nomenclatura-pre-proposta.md).
 
 Implementação: 11/11/2026. Conferência final: 12/11/2026. Complementa os documentos 22, 77, 81 e 82.

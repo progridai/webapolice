@@ -1,6 +1,8 @@
 import { HttpApiError } from '../../../services/http/httpError';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { useAuthorization } from '../../../auth/AuthorizationProvider';
+import { useConsulta } from '../../../shared/hooks/useConsulta';
 import {
   EstipulanteForm,
   type EstipulanteFormData,
@@ -25,92 +27,90 @@ import {
 export const EditarEstipulantePage: React.FC = () => {
   const { publicId } = useParams<{ publicId: string }>();
   const navigate = useNavigate();
-
-  const [initialData, setInitialData] =
-    useState<Partial<EstipulanteFormData> | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const { possuiPermissao } = useAuthorization();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [notFound, setNotFound] = useState(false);
-
-  useEffect(() => {
-    const fetchEstipulante = async () => {
+  const load = useCallback(
+    async (signal: AbortSignal) => {
       if (!publicId) return;
-      try {
-        const [estipulanteData, configData] = await Promise.all([
-          obterEstipulante(publicId),
-          obterConfiguracao(publicId).catch((err: unknown) => {
-            // Se a configuração não existir (404), tratamos graciosamente
-            if (err instanceof HttpApiError && err.isNotFound()) return null;
-            throw err;
-          }),
-        ]);
-
-        setInitialData({
-          razaoSocial: estipulanteData.razaoSocial,
-          nomeFantasia: estipulanteData.nomeFantasia || '',
-          cnpj: estipulanteData.cnpj,
-          codigo: estipulanteData.codigo || '',
-          grupoPublicId: estipulanteData.grupoPublicId || '',
-          seguradoraPublicId: estipulanteData.seguradoraPublicId || '',
-          observacao: estipulanteData.observacao || '',
-          endereco: estipulanteData.endereco
-            ? {
-                cep: estipulanteData.endereco.cep || '',
-                logradouro: estipulanteData.endereco.logradouro || '',
-                numero: estipulanteData.endereco.numero || '',
-                complemento: estipulanteData.endereco.complemento || '',
-                bairro: estipulanteData.endereco.bairro || '',
-                uf: estipulanteData.endereco.uf || '',
-                cidadeId: estipulanteData.endereco.cidadeId || undefined,
-              }
-            : undefined,
-          contatos:
-            estipulanteData.contatos?.map((c) => ({
-              tipoContato: c.tipoContato,
-              valor: c.valor,
-              principal: c.principal,
-            })) || [],
-          contatosInstitucionais:
-            estipulanteData.contatosInstitucionais?.map((c) => ({
-              nome: c.nome,
-              departamento: c.departamento,
-              email: c.email,
-              telefone: c.telefone,
-              ramal: c.ramal,
-            })) || [],
-          configuracao: configData
-            ? {
-                dataInicioVigencia: configData.dataInicioVigencia
-                  ? new Date(configData.dataInicioVigencia)
-                      .toISOString()
-                      .split('T')[0]
-                  : '',
-                dataFimVigencia: configData.dataFimVigencia
-                  ? new Date(configData.dataFimVigencia)
-                      .toISOString()
-                      .split('T')[0]
-                  : '',
-              }
-            : undefined,
-        });
-      } catch (err: unknown) {
-        if (err instanceof HttpApiError && err.isNotFound()) {
-          setNotFound(true);
-        } else {
-          console.error('Erro ao carregar estipulante:', err);
-          setError('Não foi possível carregar os dados do estipulante.');
-        }
-      } finally {
-        setIsLoading(false);
-      }
+      const [estipulanteData, configData] = await Promise.all([
+        obterEstipulante(publicId, signal),
+        obterConfiguracao(publicId, signal).catch((err: unknown) => {
+          // Se a configuração não existir (404), tratamos graciosamente
+          if (err instanceof HttpApiError && err.isNotFound()) return null;
+          throw err;
+        }),
+      ]);
+      return { estipulanteData, configData };
+    },
+    [publicId],
+  );
+  const {
+    data,
+    isLoading,
+    error: erroConsulta,
+    refetch,
+  } = useConsulta(
+    publicId ? load : null,
+    'Não foi possível carregar os dados do estipulante.',
+  );
+  const seguradoraNome = data?.estipulanteData.seguradoraNome;
+  const grupoLegadoId = data?.estipulanteData.grupoId ?? null;
+  const notFound =
+    !publicId ||
+    (erroConsulta instanceof HttpApiError && erroConsulta.isNotFound());
+  const initialData = useMemo<Partial<EstipulanteFormData> | null>(() => {
+    if (!data) return null;
+    const { estipulanteData, configData } = data;
+    return {
+      razaoSocial: estipulanteData.razaoSocial,
+      nomeFantasia: estipulanteData.nomeFantasia || '',
+      cnpj: estipulanteData.cnpj,
+      codigo: estipulanteData.codigo || '',
+      seguradoraPublicId: estipulanteData.seguradoraPublicId || '',
+      observacao: estipulanteData.observacao || '',
+      endereco: estipulanteData.endereco
+        ? {
+            cep: estipulanteData.endereco.cep || '',
+            logradouro: estipulanteData.endereco.logradouro || '',
+            numero: estipulanteData.endereco.numero || '',
+            complemento: estipulanteData.endereco.complemento || '',
+            bairro: estipulanteData.endereco.bairro || '',
+            uf: estipulanteData.endereco.uf || '',
+            cidadeId: estipulanteData.endereco.cidadeId || undefined,
+          }
+        : undefined,
+      contatos:
+        estipulanteData.contatos?.map((c) => ({
+          tipoContato: c.tipoContato,
+          valor: c.valor,
+          principal: c.principal,
+        })) || [],
+      contatosInstitucionais:
+        estipulanteData.contatosInstitucionais?.map((c) => ({
+          nome: c.nome,
+          departamento: c.departamento,
+          email: c.email,
+          telefone: c.telefone,
+          ramal: c.ramal,
+        })) || [],
+      configuracao: configData
+        ? {
+            dataInicioVigencia: configData.dataInicioVigencia
+              ? new Date(configData.dataInicioVigencia)
+                  .toISOString()
+                  .split('T')[0]
+              : '',
+            dataFimVigencia: configData.dataFimVigencia
+              ? new Date(configData.dataFimVigencia).toISOString().split('T')[0]
+              : '',
+          }
+        : undefined,
     };
-
-    fetchEstipulante();
-  }, [publicId]);
+  }, [data]);
 
   const handleSubmit = async (data: EstipulanteFormData) => {
-    if (!publicId) return;
+    if (!publicId || !data || isSubmitting) return;
     setIsSubmitting(true);
     setError(null);
     try {
@@ -118,7 +118,7 @@ export const EditarEstipulantePage: React.FC = () => {
         razaoSocial: data.razaoSocial,
         nomeFantasia: data.nomeFantasia,
         codigo: data.codigo,
-        grupoPublicId: data.grupoPublicId || undefined,
+        grupoId: grupoLegadoId,
         seguradoraPublicId: data.seguradoraPublicId || undefined,
         observacao: data.observacao,
         endereco: data.endereco ? { ...data.endereco } : undefined,
@@ -214,7 +214,7 @@ export const EditarEstipulantePage: React.FC = () => {
     );
   }
 
-  if (error && !initialData) {
+  if (erroConsulta && !initialData) {
     return (
       <main
         className="flex flex-col gap-6 p-6 max-w-4xl mx-auto focus:outline-none"
@@ -222,8 +222,11 @@ export const EditarEstipulantePage: React.FC = () => {
         tabIndex={-1}
       >
         <Alert variant="error" title="Erro">
-          {error}
+          Não foi possível carregar os dados do estipulante.
         </Alert>
+        <Button variant="secondary" onClick={() => void refetch()}>
+          Tentar novamente
+        </Button>
         <Button className="mt-4" onClick={() => navigate('/estipulantes')}>
           Voltar
         </Button>
@@ -265,6 +268,8 @@ export const EditarEstipulantePage: React.FC = () => {
         {initialData && (
           <EstipulanteForm
             initialData={initialData}
+            initialSeguradoraNome={seguradoraNome}
+            podeConsultarSeguradoras={possuiPermissao('seguradoras.visualizar')}
             isEdit={true}
             onSubmit={handleSubmit}
             onCancel={handleCancel}

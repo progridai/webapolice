@@ -1,5 +1,7 @@
 # Preenchimento de Pré Proposta
 
+> Referência atual — 25/11/2026: As ausências de funcionalidades descritas abaixo são relativas à etapa original. A sequência de entregas posteriores, incluindo confirmação, agendamento, cancelamento e reinclusão, está no [índice funcional 106](106-indice-funcional-atual.md). O escopo financeiro atual está consolidado no [104](104-alcance-atual-rotinas-financeiras.md). As evidências originais permanecem vinculadas à etapa em que foram obtidas; a homologação visual continua pendente.
+
 Data: 12/11/2026. Complementa o [documento 83](83-fluxo-operacional-propostas.md). Etapa implementada: editar observação, preencher beneficiários e ajustar prêmios de coberturas da proposta nativa em pré proposta, sem confirmar adesão, alterar a Vida ou gerar movimentos financeiros.
 
 ## Modelagem Antes das Alterações

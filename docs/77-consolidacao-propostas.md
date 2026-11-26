@@ -1,5 +1,7 @@
 # Consolidação de Propostas — 23/10/2026
 
+> Referência atual — 25/11/2026: O diagnóstico e as pendências abaixo correspondem à etapa original. O fluxo avançou a partir do [83](83-fluxo-operacional-propostas.md), incluindo confirmação, agendamento, cancelamento e reinclusão. O financeiro atual está no [104](104-alcance-atual-rotinas-financeiras.md); a sequência está no [106](106-indice-funcional-atual.md). A homologação visual permanece pendente, adiada pelo responsável.
+
 Escopo desta correção: A04 da revisão 76. A funcionalidade continua sem homologação integrada e sem regras financeiras completas.
 
 ## Decisões Confirmadas Pelo Responsável

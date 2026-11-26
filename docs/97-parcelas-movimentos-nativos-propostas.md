@@ -18,7 +18,7 @@ Continuidade da [simulação mensal](95-formacao-valores-financeiros-propostas.m
 
 ## Geração Mensal Manual e Vencimentos
 
-O responsável definiu que os meses seguintes serão gerados **manualmente em lote por um usuário**, após a baixa do mês anterior. Não implementar geração mensal automática por calendário ou vencimento. O controle deve permitir identificar inadimplentes, cancelamentos e novas inclusões antes da geração seguinte. A primeira parcela automática na ativação continua sendo o recorte aprovado anteriormente; sua articulação com o lote deve impedir duplicar uma parcela já existente.
+Os meses seguintes são gerados **manualmente em lote por um usuário**, após o **fechamento da competência anterior**, que pode manter parcelas abertas. A definição inicial citava a baixa do mês anterior; o refinamento em "Definições do Lote e da Baixa Aprovadas", abaixo, consolidado no [documento 98](98-lotes-mensais-baixa-parcelas.md), não exige que todos tenham pago. Não implementar geração mensal automática por calendário ou vencimento. O controle permite identificar inadimplentes, cancelamentos e novas inclusões antes da geração seguinte. A primeira parcela automática na ativação continua sendo o recorte aprovado; sua articulação com o lote impede duplicar uma parcela já existente. Conferência do estado atual no [documento 104](104-alcance-atual-rotinas-financeiras.md).
 
 Os vencimentos manterão o dia original e a distância em meses em relação à competência inicial. Em mês curto, usar o último dia daquele mês e retomar o dia original nos meses seguintes, sem deslocamento permanente da referência.
 

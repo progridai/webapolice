@@ -23,6 +23,8 @@ import { CepInput } from '../../../components/fields/CepInput';
 import { PhoneInput } from '../../../components/fields/PhoneInput';
 import { EmailInput } from '../../../components/fields/EmailInput';
 import { DateInput } from '../../../components/fields/DateInput';
+import { EntitySearchField } from '../../apolices/components/forms/AsyncEntityField';
+import { seguradorasApi } from '../../seguradoras/api/seguradoras.api';
 import { consultarCep } from '../../../shared/api/enderecosApi';
 import { isValidCnpj, isValidPhone } from '../../../shared/utils/validators';
 import {
@@ -64,6 +66,17 @@ const ESTADOS_BRASILEIROS = [
   'SE',
   'TO',
 ];
+
+async function buscarSeguradoras(termo: string, signal?: AbortSignal) {
+  const result = await seguradorasApi.listar(
+    { pagina: 1, tamanhoPagina: 20, busca: termo, ativo: true },
+    signal,
+  );
+  return result.itens.map((seguradora) => ({
+    value: seguradora.publicId,
+    label: seguradora.nome,
+  }));
+}
 
 const contatoSchema = z
   .object({
@@ -117,7 +130,6 @@ const estipulanteSchema = z.object({
     .min(14, 'CNPJ inválido')
     .refine(isValidCnpj, 'CNPJ inválido'),
   codigo: z.string().trim().max(50, 'Máximo de 50 caracteres').optional(),
-  grupoPublicId: z.string().optional(),
   seguradoraPublicId: z.string().optional(),
   observacao: z
     .string()
@@ -208,6 +220,8 @@ export type EstipulanteFormData = z.output<typeof estipulanteSchema>;
 
 interface EstipulanteFormProps {
   initialData?: Partial<EstipulanteFormData>;
+  initialSeguradoraNome?: string;
+  podeConsultarSeguradoras?: boolean;
   isEdit?: boolean;
   isSubmitting?: boolean;
   onSubmit: (data: EstipulanteFormData) => void;
@@ -217,6 +231,8 @@ interface EstipulanteFormProps {
 
 export const EstipulanteForm: React.FC<EstipulanteFormProps> = ({
   initialData,
+  initialSeguradoraNome,
+  podeConsultarSeguradoras = false,
   isEdit = false,
   isSubmitting = false,
   onSubmit,
@@ -237,7 +253,6 @@ export const EstipulanteForm: React.FC<EstipulanteFormProps> = ({
       nomeFantasia: initialData?.nomeFantasia || '',
       cnpj: initialData?.cnpj || '',
       codigo: initialData?.codigo || '',
-      grupoPublicId: initialData?.grupoPublicId || '',
       seguradoraPublicId: initialData?.seguradoraPublicId || '',
       observacao: initialData?.observacao || '',
       endereco: initialData?.endereco || {
@@ -267,7 +282,6 @@ export const EstipulanteForm: React.FC<EstipulanteFormProps> = ({
         nomeFantasia: initialData.nomeFantasia || '',
         cnpj: initialData.cnpj || '',
         codigo: initialData.codigo || '',
-        grupoPublicId: initialData.grupoPublicId || '',
         seguradoraPublicId: initialData.seguradoraPublicId || '',
         observacao: initialData.observacao || '',
         endereco: initialData.endereco || {
@@ -501,22 +515,45 @@ export const EstipulanteForm: React.FC<EstipulanteFormProps> = ({
           </div>
 
           <div className="lg:col-span-4">
-            <FormField label="Grupo" error={errors.grupoPublicId?.message}>
-              <Select {...register('grupoPublicId')} disabled={true}>
-                <option value="">Selecione um grupo (Em breve)</option>
-              </Select>
-            </FormField>
-          </div>
-
-          <div className="lg:col-span-4">
-            <FormField
-              label="Seguradora"
-              error={errors.seguradoraPublicId?.message}
-            >
-              <Select {...register('seguradoraPublicId')} disabled={true}>
-                <option value="">Selecione uma seguradora (Em breve)</option>
-              </Select>
-            </FormField>
+            <Controller
+              name="seguradoraPublicId"
+              control={control}
+              render={({ field }) => (
+                <>
+                  <FormField
+                    label="Seguradora"
+                    error={errors.seguradoraPublicId?.message}
+                    hint={
+                      podeConsultarSeguradoras
+                        ? 'Busque pelo nome, CNPJ, código ou SUSEP. Campo opcional.'
+                        : 'A seleção exige permissão para visualizar seguradoras. O vínculo atual será preservado.'
+                    }
+                  >
+                    <EntitySearchField
+                      value={field.value || ''}
+                      onChange={field.onChange}
+                      onBlur={field.onBlur}
+                      initialLabel={initialSeguradoraNome}
+                      searcher={buscarSeguradoras}
+                      disabled={isSubmitting || !podeConsultarSeguradoras}
+                      placeholder="Buscar seguradora"
+                      emptyMessage="Nenhuma seguradora ativa encontrada. Refine a busca."
+                    />
+                  </FormField>
+                  {field.value && podeConsultarSeguradoras && (
+                    <Button
+                      type="button"
+                      variant="text"
+                      size="small"
+                      disabled={isSubmitting}
+                      onClick={() => field.onChange('')}
+                    >
+                      Remover seguradora
+                    </Button>
+                  )}
+                </>
+              )}
+            />
           </div>
 
           <div className="lg:col-span-12">

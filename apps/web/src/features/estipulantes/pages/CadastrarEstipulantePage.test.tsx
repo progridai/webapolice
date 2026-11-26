@@ -4,6 +4,11 @@ import { BrowserRouter } from 'react-router-dom';
 import { vi, describe, it, expect, beforeEach } from 'vitest';
 import { CadastrarEstipulantePage } from './CadastrarEstipulantePage';
 import * as api from '../api/estipulantes.api';
+import { makeAuthorization } from '../../../../tests/helpers/authorization';
+
+vi.mock('../../../auth/AuthorizationProvider', () => ({
+  useAuthorization: () => makeAuthorization(),
+}));
 
 vi.mock('../api/estipulantes.api', () => ({
   cadastrarEstipulante: vi.fn(),

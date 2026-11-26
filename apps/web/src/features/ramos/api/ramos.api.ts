@@ -43,8 +43,10 @@ export const ramosApi = {
     return res.data;
   },
 
-  obter: async (publicId: string) => {
-    const res = await httpClient.get<RamoDto>(`/api/ramos/${publicId}`);
+  obter: async (publicId: string, signal?: AbortSignal) => {
+    const res = await httpClient.get<RamoDto>(`/api/ramos/${publicId}`, {
+      signal,
+    });
     return res.data;
   },
 

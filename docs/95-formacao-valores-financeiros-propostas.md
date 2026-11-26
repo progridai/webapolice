@@ -1,5 +1,7 @@
 # Formação de Valores Financeiros das Propostas
 
+Estado atual conferido em 24/11/2026: este documento registra a etapa de simulação. A confirmação com plano financeiro, a geração de parcelas, os lotes e as baixas foram entregues posteriormente no [documento 98](98-lotes-mensais-baixa-parcelas.md), com aplicação local registrada no [documento 99](99-aplicacao-financeiro-execucao-local.md). As limitações abaixo se referem ao recorte original. Consulte o [quadro atual de alcance financeiro](104-alcance-atual-rotinas-financeiras.md) antes de preparar o manual.
+
 Data: 18/11/2026. Status: implementação local concluída e validada. Migrations aplicadas posteriormente em testes, conforme documento 96.
 
 Continuidade dos documentos [22](22-plano-coberturas-modulo-apolice.md), [83](83-fluxo-operacional-propostas.md) e [94](94-revisao-explicita-condicoes-propostas.md). As alterações locais anteriores, inclusive migrations preparadas e trabalho independente de navegação, permanecem preservadas. A implantação posterior em testes está registrada no documento 96.

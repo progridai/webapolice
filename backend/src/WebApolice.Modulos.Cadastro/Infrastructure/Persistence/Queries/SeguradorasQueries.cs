@@ -36,9 +36,10 @@ public class SeguradorasQueries : ISeguradorasQueries
 
         if (!string.IsNullOrWhiteSpace(busca))
         {
-            var buscaLower = busca.ToLower();
+            var buscaLower = busca.ToLowerInvariant();
             query = query.Where(x => 
-                (x.p.NomeNormalizado != null && x.p.NomeNormalizado.Contains(buscaLower)) || 
+                (x.p.NomeNormalizado != null && x.p.NomeNormalizado.ToLower().Contains(buscaLower)) ||
+                x.p.Nome.ToLower().Contains(buscaLower) ||
                 (x.p.DocumentoPrincipal != null && x.p.DocumentoPrincipal.Contains(busca)) ||
                 (x.p.DocumentoPrincipalLimpo != null && x.p.DocumentoPrincipalLimpo.Contains(busca)) ||
                 (x.s.Codigo != null && x.s.Codigo.ToLower().Contains(buscaLower)) ||

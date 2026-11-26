@@ -14,9 +14,11 @@ import {
   HomeIcon,
 } from '../../../components/ui';
 import type { CriarEstipulanteRequest } from '../types/estipulante.types';
+import { useAuthorization } from '../../../auth/AuthorizationProvider';
 
 export const CadastrarEstipulantePage: React.FC = () => {
   const navigate = useNavigate();
+  const { possuiPermissao } = useAuthorization();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -29,8 +31,7 @@ export const CadastrarEstipulantePage: React.FC = () => {
         nomeFantasia: data.nomeFantasia,
         cnpj: data.cnpj,
         codigo: data.codigo,
-        grupoPublicId: undefined, // WIP (Backend/Mock)
-        seguradoraPublicId: undefined, // WIP (Backend/Mock)
+        seguradoraPublicId: data.seguradoraPublicId || undefined,
         observacao: data.observacao,
         endereco: data.endereco
           ? {
@@ -118,6 +119,7 @@ export const CadastrarEstipulantePage: React.FC = () => {
         )}
 
         <EstipulanteForm
+          podeConsultarSeguradoras={possuiPermissao('seguradoras.visualizar')}
           onSubmit={handleSubmit}
           onCancel={handleCancel}
           isSubmitting={isSubmitting}

@@ -1,5 +1,7 @@
 # Módulo Clientes: Detalhes
 
+> Referência atual — 25/11/2026: A manutenção de vínculos e a identificação das participações em Apólices foram entregues no [81](81-vinculos-clientes-participacoes.md); a consulta de propostas pelo vínculo está no [101](101-consulta-propostas-vinculo-cliente.md). Isso não declara concluída a manutenção geral de dependentes. Consulte o [índice atual 106](106-indice-funcional-atual.md).
+
 Estado conferido no código em 21/10/2026. Validações gerais em [29 — Estabilização do Frontend](29-estabilizacao-frontend.md) e correções de identificadores, endereços e filtros em [34 — Estabilização de Clientes e Apólices](34-estabilizacao-clientes-referencias-apolices.md).
 
 ## Objetivo

@@ -129,8 +129,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         // Race entre a inicialização do Keycloak e um timeout de 8 segundos.
         // O silent SSO cross-origin pode travar indefinidamente quando o browser
         // bloqueia o postMessage do iframe por política CORS/SameSite.
+        let timeoutId: ReturnType<typeof setTimeout> | undefined;
         const timeoutPromise = new Promise<boolean>((resolve) => {
-          setTimeout(() => {
+          timeoutId = setTimeout(() => {
             console.warn(
               '[AuthProvider] Keycloak init timeout — continuando como não autenticado.',
             );
@@ -138,18 +139,23 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           }, 8000);
         });
 
-        const authenticated = await Promise.race([
-          initKeycloakOnce({
-            onLoad: 'check-sso',
-            silentCheckSsoRedirectUri:
-              window.location.origin + '/silent-check-sso.html',
-            pkceMethod: 'S256',
-            checkLoginIframe: false,
-            redirectUri: getOidcRedirectUri(),
-            responseMode: 'query',
-          }),
-          timeoutPromise,
-        ]);
+        let authenticated: boolean;
+        try {
+          authenticated = await Promise.race([
+            initKeycloakOnce({
+              onLoad: 'check-sso',
+              silentCheckSsoRedirectUri:
+                window.location.origin + '/silent-check-sso.html',
+              pkceMethod: 'S256',
+              checkLoginIframe: false,
+              redirectUri: getOidcRedirectUri(),
+              responseMode: 'query',
+            }),
+            timeoutPromise,
+          ]);
+        } finally {
+          clearTimeout(timeoutId);
+        }
 
         if (!mounted) return;
 

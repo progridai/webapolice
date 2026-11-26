@@ -224,6 +224,26 @@ describe('AuthProvider', () => {
     );
   });
 
+  it('deve cancelar o timer de timeout quando Keycloak inicializa antes do prazo', async () => {
+    const clearTimeoutSpy = vi.spyOn(globalThis, 'clearTimeout');
+    mockAuthenticated = true;
+    mockTokenParsed = {
+      sub: 'user-123',
+      preferred_username: 'dev.admin',
+      name: 'Dev Admin',
+      email: 'dev.admin@local.test',
+      realm_access: { roles: [APP_ROLES.ADMIN] },
+    };
+    mockKeycloakInit = vi.fn().mockResolvedValue(true);
+
+    renderWithAuth();
+    await waitFor(() =>
+      expect(screen.getByTestId('status').textContent).toBe('authenticated'),
+    );
+    expect(clearTimeoutSpy).toHaveBeenCalled();
+    clearTimeoutSpy.mockRestore();
+  });
+
   it('deve retornar false quando refreshToken falha e encerrar sessão', async () => {
     mockAuthenticated = true;
     mockTokenParsed = {

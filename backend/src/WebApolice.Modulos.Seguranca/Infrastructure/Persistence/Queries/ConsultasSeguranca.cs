@@ -12,6 +12,10 @@ namespace WebApolice.Modulos.Seguranca.Infrastructure.Persistence.Queries;
 
 public sealed class ConsultasSeguranca(SegurancaDbContext _dbContext) : IConsultasSeguranca
 {
+    // Rótulo técnico com a grafia da sigla preservada após a normalização do banco.
+    private const string CodigoDiscadorVoip = "DISCADOR_VOIP";
+    private const string NomeDiscadorVoip = "Discador VoIP";
+
     public async Task<ListagemPaginadaDto<AuditoriaDto>> ListarAuditoriaAsync(
         int pagina,
         int tamanhoPagina,
@@ -107,7 +111,7 @@ public sealed class ConsultasSeguranca(SegurancaDbContext _dbContext) : IConsult
             m.Recursos.OrderBy(r => r.Ordem).Select(r => new CatalogoRecursoDto(
                 r.PublicId,
                 r.Codigo,
-                r.Nome,
+                r.Codigo == CodigoDiscadorVoip ? NomeDiscadorVoip : r.Nome,
                 r.Descricao,
                 r.RotaFrontend,
                 r.Permissoes.OrderBy(p => p.Nome).Select(p => new CatalogoPermissaoDto(
@@ -140,7 +144,12 @@ public sealed class ConsultasSeguranca(SegurancaDbContext _dbContext) : IConsult
             .OrderBy(m => m.Ordem)
             .Select(m => new ModuloDto(
                 m.PublicId, m.Codigo, m.Nome, m.Descricao, m.Icone, m.Ordem, m.Ativo, m.Habilitado,
-                m.Recursos.Select(r => new RecursoDto(r.PublicId, r.Codigo, r.Nome, r.Ativo, r.Habilitado)).ToList()
+                m.Recursos.Select(r => new RecursoDto(
+                    r.PublicId,
+                    r.Codigo,
+                    r.Codigo == CodigoDiscadorVoip ? NomeDiscadorVoip : r.Nome,
+                    r.Ativo,
+                    r.Habilitado)).ToList()
             ))
             .ToListAsync(cancellationToken);
     }

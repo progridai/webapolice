@@ -184,5 +184,10 @@ public static class PermissoesSeguranca
         {
             public const string Utilizar = "crm.assertiva.utilizar";
         }
+
+        public static class DiscadorVoip
+        {
+            public const string Utilizar = "crm.discador_voip.utilizar";
+        }
     }
 }
